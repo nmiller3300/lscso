@@ -23,7 +23,7 @@ export default function TrainingRecruitmentPage() {
         eyebrow="Standards & Development"
         title="Training & Recruitment"
         description="Selecting people with the character to serve and preparing them to meet the standard expected of an LSCSO deputy."
-        image="/images/deputy-gray-uniform.png"
+        image="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/deputy-gray-uniform.png"
         imageAlt="LSCSO deputy in uniform"
         imagePosition="center 30%"
       />
@@ -88,7 +88,7 @@ export default function TrainingRecruitmentPage() {
       <section className="training-feature">
         <div className="training-feature-media">
           <Image
-            src="/images/deputy-brown-uniform.png"
+            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/deputy-brown-uniform.png"
             alt="LSCSO deputy in patrol uniform"
             fill
             sizes="(max-width: 850px) 100vw, 50vw"

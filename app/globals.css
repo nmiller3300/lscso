@@ -1005,7 +1005,7 @@ p {
   padding-top: 120px;
   background:
     linear-gradient(90deg, rgba(10, 10, 8, 0.96), rgba(10, 10, 8, 0.77)),
-    url("/images/patrol-vehicle.png") center / cover;
+    url("https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/patrol-vehicle.png") center / cover;
 }
 
 .not-found-page h1 {

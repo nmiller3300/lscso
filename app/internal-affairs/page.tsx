@@ -21,7 +21,7 @@ export default function InternalAffairsPage() {
         eyebrow="Professional Standards"
         title="Internal Affairs"
         description="Protecting the integrity of the Office through fair, consistent, and impartial review."
-        image="/images/lscso-patch-subdued.png"
+        image="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-subdued.png"
         imageAlt="Subdued LSCSO shoulder patch"
         containedImage
       />

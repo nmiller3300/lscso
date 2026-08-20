@@ -19,14 +19,20 @@ export const metadata: Metadata = {
   description:
     "The official website of the Los Santos County Sheriff’s Office, serving Los Santos County since 1963.",
   icons: {
-    icon: "/images/lscso-patch-color.png",
-    apple: "/images/lscso-patch-color.png",
+    icon: "https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png",
+    apple: "https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png",
   },
   openGraph: {
     title: "Los Santos County Sheriff’s Office",
     description: "Driven to Protect. Dedicated to Serve. Established 1963.",
     type: "website",
-    images: [{ url: "/images/patrol-vehicle.png", width: 1280, height: 720 }],
+    images: [
+      {
+        url: "https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/patrol-vehicle.png",
+        width: 1280,
+        height: 720,
+      },
+    ],
   },
 };
 

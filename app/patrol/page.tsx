@@ -25,7 +25,7 @@ export default function PatrolPage() {
         eyebrow="Primary Operations"
         title="Patrol Division"
         description="The first response, the visible presence, and the operational foundation of the Los Santos County Sheriff’s Office."
-        image="/images/patrol-vehicle.png"
+        image="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/patrol-vehicle.png"
         imageAlt="LSCSO Patrol Division vehicle"
         imagePosition="center 55%"
       />
@@ -66,7 +66,7 @@ export default function PatrolPage() {
       <section className="patrol-responsibilities">
         <div className="patrol-photo">
           <Image
-            src="/images/deputy-brown-uniform.png"
+            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/deputy-brown-uniform.png"
             alt="LSCSO patrol deputy"
             fill
             sizes="(max-width: 850px) 100vw, 48vw"

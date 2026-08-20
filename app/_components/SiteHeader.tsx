@@ -21,7 +21,7 @@ export function SiteHeader() {
       <div className="site-shell nav-shell">
         <Link className="site-brand" href="/" aria-label="LSCSO homepage">
           <Image
-            src="/images/lscso-patch-color.png"
+            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
             alt=""
             width={58}
             height={58}

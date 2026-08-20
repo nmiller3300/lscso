@@ -22,7 +22,7 @@ export default function OfficeOfTheSheriffPage() {
         eyebrow="Executive Leadership"
         title="Office of the Sheriff"
         description="Purposeful leadership, clear standards, and direct accountability for the service LSCSO provides to Los Santos County."
-        image="/images/command-uniform.png"
+        image="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/command-uniform.png"
         imageAlt="LSCSO command staff member"
         imagePosition="center 42%"
       />
