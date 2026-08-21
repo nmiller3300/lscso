@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { PageHero } from "../_components/PageHero";
 import { WarrantDirectory } from "./WarrantDirectory";
 import { publicWarrants } from "./_data";
+import "./warrants.css";
 
 export const metadata: Metadata = {
   title: "Warrant Information",
