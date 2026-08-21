@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../../_components/PortalShell";
+import { RosterRowInteraction } from "../../../_components/RosterRowInteraction";
 import { RosterWorkspace } from "../../../_components/RosterWorkspace";
 import type { PersonnelRecord } from "../../../_data/model";
 import { createClient } from "@/lib/supabase/server";
@@ -46,6 +47,7 @@ export default async function FullRosterPage() {
       title="Full roster"
       description="Department-wide roster and credential management."
     >
+      <RosterRowInteraction />
       <RosterWorkspace personnel={personnel} />
     </PortalShell>
   );
