@@ -20,6 +20,8 @@ export default async function PersonnelSupervisionPage({ params }: PageProps) {
     supabase.from("disciplinary_point_events").select("id,event_type,delta,reason,effective_on,created_at").eq("profile_id", member.id).order("created_at", { ascending: false }),
   ]);
 
+  const focusedGuardianHref = `/portal/command/guardians?q=${encodeURIComponent(member.personnel_id)}`;
+
   return (
     <PortalShell active="personnel" eyebrow={`${member.personnel_id} · Supervision`} title={`${member.display_name} · Supervision`} description="Guardian history, accountability, and supervisory context." actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}>
       <PersonnelRecordTabs personnelId={member.personnel_id} active="supervision" />
@@ -42,8 +44,8 @@ export default async function PersonnelSupervisionPage({ params }: PageProps) {
         </section>
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Workflow</p><h2>Guardian Center</h2></div></div>
-          <p className="command-v2-compact-copy">Create, review, and follow up on Guardian records through the existing authorized workflow.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/guardians">Open Guardian Center</Link></div>
+          <p className="command-v2-compact-copy">Open Guardian records already filtered to this employee instead of searching for them again.</p>
+          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href={focusedGuardianHref}>Open this employee&apos;s Guardians</Link></div>
         </section>
       </div>
     </PortalShell>
