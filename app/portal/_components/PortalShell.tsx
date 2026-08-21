@@ -9,7 +9,18 @@ import { PortalSignOut } from "./PortalSignOut";
 import { ThemeToggle } from "./ThemeToggle";
 
 type PortalShellProps = {
-  active: "overview" | "personnel" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards";
+  active:
+    | "overview"
+    | "personnel"
+    | "supervision"
+    | "training"
+    | "administration"
+    | "guardians"
+    | "record"
+    | "approvals"
+    | "activity"
+    | "certifications"
+    | "awards";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
