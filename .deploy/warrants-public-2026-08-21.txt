@@ -1,1 +1,2 @@
 Public warrant information and Most Wanted deployment marker.
+Force production rebuild for complete warrant page, styling, search, and navigation.
