@@ -5,7 +5,7 @@ create table if not exists public.organizational_units (
   id uuid primary key default gen_random_uuid(),
   name text not null,
   short_name text,
-  unit_type text not null check (unit_type in ('Department','Bureau','Division','Section','Unit','Team','Detail','Program')),
+  unit_type text not null check (unit_type in ('Department','Bureau','Division','Section','Unit','Team','Detail','Program','Shift')),
   parent_unit_id uuid references public.organizational_units(id) on delete restrict,
   active boolean not null default true,
   sort_order integer not null default 0,
@@ -57,9 +57,55 @@ create index if not exists supervisory_authority_unit_idx
 create index if not exists supervisory_authority_subject_idx
   on public.supervisory_authority(subject_profile_id, starts_at desc);
 
+-- A directed action authorizes one scoped action or matter without changing the org chart.
+-- Example: Sheriff directs a 1st Lieutenant to conduct a Conversation Guardian outside normal purview.
+create table if not exists public.directed_personnel_actions (
+  id uuid primary key default gen_random_uuid(),
+  assignee_profile_id uuid not null references public.personnel_profiles(id) on delete restrict,
+  subject_profile_id uuid not null references public.personnel_profiles(id) on delete restrict,
+  capability text not null,
+  matter_type text,
+  matter_id uuid,
+  direction_reason text not null,
+  directed_by uuid not null references public.personnel_profiles(id) on delete restrict,
+  starts_at timestamptz not null default now(),
+  expires_at timestamptz,
+  completed_at timestamptz,
+  revoked_at timestamptz,
+  revoked_by uuid references public.personnel_profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  check (assignee_profile_id <> subject_profile_id),
+  check (expires_at is null or expires_at > starts_at)
+);
+
+create index if not exists directed_personnel_actions_assignee_idx
+  on public.directed_personnel_actions(assignee_profile_id, subject_profile_id, starts_at desc);
+
+-- Recusal removes authority for one matter without changing standing supervision.
+create table if not exists public.personnel_matter_recusals (
+  id uuid primary key default gen_random_uuid(),
+  matter_type text not null,
+  matter_id uuid not null,
+  recused_profile_id uuid not null references public.personnel_profiles(id) on delete restrict,
+  replacement_profile_id uuid references public.personnel_profiles(id) on delete restrict,
+  reason text not null,
+  imposed_by uuid not null references public.personnel_profiles(id) on delete restrict,
+  starts_at timestamptz not null default now(),
+  lifted_at timestamptz,
+  lifted_by uuid references public.personnel_profiles(id) on delete set null,
+  created_at timestamptz not null default now(),
+  check (replacement_profile_id is null or replacement_profile_id <> recused_profile_id)
+);
+
+create unique index if not exists active_personnel_matter_recusal_idx
+  on public.personnel_matter_recusals(matter_type, matter_id, recused_profile_id)
+  where lifted_at is null;
+
 alter table public.organizational_units enable row level security;
 alter table public.personnel_unit_assignments enable row level security;
 alter table public.supervisory_authority enable row level security;
+alter table public.directed_personnel_actions enable row level security;
+alter table public.personnel_matter_recusals enable row level security;
 
 -- Recursive helper: a unit is in scope when it is the assigned unit or descends from it.
 create or replace function app_private.unit_is_within_scope(target_unit uuid, authority_unit uuid)
@@ -83,6 +129,7 @@ as $$
 $$;
 
 -- Returns every active authority relationship explaining why actor may have scope over target.
+-- Captain and above receive standing department scope. 1st Lieutenant and below remain scope-bound.
 create or replace function public.get_personnel_authority_scopes(target_profile_id uuid)
 returns table(scope text, authority_type text, organizational_unit_id uuid)
 language sql
@@ -91,8 +138,10 @@ security definer
 set search_path = ''
 as $$
   with caller as (
-    select app_private.current_profile_id() as profile_id,
-           app_private.current_access_tier() as access_tier
+    select p.id as profile_id, p.rank, p.access_tier
+    from public.personnel_profiles p
+    where p.auth_user_id = (select auth.uid())
+    limit 1
   ),
   target_assignments as (
     select a.organizational_unit_id
@@ -110,6 +159,12 @@ as $$
   )
   select 'self'::text, 'Self'::text, null::uuid
   from caller c where c.profile_id = target_profile_id
+
+  union all
+
+  select 'department'::text, 'Standing Command'::text, null::uuid
+  from caller c
+  where c.rank in ('Sheriff','Undersheriff','Major','Captain')
 
   union all
 
@@ -137,12 +192,64 @@ as $$
 
   union all
 
-  select 'department'::text, 'Executive'::text, null::uuid
-  from caller c where c.access_tier = 'Executive';
+  select 'directed'::text, 'Directed Action'::text, null::uuid
+  from public.directed_personnel_actions da, caller c
+  where da.assignee_profile_id = c.profile_id
+    and da.subject_profile_id = target_profile_id
+    and da.starts_at <= now()
+    and (da.expires_at is null or da.expires_at > now())
+    and da.completed_at is null
+    and da.revoked_at is null;
 $$;
 
--- Read policies are intentionally broad enough to support discovery while still respecting scope.
--- Mutation RPCs should call get_personnel_authority_scopes and enforce capability-specific rules.
+create or replace function public.has_active_directed_personnel_action(
+  target_profile_id uuid,
+  requested_capability text,
+  requested_matter_type text default null,
+  requested_matter_id uuid default null
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.directed_personnel_actions da
+    where da.assignee_profile_id = app_private.current_profile_id()
+      and da.subject_profile_id = target_profile_id
+      and da.capability = requested_capability
+      and da.starts_at <= now()
+      and (da.expires_at is null or da.expires_at > now())
+      and da.completed_at is null
+      and da.revoked_at is null
+      and (requested_matter_type is null or da.matter_type is null or da.matter_type = requested_matter_type)
+      and (requested_matter_id is null or da.matter_id is null or da.matter_id = requested_matter_id)
+  );
+$$;
+
+create or replace function public.is_recused_from_personnel_matter(
+  requested_matter_type text,
+  requested_matter_id uuid
+)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.personnel_matter_recusals r
+    where r.matter_type = requested_matter_type
+      and r.matter_id = requested_matter_id
+      and r.recused_profile_id = app_private.current_profile_id()
+      and r.lifted_at is null
+  );
+$$;
+
+-- Read policies support discovery but do not grant mutation authority.
 create policy organizational_units_read on public.organizational_units
 for select to authenticated
 using (active or app_private.current_access_tier() in ('Executive','Command'));
@@ -151,10 +258,10 @@ create policy personnel_unit_assignments_read on public.personnel_unit_assignmen
 for select to authenticated
 using (
   profile_id = app_private.current_profile_id()
-  or app_private.current_access_tier() in ('Executive','Command')
+  or (select rank from public.personnel_profiles where id = app_private.current_profile_id()) in ('Sheriff','Undersheriff','Major','Captain')
   or exists (
     select 1 from public.get_personnel_authority_scopes(profile_id) s
-    where s.scope in ('direct','unit','command_chain','training','temporary')
+    where s.scope in ('direct','unit','command_chain','training','temporary','directed')
   )
 );
 
@@ -163,8 +270,25 @@ for select to authenticated
 using (
   supervisor_profile_id = app_private.current_profile_id()
   or subject_profile_id = app_private.current_profile_id()
-  or app_private.current_access_tier() in ('Executive','Command')
+  or (select rank from public.personnel_profiles where id = app_private.current_profile_id()) in ('Sheriff','Undersheriff','Major','Captain')
 );
 
--- No direct insert/update/delete policies on assignments or supervisory authority.
--- Those mutations must go through audited SECURITY DEFINER RPCs once the final matrix is approved.
+create policy directed_personnel_actions_read on public.directed_personnel_actions
+for select to authenticated
+using (
+  assignee_profile_id = app_private.current_profile_id()
+  or directed_by = app_private.current_profile_id()
+  or (select rank from public.personnel_profiles where id = app_private.current_profile_id()) in ('Sheriff','Undersheriff','Major','Captain')
+);
+
+create policy personnel_matter_recusals_read on public.personnel_matter_recusals
+for select to authenticated
+using (
+  recused_profile_id = app_private.current_profile_id()
+  or replacement_profile_id = app_private.current_profile_id()
+  or imposed_by = app_private.current_profile_id()
+  or (select rank from public.personnel_profiles where id = app_private.current_profile_id()) in ('Sheriff','Undersheriff','Major','Captain')
+);
+
+-- No direct insert/update/delete policies on authority records.
+-- Mutations must go through audited SECURITY DEFINER RPCs after the matrix is approved.
