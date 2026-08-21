@@ -47,6 +47,11 @@
 .personnel-document-list strong,.personnel-document-list span { display:block; }
 .personnel-document-list span { margin-top:3px; font-size:.8rem; opacity:.62; }
 
+.personnel-record-qol { margin-bottom:14px; }
+.personnel-record-qol-actions { display:flex; gap:9px; flex-wrap:wrap; }
+.personnel-record-qol-actions .portal-button { min-height:42px; }
+.personnel-record-qol-actions .portal-button.is-active { border-color:rgba(162,124,69,.55); background:rgba(162,124,69,.12); }
+
 /* Roster personnel manager: keep the dialog contained and usable on phones. */
 .portal-modal-backdrop { box-sizing:border-box; padding:clamp(12px,3vw,28px); overflow-y:auto; overscroll-behavior:contain; }
 .portal-modal { box-sizing:border-box; width:min(680px,100%); max-width:100%; max-height:calc(100dvh - 24px); margin:auto; overflow-y:auto; overflow-x:hidden; }
@@ -69,6 +74,8 @@
   .command-v2-assignment-chips>div { min-width:0; }
   .personnel-document-list article { align-items:flex-start; }
   .personnel-document-list article>div:last-child { max-width:42%; }
+  .personnel-record-qol-actions { display:grid; grid-template-columns:1fr 1fr; }
+  .personnel-record-qol-actions .portal-button { width:100%; justify-content:center; }
 
   .portal-modal-backdrop { padding:10px; align-items:flex-start; }
   .portal-modal { width:100%; max-height:calc(100dvh - 20px); margin:0; border-radius:0; }
