@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PersonnelRecordTabs } from "../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordUtilities } from "../../../_components/PersonnelRecordUtilities";
 import { PortalShell } from "../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
@@ -57,6 +58,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
         <div className="deputy-profile-facts"><div><span>Primary assignment</span><strong>{primaryUnitName}</strong></div><div><span>Assignments</span><strong>{activeAssignments.length}</strong></div><div><span>Status</span><strong>{member.status}</strong></div><div><span>Access</span><strong>{member.access_tier}</strong></div></div>
       </section>
 
+      <PersonnelRecordUtilities personnelId={member.personnel_id} displayName={member.display_name} />
       <PersonnelRecordTabs personnelId={member.personnel_id} active="overview" />
 
       <div className="deputy-summary-grid command-v2-record-metrics">
