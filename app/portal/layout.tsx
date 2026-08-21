@@ -4,6 +4,7 @@ import "./portal.css";
 import "./medals.css";
 import "./certifications.css";
 import "./command-v2.css";
+import "./quick-find.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
