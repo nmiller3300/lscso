@@ -4,6 +4,14 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 const departmentSearchRanks = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 
+type SearchProfile = {
+  id: string;
+  personnel_id: string;
+  display_name: string;
+  rank: string;
+  call_sign: string | null;
+};
+
 function normalizeQuery(value: string | null) {
   return (value ?? "").trim().replace(/[(),]/g, " ").slice(0, 80);
 }
@@ -58,10 +66,10 @@ export async function GET(request: Request) {
     ? await supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign").in("id", relatedProfileIds)
     : { data: [] };
 
-  const people = new Map((relatedProfiles ?? []).map((person:any) => [person.id, person]));
+  const people = new Map<string, SearchProfile>(
+    ((relatedProfiles ?? []) as SearchProfile[]).map((person) => [person.id, person]),
+  );
 
-  // Guardian numbers and personnel names are common lookup terms but cannot be
-  // expressed safely in the same PostgREST text filter. Add exact/related matches.
   let guardianNumberMatches:any[] = [];
   const guardianNumber = Number(query.replace(/^g-/i, ""));
   if (Number.isInteger(guardianNumber) && guardianNumber > 0) {
