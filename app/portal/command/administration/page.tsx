@@ -9,6 +9,8 @@ export default async function AdministrationWorkspacePage() {
     redirect("/portal/command/supervision");
   }
 
+  const executive = profile.access_tier === "Executive";
+
   return (
     <PortalShell
       active="administration"
@@ -40,6 +42,14 @@ export default async function AdministrationWorkspacePage() {
             <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Open service records</Link>
           </div>
         </section>
+
+        {executive ? <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Organization</p><h2>Command Structure</h2></div><span>Executive</span></div>
+          <p className="command-v2-compact-copy">Review the department structure, assignments, and authority model.</p>
+          <div className="command-v2-action-row">
+            <Link className="portal-button portal-button--secondary" href="/portal/command/administration/structure">Open structure</Link>
+          </div>
+        </section> : null}
       </div>
     </PortalShell>
   );
