@@ -4,14 +4,25 @@ import { PageHero } from "../_components/PageHero";
 
 export const metadata: Metadata = {
   title: "Join LSCSO",
-  description: "Learn about joining the Los Santos County Sheriff’s Office and the path into Patrol Division.",
+  description: "Learn about service, expectations, training, and the path to joining the Los Santos County Sheriff’s Office.",
 };
 
+const expectations = [
+  ["Professionalism", "Represent the department professionally in public interactions, radio traffic, reports, and conduct with other personnel."],
+  ["Judgment", "Slow situations down when possible, make defensible decisions, and understand that discretion carries responsibility."],
+  ["Accountability", "Own mistakes, accept correction, follow policy, and understand that rank or assignment does not remove accountability."],
+  ["Communication", "Communicate clearly with partners, supervisors, other agencies, and the public. Ask questions when something is unclear."],
+  ["Teamwork", "Operate within a chain of command, support other deputies, and contribute to the department rather than treating patrol as a solo experience."],
+  ["Development", "Be willing to learn. Training does not end after initial qualification, and deputies are expected to continue developing throughout their service."],
+];
+
 const steps = [
-  ["01", "Apply", "Submit an application when recruitment is open. The application system will be connected here as recruitment tooling is finalized."],
-  ["02", "Review", "Training & Recruitment reviews applicants for eligibility, professionalism, and overall suitability for appointment."],
-  ["03", "Selection", "Qualified applicants advance through the department’s selection process and any required interviews or evaluations."],
-  ["04", "Training", "Selected recruits enter structured training and supervised development before independent service."],
+  ["01", "Application", "When recruitment opens, applicants will submit the LSCSO application directly through this page."],
+  ["02", "Review", "Training & Recruitment reviews the application and determines whether the applicant should advance in the selection process."],
+  ["03", "Selection", "Selected applicants may complete interviews, discussions, or other department evaluations before appointment."],
+  ["04", "Initial Training", "New personnel learn department expectations, policy, procedures, communications, documentation, and the fundamentals required for service."],
+  ["05", "Field Development", "Recruits and developing deputies work under designated trainers and supervisors while demonstrating safe, consistent independent performance."],
+  ["06", "Independent Service", "Successful personnel transition into regular Patrol duties while remaining accountable to continuing training, supervision, and department standards."],
 ];
 
 export default function JoinPage() {
@@ -20,7 +31,7 @@ export default function JoinPage() {
       <PageHero
         eyebrow="Careers & Recruitment"
         title="Join LSCSO"
-        description="Service starts with character, judgment, and the willingness to accept responsibility for the community you represent."
+        description="Service starts with character, judgment, and the willingness to accept responsibility for the community and the people beside you."
         image="/images/deputy-gray-uniform.png"
         imageAlt="LSCSO deputy in uniform"
         imagePosition="center 28%"
@@ -29,21 +40,21 @@ export default function JoinPage() {
       <section className="status-ribbon status-ribbon--gold">
         <div className="site-shell">
           <span className="status-dot" />
-          <strong>Applications Open</strong>
-          <span>Current sworn recruitment is for the Patrol Division.</span>
+          <strong>Applications Coming Soon</strong>
+          <span>Patrol Division will be the primary entry point for sworn personnel.</span>
         </div>
       </section>
 
       <section className="content-section content-section--light">
         <div className="site-shell two-column-editorial">
           <div>
-            <p className="section-kicker section-kicker--dark">Serve Los Santos County</p>
-            <h2>Start your career with Patrol.</h2>
+            <p className="section-kicker section-kicker--dark">Service with LSCSO</p>
+            <h2>More than putting on a uniform.</h2>
           </div>
           <div className="reading-column">
-            <p className="intro-serif">LSCSO is looking for people who can be trusted with responsibility, authority, and the expectations that come with wearing the badge.</p>
-            <p>Patrol Division is the current entry point for sworn personnel. Applicants should be prepared to communicate professionally, learn department policy, accept coaching, exercise sound judgment, and work as part of a structured chain of command.</p>
-            <p>This page is the permanent home for LSCSO recruitment. The department application will be integrated here when it is ready, so applicants will not need to hunt through Discord or unrelated pages to begin the process.</p>
+            <p className="intro-serif">LSCSO is built around people who can be trusted with responsibility, authority, and the expectations that come with wearing the badge.</p>
+            <p>Patrol is intended to be the foundation of sworn service. Deputies answer calls, conduct proactive patrol, investigate incidents, document their actions, work with supervisors and specialty personnel, and make decisions that affect other people.</p>
+            <p>We are not looking for perfection on day one. We are looking for maturity, willingness to learn, good communication, sound judgment, and people who can take both initiative and direction.</p>
           </div>
         </div>
       </section>
@@ -51,8 +62,45 @@ export default function JoinPage() {
       <section className="content-section content-section--sand">
         <div className="site-shell">
           <div className="section-heading-row section-heading-row--dark">
-            <div><p className="section-kicker section-kicker--dark">The Process</p><h2>What to expect.</h2></div>
-            <p>A straightforward path from application to supervised field development.</p>
+            <div><p className="section-kicker section-kicker--dark">What We Expect</p><h2>The standard starts with how you carry yourself.</h2></div>
+            <p>Technical skills can be taught. Character, judgment, and the way someone treats other people matter just as much.</p>
+          </div>
+          <div className="quality-grid">
+            {expectations.map(([title, description], index) => (
+              <article key={title}><span>{String(index + 1).padStart(2, "0")}</span><h3>{title}</h3><p>{description}</p></article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section content-section--dark">
+        <div className="site-shell two-column-editorial">
+          <div><p className="section-kicker">Patrol Division</p><h2>Where sworn service begins.</h2></div>
+          <div className="reading-column">
+            <p className="intro-serif">Patrol deputies are expected to be capable generalists before chasing specialty titles.</p>
+            <p>A deputy should be comfortable responding to routine and high-priority calls, conducting traffic enforcement, gathering information, preparing clear documentation, communicating on the radio, working scenes with other personnel, and recognizing when a supervisor or specialized resource is needed.</p>
+            <p>Specialty divisions and assignments may become available as personnel develop, department needs change, and qualifications are met. Joining LSCSO is not an automatic path into a specialty unit. The expectation is that deputies first become dependable members of the department.</p>
+            <div className="button-row"><Link className="button button--outline" href="/patrol">Explore Patrol Division</Link></div>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section content-section--light">
+        <div className="site-shell two-column-editorial">
+          <div><p className="section-kicker section-kicker--dark">Training & Development</p><h2>You will be taught. You will also be expected to improve.</h2></div>
+          <div className="reading-column">
+            <p>New personnel should expect structured training, feedback, supervised development, and documented progress. Trainers are there to teach and evaluate, not simply sign off a checklist.</p>
+            <p>Corrections are part of development. Deputies are expected to receive feedback professionally, ask questions, apply what they are taught, and demonstrate increasing independence over time. Supervisors and trainers remain part of that development after initial training is complete.</p>
+            <p>LSCSO may maintain certifications, recurring training requirements, specialty qualifications, and continuing-development expectations appropriate to an employee’s duties.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section content-section--sand">
+        <div className="site-shell">
+          <div className="section-heading-row section-heading-row--dark">
+            <div><p className="section-kicker section-kicker--dark">Recruitment Process</p><h2>From applicant to deputy.</h2></div>
+            <p>The exact process may evolve as LSCSO becomes operational, but applicants should expect a deliberate selection and development process.</p>
           </div>
           <div className="quality-grid">
             {steps.map(([number, title, description]) => (
@@ -64,12 +112,23 @@ export default function JoinPage() {
 
       <section className="content-section content-section--dark">
         <div className="site-shell two-column-editorial">
-          <div><p className="section-kicker">Application</p><h2>Ready when recruitment is.</h2></div>
+          <div><p className="section-kicker">Before You Apply</p><h2>Know what you are signing up for.</h2></div>
           <div className="reading-column">
-            <p>The online application portal is being prepared for integration. Once connected, this section will become the direct application entry point and can later support department notification workflows without changing the public recruitment URL.</p>
+            <p>Applicants should be prepared for a structured department with policies, supervision, documentation, training standards, and accountability. LSCSO is designed for people who want to participate in a functioning agency, not simply obtain a rank, vehicle, or specialty assignment.</p>
+            <p>Activity expectations, formal eligibility requirements, server-specific requirements, and application criteria will be published here as they are finalized. Applicants will be able to review those requirements before submitting anything.</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="content-section content-section--light">
+        <div className="site-shell two-column-editorial">
+          <div><p className="section-kicker section-kicker--dark">Applications</p><h2>Coming soon.</h2></div>
+          <div className="reading-column">
+            <p className="intro-serif">LSCSO is still preparing for operational launch, so applications are not being accepted yet.</p>
+            <p>This will remain the department’s permanent recruitment page. When the application system is ready, the application entry point and recruitment status will appear here without requiring applicants to find a separate website or Discord message.</p>
             <div className="button-row">
-              <span className="button button--muted" aria-disabled="true">Application integration coming soon</span>
-              <Link className="button button--outline" href="/patrol">Explore Patrol Division</Link>
+              <span className="button button--muted" aria-disabled="true">Applications Coming Soon</span>
+              <Link className="button button--outline" href="/training-recruitment">Training & Recruitment</Link>
             </div>
           </div>
         </div>
