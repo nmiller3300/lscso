@@ -11,7 +11,7 @@ type PortalNavigationProps = {
 };
 
 const personalNavigation = [
-  { id: "record", href: "/portal/my-office", label: "My Office", mobileLabel: "My Office", glyph: "MO" },
+  { id: "record", href: "/portal/my-office", label: "My Info", mobileLabel: "My Info", glyph: "MI" },
 ] as const;
 
 const commandNavigation = [
