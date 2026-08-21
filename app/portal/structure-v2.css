@@ -1,0 +1,62 @@
+.command-structure-status { margin-bottom: 16px; }
+
+.command-structure-principles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.command-structure-principles article {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+  border: 1px solid rgba(82, 68, 51, 0.12);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.command-structure-principles article > span {
+  flex: 0 0 auto;
+  font-size: 0.7rem;
+  font-weight: 800;
+  opacity: 0.5;
+}
+
+.command-structure-principles strong,
+.command-structure-principles small { display: block; }
+.command-structure-principles small { margin-top: 3px; line-height: 1.4; opacity: 0.65; }
+
+.command-structure-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.75fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.command-structure-side { display: grid; gap: 16px; }
+.command-structure-groups { display: grid; gap: 10px; }
+.command-structure-groups > article { border: 1px solid rgba(82, 68, 51, 0.13); border-radius: 10px; overflow: hidden; }
+.command-structure-group-head { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 11px 13px; background: rgba(116, 89, 53, 0.045); }
+.command-structure-group-head span { font-size: 0.76rem; opacity: 0.62; }
+.command-structure-members { display: grid; }
+.command-structure-members > div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 13px; border-top: 1px solid rgba(82, 68, 51, 0.08); }
+.command-structure-members span { font-weight: 650; }
+.command-structure-members small { opacity: 0.62; text-align: right; }
+.command-structure-footnote { display: block; margin-top: 12px; opacity: 0.58; line-height: 1.4; }
+
+.command-structure-rank-list { display: grid; gap: 8px; }
+.command-structure-rank-list > div { padding: 10px 0; border-bottom: 1px solid rgba(82, 68, 51, 0.1); }
+.command-structure-rank-list > div:last-child { border-bottom: 0; }
+.command-structure-rank-list strong,
+.command-structure-rank-list span { display: block; }
+.command-structure-rank-list span { margin-top: 3px; font-size: 0.8rem; opacity: 0.65; }
+
+@media (max-width: 900px) {
+  .command-structure-layout { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .command-structure-principles { grid-template-columns: 1fr; }
+  .command-structure-members > div { align-items: flex-start; }
+  .command-structure-members small { max-width: 45%; }
+}
