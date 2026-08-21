@@ -30,6 +30,7 @@ export type ActiveDirectedAction = {
 
 export type ActiveRecusal = {
   recusedProfileId: string;
+  replacementProfileId?: string | null;
   matterType: string;
   matterId: string;
 };
@@ -101,9 +102,6 @@ function uniqueScopes(scopes: AuthorityScope[]) {
 
 /**
  * Resolves why an LSCSO member has authority over another member.
- *
- * This is intentionally pure and side-effect free so the same scenarios can be
- * exercised in UI previews, server routes, and future automated tests.
  * Database RPC/RLS remains the final enforcement layer.
  */
 export function resolvePersonnelAuthority(input: AuthorityResolutionInput): AuthorityResolution {
@@ -127,35 +125,26 @@ export function resolvePersonnelAuthority(input: AuthorityResolutionInput): Auth
   );
 
   for (const authority of actorAuthority) {
+    const mappedScope: AuthorityScope =
+      authority.authorityType === "Primary"
+        ? "direct"
+        : authority.authorityType === "Training"
+          ? "training"
+          : authority.authorityType === "Temporary"
+            ? "temporary_assignment"
+            : authority.authorityType === "Command"
+              ? "command_chain"
+              : "unit";
+
     if (authority.subjectProfileId === target.id) {
-      const scope: AuthorityScope =
-        authority.authorityType === "Primary"
-          ? "direct"
-          : authority.authorityType === "Training"
-            ? "training"
-            : authority.authorityType === "Temporary"
-              ? "temporary"
-              : authority.authorityType === "Command"
-                ? "command_chain"
-                : "unit";
-      scopes.push(scope);
+      scopes.push(mappedScope);
       reasons.push(`${authority.authorityType} supervisory authority over this member`);
     }
 
     if (authority.unitId) {
       for (const assignment of targetAssignments) {
         if (unitContains(authority.unitId, assignment.unitId, input.units)) {
-          const scope: AuthorityScope =
-            authority.authorityType === "Training"
-              ? "training"
-              : authority.authorityType === "Temporary"
-                ? "temporary"
-                : authority.authorityType === "Command"
-                  ? "command_chain"
-                  : authority.authorityType === "Primary"
-                    ? "direct"
-                    : "unit";
-          scopes.push(scope);
+          scopes.push(mappedScope);
           reasons.push(`${authority.authorityType} authority through an active unit assignment`);
         }
       }
@@ -172,19 +161,19 @@ export function resolvePersonnelAuthority(input: AuthorityResolutionInput): Auth
   });
 
   if (directed) {
-    scopes.push("directed");
+    scopes.push("directed_action");
     reasons.push("Authorized directed action for this member/matter");
   }
 
-  const blockedByRecusal = Boolean(
-    input.matter &&
-      (input.recusals ?? []).some(
+  const matchingRecusal = input.matter
+    ? (input.recusals ?? []).find(
         (recusal) =>
-          recusal.recusedProfileId === actor.id &&
-          recusal.matterType === input.matter?.type &&
-          recusal.matterId === input.matter?.id,
-      ),
-  );
+          recusal.matterType === input.matter?.type && recusal.matterId === input.matter?.id,
+      )
+    : undefined;
+
+  const blockedByRecusal = matchingRecusal?.recusedProfileId === actor.id;
+  const isConflictReplacement = matchingRecusal?.replacementProfileId === actor.id;
 
   if (blockedByRecusal) {
     return {
@@ -195,8 +184,12 @@ export function resolvePersonnelAuthority(input: AuthorityResolutionInput): Auth
     };
   }
 
-  // A directed action is intentionally capability-specific. It may authorize
-  // the requested action even when the actor has no general personnel scope.
+  if (isConflictReplacement) {
+    scopes.push("conflict_reassignment");
+    reasons.push("Assigned as replacement authority for a recused personnel matter");
+  }
+
+  // Directed action is capability-specific and does not grant general record access.
   if (directed) {
     return {
       allowed: true,
