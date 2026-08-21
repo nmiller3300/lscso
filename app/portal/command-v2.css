@@ -164,6 +164,7 @@
   scrollbar-width: thin;
 }
 
+.command-v2-record-tabs a,
 .command-v2-record-tabs span {
   flex: 0 0 auto;
   border: 1px solid rgba(82, 68, 51, 0.14);
@@ -172,8 +173,16 @@
   font-size: 0.82rem;
   font-weight: 650;
   opacity: 0.66;
+  color: inherit;
+  text-decoration: none;
 }
 
+.command-v2-record-tabs a:hover {
+  opacity: 1;
+  border-color: rgba(82, 68, 51, 0.34);
+}
+
+.command-v2-record-tabs a.is-active,
 .command-v2-record-tabs span.is-active {
   opacity: 1;
   border-color: currentColor;
