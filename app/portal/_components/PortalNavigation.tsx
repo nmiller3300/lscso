@@ -40,35 +40,24 @@ const deputyNavigation = [
 
 export function PortalNavigation({ active, audience }: PortalNavigationProps) {
   const profile = usePortalProfile();
-  const navigation = audience === "deputy"
-    ? deputyNavigation
-    : ["Executive", "Command"].includes(profile.access_tier)
-      ? commandNavigation
-      : supervisorNavigation;
+  const navigation = ["Executive", "Command"].includes(profile.access_tier)
+    ? commandNavigation
+    : ["Supervisor", "Preliminary"].includes(profile.access_tier)
+      ? supervisorNavigation
+      : deputyNavigation;
 
   return (
     <>
       <nav className="portal-navigation" aria-label={`${audience} portal navigation`}>
         {navigation.map((item) => {
           const isActive = item.id === active;
-          return (
-            <Link aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined} href={item.href} key={`${item.id}-${item.href}`}>
-              <span aria-hidden="true">{item.glyph}</span>
-              {item.label}
-            </Link>
-          );
+          return <Link aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined} href={item.href} key={`${item.id}-${item.href}`}><span aria-hidden="true">{item.glyph}</span>{item.label}</Link>;
         })}
       </nav>
-
       <nav className="portal-mobile-navigation" aria-label={`${audience} mobile navigation`}>
         {navigation.map((item) => {
           const isActive = item.id === active;
-          return (
-            <Link aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined} href={item.href} key={`mobile-${item.id}-${item.href}`}>
-              <span aria-hidden="true">{item.glyph}</span>
-              <small>{item.mobileLabel}</small>
-            </Link>
-          );
+          return <Link aria-current={isActive ? "page" : undefined} className={isActive ? "is-active" : undefined} href={item.href} key={`mobile-${item.id}-${item.href}`}><span aria-hidden="true">{item.glyph}</span><small>{item.mobileLabel}</small></Link>;
         })}
       </nav>
     </>
