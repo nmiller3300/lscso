@@ -78,14 +78,15 @@ export default async function NotificationsPage() {
     const purview = departmentAuthority ? null : await loadPersonnelPurview(profile);
     const scopedIds = new Set((purview?.rows ?? []).map((row) => row.profileId));
     const allowed = (profileId: string | null | undefined) => departmentAuthority || Boolean(profileId && scopedIds.has(profileId));
+    const allowedDecision = (profileId: string | null | undefined) => Boolean(profileId && profileId !== profile.id && allowed(profileId));
 
     if (!departmentAuthority && !purview?.structuredAuthorityAvailable) {
       scopeNotice = "Your personal action items are shown. Supervisory action queues will populate when structured purview is active; legacy supervisor text is not used to infer access.";
     } else if (!departmentAuthority) {
-      scopeNotice = "Supervisory actions are limited to personnel currently inside your resolved purview.";
+      scopeNotice = "Supervisory actions are limited to personnel currently inside your resolved purview. Your own matters are never presented as self-approval decisions.";
     }
 
-    for (const item of guardians.filter((row: any) => allowed(row.subject_profile_id) && row.status === "Pending Approval")) {
+    for (const item of guardians.filter((row: any) => allowedDecision(row.subject_profile_id) && row.status === "Pending Approval")) {
       actionItems.push({
         id: `approval-guardian-${item.id}`,
         category: "Guardians",
@@ -98,17 +99,17 @@ export default async function NotificationsPage() {
       });
     }
 
-    for (const item of guardians.filter((row: any) => allowed(row.subject_profile_id) && row.follow_up_due_at && new Date(row.follow_up_due_at) <= now && !["Acknowledged", "Closed"].includes(row.status))) {
+    for (const item of guardians.filter((row: any) => allowedDecision(row.subject_profile_id) && row.follow_up_due_at && new Date(row.follow_up_due_at) <= now && !["Acknowledged", "Closed"].includes(row.status))) {
       actionItems.push({ id: `followup-${item.id}`, category: "Guardians", priority: "High", title: `Guardian follow-up due`, detail: `G-${String(item.guardian_number).padStart(4, "0")} · ${item.title}`, href: `/portal/command/guardians/${item.guardian_number}`, createdAt: item.follow_up_due_at, status: "Follow-up due" });
     }
 
-    for (const item of requests.filter((row: any) => allowed(row.requester_profile_id) && ["Submitted", "In Review"].includes(row.status))) {
+    for (const item of requests.filter((row: any) => allowedDecision(row.requester_profile_id) && ["Submitted", "In Review"].includes(row.status))) {
       actionItems.push({ id: `approval-request-${item.id}`, category: "Requests", priority: "Normal", title: `${item.request_type} request`, detail: `${item.subject} · RQ-${String(item.request_number).padStart(4, "0")}`, href: "/portal/command/approvals#personnel-requests", createdAt: item.created_at, status: item.status });
     }
-    for (const item of leave.filter((row: any) => allowed(row.profile_id) && ["Submitted", "In Review"].includes(row.status))) {
+    for (const item of leave.filter((row: any) => allowedDecision(row.profile_id) && ["Submitted", "In Review"].includes(row.status))) {
       actionItems.push({ id: `approval-leave-${item.id}`, category: "Requests", priority: "Normal", title: `${item.leave_type} LOA request`, detail: `RQ-${String(item.request_number).padStart(4, "0")}`, href: "/portal/command/approvals#leave-requests", createdAt: item.created_at, status: item.status });
     }
-    for (const item of certifications.filter((row: any) => allowed(row.profile_id) && ["Requested", "Pending"].includes(row.status))) {
+    for (const item of certifications.filter((row: any) => allowedDecision(row.profile_id) && ["Requested", "Pending"].includes(row.status))) {
       actionItems.push({ id: `approval-cert-${item.id}`, category: "Training", priority: "Normal", title: item.name, detail: "Certification request awaiting Command action", href: "/portal/command/approvals#certification-requests", createdAt: item.created_at, status: item.status });
     }
   }
