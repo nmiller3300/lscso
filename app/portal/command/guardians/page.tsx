@@ -2,6 +2,12 @@ import { GuardianDirectory } from "../../_components/GuardianDirectory";
 import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 
+type GuardianDirectoryPerson = {
+  id: string;
+  personnel_id: string;
+  display_name: string;
+};
+
 export default async function GuardianCenterPage() {
   const supabase = await createClient() as any;
   const [{ data: guardians }, { data: personnel }] = await Promise.all([
@@ -11,7 +17,9 @@ export default async function GuardianCenterPage() {
     supabase.from("personnel_profiles").select("id,personnel_id,display_name"),
   ]);
 
-  const names = new Map((personnel ?? []).map((member:any) => [member.id, member]));
+  const names = new Map<string, GuardianDirectoryPerson>(
+    ((personnel ?? []) as GuardianDirectoryPerson[]).map((member) => [member.id, member]),
+  );
 
   return (
     <PortalShell
