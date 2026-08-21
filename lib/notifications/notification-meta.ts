@@ -1,12 +1,13 @@
-export type NotificationCategory = "Personnel" | "Guardians" | "Requests" | "Training" | "System";
+export type NotificationCategory = "Personnel" | "Guardians" | "Requests" | "Training" | "Recognition" | "System";
 export type NotificationPriority = "Critical" | "High" | "Normal" | "Low";
 
 export function classifyNotification(type: string, title = "", message = ""): NotificationCategory {
   const value = `${type} ${title} ${message}`.toLowerCase();
+  if (value.includes("medal") || value.includes("award") || value.includes("outstanding performance") || value.includes("commendation restoration") || value.includes("distinguished service") || value.includes("life saving")) return "Recognition";
   if (value.includes("guardian") || value.includes("disciplin") || value.includes("commendation")) return "Guardians";
   if (value.includes("request") || value.includes("leave") || value.includes("loa") || value.includes("promotion") || value.includes("transfer")) return "Requests";
   if (value.includes("cert") || value.includes("training") || value.includes("fto") || value.includes("academy")) return "Training";
-  if (value.includes("personnel") || value.includes("account") || value.includes("credential") || value.includes("call sign") || value.includes("rank") || value.includes("assignment")) return "Personnel";
+  if (value.includes("personnel") || value.includes("account") || value.includes("credential") || value.includes("call sign") || value.includes("rank") || value.includes("assignment") || value.includes("flag")) return "Personnel";
   return "System";
 }
 
