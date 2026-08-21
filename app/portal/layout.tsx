@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./portal.css";
+import "./medals.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
