@@ -59,10 +59,19 @@ function newId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+function isDraftState(value: unknown): value is DraftState {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Partial<DraftState>;
+  return candidate.version === 1 && Array.isArray(candidate.units) && Array.isArray(candidate.assignments) && Array.isArray(candidate.authorities);
+}
+
 export function CommandStructureDraft({ personnel }: { personnel: PersonnelOption[] }) {
   const [draft, setDraft] = useState<DraftState>(initialDraft);
   const [loaded, setLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState<"units" | "assignments" | "authority">("units");
+  const [notice, setNotice] = useState<string | null>(null);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importValue, setImportValue] = useState("");
 
   const [unitName, setUnitName] = useState("");
   const [unitType, setUnitType] = useState<UnitType>("Division");
@@ -82,10 +91,8 @@ export function CommandStructureDraft({ personnel }: { personnel: PersonnelOptio
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
-        const parsed = JSON.parse(raw) as DraftState;
-        if (parsed?.version === 1 && Array.isArray(parsed.units) && Array.isArray(parsed.assignments) && Array.isArray(parsed.authorities)) {
-          setDraft(parsed);
-        }
+        const parsed = JSON.parse(raw) as unknown;
+        if (isDraftState(parsed)) setDraft(parsed);
       }
     } catch {
       setDraft(initialDraft);
@@ -117,14 +124,38 @@ export function CommandStructureDraft({ personnel }: { personnel: PersonnelOptio
     return [...draft.units].sort((a, b) => depth(a) - depth(b) || a.name.localeCompare(b.name));
   }, [draft.units, unitById]);
 
+  const warnings = useMemo(() => {
+    const issues: string[] = [];
+    const primaryCounts = new Map<string, number>();
+    for (const assignment of draft.assignments) {
+      if (assignment.type !== "Primary") continue;
+      primaryCounts.set(assignment.personnelId, (primaryCounts.get(assignment.personnelId) ?? 0) + 1);
+    }
+    for (const [personnelId, count] of primaryCounts) {
+      if (count > 1) issues.push(`${personnelById.get(personnelId)?.display_name ?? personnelId} has ${count} primary assignments.`);
+    }
+    for (const authority of draft.authorities) {
+      if (authority.targetType === "Person" && authority.subjectPersonnelId === authority.supervisorPersonnelId) {
+        issues.push(`${personnelById.get(authority.supervisorPersonnelId)?.display_name ?? authority.supervisorPersonnelId} has authority assigned over themself.`);
+      }
+    }
+    return issues;
+  }, [draft.assignments, draft.authorities, personnelById]);
+
   function addUnit() {
     const name = unitName.trim();
     if (!name) return;
+    const duplicate = draft.units.some((unit) => unit.parentId === (unitParent || ROOT_ID) && unit.name.toLowerCase() === name.toLowerCase());
+    if (duplicate) {
+      setNotice("A unit with that name already exists under the selected parent.");
+      return;
+    }
     setDraft((current) => ({
       ...current,
       units: [...current.units, { id: newId("unit"), name, type: unitType, parentId: unitParent || ROOT_ID }],
     }));
     setUnitName("");
+    setNotice(null);
   }
 
   function addAssignment() {
@@ -132,17 +163,40 @@ export function CommandStructureDraft({ personnel }: { personnel: PersonnelOptio
     const duplicate = draft.assignments.some(
       (row) => row.personnelId === assignmentPerson && row.unitId === assignmentUnit && row.type === assignmentType,
     );
-    if (duplicate) return;
+    if (duplicate) {
+      setNotice("That exact assignment already exists.");
+      return;
+    }
+    if (assignmentType === "Primary" && draft.assignments.some((row) => row.personnelId === assignmentPerson && row.type === "Primary")) {
+      setNotice("This member already has a primary assignment. Use Secondary, Special, Temporary, or Training unless the existing primary assignment is removed first.");
+      return;
+    }
     setDraft((current) => ({
       ...current,
       assignments: [...current.assignments, { id: newId("assignment"), personnelId: assignmentPerson, unitId: assignmentUnit, type: assignmentType }],
     }));
+    setNotice(null);
   }
 
   function addAuthority() {
     if (!authoritySupervisor) return;
     if (authorityTargetType === "Unit" && !authorityUnit) return;
     if (authorityTargetType === "Person" && !authoritySubject) return;
+    if (authorityTargetType === "Person" && authoritySupervisor === authoritySubject) {
+      setNotice("A member cannot be assigned supervisory authority over themself.");
+      return;
+    }
+    const duplicate = draft.authorities.some((row) =>
+      row.supervisorPersonnelId === authoritySupervisor &&
+      row.targetType === authorityTargetType &&
+      row.unitId === (authorityTargetType === "Unit" ? authorityUnit : null) &&
+      row.subjectPersonnelId === (authorityTargetType === "Person" ? authoritySubject : null) &&
+      row.type === authorityType,
+    );
+    if (duplicate) {
+      setNotice("That exact supervisory authority already exists.");
+      return;
+    }
     setDraft((current) => ({
       ...current,
       authorities: [
@@ -157,21 +211,56 @@ export function CommandStructureDraft({ personnel }: { personnel: PersonnelOptio
         },
       ],
     }));
+    setNotice(null);
   }
 
   function removeUnit(id: string) {
     if (id === ROOT_ID) return;
+    const childUnits = draft.units.filter((unit) => unit.parentId === id);
+    if (childUnits.length) {
+      setNotice("Remove or move the child units first. This prevents an accidental orphaned structure.");
+      return;
+    }
     setDraft((current) => ({
       ...current,
       units: current.units.filter((unit) => unit.id !== id),
       assignments: current.assignments.filter((row) => row.unitId !== id),
       authorities: current.authorities.filter((row) => row.unitId !== id),
     }));
+    setNotice(null);
+  }
+
+  async function copyDraft() {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(draft));
+      setNotice("Draft copied. Paste it into Import Draft on the other browser.");
+    } catch {
+      setImportValue(JSON.stringify(draft));
+      setImportOpen(true);
+      setNotice("Clipboard access was blocked. Copy the draft text below instead.");
+    }
+  }
+
+  function importDraft() {
+    try {
+      const parsed = JSON.parse(importValue) as unknown;
+      if (!isDraftState(parsed) || !parsed.units.some((unit) => unit.id === ROOT_ID)) {
+        setNotice("That is not a valid LSCSO Command Structure draft.");
+        return;
+      }
+      setDraft(parsed);
+      setImportValue("");
+      setImportOpen(false);
+      setNotice("Draft imported into this browser. Production was not changed.");
+    } catch {
+      setNotice("The draft text could not be read. Make sure the full copied draft was pasted.");
+    }
   }
 
   function resetDraft() {
     if (!window.confirm("Clear this browser-only Command Structure draft? This does not affect the database.")) return;
     setDraft(initialDraft);
+    setNotice("Browser draft cleared. Production was not changed.");
   }
 
   return (
@@ -185,6 +274,27 @@ export function CommandStructureDraft({ personnel }: { personnel: PersonnelOptio
         <strong>Preview only.</strong>
         <span>Changes here are saved in this browser and do not write to Supabase.</span>
       </div>
+
+      <div className="command-structure-transfer-row">
+        <button className="portal-button portal-button--secondary" onClick={copyDraft} type="button">Copy Draft</button>
+        <button className="portal-button portal-button--secondary" onClick={() => setImportOpen((value) => !value)} type="button">Import Draft</button>
+        <span>Use these to move the same draft between authorized browsers.</span>
+      </div>
+
+      {importOpen ? (
+        <div className="command-structure-import">
+          <label><span>Draft data</span><textarea value={importValue} onChange={(event) => setImportValue(event.target.value)} placeholder="Paste copied LSCSO structure draft" /></label>
+          <div className="command-v2-action-row"><button className="portal-button portal-button--primary" onClick={importDraft} type="button">Import</button></div>
+        </div>
+      ) : null}
+
+      {notice ? <div className="command-structure-editor-notice" role="status">{notice}</div> : null}
+      {warnings.length ? (
+        <div className="command-structure-editor-warnings">
+          <strong>Draft checks</strong>
+          {warnings.map((warning) => <span key={warning}>{warning}</span>)}
+        </div>
+      ) : null}
 
       <div className="command-structure-editor-tabs" role="tablist" aria-label="Command Structure draft sections">
         <button className={activeTab === "units" ? "is-active" : ""} onClick={() => setActiveTab("units")} type="button">Units <span>{draft.units.length - 1}</span></button>
