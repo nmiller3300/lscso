@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-type PersonnelRecordSection = "overview" | "timeline" | "supervision" | "training" | "recognition" | "administration";
+type PersonnelRecordSection = "overview" | "timeline" | "supervision" | "training" | "recognition" | "documents" | "administration";
 
 export function PersonnelRecordTabs({ personnelId, active }: { personnelId: string; active: PersonnelRecordSection }) {
   const base = `/portal/command/personnel/${personnelId}`;
@@ -10,6 +10,7 @@ export function PersonnelRecordTabs({ personnelId, active }: { personnelId: stri
     { id: "supervision", label: "Supervision", href: `${base}/supervision` },
     { id: "training", label: "Training", href: `${base}/training` },
     { id: "recognition", label: "Recognition", href: `${base}/recognition` },
+    { id: "documents", label: "Documents", href: `${base}/documents` },
     { id: "administration", label: "Administration", href: `${base}/administration` },
   ];
 
