@@ -75,8 +75,8 @@ export default function HomePage() {
             <Image
               src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
               alt="Los Santos County Sheriff’s Office patch"
-              width={118}
-              height={118}
+              width={160}
+              height={160}
             />
             <div>
               <span>Established</span>

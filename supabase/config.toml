@@ -1,0 +1,7 @@
+project_id = "ksumxsdoaporjadqlpze"
+
+[functions.personnel-admin]
+verify_jwt = true
+
+[functions.bootstrap-lscso-accounts]
+verify_jwt = false

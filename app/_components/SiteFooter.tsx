@@ -25,6 +25,7 @@ export function SiteFooter() {
             <Link href="/about">About LSCSO</Link>
             <Link href="/office-of-the-sheriff">Office of the Sheriff</Link>
             <Link href="/internal-affairs">Internal Affairs</Link>
+            <Link href="/portal">Personnel Portal</Link>
           </div>
           <div>
             <span>Operations</span>

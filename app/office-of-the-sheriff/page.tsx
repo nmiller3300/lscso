@@ -35,20 +35,33 @@ export default function OfficeOfTheSheriffPage() {
           </div>
           <div className="reading-column">
             <p className="intro-serif">
-              The Office of the Sheriff carries final responsibility for the
-              direction, readiness, and professional standards of LSCSO.
+              Sheriff Nicholas Miller leads the Los Santos County Sheriff’s
+              Office alongside Undersheriff Michael White.
             </p>
             <p>
-              Command leadership establishes department-wide priorities,
-              maintains policy oversight, develops personnel, and ensures each
-              function of the Sheriff’s Office serves a defined public-safety
-              purpose.
+              Together, the Sheriff and Undersheriff carry final responsibility
+              for LSCSO’s direction, readiness, and professional standards.
+              Executive leadership establishes department-wide priorities,
+              maintains policy oversight, develops personnel, and ensures every
+              function serves a defined public-safety purpose.
             </p>
             <p>
               Authority within LSCSO is inseparable from accountability. Command
               decisions are expected to reflect department values, operational
               realities, and the long-term health of the Office.
             </p>
+            <div className="executive-leadership-grid" aria-label="LSCSO executive leadership">
+              <article>
+                <span>Sheriff</span>
+                <strong>Nicholas Miller</strong>
+                <small>Chief law-enforcement officer · Call sign S-401</small>
+              </article>
+              <article>
+                <span>Undersheriff</span>
+                <strong>Michael White</strong>
+                <small>Executive command · Call sign S-402</small>
+              </article>
+            </div>
           </div>
         </div>
       </section>

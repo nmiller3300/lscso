@@ -7,6 +7,7 @@ const navigation = [
   { href: "/patrol", label: "Patrol" },
   { href: "/internal-affairs", label: "Internal Affairs" },
   { href: "/training-recruitment", label: "Training & Recruitment" },
+  { href: "/portal", label: "Personnel Portal" },
 ];
 
 export function SiteHeader() {
@@ -23,8 +24,8 @@ export function SiteHeader() {
           <Image
             src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
             alt=""
-            width={58}
-            height={58}
+            width={72}
+            height={72}
             priority
           />
           <span>
