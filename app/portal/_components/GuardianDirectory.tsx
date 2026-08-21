@@ -18,12 +18,13 @@ type GuardianDirectoryRecord = {
 
 type GuardianDirectoryProps = {
   records: GuardianDirectoryRecord[];
+  initialQuery?: string;
 };
 
 const RECENT_KEY = "lscso.command.recent-guardians:v1";
 
-export function GuardianDirectory({ records }: GuardianDirectoryProps) {
-  const [query, setQuery] = useState("");
+export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirectoryProps) {
+  const [query, setQuery] = useState(initialQuery);
   const [status, setStatus] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
 
