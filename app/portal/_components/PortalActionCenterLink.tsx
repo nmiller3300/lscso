@@ -35,9 +35,7 @@ export function PortalActionCenterLink({ audience }: { audience: "command" | "de
 
         const canQueryDepartment = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
         if (canQueryDepartment || (scopedIds && scopedIds.length)) {
-          const applyScope = (query: any, column: string) => canQueryDepartment
-            ? query.neq(column, profile.id)
-            : query.in(column, scopedIds!);
+          const applyScope = (query: any, column: string) => canQueryDepartment ? query.neq(column, profile.id) : query.in(column, scopedIds!);
           const now = new Date().toISOString();
           const [guardians, requests, leave, certs, followUps] = await Promise.all([
             applyScope(supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("status", "Pending Approval"), "subject_profile_id"),
@@ -54,17 +52,26 @@ export function PortalActionCenterLink({ audience }: { audience: "command" | "de
     }
 
     void refreshCount();
-    const interval = window.setInterval(refreshCount, 60_000);
+    const interval = window.setInterval(refreshCount, 15_000);
+    const onFocus = () => void refreshCount();
+    window.addEventListener("focus", onFocus);
     return () => {
       cancelled = true;
       window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
     };
   }, [audience, profile.id, profile.rank]);
 
+  const hasActions = count > 0;
   return (
-    <Link aria-label={`${count} items require action`} className="portal-action-center-button" href="/portal/notifications#action-required">
+    <Link
+      aria-label={hasActions ? `${count} items require immediate attention` : "No items currently require action"}
+      className={`portal-action-center-button${hasActions ? " has-actions" : ""}`}
+      href="/portal/notifications#action-required"
+      title={hasActions ? `${count} action-required item${count === 1 ? "" : "s"}` : "Action Center"}
+    >
       <span aria-hidden="true">{String(count).padStart(2, "0")}</span>
-      Action Center
+      {hasActions ? "Action Required" : "Action Center"}
     </Link>
   );
 }
