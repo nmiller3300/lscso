@@ -1,9 +1,9 @@
 drop function if exists public.review_leave_request(uuid,text,text);
 
 create function public.review_leave_request(
-  p_record_id uuid,
-  p_decision text,
-  p_review_notes text default null
+  record_id uuid,
+  decision text,
+  review_notes text default null
 )
 returns public.leave_requests
 language plpgsql
@@ -19,17 +19,17 @@ begin
     raise exception 'Command approval authority required';
   end if;
 
-  if p_decision not in ('Approved','Denied') then
+  if $2 not in ('Approved','Denied') then
     raise exception 'Decision must be Approved or Denied';
   end if;
 
   update public.leave_requests as lr
-  set status = p_decision,
+  set status = $2,
       reviewed_by = v_caller,
-      review_notes = nullif(trim(p_review_notes), ''),
+      review_notes = nullif(trim($3), ''),
       reviewed_at = now(),
       updated_at = now()
-  where lr.id = p_record_id
+  where lr.id = $1
     and lr.status in ('Submitted','In Review')
   returning lr.* into v_result;
 
@@ -41,8 +41,8 @@ begin
   values (
     v_result.profile_id,
     'Request Decision',
-    'Leave request ' || lower(p_decision),
-    'LOA-' || lpad(v_result.request_number::text, 4, '0') || ' was ' || lower(p_decision) || ' by Command.',
+    'Leave request ' || lower($2),
+    'LOA-' || lpad(v_result.request_number::text, 4, '0') || ' was ' || lower($2) || ' by Command.',
     '/portal/personnel#leave-requests'
   );
 
