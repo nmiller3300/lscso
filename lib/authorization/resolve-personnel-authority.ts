@@ -189,16 +189,6 @@ export function resolvePersonnelAuthority(input: AuthorityResolutionInput): Auth
     reasons.push("Assigned as replacement authority for a recused personnel matter");
   }
 
-  // Directed action is capability-specific and does not grant general record access.
-  if (directed) {
-    return {
-      allowed: true,
-      scopes: uniqueScopes(scopes),
-      reasons,
-      blockedByRecusal: false,
-    };
-  }
-
   const context: AuthorityContext = {
     actorId: actor.id,
     targetId: target.id,
