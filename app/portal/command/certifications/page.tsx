@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 export default async function CertificationCenterPage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) redirect("/portal");
-  const supabase = await createClient();
+  const supabase = await createClient() as any;
   const { data: canRequest } = await supabase.rpc("can_request_certifications");
   if (!canRequest) redirect("/portal/personnel");
 
@@ -24,7 +24,7 @@ export default async function CertificationCenterPage() {
       title="Certification Center"
       description="FTOs and supervisors may recommend certifications. Command and Executive personnel issue the final credential."
     >
-      <CertificationWorkspace personnel={personnel ?? []} catalog={(catalog ?? []).map((item) => item.name)} certifications={certifications ?? []} />
+      <CertificationWorkspace personnel={personnel ?? []} catalog={(catalog ?? []).map((item: any) => item.name)} certifications={certifications ?? []} />
     </PortalShell>
   );
 }
