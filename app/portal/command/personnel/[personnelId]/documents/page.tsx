@@ -7,22 +7,22 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 type PageProps = { params: Promise<{ personnelId: string }> };
 
-type DocumentRow = {
-  id: string;
-  document_number: number;
-  title: string;
-  category: string;
-  document_date: string | null;
-  visibility: string;
-  source_type: string;
-  status: string;
-  file_name: string;
-  created_at: string;
-};
+const categories = [
+  ["Guardians", "Guardian attachments and supporting documentation."],
+  ["Evaluations", "Performance reviews and supervisory evaluations."],
+  ["Training", "Training records, evaluations, and supporting files."],
+  ["Certifications", "Certification documents and qualification records."],
+  ["Leave / LOA", "Approved leave documentation and related records."],
+  ["Disciplinary", "Authorized disciplinary supporting documents."],
+  ["Administrative", "Personnel actions and administrative records."],
+  ["Other", "Authorized personnel documents that do not fit another category."],
+] as const;
 
 export default async function PersonnelDocumentsPage({ params }: PageProps) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
+  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
+    redirect("/portal/command/supervision");
+  }
 
   const { personnelId } = await params;
   const supabase = await createClient() as any;
@@ -34,23 +34,6 @@ export default async function PersonnelDocumentsPage({ params }: PageProps) {
 
   if (!member) notFound();
 
-  const documents = await supabase
-    .from("personnel_documents")
-    .select("id,document_number,title,category,document_date,visibility,source_type,status,file_name,created_at")
-    .eq("profile_id", member.id)
-    .neq("status", "Removed")
-    .order("document_date", { ascending: false, nullsFirst: false })
-    .order("created_at", { ascending: false });
-
-  const vaultReady = !documents.error;
-  const rows = (documents.data ?? []) as DocumentRow[];
-  const grouped = new Map<string, DocumentRow[]>();
-  for (const row of rows) {
-    const current = grouped.get(row.category) ?? [];
-    current.push(row);
-    grouped.set(row.category, current);
-  }
-
   return (
     <PortalShell
       active="personnel"
@@ -61,44 +44,22 @@ export default async function PersonnelDocumentsPage({ params }: PageProps) {
     >
       <PersonnelRecordTabs personnelId={member.personnel_id} active="documents" />
 
-      {!vaultReady ? (
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Document Vault</p><h2>Vault schema not active</h2></div><span>Preview</span></div>
-          <div className="command-v2-inline-state">
-            <strong>No production document storage has been enabled.</strong>
-            <span>The V2 vault remains isolated until its authority and storage policies are approved.</span>
-          </div>
-        </section>
-      ) : (
-        <div className="command-v2-directory">
-          <section className="portal-panel">
-            <div className="portal-panel-heading"><div><p>Vault</p><h2>Documents on file</h2></div><span>{rows.length}</span></div>
-            {rows.length ? (
-              <div className="personnel-document-groups">
-                {Array.from(grouped.entries()).sort(([a], [b]) => a.localeCompare(b)).map(([category, items]) => (
-                  <section key={category}>
-                    <div className="personnel-document-group-head"><strong>{category}</strong><span>{items.length}</span></div>
-                    <div className="personnel-document-list">
-                      {items.map((item) => (
-                        <article key={item.id}>
-                          <div>
-                            <strong>{item.title}</strong>
-                            <span>PD-{String(item.document_number).padStart(6, "0")} · {item.file_name}</span>
-                          </div>
-                          <div>
-                            <strong>{item.document_date ? new Date(`${item.document_date}T12:00:00`).toLocaleDateString() : new Date(item.created_at).toLocaleDateString()}</strong>
-                            <span>{item.visibility} · {item.status}</span>
-                          </div>
-                        </article>
-                      ))}
-                    </div>
-                  </section>
-                ))}
-              </div>
-            ) : <p className="command-v2-compact-copy">No documents on file.</p>}
-          </section>
+      <section className="portal-panel">
+        <div className="portal-panel-heading"><div><p>Personnel Vault</p><h2>Document storage</h2></div><span>Preview</span></div>
+        <div className="command-v2-inline-state">
+          <strong>Private vault storage is staged, not active.</strong>
+          <span>Uploads stay disabled until the V2 authority model and storage policies are approved.</span>
         </div>
-      )}
+      </section>
+
+      <div className="command-v2-workspace-grid">
+        {categories.map(([category, description]) => (
+          <section className="portal-panel command-v2-launcher" key={category}>
+            <div className="portal-panel-heading"><div><p>Category</p><h2>{category}</h2></div><span>0</span></div>
+            <p className="command-v2-compact-copy">{description}</p>
+          </section>
+        ))}
+      </div>
     </PortalShell>
   );
 }
