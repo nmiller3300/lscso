@@ -14,7 +14,7 @@ export default async function CertificationCenterPage() {
   const [{ data: personnel }, { data: catalog }, { data: certifications }] = await Promise.all([
     supabase.rpc("certification_request_candidates"),
     supabase.from("certification_catalog").select("name").eq("active", true).order("name"),
-    supabase.from("certifications").select("id,profile_id,name,status,issuer,issued_on,expires_on,notes").order("created_at", { ascending: false }),
+    supabase.from("certifications").select("id,profile_id,name,status,issuer,certificate_number,issued_on,expires_on,notes").order("created_at", { ascending: false }),
   ]);
 
   return (
@@ -22,7 +22,7 @@ export default async function CertificationCenterPage() {
       active="certifications"
       eyebrow="Professional standards · Qualifications"
       title="Certification Center"
-      description="FTOs and supervisors may recommend certifications. Command and Executive personnel issue the final credential."
+      description="FTOs and supervisors may recommend certifications. Command and Executive personnel issue the final credential. Certificate numbers are assigned automatically at issuance."
     >
       <CertificationWorkspace personnel={personnel ?? []} catalog={(catalog ?? []).map((item: any) => item.name)} certifications={certifications ?? []} />
     </PortalShell>
