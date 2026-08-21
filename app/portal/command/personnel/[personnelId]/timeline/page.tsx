@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
 import { PersonnelTimeline, type PersonnelTimelineEvent } from "../../../../_components/PersonnelTimeline";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
@@ -106,6 +107,7 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
       description="Chronological service record."
       actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}
     >
+      <PersonnelRecordTabs personnelId={member.personnel_id} active="timeline" />
       <PersonnelTimeline events={events} />
     </PortalShell>
   );
