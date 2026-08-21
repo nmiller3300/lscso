@@ -11,6 +11,7 @@
   font-weight: 750;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease, color .18s ease;
 }
 
 .portal-action-center-button > span {
@@ -25,6 +26,21 @@
 }
 
 .portal-action-center-button:hover { border-color: rgba(82, 68, 51, 0.35); }
+.portal-action-center-button.has-actions {
+  border-color: rgba(164, 45, 45, 0.58);
+  background: rgba(164, 45, 45, 0.10);
+  box-shadow: 0 0 0 3px rgba(164, 45, 45, 0.08);
+  color: #8f2525;
+}
+.portal-action-center-button.has-actions > span {
+  background: #a63232;
+  color: #fff;
+  box-shadow: 0 0 0 4px rgba(166, 50, 50, 0.12);
+}
+.portal-action-center-button.has-actions:hover {
+  border-color: #8f2525;
+  background: rgba(164, 45, 45, 0.15);
+}
 
 .portal-notification-center { display: grid; gap: 18px; }
 .portal-action-center,
