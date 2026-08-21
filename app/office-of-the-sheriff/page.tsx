@@ -15,6 +15,25 @@ const responsibilities = [
   ["Interagency Coordination", "Representing LSCSO and maintaining effective cooperation with public-safety partners."],
 ];
 
+const executiveLeadership = [
+  {
+    order: "01",
+    rank: "Sheriff",
+    name: "Nicholas Miller",
+    role: "Chief law-enforcement officer",
+    callSign: "S-401",
+    summary: "Sets the Office’s direction, standards, and final executive decisions.",
+  },
+  {
+    order: "02",
+    rank: "Undersheriff",
+    name: "Michael White",
+    role: "Second in command",
+    callSign: "S-402",
+    summary: "Directs executive coordination, readiness, and command implementation.",
+  },
+];
+
 export default function OfficeOfTheSheriffPage() {
   return (
     <>
@@ -28,40 +47,45 @@ export default function OfficeOfTheSheriffPage() {
       />
 
       <section className="content-section content-section--light">
-        <div className="site-shell two-column-editorial">
+        <div className="site-shell office-leadership-layout">
           <div>
             <p className="section-kicker section-kicker--dark">Command Direction</p>
             <h2>Leadership that keeps the mission clear.</h2>
           </div>
           <div className="reading-column">
             <p className="intro-serif">
-              Sheriff Nicholas Miller leads the Los Santos County Sheriff’s
-              Office alongside Undersheriff Michael White.
+              Executive command carries final responsibility for the direction,
+              readiness, and professional standards of the Office.
             </p>
             <p>
-              Together, the Sheriff and Undersheriff carry final responsibility
-              for LSCSO’s direction, readiness, and professional standards.
-              Executive leadership establishes department-wide priorities,
-              maintains policy oversight, develops personnel, and ensures every
-              function serves a defined public-safety purpose.
+              Department-wide priorities, policy oversight, personnel development,
+              and operational decisions are coordinated through a clear executive
+              chain of command.
             </p>
             <p>
               Authority within LSCSO is inseparable from accountability. Command
               decisions are expected to reflect department values, operational
               realities, and the long-term health of the Office.
             </p>
-            <div className="executive-leadership-grid" aria-label="LSCSO executive leadership">
-              <article>
-                <span>Sheriff</span>
-                <strong>Nicholas Miller</strong>
-                <small>Chief law-enforcement officer · Call sign S-401</small>
+          </div>
+          <div className="executive-command-roster" aria-label="LSCSO executive leadership">
+            {executiveLeadership.map((leader) => (
+              <article key={leader.rank}>
+                <span className="executive-command-index">{leader.order}</span>
+                <div className="executive-command-identity">
+                  <span>{leader.rank}</span>
+                  <h3>{leader.name}</h3>
+                </div>
+                <div className="executive-command-role">
+                  <strong>{leader.role}</strong>
+                  <p>{leader.summary}</p>
+                </div>
+                <div className="executive-command-call">
+                  <span>Call sign</span>
+                  <strong>{leader.callSign}</strong>
+                </div>
               </article>
-              <article>
-                <span>Undersheriff</span>
-                <strong>Michael White</strong>
-                <small>Executive command · Call sign S-402</small>
-              </article>
-            </div>
+            ))}
           </div>
         </div>
       </section>

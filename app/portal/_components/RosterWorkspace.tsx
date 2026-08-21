@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isStrongPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 import type { AccessTier, PersonnelRecord, PersonnelStatus } from "../_data/model";
 
 type RosterWorkspaceProps = {
@@ -12,7 +13,6 @@ type RosterWorkspaceProps = {
 type ConfirmAction = "suspend" | "reinstate" | "deactivate";
 
 const CALL_SIGN_PATTERN = /^S-4\d{2}$/;
-const STRONG_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/;
 
 const accessOptions: Array<AccessTier | "All"> = [
   "All",
@@ -135,8 +135,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       setFormError(`@${username} is already assigned and cannot be reused.`);
       return;
     }
-    if (!STRONG_PASSWORD.test(password)) {
-      setFormError("Temporary passwords require at least 12 characters with uppercase, lowercase, a number, and a symbol.");
+    if (!isStrongPassword(password)) {
+      setFormError(PASSWORD_REQUIREMENT);
       return;
     }
 
@@ -180,7 +180,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     setPersonnel((current) => [...current, newMember]);
     setSelectedId(id);
     closeCreate();
-    showNotice(`${callSign} assigned to ${displayName}. The production roster was updated.`);
+    showNotice(`${callSign} assigned to ${displayName}. The department roster was updated.`);
     router.refresh();
   }
 
@@ -200,7 +200,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     }
 
     if (!selected.profileId) {
-      setFormError("This personnel record is not linked to the production database.");
+      setFormError("This personnel record is not linked to the department system.");
       return;
     }
 
@@ -285,8 +285,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       setFormError("Assign a username containing 3–32 lowercase letters, numbers, dots, underscores, or hyphens.");
       return;
     }
-    if (!STRONG_PASSWORD.test(password)) {
-      setFormError("Temporary passwords require at least 12 characters with uppercase, lowercase, a number, and a symbol.");
+    if (!isStrongPassword(password)) {
+      setFormError(PASSWORD_REQUIREMENT);
       return;
     }
 
@@ -459,7 +459,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                 <label>Display name<input name="displayName" required placeholder="Department display name" /></label>
                 <label>Permanent personnel ID<input name="employeeId" pattern="LS-[0-9]{3}" required placeholder="LS-000" /></label>
                 <label>Assigned username<input name="username" required autoComplete="off" placeholder="first.last" /></label>
-                <label>Temporary password<input name="password" required autoComplete="new-password" minLength={12} placeholder="Minimum 12 characters" type="password" /></label>
+                <label>Temporary password<input name="password" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" /></label>
                 <label>
                   Operational call sign
                   <input defaultValue="S-4" maxLength={5} name="callSign" pattern="S-4[0-9]{2}" required placeholder="S-4##" />
@@ -509,7 +509,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                   ? `${selected.callSign} will remain reserved while access is suspended.`
                   : `${selected.callSign} will remain assigned as access returns to active status.`}
             </p>
-            <label>Command reason<textarea placeholder="Required production audit reason" rows={3} /></label>
+            <label>Command reason<textarea placeholder="Required audit reason" rows={3} /></label>
             <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setConfirmAction(null)} type="button">Cancel</button><button className={`portal-button ${confirmAction === "deactivate" ? "portal-button--danger" : "portal-button--primary"}`} onClick={applyConfirmedAction} type="button">Confirm action</button></div>
           </section>
         </div>
@@ -529,9 +529,9 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
               </label>
               <label>
                 Temporary password
-                <input autoComplete="new-password" name="credentialPassword" placeholder="Minimum 12 characters" required type="password" />
+                <input autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} name="credentialPassword" placeholder="Minimum 8 characters" required type="password" />
               </label>
-              <small className="portal-field-help">Uppercase, lowercase, a number, and a symbol are required. The password is sent directly to Supabase Auth and is not stored in the personnel profile.</small>
+              <small className="portal-field-help">{PASSWORD_REQUIREMENT} The password is sent directly to the secure authentication service and is not stored in the personnel profile.</small>
               {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
               <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setCredentialEditor(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" type="submit">{selected.credentialsAssigned ? "Set temporary password" : "Assign credentials"}</button></div>
             </form>

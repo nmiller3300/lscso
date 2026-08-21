@@ -161,7 +161,7 @@ export function GuardianWorkspace() {
         isTestAccount: profile.is_test_account,
       }));
       const names = new Map(options.map((profile) => [profile.id, profile.displayName]));
-      setPersonnel(options);
+      setPersonnel(options.filter((profile) => profile.id !== currentProfile.id));
       setPointTiers((tierRows ?? []).map((tier) => ({
         id: tier.id,
         minPoints: tier.min_points,
@@ -187,7 +187,7 @@ export function GuardianWorkspace() {
 
     void loadGuardianData();
     return () => { cancelled = true; };
-  }, []);
+  }, [currentProfile.id]);
 
   function toggleCategory(category: string) {
     setSelectedCategories((current) =>
@@ -215,7 +215,6 @@ export function GuardianWorkspace() {
 
     const { data, error } = await supabase.from("guardian_records").insert({
       subject_profile_id: subjectProfileId,
-      author_profile_id: currentProfile.id,
       record_type: config.label,
       status,
       title,
@@ -242,7 +241,6 @@ export function GuardianWorkspace() {
       escalation_reason: kind === "commendation" ? null : String(form.get("escalationReason") ?? "").trim() || null,
       submitted_at: status === "Draft" ? null : new Date().toISOString(),
       issued_at: status === "Awaiting Acknowledgment" ? new Date().toISOString() : null,
-      is_test_record: subject.isTestAccount,
     }).select("id,guardian_number,record_type,status,follow_up_due_at").single();
 
     if (error || !data) throw new Error(error?.message ?? "The Guardian could not be saved.");
@@ -400,12 +398,11 @@ export function GuardianWorkspace() {
                     <option>Patrol Division</option><option>Training & FTO</option><option>Internal Affairs</option><option>Office of the Sheriff</option>
                   </select>
                 </label>
-                <label>
-                  Supervisor of record
-                  <select defaultValue={currentProfile.id} disabled name="supervisor">
-                    <option value={currentProfile.id}>{currentProfile.display_name} · {currentProfile.rank}</option>
-                  </select>
-                </label>
+                <div className="guardian-author-identity" aria-label={`Recorded by ${currentProfile.display_name}, ${currentProfile.rank}`}>
+                  <span>Recorded by</span>
+                  <strong>{currentProfile.display_name}</strong>
+                  <small>{currentProfile.rank} · Verified signed-in user</small>
+                </div>
                 <label>
                   Confidentiality
                   <select defaultValue="Standard personnel record" name="confidentiality">

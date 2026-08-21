@@ -2,8 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-
-const STRONG_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/;
+import { isStrongPassword, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 
 export function PasswordChangeDialog() {
   const [open, setOpen] = useState(false);
@@ -19,8 +18,8 @@ export function PasswordChangeDialog() {
     setError("");
     setMessage("");
 
-    if (!STRONG_PASSWORD.test(nextPassword)) {
-      setError("Use at least 12 characters with uppercase, lowercase, a number, and a symbol.");
+    if (!isStrongPassword(nextPassword)) {
+      setError(PASSWORD_REQUIREMENT);
       return;
     }
     if (nextPassword !== confirmation) {
@@ -35,39 +34,34 @@ export function PasswordChangeDialog() {
     setPending(true);
     try {
       const supabase = createClient();
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user?.email) {
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
         setError("Your secure session could not be verified. Sign in again and retry.");
         return;
       }
 
-      const { error: verifyError } = await supabase.auth.signInWithPassword({
-        email: userData.user.email,
-        password: currentPassword,
+      const { data, error: functionError } = await supabase.functions.invoke("personnel-admin", {
+        body: {
+          operation: "change_own_password",
+          current_password: currentPassword,
+          password: nextPassword,
+        },
       });
-      if (verifyError) {
-        setError("The current password is incorrect.");
+      if (functionError || data?.error) {
+        setError(String(data?.error ?? functionError?.message ?? "The password could not be updated."));
         return;
       }
 
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: nextPassword,
-        data: { ...userData.user.user_metadata, must_change_password: false },
-      });
-      if (updateError) {
-        setError("The password could not be updated. Please try again.");
-        return;
-      }
-
-      await supabase.auth.signOut({ scope: "others" });
-      await supabase.rpc("record_session_event", {
-        session_event_type: "Password Changed",
-        session_user_agent: navigator.userAgent,
-      });
+      await supabase.auth.refreshSession();
+      const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
       setCurrentPassword("");
       setNextPassword("");
       setConfirmation("");
-      setMessage("Password changed. Other active sessions have been signed out.");
+      setMessage(
+        signOutError
+          ? "Password changed. Review active sessions from Command if another device should be signed out."
+          : "Password changed. Other active sessions have been signed out.",
+      );
     } catch {
       setError("The secure account service could not be reached. Please try again.");
     } finally {
@@ -91,7 +85,7 @@ export function PasswordChangeDialog() {
               <label>Current password<input autoComplete="current-password" onChange={(event) => setCurrentPassword(event.target.value)} required type="password" value={currentPassword} /></label>
               <label>New password<input autoComplete="new-password" onChange={(event) => setNextPassword(event.target.value)} required type="password" value={nextPassword} /></label>
               <label>Confirm new password<input autoComplete="new-password" onChange={(event) => setConfirmation(event.target.value)} required type="password" value={confirmation} /></label>
-              <small className="portal-field-help">Minimum 12 characters with uppercase, lowercase, a number, and a symbol.</small>
+              <small className="portal-field-help">{PASSWORD_REQUIREMENT}</small>
               {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
               {message ? <div className="portal-form-success" role="status">{message}</div> : null}
               <div className="portal-modal-actions">

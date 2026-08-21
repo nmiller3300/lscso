@@ -482,7 +482,7 @@ export type Database = {
           action_taken?: string | null
           approved_at?: string | null
           approved_by?: string | null
-          author_profile_id: string
+          author_profile_id?: string
           closed_at?: string | null
           command_notes?: string | null
           created_at?: string
@@ -946,6 +946,31 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "guardian_records"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      review_personnel_request: {
+        Args: { decision: string; record_id: string; review_notes?: string }
+        Returns: {
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_notes: string | null
+          details: string
+          id: string
+          is_test_record: boolean
+          request_number: number
+          request_type: string
+          requested_effective_at: string | null
+          requester_profile_id: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "personnel_requests"
           isOneToOne: true
           isSetofReturn: false
         }

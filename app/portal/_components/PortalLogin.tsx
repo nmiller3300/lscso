@@ -120,11 +120,6 @@ export function PortalLogin() {
         <button disabled={pending} type="submit">{pending ? "Verifying…" : "Sign in"}</button>
       </form>
 
-      <div className="portal-private-credential-note">
-        <strong>Private credentials</strong>
-        <span>Usernames and passwords are assigned by Command and are never displayed on this page.</span>
-      </div>
-
       {activeProfile ? (
         <button className="portal-continue-session" onClick={() => router.push(homeFor(activeProfile.access_tier))} type="button">
           Continue {activeProfile.display_name} session →

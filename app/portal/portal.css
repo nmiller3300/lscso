@@ -1382,6 +1382,34 @@ body:has(.portal-root) {
   font-weight: 800;
 }
 
+.portal-approval-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 5px !important;
+}
+
+.portal-approval-actions button {
+  min-height: 31px;
+  padding: 0 9px;
+  border: 1px solid var(--portal-line);
+  background: #fff;
+  color: var(--portal-muted);
+  font-size: 10px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.portal-approval-actions button.is-primary {
+  border-color: var(--portal-gold-dark);
+  background: var(--portal-gold);
+  color: #171811;
+}
+
+.portal-approval-actions button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
 .portal-activity-list {
   padding: 6px 19px 0;
 }
@@ -1501,7 +1529,7 @@ body:has(.portal-root) {
 
 .portal-quick-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   border-top: 1px solid #cfd3cd;
   border-left: 1px solid #cfd3cd;
 }
@@ -2428,6 +2456,37 @@ body:has(.portal-root) {
   gap: 14px;
   padding-top: 17px;
   border-top: 1px solid var(--portal-line);
+}
+
+.guardian-author-identity {
+  min-height: 73px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  padding: 11px 15px;
+  border: 1px solid var(--portal-line);
+  border-left: 3px solid var(--portal-gold);
+  background: #f4f2e9;
+}
+
+.guardian-author-identity > span {
+  color: var(--portal-gold-dark);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.guardian-author-identity > strong {
+  color: var(--portal-ink);
+  font-size: 15px;
+}
+
+.guardian-author-identity > small {
+  color: var(--portal-muted);
+  font-size: 12px;
+  font-weight: 650;
 }
 
 .guardian-points-assessment {
@@ -4289,6 +4348,12 @@ body:has(.portal-root[data-theme="dark"]) {
   border-top-color: #0d0f0c;
 }
 
+.portal-root[data-theme="dark"] .guardian-author-identity {
+  border-color: #3a4038;
+  border-left-color: var(--portal-gold);
+  background: #1b1e19;
+}
+
 .portal-root[data-theme="dark"] :is(
   .guardian-type-grid button > span,
   .guardian-queue > article > div:first-child > span
@@ -4306,6 +4371,18 @@ body:has(.portal-root[data-theme="dark"]) {
 
 .portal-root[data-theme="dark"] .portal-record-type {
   background: #252923;
+}
+
+.portal-root[data-theme="dark"] .portal-approval-actions button {
+  border-color: #41473f;
+  background: #20231e;
+  color: #c7cec4;
+}
+
+.portal-root[data-theme="dark"] .portal-approval-actions button.is-primary {
+  border-color: #c8ac5b;
+  background: #c8ac5b;
+  color: #111310;
 }
 
 .portal-root[data-theme="dark"] .guardian-route-card li.is-current > span {

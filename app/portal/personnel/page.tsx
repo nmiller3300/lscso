@@ -82,7 +82,7 @@ export default async function PersonnelPortalPage() {
         </div>
         <div className="deputy-profile-seal">
           <strong>Personnel record</strong>
-          <span>Live database verified</span>
+          <span>Protected and attributed</span>
         </div>
       </section>
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CommandApprovalQueue, type CommandApprovalItem } from "../_components/CommandApprovalQueue";
 import { CommandActivity } from "../_components/CommandInteractions";
 import { PortalShell } from "../_components/PortalShell";
 import { rankAccess } from "../_data/model";
@@ -29,9 +30,11 @@ export default async function CommandDashboardPage() {
     { value: String(overdue).padStart(2, "0"), label: "Overdue follow-ups", detail: "Supervisor response due", tone: "danger" },
   ];
 
-  const approvalQueue = [
+  const approvalQueue: CommandApprovalItem[] = [
     ...pendingGuardians.map((record) => ({
+      databaseId: record.id,
       id: `G-${String(record.guardian_number).padStart(4, "0")}`,
+      kind: "Guardian" as const,
       type: record.record_type,
       subject: profileNames.get(record.subject_profile_id) ?? "Restricted personnel",
       submittedBy: profileNames.get(record.author_profile_id) ?? "Command",
@@ -39,7 +42,9 @@ export default async function CommandDashboardPage() {
       age: new Date(record.created_at).toLocaleDateString(),
     })),
     ...pendingRequests.map((request) => ({
+      databaseId: request.id,
       id: `RQ-${String(request.request_number).padStart(4, "0")}`,
+      kind: "Request" as const,
       type: request.request_type,
       subject: profileNames.get(request.requester_profile_id) ?? "Restricted personnel",
       submittedBy: "Self-service",
@@ -98,33 +103,7 @@ export default async function CommandDashboardPage() {
             </div>
             <span>{approvalQueue.length} open</span>
           </div>
-          <div className="portal-approval-list">
-            {approvalQueue.map((item) => (
-              <article key={item.id}>
-                <span className={`portal-record-type portal-record-type--${item.type.toLowerCase().replaceAll(" ", "-")}`}>
-                  {item.type.slice(0, 2).toUpperCase()}
-                </span>
-                <div className="portal-approval-id">
-                  <strong>{item.id}</strong>
-                  <span>{item.type}</span>
-                </div>
-                <div>
-                  <strong>{item.subject}</strong>
-                  <span>{item.submittedBy}</span>
-                </div>
-                <span className={`portal-priority portal-priority--${item.priority.toLowerCase()}`}>
-                  {item.priority}
-                </span>
-                <small>{item.age}</small>
-                <Link href={item.id.startsWith("G-") ? "/portal/command/guardians" : "/portal/command#certifications"}>
-                  Review →
-                </Link>
-              </article>
-            ))}
-            {approvalQueue.length === 0 ? (
-              <div className="portal-empty-state"><strong>No command approvals are waiting.</strong></div>
-            ) : null}
-          </div>
+          <CommandApprovalQueue initialItems={approvalQueue} />
         </section>
 
         <CommandActivity notifications={notifications} />
@@ -151,17 +130,11 @@ export default async function CommandDashboardPage() {
             <p>Use an organized, type-specific form for feedback, warnings, write-ups, or commendations.</p>
             <b>Open Guardian Center →</b>
           </Link>
-          <Link href="/portal/command#certifications" id="certifications">
+          <Link href="/portal/command#approvals">
             <span>03</span>
-            <strong>Review certification request</strong>
-            <p>Approve additions, monitor expiration dates, and preserve supporting documentation.</p>
-            <b>Review requests →</b>
-          </Link>
-          <Link href="/portal/command#training" id="training">
-            <span>04</span>
-            <strong>Update Academy or FTO</strong>
-            <p>Track phases, evaluations, remedial plans, sign-offs, and release readiness.</p>
-            <b>Open training →</b>
+            <strong>Review personnel requests</strong>
+            <p>Approve or deny promotion, transfer, certification, and record-review requests.</p>
+            <b>Open decision queue →</b>
           </Link>
         </div>
       </section>

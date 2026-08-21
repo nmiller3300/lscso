@@ -22,9 +22,7 @@ const commandNavigation = [
   { id: "personnel", href: "/portal/command/personnel", label: "Personnel roster", glyph: "PR" },
   { id: "guardians", href: "/portal/command/guardians", label: "Guardian center", glyph: "GC" },
   { id: "approvals", href: "/portal/command#approvals", label: "Approvals", glyph: "AP" },
-  { id: "training", href: "/portal/command#training", label: "Training & FTO", glyph: "FT" },
-  { id: "certifications", href: "/portal/command#certifications", label: "Certifications", glyph: "CE" },
-  { id: "audit", href: "/portal/command#audit", label: "Audit & sessions", glyph: "AS" },
+  { id: "activity", href: "/portal/command#notifications", label: "Recent activity", glyph: "RA" },
 ] as const;
 
 const deputyNavigation = [
@@ -82,8 +80,8 @@ export function PortalShell({
         <div className="portal-sidebar-foot">
           <span className="portal-security-pulse" aria-hidden="true" />
           <div>
-            <strong>Production secured</strong>
-            <small>Shared Supabase record storage</small>
+            <strong>Restricted access</strong>
+            <small>Protected department records</small>
           </div>
         </div>
       </aside>

@@ -50,7 +50,7 @@ function validUsername(value: unknown): value is string {
 
 function validPassword(value: unknown): value is string {
   return typeof value === "string" &&
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{12,}$/.test(value);
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
 Deno.serve(async (request) => {
@@ -85,8 +85,6 @@ Deno.serve(async (request) => {
   const executiveAllowed = caller.access_tier === "Executive" &&
     ["Sheriff", "Undersheriff"].includes(caller.rank);
 
-  if (!commandAllowed) return json({ error: "Command authority required" }, 403);
-
   const writeAudit = async (action: string, recordId: string | null, newData: unknown) => {
     await admin.from("audit_log").insert({
       actor_user_id: userData.user.id,
@@ -97,6 +95,50 @@ Deno.serve(async (request) => {
       new_data: newData,
     });
   };
+
+  if (operation === "change_own_password") {
+    const currentPassword = typeof body?.current_password === "string" ? body.current_password : "";
+    const nextPassword = body?.password;
+    const verificationKey = Deno.env.get("SUPABASE_ANON_KEY") ?? serviceRoleKey;
+
+    if (!currentPassword || !validPassword(nextPassword)) {
+      return json({ error: "Use at least 8 characters with uppercase, lowercase, a number, and a symbol." }, 400);
+    }
+    if (currentPassword === nextPassword) {
+      return json({ error: "The new password must be different from the current password." }, 400);
+    }
+    if (!userData.user.email) {
+      return json({ error: "The secure account service is unavailable." }, 503);
+    }
+
+    const verifier = createClient(supabaseUrl, verificationKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+    const { error: verificationError } = await verifier.auth.signInWithPassword({
+      email: userData.user.email,
+      password: currentPassword,
+    });
+    if (verificationError) return json({ error: "The current password is incorrect." }, 400);
+
+    const { error: passwordError } = await admin.auth.admin.updateUserById(userData.user.id, {
+      password: nextPassword,
+      user_metadata: {
+        ...(userData.user.user_metadata ?? {}),
+        must_change_password: false,
+      },
+    });
+    if (passwordError) return json({ error: "The password could not be updated." }, 400);
+
+    await admin.from("session_events").insert({
+      profile_id: caller.id,
+      event_type: "Password Changed",
+      user_agent: "Self-service password change",
+    });
+    await writeAudit("ACCOUNT_PASSWORD_CHANGED", caller.id, { profile_id: caller.id });
+    return json({ success: true });
+  }
+
+  if (!commandAllowed) return json({ error: "Command authority required" }, 403);
 
   if (operation === "assign_credentials") {
     const profileId = typeof body?.profile_id === "string" ? body.profile_id : "";
