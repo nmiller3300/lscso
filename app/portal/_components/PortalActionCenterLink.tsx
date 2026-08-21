@@ -30,12 +30,14 @@ export function PortalActionCenterLink({ audience }: { audience: "command" | "de
         let scopedIds: string[] | null = null;
         if (!DEPARTMENT_COMMAND_RANKS.has(profile.rank)) {
           const { data, error } = await supabase.rpc("get_personnel_in_my_purview");
-          if (!error) scopedIds = Array.from(new Set((data ?? []).map((row: any) => row.profile_id).filter(Boolean)));
+          if (!error) scopedIds = Array.from(new Set((data ?? []).map((row: any) => row.profile_id).filter((id: string) => Boolean(id) && id !== profile.id)));
         }
 
         const canQueryDepartment = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
         if (canQueryDepartment || (scopedIds && scopedIds.length)) {
-          const applyScope = (query: any, column: string) => canQueryDepartment ? query : query.in(column, scopedIds!);
+          const applyScope = (query: any, column: string) => canQueryDepartment
+            ? query.neq(column, profile.id)
+            : query.in(column, scopedIds!);
           const now = new Date().toISOString();
           const [guardians, requests, leave, certs, followUps] = await Promise.all([
             applyScope(supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("status", "Pending Approval"), "subject_profile_id"),
