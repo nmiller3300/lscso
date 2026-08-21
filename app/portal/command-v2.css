@@ -192,6 +192,60 @@
   margin-bottom: 16px;
 }
 
+.personnel-document-groups {
+  display: grid;
+  gap: 14px;
+}
+
+.personnel-document-groups > section {
+  border: 1px solid rgba(82, 68, 51, 0.12);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.personnel-document-group-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 13px;
+  background: rgba(116, 89, 53, 0.045);
+}
+
+.personnel-document-group-head span {
+  font-size: 0.76rem;
+  opacity: 0.62;
+}
+
+.personnel-document-list {
+  display: grid;
+}
+
+.personnel-document-list article {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  padding: 11px 13px;
+  border-top: 1px solid rgba(82, 68, 51, 0.08);
+}
+
+.personnel-document-list article > div:last-child {
+  text-align: right;
+  flex: 0 0 auto;
+}
+
+.personnel-document-list strong,
+.personnel-document-list span {
+  display: block;
+}
+
+.personnel-document-list span {
+  margin-top: 3px;
+  font-size: 0.8rem;
+  opacity: 0.62;
+}
+
 @media (max-width: 980px) {
   .command-v2-workspace-grid {
     grid-template-columns: 1fr 1fr;
@@ -218,5 +272,13 @@
 
   .command-v2-personnel-results a > div:last-child {
     max-width: 38%;
+  }
+
+  .personnel-document-list article {
+    align-items: flex-start;
+  }
+
+  .personnel-document-list article > div:last-child {
+    max-width: 42%;
   }
 }
