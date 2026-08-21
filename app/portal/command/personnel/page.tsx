@@ -1,9 +1,15 @@
+import { redirect } from "next/navigation";
 import { PortalShell } from "../../_components/PortalShell";
 import { RosterWorkspace } from "../../_components/RosterWorkspace";
 import type { PersonnelRecord } from "../../_data/model";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 export default async function CommandPersonnelPage() {
+  const profile = await getCurrentPortalProfile();
+  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
+    redirect("/portal/command/guardians");
+  }
   const supabase = await createClient();
   const [{ data: profiles }, { data: assignments }, { data: certifications }, { data: guardians }] = await Promise.all([
     supabase.from("personnel_profiles").select("*").order("personnel_id"),

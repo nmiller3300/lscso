@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="site-shell footer-main">
         <div className="footer-identity">
           <Image
-            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
+            src="/images/lscso-patch-color.png"
             alt="Los Santos County Sheriff’s Office patch"
             width={100}
             height={100}

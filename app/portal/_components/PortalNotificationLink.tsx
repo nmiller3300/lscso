@@ -21,11 +21,19 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
 
       let actionCount = 0;
       if (audience === "command") {
-        const [{ count: guardianCount }, { count: requestCount }] = await Promise.all([
-          supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("status", "Pending Approval"),
-          supabase.from("personnel_requests").select("id", { count: "exact", head: true }).in("status", ["Submitted", "In Review"]),
-        ]);
-        actionCount = (guardianCount ?? 0) + (requestCount ?? 0);
+        if (["Executive", "Command"].includes(profile.access_tier)) {
+          const [{ count: guardianCount }, { count: requestCount }] = await Promise.all([
+            supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("status", "Pending Approval"),
+            supabase.from("personnel_requests").select("id", { count: "exact", head: true }).in("status", ["Submitted", "In Review"]),
+          ]);
+          actionCount = (guardianCount ?? 0) + (requestCount ?? 0);
+        } else {
+          const { count } = await supabase.from("guardian_records")
+            .select("id", { count: "exact", head: true })
+            .eq("author_profile_id", profile.id)
+            .eq("status", "Approved");
+          actionCount = count ?? 0;
+        }
       } else {
         const { count } = await supabase.from("guardian_records")
           .select("id", { count: "exact", head: true })
@@ -43,11 +51,15 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
       cancelled = true;
       window.clearInterval(interval);
     };
-  }, [audience, profile.id]);
+  }, [audience, profile.access_tier, profile.id]);
 
-  const destination = audience === "command" ? "/portal/command#notifications" : "/portal/personnel#notifications";
+  const destination = audience === "command"
+    ? ["Executive", "Command"].includes(profile.access_tier)
+      ? "/portal/command#notifications"
+      : "/portal/command/guardians"
+    : "/portal/personnel#notifications";
   return (
-    <Link className="portal-notification-button" href={destination}>
+    <Link aria-label={`${unreadCount} portal notifications`} className="portal-notification-button" href={destination}>
       <span aria-hidden="true">{String(unreadCount).padStart(2, "0")}</span>
       Notifications
     </Link>

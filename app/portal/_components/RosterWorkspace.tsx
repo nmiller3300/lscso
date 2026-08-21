@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { isStrongPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
+import { usePortalProfile } from "./PortalProfileProvider";
 import type { AccessTier, PersonnelRecord, PersonnelStatus } from "../_data/model";
 
 type RosterWorkspaceProps = {
@@ -50,6 +51,7 @@ function appendHistory(member: PersonnelRecord, releasedCallSign: string) {
 
 export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspaceProps) {
   const router = useRouter();
+  const currentProfile = usePortalProfile();
   const [personnel, setPersonnel] = useState(initialPersonnel);
   const [query, setQuery] = useState("");
   const [access, setAccess] = useState<AccessTier | "All">("All");
@@ -60,6 +62,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
   const [credentialEditor, setCredentialEditor] = useState(false);
   const [formError, setFormError] = useState("");
   const [notice, setNotice] = useState("");
+  const [commandReason, setCommandReason] = useState("");
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
 
   useEffect(() => {
     setPersonnel(initialPersonnel);
@@ -87,6 +91,11 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
   }, [access, personnel, query]);
 
   const selected = personnel.find((member) => member.id === selectedId) ?? personnel[0];
+  const isExecutiveCaller = currentProfile.access_tier === "Executive";
+  const selectedRequiresExecutive = selected?.access === "Executive";
+  const canManageSelected = !selectedRequiresExecutive || isExecutiveCaller;
+  const isSelectedSelf = selected?.profileId === currentProfile.id;
+  const canDeactivateSelected = isExecutiveCaller && !isSelectedSelf;
 
   function callSignIsReserved(callSign: string, exceptId?: string) {
     return personnel.some(
@@ -97,6 +106,15 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
   function showNotice(message: string) {
     setNotice(message);
     window.setTimeout(() => setNotice(""), 3600);
+  }
+
+  function selectMember(id: string) {
+    setSelectedId(id);
+    if (window.matchMedia("(max-width: 620px)").matches) {
+      window.requestAnimationFrame(() => {
+        document.getElementById("portal-member-detail")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    }
   }
 
   function closeCreate() {
@@ -115,6 +133,11 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     const rank = String(form.get("rank") ?? "Deputy");
     const division = String(form.get("division") ?? "Patrol Division");
     const isTestAccount = form.get("isTestAccount") === "on";
+
+    if (rankAccess[rank] === "Executive" && !isExecutiveCaller) {
+      setFormError("Only Sheriff or Undersheriff may create an Executive account.");
+      return;
+    }
 
     if (!CALL_SIGN_PATTERN.test(callSign)) {
       setFormError("Call sign must use the S-4## format, such as S-417.");
@@ -138,6 +161,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     }
 
     let result: Record<string, unknown>;
+    setPendingAction("create");
     try {
       result = await runPersonnelAction({
         operation: "create_personnel",
@@ -153,6 +177,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "The account could not be created.");
       return;
+    } finally {
+      setPendingAction(null);
     }
 
     const newMember: PersonnelRecord = {
@@ -201,11 +227,32 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       return;
     }
 
+    if (!canManageSelected || selected.status === "Deactivated") {
+      setFormError(selected.status === "Deactivated"
+        ? "Deactivated personnel records are retained for audit and cannot be reactivated."
+        : "Executive personnel changes require Sheriff or Undersheriff authority.");
+      return;
+    }
+
+    const assignmentReason = String(form.get("assignmentReason") ?? "").trim();
+    if (assignmentReason.length < 4) {
+      setFormError("Enter a short command reason for the call-sign assignment.");
+      return;
+    }
+
+    setPendingAction("call-sign");
     try {
-      await runPersonnelAction({ operation: "assign_call_sign", profile_id: selected.profileId, call_sign: nextCallSign });
+      await runPersonnelAction({
+        operation: "assign_call_sign",
+        profile_id: selected.profileId,
+        call_sign: nextCallSign,
+        reason: assignmentReason,
+      });
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "The call sign could not be assigned.");
       return;
+    } finally {
+      setPendingAction(null);
     }
 
     const releasedCallSign = selected.callSign;
@@ -213,7 +260,6 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       ...member,
       callSign: nextCallSign,
       callSignHistory: releasedCallSign === nextCallSign ? member.callSignHistory : appendHistory(member, releasedCallSign),
-      status: member.status === "Deactivated" ? "Active" : member.status,
     } : member));
     setShowCallSignEditor(false);
     setFormError("");
@@ -227,19 +273,39 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
 
   async function applyConfirmedAction() {
     if (!selected || !confirmAction || !selected.profileId) return;
+    const reason = commandReason.trim();
+    if (reason.length < 4) {
+      setFormError("Enter a short command reason before confirming this action.");
+      return;
+    }
+    if (!canManageSelected || (confirmAction === "deactivate" && !canDeactivateSelected)) {
+      setConfirmAction(null);
+      setFormError(confirmAction === "deactivate"
+        ? "Only Sheriff or Undersheriff may deactivate another account."
+        : "Executive personnel changes require Sheriff or Undersheriff authority.");
+      return;
+    }
     let nextStatus: PersonnelStatus = selected.status;
     let message = "";
 
+    setPendingAction(confirmAction);
     try {
       await runPersonnelAction(
         confirmAction === "deactivate"
-          ? { operation: "deactivate", profile_id: selected.profileId }
-          : { operation: "set_status", profile_id: selected.profileId, status: confirmAction === "suspend" ? "Suspended" : "Active" },
+          ? { operation: "deactivate", profile_id: selected.profileId, reason }
+          : {
+              operation: "set_status",
+              profile_id: selected.profileId,
+              status: confirmAction === "suspend" ? "Suspended" : "Active",
+              reason,
+            },
       );
     } catch (error) {
       setConfirmAction(null);
       setFormError(error instanceof Error ? error.message : "The account action failed.");
       return;
+    } finally {
+      setPendingAction(null);
     }
 
     if (confirmAction === "suspend") {
@@ -260,12 +326,14 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       callSign: confirmAction === "deactivate" ? "" : member.callSign,
     } : member));
     setConfirmAction(null);
+    setCommandReason("");
+    setFormError("");
     showNotice(message);
     router.refresh();
   }
 
   function resetCredentials() {
-    if (!selected) return;
+    if (!selected || !canManageSelected || selected.status === "Deactivated") return;
     setFormError("");
     setCredentialEditor(true);
   }
@@ -287,6 +355,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       return;
     }
 
+    setPendingAction("credentials");
     try {
       await runPersonnelAction(
         selected.credentialsAssigned
@@ -296,6 +365,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Credentials could not be updated.");
       return;
+    } finally {
+      setPendingAction(null);
     }
 
     setPersonnel((current) => current.map((member) => member.id === selected.id ? {
@@ -322,9 +393,13 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
           <p>Call signs are recycled operational assignments. Suspension reserves the call sign; deactivation releases it while preserving assignment history.</p>
         </div>
         <div className="portal-control-actions">
-          <button className="portal-button portal-button--primary" onClick={() => setShowCreate(true)} type="button">+ Create account</button>
+          <button className="portal-button portal-button--primary" onClick={() => { setFormError(""); setShowCreate(true); }} type="button">+ Create account</button>
         </div>
       </section>
+
+      {formError && !showCreate && !showCallSignEditor && !confirmAction && !credentialEditor ? (
+        <div className="portal-form-error portal-operation-error" role="alert">{formError}</div>
+      ) : null}
 
       <div className="portal-roster-layout">
         <section className="portal-panel portal-roster-panel">
@@ -361,8 +436,8 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
               <tbody>
                 {filteredPersonnel.map((member) => (
                   <tr className={member.id === selected?.id ? "is-selected" : undefined} key={member.id}>
-                    <td>
-                      <button className="portal-member-link" onClick={() => setSelectedId(member.id)} type="button">
+                    <td data-label="Member">
+                      <button className="portal-member-link" onClick={() => selectMember(member.id)} type="button">
                         <span>{member.callSign ? member.callSign.slice(-2) : "—"}</span>
                         <div>
                           <div className="portal-member-name-line">
@@ -373,11 +448,11 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                         </div>
                       </button>
                     </td>
-                    <td><strong>{member.rank}</strong><span>{member.access}</span></td>
-                    <td><strong>{member.division}</strong><span>Reports to {member.supervisor}</span></td>
-                    <td><span className={`portal-status portal-status--${member.status.toLowerCase()}`}>{member.status}</span></td>
-                    <td><strong className={member.guardianOpen ? "portal-open-count" : undefined}>{member.guardianOpen}</strong></td>
-                    <td><button className="portal-row-arrow" onClick={() => setSelectedId(member.id)} type="button" aria-label={`Open ${member.displayName} record`}>→</button></td>
+                    <td data-label="Rank / access"><strong>{member.rank}</strong><span>{member.access}</span></td>
+                    <td data-label="Assignment"><strong>{member.division}</strong><span>Reports to {member.supervisor}</span></td>
+                    <td data-label="Status"><span className={`portal-status portal-status--${member.status.toLowerCase()}`}>{member.status}</span></td>
+                    <td data-label="Open Guardians"><strong className={member.guardianOpen ? "portal-open-count" : undefined}>{member.guardianOpen}</strong></td>
+                    <td data-label="Open record"><button className="portal-row-arrow" onClick={() => selectMember(member.id)} type="button" aria-label={`Open ${member.displayName} record`}>→</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -393,7 +468,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
         </section>
 
         {selected ? (
-          <aside className="portal-member-card">
+          <aside className="portal-member-card" id="portal-member-detail">
             <div className="portal-member-card-head">
               <span>{selected.callSign ? selected.callSign.slice(-2) : "—"}</span>
               <div>
@@ -416,26 +491,38 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
               <div><span>Account type</span><strong>{selected.isTestAccount ? "Testing · Excluded from official reports" : "Department personnel"}</strong></div>
             </div>
             <div className="portal-member-actions">
-              <button onClick={() => { setFormError(""); setShowCallSignEditor(true); }} type="button">
-                {selected.status === "Deactivated" ? "Reactivate & assign call sign" : "Reassign call sign"}
+              <button disabled={selected.status === "Deactivated" || !canManageSelected || pendingAction !== null} onClick={() => { setFormError(""); setShowCallSignEditor(true); }} type="button">
+                Reassign call sign
               </button>
-              <button disabled={selected.status === "Deactivated"} onClick={resetCredentials} type="button">
+              <button disabled={selected.status === "Deactivated" || !canManageSelected || isSelectedSelf || pendingAction !== null} onClick={resetCredentials} type="button">
                 {selected.credentialsAssigned ? "Reset password" : "Assign credentials"}
               </button>
               {selected.status === "Suspended" ? (
-                <button onClick={() => setConfirmAction("reinstate")} type="button">Reinstate access</button>
+                <button disabled={!canManageSelected || isSelectedSelf || pendingAction !== null} onClick={() => { setCommandReason(""); setFormError(""); setConfirmAction("reinstate"); }} type="button">Reinstate access</button>
               ) : (
-                <button disabled={selected.status === "Deactivated"} onClick={() => setConfirmAction("suspend")} type="button">Suspend access</button>
+                <button disabled={selected.status === "Deactivated" || !canManageSelected || isSelectedSelf || pendingAction !== null} onClick={() => { setCommandReason(""); setFormError(""); setConfirmAction("suspend"); }} type="button">Suspend access</button>
               )}
               <button
                 className="portal-danger-action"
-                disabled={selected.status === "Deactivated"}
-                onClick={() => setConfirmAction("deactivate")}
+                disabled={selected.status === "Deactivated" || !canDeactivateSelected || pendingAction !== null}
+                onClick={() => { setCommandReason(""); setFormError(""); setConfirmAction("deactivate"); }}
                 type="button"
               >
                 Deactivate account
               </button>
             </div>
+            {!canManageSelected ? (
+              <div className="portal-member-protection portal-member-protection--restricted">
+                <strong>Executive profile protected</strong>
+                <span>Only Sheriff or Undersheriff may change credentials, call signs, or access for an Executive account.</span>
+              </div>
+            ) : null}
+            {isSelectedSelf ? (
+              <div className="portal-member-protection">
+                <strong>Current signed-in account</strong>
+                <span>Use My account to change your own password. Self-suspension and self-deactivation are blocked to prevent an accidental lockout.</span>
+              </div>
+            ) : null}
             <div className="portal-member-protection">
               <strong>Recyclable call-sign model</strong>
               <span>The permanent personnel ID and audit history remain. Only the operational call sign returns to the pool after deactivation.</span>
@@ -462,14 +549,14 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                   <input defaultValue="S-4" maxLength={5} name="callSign" pattern="S-4[0-9]{2}" required placeholder="S-4##" />
                   <small className="portal-field-help">Type the final two digits. Released call signs may be recycled.</small>
                 </label>
-                <label>Rank<select defaultValue="Deputy" name="rank"><option>Sheriff</option><option>Undersheriff</option><option>Major</option><option>Captain</option><option>1st Lieutenant</option><option>Lieutenant</option><option>Sergeant</option><option>Corporal</option><option>Master Deputy</option><option>Deputy III</option><option>Deputy II</option><option>Deputy</option><option>Recruit</option></select></label>
+                <label>Rank<select defaultValue="Deputy" name="rank">{isExecutiveCaller ? <><option>Sheriff</option><option>Undersheriff</option></> : null}<option>Major</option><option>Captain</option><option>1st Lieutenant</option><option>Lieutenant</option><option>Sergeant</option><option>Corporal</option><option>Master Deputy</option><option>Deputy III</option><option>Deputy II</option><option>Deputy</option><option>Recruit</option></select></label>
                 <label>Primary division<select defaultValue="Patrol Division" name="division"><option>Office of the Sheriff</option><option>Field Operations</option><option>Patrol Division</option><option>Training & FTO</option><option>Internal Affairs</option><option>Academy</option></select></label>
               </div>
-              <label className="portal-checkbox-row"><input defaultChecked type="checkbox" /><span><strong>Require password change at first secure sign-in</strong><small>Recommended for every new or reset credential.</small></span></label>
+              <div className="portal-form-protection"><strong>First sign-in protection is required.</strong><span>Every new or reset credential must be changed by the member after secure sign-in.</span></div>
               <label className="portal-checkbox-row portal-checkbox-row--test"><input name="isTestAccount" type="checkbox" /><span><strong>Mark as a test account</strong><small>Clearly labels the profile and excludes its activity from official personnel reporting.</small></span></label>
               {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
               <div className="portal-form-protection"><strong>Call signs are not permanent identifiers.</strong><span>The permanent LS personnel ID remains with the member. Deactivation releases the call sign for future assignment while retaining the history.</span></div>
-              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={closeCreate} type="button">Cancel</button><button className="portal-button portal-button--primary" type="submit">Create credential</button></div>
+              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" disabled={pendingAction === "create"} onClick={closeCreate} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pendingAction === "create"} type="submit">{pendingAction === "create" ? "Creating…" : "Create credential"}</button></div>
             </form>
           </section>
         </div>
@@ -479,15 +566,16 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setShowCallSignEditor(false); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="call-sign-title">
             <div className="portal-modal-heading">
-              <div><span>Operational assignment</span><h2 id="call-sign-title">{selected.status === "Deactivated" ? "Reactivate personnel account" : "Reassign call sign"}</h2></div>
+              <div><span>Operational assignment</span><h2 id="call-sign-title">Reassign call sign</h2></div>
               <button onClick={() => setShowCallSignEditor(false)} type="button" aria-label="Close call sign form">×</button>
             </div>
             <form onSubmit={handleCallSignAssignment}>
               <div className="portal-call-sign-summary"><span>Personnel member</span><strong>{selected.displayName}</strong><small>{selected.id} · {selected.rank}</small></div>
               <label className="portal-call-sign-field">New call sign<input autoFocus defaultValue={selected.callSign || "S-4"} maxLength={5} name="callSign" pattern="S-4[0-9]{2}" required /></label>
+              <label className="portal-call-sign-field">Assignment reason<textarea name="assignmentReason" placeholder="Brief operational reason for the audit history..." required rows={3} /></label>
               <p className="portal-call-sign-note">Suspension does not release a call sign. Reassignment or deactivation does. Every assignment retains its effective history.</p>
               {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
-              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setShowCallSignEditor(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" type="submit">Assign call sign</button></div>
+              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" disabled={pendingAction === "call-sign"} onClick={() => setShowCallSignEditor(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pendingAction === "call-sign"} type="submit">{pendingAction === "call-sign" ? "Assigning…" : "Assign call sign"}</button></div>
             </form>
           </section>
         </div>
@@ -497,7 +585,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
         <div className="portal-modal-backdrop" role="presentation">
           <section className="portal-modal portal-modal--confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-action-title">
             <div className="portal-confirm-icon">{confirmAction === "deactivate" ? "!" : "✓"}</div>
-            <span>Executive confirmation</span>
+            <span>{confirmAction === "deactivate" ? "Executive confirmation" : "Command confirmation"}</span>
             <h2 id="confirm-action-title">{confirmAction === "deactivate" ? "Deactivate this account?" : confirmAction === "suspend" ? "Suspend this account?" : "Reinstate this account?"}</h2>
             <p>
               {confirmAction === "deactivate"
@@ -506,8 +594,9 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                   ? `${selected.callSign} will remain reserved while access is suspended.`
                   : `${selected.callSign} will remain assigned as access returns to active status.`}
             </p>
-            <label>Command reason<textarea placeholder="Required audit reason" rows={3} /></label>
-            <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setConfirmAction(null)} type="button">Cancel</button><button className={`portal-button ${confirmAction === "deactivate" ? "portal-button--danger" : "portal-button--primary"}`} onClick={applyConfirmedAction} type="button">Confirm action</button></div>
+            <label>Command reason<textarea autoFocus onChange={(event) => setCommandReason(event.target.value)} placeholder="Required audit reason" required rows={3} value={commandReason} /></label>
+            {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
+            <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" disabled={pendingAction !== null} onClick={() => { setConfirmAction(null); setCommandReason(""); setFormError(""); }} type="button">Cancel</button><button className={`portal-button ${confirmAction === "deactivate" ? "portal-button--danger" : "portal-button--primary"}`} disabled={pendingAction !== null || commandReason.trim().length < 4} onClick={applyConfirmedAction} type="button">{pendingAction ? "Applying…" : "Confirm action"}</button></div>
           </section>
         </div>
       ) : null}
@@ -530,7 +619,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
               </label>
               <small className="portal-field-help">{PASSWORD_REQUIREMENT} The password is sent directly to the secure authentication service and is not stored in the personnel profile.</small>
               {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
-              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setCredentialEditor(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" type="submit">{selected.credentialsAssigned ? "Set temporary password" : "Assign credentials"}</button></div>
+              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" disabled={pendingAction === "credentials"} onClick={() => setCredentialEditor(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pendingAction === "credentials"} type="submit">{pendingAction === "credentials" ? "Saving…" : selected.credentialsAssigned ? "Set temporary password" : "Assign credentials"}</button></div>
             </form>
           </section>
         </div>

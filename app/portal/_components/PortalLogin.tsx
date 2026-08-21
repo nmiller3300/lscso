@@ -11,7 +11,9 @@ function toInternalEmail(username: string) {
 }
 
 function homeFor(accessTier: string) {
-  return accessTier === "Deputy" ? "/portal/personnel" : "/portal/command";
+  if (accessTier === "Deputy") return "/portal/personnel";
+  if (["Supervisor", "Preliminary"].includes(accessTier)) return "/portal/command/guardians";
+  return "/portal/command";
 }
 
 export function PortalLogin() {

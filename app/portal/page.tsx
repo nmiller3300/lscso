@@ -9,7 +9,7 @@ export default function PortalEntryPage() {
       <section className="portal-entry-story">
         <div className="portal-entry-brand">
           <Image
-            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
+            src="/images/lscso-patch-color.png"
             alt="Los Santos County Sheriff’s Office patch"
             width={94}
             height={94}

@@ -13,6 +13,13 @@ type PersonnelGuardian = {
   status: string;
   pointsAssessed?: number;
   fingerprintId?: string | null;
+  incidentAt?: string;
+  location?: string;
+  policyReference?: string;
+  observedBehavior?: string;
+  expectedStandard?: string;
+  actionTaken?: string;
+  followUpPlan?: string;
 };
 
 type RequestKind = "promotion" | "transfer" | "certification" | "record";
@@ -69,7 +76,7 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
     async function loadRecords() {
       const supabase = createClient();
       const [{ data: guardianRows }, { data: profileRows }, { data: acknowledgmentRows }] = await Promise.all([
-        supabase.from("guardian_records").select("id,guardian_number,record_type,status,issued_at,created_at,author_profile_id,points_assessed").eq("subject_profile_id", profile.id).order("created_at", { ascending: false }),
+        supabase.from("guardian_records").select("id,guardian_number,record_type,status,issued_at,created_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,author_profile_id,points_assessed").eq("subject_profile_id", profile.id).order("created_at", { ascending: false }),
         supabase.from("personnel_profiles").select("id,display_name"),
         supabase.from("guardian_acknowledgments").select("guardian_id,fingerprint_id").eq("profile_id", profile.id),
       ]);
@@ -86,6 +93,13 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
         status: record.status,
         pointsAssessed: record.points_assessed,
         fingerprintId: fingerprints.get(record.id) ?? null,
+        incidentAt: new Date(record.incident_at).toLocaleDateString(),
+        location: record.location ?? "Not specified",
+        policyReference: record.policy_reference ?? "Not specified",
+        observedBehavior: record.observed_behavior ?? "No narrative was entered.",
+        expectedStandard: record.expected_standard ?? "Not specified",
+        actionTaken: record.action_taken ?? "Not specified",
+        followUpPlan: record.follow_up_plan ?? "No follow-up specified",
       }));
       setVisibleRecords(shared.length ? shared : records);
       setAcknowledged(shared.filter((item) => ["Acknowledged", "Closed"].includes(item.status)).map((item) => item.id));
@@ -98,8 +112,9 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
   async function acknowledgeRecord() {
     if (!selectedRecord?.databaseId) return;
     const isNegative = selectedRecord.type !== "Commendation";
-    if (isNegative && signatureName.trim().length < 2) {
-      setNotice("Type your name before signing and acknowledging this Guardian.");
+    const normalizeName = (value: string) => value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+    if (isNegative && normalizeName(signatureName) !== normalizeName(profile.display_name)) {
+      setNotice(`Type your full personnel name exactly as shown: ${profile.display_name}.`);
       return;
     }
     setSubmittingAcknowledgment(true);
@@ -166,11 +181,20 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
               <button onClick={() => setSelectedRecord(null)} type="button" aria-label="Close Guardian record">×</button>
             </div>
             <div className="deputy-guardian-detail">
+              <div><span>Event date</span><strong>{selectedRecord.incidentAt ?? selectedRecord.issued}</strong></div>
               <div><span>Issued</span><strong>{selectedRecord.issued}</strong></div>
               <div><span>Supervisor</span><strong>{selectedRecord.author}</strong></div>
               <div><span>Status</span><strong>{selectedRecord.status}</strong></div>
               <div><span>Disciplinary points</span><strong>{selectedRecord.pointsAssessed ?? 0}</strong></div>
+              <div><span>Division / location</span><strong>{selectedRecord.location ?? "Not specified"}</strong></div>
+              <div><span>Policy / standard</span><strong>{selectedRecord.policyReference ?? "Not specified"}</strong></div>
+              <div><span>Follow-up</span><strong>{selectedRecord.followUpPlan ?? "No follow-up specified"}</strong></div>
               <div><span>Record protection</span><strong>Original locked · Amendments attributed</strong></div>
+            </div>
+            <div className="deputy-guardian-narrative">
+              <article><span>Observed conduct or performance</span><p>{selectedRecord.observedBehavior ?? "No narrative was entered."}</p></article>
+              <article><span>Expected standard / impact</span><p>{selectedRecord.expectedStandard ?? "Not specified"}</p></article>
+              {selectedRecord.actionTaken && selectedRecord.actionTaken !== "Not specified" ? <article><span>Recognition / action</span><p>{selectedRecord.actionTaken}</p></article> : null}
             </div>
             {selectedRecord.fingerprintId ? (
               <div className="guardian-fingerprint-receipt">
@@ -229,6 +253,7 @@ export function DeputyRequestCenter() {
   const [selectedKind, setSelectedKind] = useState<RequestKind | null>(null);
   const [requests, setRequests] = useState<PersonnelRequest[]>([]);
   const [notice, setNotice] = useState("");
+  const [submittingRequest, setSubmittingRequest] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -262,25 +287,32 @@ export function DeputyRequestCenter() {
 
   async function submitRequest(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!selectedKind) return;
+    if (!selectedKind || submittingRequest) return;
     const form = new FormData(event.currentTarget);
     const requestType = requestTypes[selectedKind];
+    const requestSummary = String(form.get("requestSummary") ?? "").trim();
+    if (requestSummary.length < 10) {
+      setNotice("Add a brief operational explanation before submitting this request.");
+      return;
+    }
     const databaseType: Record<RequestKind, "Promotion" | "Division Transfer" | "Certification" | "Other"> = {
       promotion: "Promotion",
       transfer: "Division Transfer",
       certification: "Certification",
       record: "Other",
     };
+    setSubmittingRequest(true);
     const { data, error } = await createClient().from("personnel_requests").insert({
       requester_profile_id: profile.id,
       request_type: databaseType[selectedKind],
       subject: requestType.label,
-      details: String(form.get("requestSummary") ?? ""),
+      details: requestSummary,
       requested_effective_at: form.get("effectiveDate") ? new Date(`${String(form.get("effectiveDate"))}T12:00:00`).toISOString() : null,
       status: "Submitted",
       is_test_record: profile.is_test_account,
     }).select("request_number,status,created_at").single();
     if (error || !data) {
+      setSubmittingRequest(false);
       setNotice(error?.message ?? "The request could not be submitted.");
       return;
     }
@@ -293,6 +325,7 @@ export function DeputyRequestCenter() {
     };
     setRequests((current) => [request, ...current]);
     setSelectedKind(null);
+    setSubmittingRequest(false);
     setNotice(`${request.id} submitted to ${requestType.routing}.`);
     window.setTimeout(() => setNotice(""), 3800);
   }
@@ -329,7 +362,7 @@ export function DeputyRequestCenter() {
                 <label>Current routing<select defaultValue="Chain of command"><option>Chain of command</option></select></label>
               </div>
               <div className="portal-form-protection"><strong>Secure routing</strong><span>{requestTypes[selectedKind].routing}. You will receive a notification whenever the reviewer changes its status.</span></div>
-              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" onClick={() => setSelectedKind(null)} type="button">Cancel</button><button className="portal-button portal-button--primary" type="submit">Submit request</button></div>
+              <div className="portal-modal-actions"><button className="portal-button portal-button--secondary" disabled={submittingRequest} onClick={() => setSelectedKind(null)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={submittingRequest} type="submit">{submittingRequest ? "Submitting…" : "Submit request"}</button></div>
             </form>
           </section>
         </div>

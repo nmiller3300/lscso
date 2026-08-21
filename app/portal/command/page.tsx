@@ -1,17 +1,24 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CommandApprovalQueue, type CommandApprovalItem } from "../_components/CommandApprovalQueue";
-import { CommandActivity } from "../_components/CommandInteractions";
+import { CommandActivity, type PortalNotificationItem } from "../_components/CommandInteractions";
 import { PortalShell } from "../_components/PortalShell";
 import { rankAccess } from "../_data/model";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 export default async function CommandDashboardPage() {
+  const profile = await getCurrentPortalProfile();
+  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
+    redirect("/portal/command/guardians");
+  }
   const supabase = await createClient();
-  const [{ data: profiles }, { data: guardians }, { data: certifications }, { data: requests }] = await Promise.all([
+  const [{ data: profiles }, { data: guardians }, { data: certifications }, { data: requests }, { data: directNotifications }] = await Promise.all([
     supabase.from("personnel_profiles").select("id,display_name,status,is_test_account"),
     supabase.from("guardian_records").select("id,guardian_number,record_type,status,subject_profile_id,author_profile_id,created_at,follow_up_due_at").order("created_at", { ascending: false }),
     supabase.from("certifications").select("id,status,expires_on"),
-    supabase.from("personnel_requests").select("id,request_number,request_type,status,requester_profile_id,created_at").order("created_at", { ascending: false }),
+    supabase.from("personnel_requests").select("id,request_number,request_type,subject,details,requested_effective_at,status,requester_profile_id,created_at").order("created_at", { ascending: false }),
+    supabase.from("notifications").select("id,notification_type,title,message,href,read_at,created_at").eq("recipient_profile_id", profile.id).order("created_at", { ascending: false }).limit(8),
   ]);
 
   const now = new Date();
@@ -40,6 +47,8 @@ export default async function CommandDashboardPage() {
       submittedBy: profileNames.get(record.author_profile_id) ?? "Command",
       priority: ["Written Warning", "Write-Up"].includes(record.record_type) ? "High" : "Review",
       age: new Date(record.created_at).toLocaleDateString(),
+      details: "Open the Guardian Center to review the complete attributed record before making a decision.",
+      effectiveDate: record.follow_up_due_at ? new Date(record.follow_up_due_at).toLocaleDateString() : "Not specified",
     })),
     ...pendingRequests.map((request) => ({
       databaseId: request.id,
@@ -50,23 +59,42 @@ export default async function CommandDashboardPage() {
       submittedBy: "Self-service",
       priority: "Routine",
       age: new Date(request.created_at).toLocaleDateString(),
+      details: request.details,
+      effectiveDate: request.requested_effective_at ? new Date(request.requested_effective_at).toLocaleDateString() : "Not specified",
     })),
   ];
 
-  const notifications = [
+  const fallbackActivity: PortalNotificationItem[] = [
     ...(guardians ?? []).slice(0, 3).map((record) => ({
+      id: `activity-guardian-${record.id}`,
       time: new Date(record.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
       title: `${record.record_type} ${record.status.toLowerCase()}`,
       detail: `G-${String(record.guardian_number).padStart(4, "0")} · ${profileNames.get(record.subject_profile_id) ?? "Restricted personnel"}`,
       type: "Guardian",
+      href: "/portal/command/guardians",
+      read: true,
     })),
     ...(requests ?? []).slice(0, 2).map((request) => ({
+      id: `activity-request-${request.id}`,
       time: new Date(request.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       title: `${request.request_type} request`,
       detail: `RQ-${String(request.request_number).padStart(4, "0")} · ${profileNames.get(request.requester_profile_id) ?? "Restricted personnel"}`,
       type: "Request",
+      href: "/portal/command#approvals",
+      read: true,
     })),
   ];
+  const notifications: PortalNotificationItem[] = (directNotifications ?? []).length
+    ? (directNotifications ?? []).map((notification) => ({
+        id: notification.id,
+        time: new Date(notification.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }),
+        title: notification.title,
+        detail: notification.message,
+        type: notification.notification_type,
+        href: notification.href,
+        read: Boolean(notification.read_at),
+      }))
+    : fallbackActivity;
   return (
     <PortalShell
       active="overview"

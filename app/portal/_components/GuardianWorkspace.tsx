@@ -18,6 +18,13 @@ type GuardianRecord = {
   due: string;
   pointsAssessed: number;
   escalationOverride: boolean;
+  incidentAt: string;
+  location: string;
+  policyReference: string;
+  observedBehavior: string;
+  expectedStandard: string;
+  actionTaken: string;
+  followUpPlan: string;
 };
 
 type PersonnelOption = {
@@ -36,15 +43,6 @@ type PointTier = {
   action: string;
   color: string;
 };
-
-const countedPointStatuses = new Set([
-  "Approved",
-  "Issued",
-  "Awaiting Acknowledgment",
-  "Acknowledged",
-  "Follow-Up Due",
-  "Closed",
-]);
 
 function localDateInputValue(date = new Date()) {
   const localTime = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
@@ -122,20 +120,22 @@ export function GuardianWorkspace() {
   const [personnel, setPersonnel] = useState<PersonnelOption[]>([]);
   const [pointTiers, setPointTiers] = useState<PointTier[]>([]);
   const [selectedMemberId, setSelectedMemberId] = useState("");
+  const [currentMemberPoints, setCurrentMemberPoints] = useState(0);
   const [pointsAssessed, setPointsAssessed] = useState(0);
   const [escalationOverride, setEscalationOverride] = useState(false);
   const [processingRecordId, setProcessingRecordId] = useState<string | null>(null);
   const [showAllRecords, setShowAllRecords] = useState(false);
   const [notice, setNotice] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [formKey, setFormKey] = useState(0);
+  const [savingGuardian, setSavingGuardian] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState<GuardianRecord | null>(null);
+  const [reviewNotes, setReviewNotes] = useState("");
 
   const config = guardianTypes[kind];
   const categories = kind === "commendation" ? positiveCategories : conductCategories;
   const requiresApproval = kind === "warning" || kind === "writeup";
   const visibleRecords = showAllRecords ? records : records.slice(0, 4);
-  const currentMemberPoints = records
-    .filter((record) => record.subjectProfileId === selectedMemberId && countedPointStatuses.has(record.status))
-    .reduce((sum, record) => sum + record.pointsAssessed, 0);
   const projectedPoints = currentMemberPoints + (kind === "commendation" ? 0 : pointsAssessed);
   const projectedTier = pointTiers.find((tier) =>
     projectedPoints >= tier.minPoints && (projectedPoints <= tier.maxPoints || tier.maxPoints === 10),
@@ -146,13 +146,18 @@ export function GuardianWorkspace() {
 
     async function loadGuardianData() {
       const supabase = createClient();
-      const [{ data: profileRows }, { data: guardianRows }, { data: tierRows }] = await Promise.all([
+      const [{ data: profileRows, error: profileError }, { data: guardianRows, error: guardianError }, { data: tierRows, error: tierError }] = await Promise.all([
         supabase.from("personnel_profiles").select("id,display_name,rank,call_sign,is_test_account").neq("status", "Deactivated").order("personnel_id"),
-        supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,record_type,status,follow_up_due_at,created_at,points_assessed,escalation_override").order("created_at", { ascending: false }),
+        supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,record_type,status,follow_up_due_at,created_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,points_assessed,escalation_override").order("created_at", { ascending: false }),
         supabase.from("disciplinary_point_tiers").select("id,min_points,max_points,tier_name,action_required,color_key").order("sort_order"),
       ]);
 
       if (cancelled) return;
+      if (profileError || guardianError || tierError) {
+        setLoadError(profileError?.message ?? guardianError?.message ?? tierError?.message ?? "Guardian records could not be loaded.");
+        return;
+      }
+      setLoadError("");
       const options = (profileRows ?? []).map((profile) => ({
         id: profile.id,
         displayName: profile.display_name,
@@ -182,12 +187,43 @@ export function GuardianWorkspace() {
         due: record.follow_up_due_at ? new Date(record.follow_up_due_at).toLocaleDateString() : "No follow-up",
         pointsAssessed: record.points_assessed,
         escalationOverride: record.escalation_override,
+        incidentAt: new Date(record.incident_at).toLocaleDateString(),
+        location: record.location ?? "Not specified",
+        policyReference: record.policy_reference ?? "Not specified",
+        observedBehavior: record.observed_behavior ?? "No narrative was entered.",
+        expectedStandard: record.expected_standard ?? "Not specified",
+        actionTaken: record.action_taken ?? "Not specified",
+        followUpPlan: record.follow_up_plan ?? "No follow-up specified",
       })));
     }
 
     void loadGuardianData();
     return () => { cancelled = true; };
   }, [currentProfile.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedMemberId) {
+      setCurrentMemberPoints(0);
+      return;
+    }
+
+    async function loadPointTotal() {
+      const { data, error } = await createClient().rpc("get_guardian_point_total", {
+        target_profile_id: selectedMemberId,
+      });
+      if (cancelled) return;
+      if (error) {
+        setCurrentMemberPoints(0);
+        setNotice(error.message);
+        return;
+      }
+      setCurrentMemberPoints(data ?? 0);
+    }
+
+    void loadPointTotal();
+    return () => { cancelled = true; };
+  }, [selectedMemberId]);
 
   function toggleCategory(category: string) {
     setSelectedCategories((current) =>
@@ -207,6 +243,7 @@ export function GuardianWorkspace() {
     const subjectProfileId = String(form.get("member") ?? "");
     const subject = personnel.find((member) => member.id === subjectProfileId);
     if (!subject) throw new Error("Select a personnel member before saving this Guardian.");
+    if (selectedCategories.length === 0) throw new Error("Select at least one Guardian category.");
 
     const eventDate = String(form.get("eventDate") ?? new Date().toISOString().slice(0, 10));
     const followUpDate = String(form.get("followUpDate") ?? "");
@@ -229,7 +266,7 @@ export function GuardianWorkspace() {
       structured_fields: {
         categories: selectedCategories,
         reference: String(form.get("reference") ?? ""),
-        confidentiality: String(form.get("confidentiality") ?? ""),
+        confidentiality: "Standard protected personnel record",
         pattern: String(form.get("pattern") ?? ""),
         impact: String(form.get("impact") ?? ""),
         context: String(form.get("context") ?? ""),
@@ -241,7 +278,7 @@ export function GuardianWorkspace() {
       escalation_reason: kind === "commendation" ? null : String(form.get("escalationReason") ?? "").trim() || null,
       submitted_at: status === "Draft" ? null : new Date().toISOString(),
       issued_at: status === "Awaiting Acknowledgment" ? new Date().toISOString() : null,
-    }).select("id,guardian_number,record_type,status,follow_up_due_at").single();
+    }).select("id,guardian_number,record_type,status,follow_up_due_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan").single();
 
     if (error || !data) throw new Error(error?.message ?? "The Guardian could not be saved.");
 
@@ -257,10 +294,19 @@ export function GuardianWorkspace() {
       due: data.follow_up_due_at ? new Date(data.follow_up_due_at).toLocaleDateString() : "No follow-up",
       pointsAssessed: kind === "commendation" ? 0 : Number(form.get("pointsAssessed") ?? 0),
       escalationOverride: kind === "commendation" ? false : form.get("escalationOverride") === "on",
+      incidentAt: new Date(data.incident_at).toLocaleDateString(),
+      location: data.location ?? "Not specified",
+      policyReference: data.policy_reference ?? "Not specified",
+      observedBehavior: data.observed_behavior ?? "No narrative was entered.",
+      expectedStandard: data.expected_standard ?? "Not specified",
+      actionTaken: data.action_taken ?? "Not specified",
+      followUpPlan: data.follow_up_plan ?? "No follow-up specified",
     } satisfies GuardianRecord;
   }
 
   async function saveDraft() {
+    if (savingGuardian) return;
+    setSavingGuardian(true);
     try {
       const record = await persistGuardian("Draft");
       setRecords((current) => [record, ...current]);
@@ -268,17 +314,22 @@ export function GuardianWorkspace() {
       window.setTimeout(() => setNotice(""), 3400);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The Guardian could not be saved.");
+    } finally {
+      setSavingGuardian(false);
     }
   }
 
   async function submitGuardian(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (savingGuardian) return;
+    setSavingGuardian(true);
     const status = requiresApproval ? "Pending Approval" : "Awaiting Acknowledgment";
     let record: GuardianRecord;
     try {
       record = await persistGuardian(status);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The Guardian could not be submitted.");
+      setSavingGuardian(false);
       return;
     }
     setRecords((current) => [record, ...current]);
@@ -293,6 +344,7 @@ export function GuardianWorkspace() {
         : `${record.id} issued for personnel acknowledgment.`,
     );
     window.setTimeout(() => setNotice(""), 3800);
+    setSavingGuardian(false);
   }
 
   function clearForm() {
@@ -304,11 +356,15 @@ export function GuardianWorkspace() {
   }
 
   async function reviewGuardian(record: GuardianRecord, decision: "Approved" | "Denied") {
+    if (reviewNotes.trim().length < 4) {
+      setNotice("Enter a short Command review note before deciding this Guardian.");
+      return;
+    }
     setProcessingRecordId(record.databaseId);
     const { data, error } = await createClient().rpc("review_guardian", {
       record_id: record.databaseId,
       decision,
-      review_notes: decision === "Denied" ? "Declined by command." : "Approved for supervisor issue.",
+      review_notes: reviewNotes.trim(),
     });
     setProcessingRecordId(null);
     if (error || !data) {
@@ -316,6 +372,8 @@ export function GuardianWorkspace() {
       return;
     }
     setRecords((current) => current.map((item) => item.databaseId === record.databaseId ? { ...item, status: data.status } : item));
+    setSelectedRecord(null);
+    setReviewNotes("");
     setNotice(`${record.id} ${decision === "Approved" ? "approved" : "declined"}. The action was written to the audit log.`);
     window.setTimeout(() => setNotice(""), 3800);
   }
@@ -348,6 +406,7 @@ export function GuardianWorkspace() {
           <span>Acknowledgment ≠ agreement</span>
         </div>
       </section>
+      {loadError ? <div className="portal-form-error portal-operation-error" role="alert">{loadError}</div> : null}
 
       <div className="guardian-layout">
         <section className="guardian-builder">
@@ -403,12 +462,11 @@ export function GuardianWorkspace() {
                   <strong>{currentProfile.display_name}</strong>
                   <small>{currentProfile.rank} · Verified signed-in user</small>
                 </div>
-                <label>
-                  Confidentiality
-                  <select defaultValue="Standard personnel record" name="confidentiality">
-                    <option>Standard personnel record</option><option>Command restricted</option><option>Internal Affairs sealed</option>
-                  </select>
-                </label>
+                <div className="guardian-author-identity">
+                  <span>Record visibility</span>
+                  <strong>Protected personnel record</strong>
+                  <small>Access follows the member, author, and Command permissions.</small>
+                </div>
               </div>
             </div>
 
@@ -559,8 +617,8 @@ export function GuardianWorkspace() {
             <div className="guardian-form-actions">
               <button className="portal-text-button" onClick={clearForm} type="button">Clear form</button>
               <div>
-                <button className="portal-button portal-button--secondary" onClick={saveDraft} type="button">Save draft</button>
-                <button className="portal-button portal-button--primary" type="submit">{config.action}</button>
+                <button className="portal-button portal-button--secondary" disabled={savingGuardian} onClick={saveDraft} type="button">{savingGuardian ? "Saving…" : "Save draft"}</button>
+                <button className="portal-button portal-button--primary" disabled={savingGuardian} type="submit">{savingGuardian ? "Saving…" : config.action}</button>
               </div>
             </div>
           </form>
@@ -580,11 +638,9 @@ export function GuardianWorkspace() {
               <h3>{record.member}</h3>
               <p>Created by {record.author}</p>
               <div className="guardian-record-status"><span>{record.status}</span><small>{record.pointsAssessed} point{record.pointsAssessed === 1 ? "" : "s"} · {record.due}</small></div>
+              <button className="portal-text-button guardian-record-review" onClick={() => { setSelectedRecord(record); setReviewNotes(""); }} type="button">View record →</button>
               {record.status === "Pending Approval" && ["Executive", "Command"].includes(currentProfile.access_tier) ? (
-                <div className="guardian-record-actions">
-                  <button disabled={processingRecordId === record.databaseId} onClick={() => reviewGuardian(record, "Denied")} type="button">Decline</button>
-                  <button disabled={processingRecordId === record.databaseId} onClick={() => reviewGuardian(record, "Approved")} type="button">Approve</button>
-                </div>
+                <small className="guardian-review-required">Command decision required</small>
               ) : null}
               {record.status === "Approved" && record.authorProfileId === currentProfile.id ? (
                 <div className="guardian-record-actions">
@@ -594,9 +650,11 @@ export function GuardianWorkspace() {
             </article>
           ))}
           <div className="guardian-queue-actions">
-            <button className="portal-text-button" onClick={() => setShowAllRecords((current) => !current)} type="button">
-              {showAllRecords ? "Show recent records" : "View all Guardian records"} →
-            </button>
+            {records.length > 4 ? (
+              <button className="portal-text-button" onClick={() => setShowAllRecords((current) => !current)} type="button">
+                {showAllRecords ? "Show recent records" : "View all Guardian records"} →
+              </button>
+            ) : <span>{records.length ? "All available records shown" : "No Guardian records yet"}</span>}
           </div>
           <div className="guardian-queue-protection">
             <strong>Record integrity</strong>
@@ -624,6 +682,45 @@ export function GuardianWorkspace() {
         </div>
         <div className="guardian-escalation-clause"><strong>Escalation clause</strong><span>Command and Internal Affairs may immediately escalate an infraction to a higher tier based on severity, a pattern of behavior, or circumstances that demand it. Point accumulation is a floor, not a ceiling.</span></div>
       </section>
+
+      {selectedRecord ? (
+        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
+          <section className="portal-modal portal-modal--guardian-review" role="dialog" aria-modal="true" aria-labelledby="guardian-review-title">
+            <div className="portal-modal-heading">
+              <div><span>{selectedRecord.id} · {selectedRecord.status}</span><h2 id="guardian-review-title">{selectedRecord.type} for {selectedRecord.member}</h2></div>
+              <button onClick={() => setSelectedRecord(null)} type="button" aria-label="Close Guardian review">×</button>
+            </div>
+            <div className="guardian-review-content">
+              <div className="guardian-review-facts">
+                <div><span>Recorded by</span><strong>{selectedRecord.author}</strong></div>
+                <div><span>Event date</span><strong>{selectedRecord.incidentAt}</strong></div>
+                <div><span>Division / location</span><strong>{selectedRecord.location}</strong></div>
+                <div><span>Policy / standard</span><strong>{selectedRecord.policyReference}</strong></div>
+                <div><span>Points</span><strong>{selectedRecord.pointsAssessed}</strong></div>
+                <div><span>Follow-up</span><strong>{selectedRecord.followUpPlan}</strong></div>
+              </div>
+              <article><span>Observed conduct or performance</span><p>{selectedRecord.observedBehavior}</p></article>
+              <article><span>Expected standard / impact</span><p>{selectedRecord.expectedStandard}</p></article>
+              {selectedRecord.actionTaken !== "Not specified" ? <article><span>Recognition / action</span><p>{selectedRecord.actionTaken}</p></article> : null}
+              {selectedRecord.status === "Pending Approval" && ["Executive", "Command"].includes(currentProfile.access_tier) ? (
+                <label className="portal-call-sign-field">
+                  Command review note
+                  <textarea autoFocus onChange={(event) => setReviewNotes(event.target.value)} placeholder="Record the reason for approval or denial..." required rows={4} value={reviewNotes} />
+                </label>
+              ) : null}
+            </div>
+            <div className="portal-modal-actions">
+              <button className="portal-button portal-button--secondary" disabled={processingRecordId === selectedRecord.databaseId} onClick={() => setSelectedRecord(null)} type="button">Close</button>
+              {selectedRecord.status === "Pending Approval" && ["Executive", "Command"].includes(currentProfile.access_tier) ? (
+                <>
+                  <button className="portal-button portal-button--danger" disabled={processingRecordId === selectedRecord.databaseId || reviewNotes.trim().length < 4} onClick={() => reviewGuardian(selectedRecord, "Denied")} type="button">{processingRecordId === selectedRecord.databaseId ? "Saving…" : "Deny"}</button>
+                  <button className="portal-button portal-button--primary" disabled={processingRecordId === selectedRecord.databaseId || reviewNotes.trim().length < 4} onClick={() => reviewGuardian(selectedRecord, "Approved")} type="button">{processingRecordId === selectedRecord.databaseId ? "Saving…" : "Approve"}</button>
+                </>
+              ) : null}
+            </div>
+          </section>
+        </div>
+      ) : null}
 
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
     </>

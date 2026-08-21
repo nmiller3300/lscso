@@ -47,11 +47,25 @@ export function PasswordChangeDialog() {
         password: nextPassword,
       });
 
-      await supabase.auth.refreshSession();
-      const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
       setCurrentPassword("");
       setNextPassword("");
       setConfirmation("");
+
+      if (!userData.user.email) {
+        setMessage("Password changed. Sign out and use the new password for your next secure session.");
+        return;
+      }
+
+      const { error: reauthenticationError } = await supabase.auth.signInWithPassword({
+        email: userData.user.email,
+        password: nextPassword,
+      });
+      if (reauthenticationError) {
+        setMessage("Password changed. Sign out and use the new password for your next secure session.");
+        return;
+      }
+
+      const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
       setMessage(
         signOutError
           ? "Password changed. Review active sessions from Command if another device should be signed out."

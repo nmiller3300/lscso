@@ -53,6 +53,10 @@ function validPassword(value: unknown): value is string {
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(value);
 }
 
+function auditReason(value: unknown) {
+  return typeof value === "string" ? value.trim().slice(0, 500) : "";
+}
+
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (request.method !== "POST") return json({ error: "Method not allowed" }, 405);
@@ -156,6 +160,9 @@ Deno.serve(async (request) => {
       .single();
 
     if (targetError || !target) return json({ error: "Personnel profile not found." }, 404);
+    if (target.access_tier === "Executive" && !executiveAllowed) {
+      return json({ error: "Only Sheriff or Undersheriff may assign Executive credentials." }, 403);
+    }
     if (target.auth_user_id) return json({ error: "Credentials are already assigned to this profile." }, 409);
 
     const email = username + "@auth.lscso.internal";
@@ -212,6 +219,9 @@ Deno.serve(async (request) => {
       !/^LS-[0-9]{3}$/.test(personnelId) || !/^S-4[0-9]{2}$/.test(callSign) || !rankAccess[rank]
     ) {
       return json({ error: "Personnel and credential fields are incomplete or invalid." }, 400);
+    }
+    if (rankAccess[rank] === "Executive" && !executiveAllowed) {
+      return json({ error: "Only Sheriff or Undersheriff may create an Executive account." }, 403);
     }
 
     const { data: profile, error: profileError } = await admin
@@ -293,8 +303,14 @@ Deno.serve(async (request) => {
     .eq("id", profileId)
     .single();
   if (targetError || !target) return json({ error: "Personnel profile not found." }, 404);
+  if (target.access_tier === "Executive" && !executiveAllowed) {
+    return json({ error: "Only Sheriff or Undersheriff may change an Executive account." }, 403);
+  }
 
   if (operation === "reset_password") {
+    if (profileId === caller.id) {
+      return json({ error: "Use My account to change your own password." }, 400);
+    }
     if (!target.auth_user_id || !validPassword(body?.password)) {
       return json({ error: "An active credential and strong temporary password are required." }, 400);
     }
@@ -318,9 +334,12 @@ Deno.serve(async (request) => {
 
   if (operation === "set_status") {
     const status = body?.status;
+    const reason = auditReason(body?.reason);
     if (!["Active", "Suspended"].includes(String(status))) {
       return json({ error: "Unsupported account status." }, 400);
     }
+    if (reason.length < 4) return json({ error: "A command reason is required." }, 400);
+    if (profileId === caller.id) return json({ error: "You cannot change your own access status." }, 400);
     if (target.status === "Deactivated") return json({ error: "A deactivated account cannot be reinstated." }, 409);
 
     if (target.auth_user_id) {
@@ -346,30 +365,44 @@ Deno.serve(async (request) => {
         user_agent: "Command suspension",
       });
     }
-    await writeAudit(status === "Suspended" ? "ACCOUNT_SUSPENDED" : "ACCOUNT_REINSTATED", profileId, { status });
+    await writeAudit(status === "Suspended" ? "ACCOUNT_SUSPENDED" : "ACCOUNT_REINSTATED", profileId, { status, reason });
     return json({ success: true });
   }
 
   if (operation === "assign_call_sign") {
     const callSign = typeof body?.call_sign === "string" ? body.call_sign.trim().toUpperCase() : "";
+    const reason = auditReason(body?.reason);
     if (!/^S-4[0-9]{2}$/.test(callSign)) return json({ error: "Call sign must use S-4##." }, 400);
+    if (reason.length < 4) return json({ error: "A command assignment reason is required." }, 400);
 
     if (target.status === "Deactivated") return json({ error: "Deactivated personnel cannot receive a call sign." }, 409);
     const { error: assignmentError } = await admin.rpc("admin_assign_call_sign", {
       target_profile_id: profileId,
       new_call_sign: callSign,
       actor_profile_id: caller.id,
-      assignment_reason: "Command reassignment",
+      assignment_reason: reason,
     });
     if (assignmentError) return json({ error: assignmentError.message }, 409);
 
-    await writeAudit("CALL_SIGN_ASSIGNED", profileId, { call_sign: callSign, prior: target.call_sign });
+    if (target.auth_user_id) {
+      const { data: authTarget } = await admin.auth.admin.getUserById(target.auth_user_id);
+      const { error: metadataError } = await admin.auth.admin.updateUserById(target.auth_user_id, {
+        user_metadata: { ...(authTarget.user?.user_metadata ?? {}), call_sign: callSign },
+      });
+      if (metadataError) {
+        await writeAudit("AUTH_METADATA_SYNC_REQUIRED", profileId, { call_sign: callSign });
+      }
+    }
+
+    await writeAudit("CALL_SIGN_ASSIGNED", profileId, { call_sign: callSign, prior: target.call_sign, reason });
     return json({ success: true });
   }
 
   if (operation === "deactivate") {
+    const reason = auditReason(body?.reason);
     if (!executiveAllowed) return json({ error: "Only Sheriff or Undersheriff may deactivate an account." }, 403);
     if (profileId === caller.id) return json({ error: "You cannot deactivate your own active account." }, 400);
+    if (reason.length < 4) return json({ error: "An Executive Command reason is required." }, 400);
 
     const authUserId = target.auth_user_id;
     if (authUserId) {
@@ -389,7 +422,7 @@ Deno.serve(async (request) => {
       const { error: deleteError } = await admin.auth.admin.deleteUser(authUserId, false);
       if (deleteError) return json({ error: "The profile was deactivated, but its credential requires command follow-up." }, 500);
     }
-    await writeAudit("ACCOUNT_DEACTIVATED", profileId, { released_call_sign: target.call_sign });
+    await writeAudit("ACCOUNT_DEACTIVATED", profileId, { released_call_sign: target.call_sign, reason });
     return json({ success: true });
   }
 

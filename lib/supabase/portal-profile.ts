@@ -22,5 +22,7 @@ export async function getCurrentPortalProfile(): Promise<PortalProfile | null> {
 }
 
 export function getPortalHome(profile: PortalProfile) {
-  return profile.access_tier === "Deputy" ? "/portal/personnel" : "/portal/command";
+  if (profile.access_tier === "Deputy") return "/portal/personnel";
+  if (["Supervisor", "Preliminary"].includes(profile.access_tier)) return "/portal/command/guardians";
+  return "/portal/command";
 }

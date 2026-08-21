@@ -45,7 +45,7 @@ export default function HomePage() {
     <>
       <section className="home-hero">
         <Image
-          src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/patrol-vehicle.png"
+          src="/images/patrol-vehicle.png"
           alt="Los Santos County Sheriff’s Office patrol vehicle"
           fill
           priority
@@ -73,7 +73,7 @@ export default function HomePage() {
           </div>
           <div className="established-mark">
             <Image
-              src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/lscso-patch-color.png"
+              src="/images/lscso-patch-color.png"
               alt="Los Santos County Sheriff’s Office patch"
               width={160}
               height={160}
@@ -141,7 +141,7 @@ export default function HomePage() {
       <section className="home-feature">
         <div className="home-feature-media">
           <Image
-            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/command-uniform.png"
+            src="/images/command-uniform.png"
             alt="LSCSO command staff member"
             fill
             sizes="(max-width: 800px) 100vw, 50vw"
@@ -164,7 +164,7 @@ export default function HomePage() {
       <section className="recruitment-banner">
         <div className="recruitment-banner-media">
           <Image
-            src="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/deputy-gray-uniform.png"
+            src="/images/deputy-gray-uniform.png"
             alt="LSCSO deputy in uniform"
             fill
             sizes="100vw"

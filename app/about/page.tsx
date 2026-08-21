@@ -24,7 +24,7 @@ export default function AboutPage() {
         eyebrow="About LSCSO"
         title="A tradition of service. A modern standard."
         description="Established in 1963, the Los Santos County Sheriff’s Office is built around public trust, professional service, and accountable leadership."
-        image="https://raw.githubusercontent.com/nmiller3300/lscso/main/public/images/deputy-brown-uniform.png"
+        image="/images/deputy-brown-uniform.png"
         imageAlt="Los Santos County sheriff’s deputy"
         imagePosition="center 26%"
       />

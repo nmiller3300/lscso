@@ -864,6 +864,10 @@ export type Database = {
         Args: { actor_profile_id: string; target_profile_id: string }
         Returns: Json
       }
+      get_guardian_point_total: {
+        Args: { target_profile_id: string }
+        Returns: number
+      }
       issue_guardian: {
         Args: { record_id: string }
         Returns: {

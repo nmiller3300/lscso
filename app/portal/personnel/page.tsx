@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { DeputyGuardianRecords, DeputyRequestCenter } from "../_components/DeputyInteractions";
+import { DeputyNotificationCenter, type PortalNotificationItem } from "../_components/CommandInteractions";
 import { LocalGreeting } from "../_components/LocalGreeting";
 import { PortalShell } from "../_components/PortalShell";
 import { TestAccountBanner } from "../_components/TestAccountBanner";
@@ -29,7 +30,7 @@ export default async function PersonnelPortalPage() {
     supabase.from("guardian_records").select("id,status,record_type,points_assessed").eq("subject_profile_id", profile.id),
     supabase.from("personnel_requests").select("id,status").eq("requester_profile_id", profile.id),
     supabase.from("training_progress").select("*").eq("profile_id", profile.id).order("created_at"),
-    supabase.from("notifications").select("*").eq("recipient_profile_id", profile.id).is("read_at", null).order("created_at", { ascending: false }).limit(4),
+    supabase.from("notifications").select("id,notification_type,title,message,href,read_at,created_at").eq("recipient_profile_id", profile.id).order("created_at", { ascending: false }).limit(4),
     supabase.from("acting_supervisor_grants").select("*").eq("profile_id", profile.id).is("revoked_at", null).gt("expires_at", new Date().toISOString()),
   ]);
 
@@ -53,17 +54,15 @@ export default async function PersonnelPortalPage() {
     >
       <TestAccountBanner />
 
-      {(notifications ?? []).length ? (
-        <section className="deputy-alert-row" id="notifications">
-          {(notifications ?? []).map((notification, index) => (
-            <article key={notification.id}>
-              <span>{String(index + 1).padStart(2, "0")}</span>
-              <div><strong>{notification.title}</strong><p>{notification.message}</p></div>
-              <small>{new Date(notification.created_at).toLocaleDateString()}</small>
-            </article>
-          ))}
-        </section>
-      ) : <span id="notifications" />}
+      <DeputyNotificationCenter notifications={(notifications ?? []).map((notification): PortalNotificationItem => ({
+        id: notification.id,
+        time: new Date(notification.created_at).toLocaleDateString(),
+        title: notification.title,
+        detail: notification.message,
+        type: notification.notification_type,
+        href: notification.href,
+        read: Boolean(notification.read_at),
+      }))} />
 
       <section className="deputy-profile-card">
         <div className="deputy-profile-identity">
