@@ -28,7 +28,7 @@ export type ActionCenterItem = {
   status: string;
 };
 
-const categories: Array<NotificationCategory | "All"> = ["All", "Personnel", "Guardians", "Requests", "Training", "System"];
+const categories: Array<NotificationCategory | "All"> = ["All", "Personnel", "Guardians", "Requests", "Training", "Recognition", "System"];
 const priorityWeight: Record<NotificationPriority, number> = { Critical: 0, High: 1, Normal: 2, Low: 3 };
 
 function formatWhen(value: string) {
