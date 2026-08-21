@@ -1,0 +1,20 @@
+-- Cover foreign keys used by V2 authority and existing personnel workflows.
+create index if not exists directed_personnel_actions_directed_by_idx on public.directed_personnel_actions(directed_by);
+create index if not exists directed_personnel_actions_revoked_by_idx on public.directed_personnel_actions(revoked_by);
+create index if not exists directed_personnel_actions_subject_idx on public.directed_personnel_actions(subject_profile_id);
+create index if not exists disciplinary_point_events_authorized_by_idx on public.disciplinary_point_events(authorized_by);
+create index if not exists leave_requests_reviewed_by_idx on public.leave_requests(reviewed_by);
+create index if not exists organizational_units_created_by_idx on public.organizational_units(created_by);
+create index if not exists organizational_units_retired_by_idx on public.organizational_units(retired_by);
+create index if not exists personnel_awards_awarded_by_idx on public.personnel_awards(awarded_by);
+create index if not exists personnel_career_events_recorded_by_idx on public.personnel_career_events(recorded_by);
+create index if not exists personnel_flags_created_by_idx on public.personnel_flags(created_by);
+create index if not exists personnel_flags_resolved_by_idx on public.personnel_flags(resolved_by);
+create index if not exists personnel_recusals_ended_by_idx on public.personnel_recusals(ended_by);
+create index if not exists personnel_recusals_imposed_by_idx on public.personnel_recusals(imposed_by);
+create index if not exists personnel_recusals_replacement_idx on public.personnel_recusals(replacement_profile_id);
+create index if not exists personnel_recusals_subject_idx on public.personnel_recusals(subject_profile_id);
+create index if not exists personnel_unit_assignments_assigned_by_idx on public.personnel_unit_assignments(assigned_by);
+create index if not exists personnel_unit_assignments_ended_by_idx on public.personnel_unit_assignments(ended_by);
+create index if not exists supervisory_authorities_ended_by_idx on public.supervisory_authorities(ended_by);
+create index if not exists supervisory_authorities_granted_by_idx on public.supervisory_authorities(granted_by);

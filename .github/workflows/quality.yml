@@ -2,7 +2,7 @@ name: Quality
 
 on:
   push:
-    branches: [main]
+    branches: [main, command-portal-v2-preview]
   pull_request:
 
 permissions:

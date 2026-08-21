@@ -81,34 +81,21 @@ export function CommandActivity({ notifications: initialNotifications }: { notif
   );
 }
 
-export function DeputyNotificationCenter({ notifications: initialNotifications }: { notifications: PortalNotificationItem[] }) {
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [notice, setNotice] = useState("");
-
-  async function markRead(id: string) {
-    const { error } = await persistRead(id);
-    if (error) {
-      setNotice(error.message);
-      return;
-    }
-    setNotifications((current) => current.map((item) => item.id === id ? { ...item, read: true } : item));
-  }
-
-  if (!notifications.length) return <span id="notifications" />;
+export function DeputyNotificationCenter({ notifications }: { notifications: PortalNotificationItem[] }) {
+  const unread = notifications.filter((item) => !item.read);
+  const latest = unread[0] ?? notifications[0] ?? null;
 
   return (
-    <>
-      <section className="deputy-alert-row" id="notifications" aria-label="Personnel notifications">
-        {notifications.map((notification, index) => (
-          <article className={notification.read ? "is-read" : undefined} key={notification.id}>
-            <span>{String(index + 1).padStart(2, "0")}</span>
-            <div><strong>{notification.title}</strong><p>{notification.detail}</p></div>
-            <small>{notification.time}</small>
-            {!notification.read ? <button onClick={() => void markRead(notification.id)} type="button">Mark read</button> : <b>Read</b>}
-          </article>
-        ))}
-      </section>
-      {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
-    </>
+    <section className="deputy-notification-summary" id="notifications" aria-label="Personnel notifications">
+      <div>
+        <span>Notifications</span>
+        <strong>{unread.length ? `${unread.length} unread notification${unread.length === 1 ? "" : "s"}` : "No unread notifications"}</strong>
+        <small>{latest ? `${latest.title} · ${latest.time}` : "Your notification inbox is caught up."}</small>
+      </div>
+      <div>
+        <Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Action Center</Link>
+        <Link className="portal-button portal-button--secondary" href="/portal/notifications#inbox">Open inbox</Link>
+      </div>
+    </section>
   );
 }

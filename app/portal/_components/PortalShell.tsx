@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { CommandQuickFind } from "./CommandQuickFind";
+import { PortalActionCenterLink } from "./PortalActionCenterLink";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
@@ -9,7 +11,19 @@ import { PortalSignOut } from "./PortalSignOut";
 import { ThemeToggle } from "./ThemeToggle";
 
 type PortalShellProps = {
-  active: "overview" | "personnel" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards";
+  active:
+    | "overview"
+    | "personnel"
+    | "supervision"
+    | "training"
+    | "administration"
+    | "guardians"
+    | "record"
+    | "approvals"
+    | "activity"
+    | "certifications"
+    | "awards"
+    | "notifications";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
@@ -38,7 +52,9 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
         <header className="portal-topbar">
           <div className="portal-environment"><span>Internal</span><strong>{audience === "command" ? "Executive Command" : "Personnel Access"}</strong></div>
           <div className="portal-topbar-actions">
+            {audience === "command" ? <CommandQuickFind /> : null}
             <ThemeToggle compact />
+            <PortalActionCenterLink audience={audience} />
             <PortalNotificationLink audience={audience} />
             <PortalSessionIdentity />
             <PasswordChangeDialog />
