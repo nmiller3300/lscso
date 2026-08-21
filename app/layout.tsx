@@ -11,7 +11,7 @@ const geist = localFont({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://lscso.vercel.app"),
+  metadataBase: new URL("https://lscsogov.vercel.app"),
   title: {
     default: "Los Santos County Sheriff’s Office",
     template: "%s | LSCSO",

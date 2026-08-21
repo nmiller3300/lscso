@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = "https://lscso.vercel.app";
+  const base = "https://lscsogov.vercel.app";
   const routes = [
     "",
     "/about",
