@@ -14,7 +14,8 @@ type ActivePortalView =
   | "approvals"
   | "activity"
   | "certifications"
-  | "awards";
+  | "awards"
+  | "notifications";
 
 type PortalNavigationProps = {
   active: ActivePortalView;
