@@ -46,7 +46,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
 
       <nav className="command-v2-record-tabs" aria-label="Personnel record sections">
         <span className="is-active">Overview</span>
-        <span>Timeline</span>
+        <Link href={`/portal/command/personnel/${member.personnel_id}/timeline`}>Timeline</Link>
         <span>Supervision</span>
         <span>Training</span>
         <span>Recognition</span>
