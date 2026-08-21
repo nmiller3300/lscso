@@ -169,7 +169,13 @@ export function canPerformPersonnelAction(
     return context.actorTier === "Command";
   }
 
-  // From 1st Lieutenant down, personnel authority must have a valid scope.
+  // Explicit FTO/trainer authority is its own relationship and does not depend
+  // on supervisory rank. It grants training capabilities only.
+  if (trainingActions.has(capability) && context.scopes.includes("training")) {
+    return true;
+  }
+
+  // From 1st Lieutenant down, general personnel authority must have a valid scope.
   if (capability === "view_personnel_summary") {
     return context.actorTier !== "Deputy" &&
       hasAnyScope(context, [...scopedOperationalAuthority, "training", "directed_action"]);
@@ -192,10 +198,6 @@ export function canPerformPersonnelAction(
 
   if (commandFinalAuthority.has(capability)) {
     return context.actorTier === "Command" && hasAnyScope(context, scopedOperationalAuthority);
-  }
-
-  if (trainingActions.has(capability) && context.scopes.includes("training")) {
-    return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier);
   }
 
   // Directed action permits the specific assigned supervisory task without
