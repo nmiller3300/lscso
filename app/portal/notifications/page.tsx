@@ -14,13 +14,21 @@ export default async function NotificationsPage() {
   const audience = profile.access_tier === "Deputy" ? "deputy" as const : "command" as const;
   const supabase = await createClient() as any;
   const now = new Date();
+  const departmentAuthority = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
 
-  const { data: directNotifications } = await supabase
+  let notificationQuery = supabase
     .from("notifications")
     .select("id,notification_type,title,message,href,read_at,created_at")
     .eq("recipient_profile_id", profile.id)
     .order("created_at", { ascending: false })
     .limit(100);
+
+  // The current database trigger predates the V2 authority model and broadcasts
+  // Guardian Approval notices to every Command-tier profile. Scoped Command
+  // (notably 1st Lieutenant) must not receive those department-wide legacy rows.
+  if (!departmentAuthority) notificationQuery = notificationQuery.neq("notification_type", "Guardian Approval");
+
+  const { data: directNotifications } = await notificationQuery;
 
   const notifications: NotificationCenterItem[] = (directNotifications ?? []).map((item: any) => ({
     id: item.id,
@@ -74,7 +82,6 @@ export default async function NotificationsPage() {
 
   let scopeNotice: string | null = null;
   if (audience === "command") {
-    const departmentAuthority = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
     const purview = departmentAuthority ? null : await loadPersonnelPurview(profile);
     const scopedIds = new Set((purview?.rows ?? []).map((row) => row.profileId));
     const allowed = (profileId: string | null | undefined) => departmentAuthority || Boolean(profileId && scopedIds.has(profileId));
