@@ -56,6 +56,17 @@
 .command-structure-draft-note { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; padding: 10px 12px; margin-bottom: 14px; border: 1px solid rgba(82, 68, 51, 0.12); border-radius: 10px; background: rgba(116, 89, 53, 0.045); }
 .command-structure-draft-note span { font-size: 0.82rem; opacity: 0.66; }
 
+.command-structure-transfer-row { display: flex; gap: 9px; align-items: center; flex-wrap: wrap; margin: -2px 0 14px; }
+.command-structure-transfer-row > span { font-size: 0.78rem; opacity: 0.62; }
+.command-structure-import { display: grid; gap: 10px; margin-bottom: 14px; padding: 12px; border: 1px solid rgba(82, 68, 51, 0.13); border-radius: 10px; }
+.command-structure-import label { display: grid; gap: 6px; }
+.command-structure-import label > span { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.07em; text-transform: uppercase; opacity: 0.72; }
+.command-structure-import textarea { min-height: 112px; resize: vertical; width: 100%; border: 1px solid rgba(82, 68, 51, 0.18); border-radius: 9px; background: var(--portal-surface, #fff); color: inherit; padding: 10px; font: inherit; font-size: 0.8rem; }
+.command-structure-editor-notice { margin-bottom: 14px; padding: 10px 12px; border: 1px solid rgba(82, 68, 51, 0.14); border-radius: 10px; font-size: 0.82rem; line-height: 1.45; }
+.command-structure-editor-warnings { display: grid; gap: 4px; margin-bottom: 14px; padding: 10px 12px; border: 1px solid rgba(82, 68, 51, 0.16); border-radius: 10px; }
+.command-structure-editor-warnings strong { font-size: 0.76rem; }
+.command-structure-editor-warnings span { font-size: 0.8rem; opacity: 0.72; }
+
 .command-structure-editor-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
 .command-structure-editor-tabs button { border: 1px solid rgba(82, 68, 51, 0.14); border-radius: 999px; background: transparent; color: inherit; padding: 8px 11px; font: inherit; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
 .command-structure-editor-tabs button span { margin-left: 5px; opacity: 0.55; }
@@ -104,4 +115,6 @@
   .command-structure-editor-tabs button { flex: 0 0 auto; }
   .command-structure-draft-list > div:not(.command-structure-empty) { align-items: flex-start; }
   .command-structure-editor-footer { align-items: flex-start; }
+  .command-structure-transfer-row { align-items: flex-start; }
+  .command-structure-transfer-row > span { width: 100%; }
 }
