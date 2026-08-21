@@ -6,19 +6,23 @@ import { createClient } from "@/lib/supabase/server";
 
 export default async function CertificationCenterPage() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command", "Supervisor", "Preliminary"].includes(profile.access_tier)) redirect("/portal/personnel");
+  if (!profile) redirect("/portal");
   const supabase = await createClient();
+  const { data: canRequest } = await supabase.rpc("can_request_certifications");
+  if (!canRequest) redirect("/portal/personnel");
+
   const [{ data: personnel }, { data: catalog }, { data: certifications }] = await Promise.all([
-    supabase.from("personnel_profiles").select("id,display_name,rank,call_sign").in("status", ["Active", "Acting"]).order("display_name"),
+    supabase.rpc("certification_request_candidates"),
     supabase.from("certification_catalog").select("name").eq("active", true).order("name"),
     supabase.from("certifications").select("id,profile_id,name,status,issuer,issued_on,expires_on,notes").order("created_at", { ascending: false }),
   ]);
+
   return (
     <PortalShell
       active="certifications"
       eyebrow="Professional standards · Qualifications"
       title="Certification Center"
-      description="Supervisors may recommend certifications. Command and Executive personnel issue the final credential."
+      description="FTOs and supervisors may recommend certifications. Command and Executive personnel issue the final credential."
     >
       <CertificationWorkspace personnel={personnel ?? []} catalog={(catalog ?? []).map((item) => item.name)} certifications={certifications ?? []} />
     </PortalShell>
