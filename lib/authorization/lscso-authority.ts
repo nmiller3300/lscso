@@ -76,7 +76,9 @@ export type AuthorityScope =
   | "unit"
   | "command_chain"
   | "training"
-  | "temporary"
+  | "temporary_assignment"
+  | "directed_action"
+  | "conflict_reassignment"
   | "department";
 
 export type AuthorityContext = {
@@ -116,22 +118,37 @@ const trainingActions = new Set<PersonnelCapability>([
   "evaluate_trainee",
 ]);
 
+const scopedOperationalAuthority: AuthorityScope[] = [
+  "direct",
+  "unit",
+  "command_chain",
+  "temporary_assignment",
+  "conflict_reassignment",
+];
+
 function hasAnyScope(context: AuthorityContext, allowed: AuthorityScope[]) {
   return context.scopes.some((scope) => allowed.includes(scope));
+}
+
+/** Sheriff, Undersheriff, Major and Captain are not restricted to their home bureau. */
+export function hasStandingDepartmentAuthority(rank: LscsoRank): boolean {
+  return ["Sheriff", "Undersheriff", "Major", "Captain"].includes(rank);
 }
 
 /**
  * UI-level authority evaluator.
  *
- * Database RPC/RLS remains the source of truth. This function exists so every
- * portal surface asks the same permission question instead of embedding its
- * own rank checks.
+ * Database RPC/RLS remains the source of truth. Every portal surface should ask
+ * this evaluator instead of embedding its own rank checks. A certification never
+ * creates supervisory authority; authority comes from command position,
+ * organizational purview, an active assignment, or an explicit directed action.
  */
 export function canPerformPersonnelAction(
   capability: PersonnelCapability,
   context: AuthorityContext,
 ): boolean {
   const isSelf = context.actorId === context.targetId || context.scopes.includes("self");
+  const standingDepartmentAuthority = hasStandingDepartmentAuthority(context.actorRank);
 
   if (capability === "view_self_record") return isSelf;
   if (isSelf && ["view_personnel_summary", "view_personnel_record"].includes(capability)) return true;
@@ -143,39 +160,58 @@ export function canPerformPersonnelAction(
     return capability === "view_personnel_summary" && context.actorTier === "Command";
   }
 
+  // Major and Captain retain standing department-wide operational reach even
+  // when working outside their normal bureau or division.
+  if (standingDepartmentAuthority) {
+    if (executiveOnly.has(capability)) return false;
+    if (capability === "manage_supervisory_authority") return true;
+    if (capability === "view_audit_log") return true;
+    return context.actorTier === "Command";
+  }
+
+  // From 1st Lieutenant down, personnel authority must have a valid scope.
   if (capability === "view_personnel_summary") {
-    return context.actorTier !== "Deputy" && hasAnyScope(context, ["direct", "unit", "command_chain", "training", "temporary", "department"]);
+    return context.actorTier !== "Deputy" &&
+      hasAnyScope(context, [...scopedOperationalAuthority, "training", "directed_action"]);
   }
 
   if (capability === "view_personnel_record") {
     return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier) &&
-      hasAnyScope(context, ["direct", "unit", "command_chain", "temporary"]);
+      hasAnyScope(context, [...scopedOperationalAuthority, "directed_action"]);
   }
 
   if (capability === "view_sensitive_personnel_documents") {
-    return context.actorTier === "Command" && hasAnyScope(context, ["direct", "unit", "command_chain", "department"]);
+    return context.actorTier === "Command" && hasAnyScope(context, scopedOperationalAuthority);
   }
 
   if (executiveOnly.has(capability)) return false;
 
   if (capability === "manage_supervisory_authority") {
-    return context.actorTier === "Command" && hasAnyScope(context, ["command_chain", "department"]);
+    return context.actorTier === "Command" && hasAnyScope(context, ["command_chain"]);
   }
 
   if (commandFinalAuthority.has(capability)) {
-    return context.actorTier === "Command" && hasAnyScope(context, ["direct", "unit", "command_chain", "temporary", "department"]);
+    return context.actorTier === "Command" && hasAnyScope(context, scopedOperationalAuthority);
   }
 
   if (trainingActions.has(capability) && context.scopes.includes("training")) {
     return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier);
   }
 
-  if (supervisoryActions.has(capability)) {
-    return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier) &&
-      hasAnyScope(context, ["direct", "unit", "command_chain", "training", "temporary", "department"]);
+  // Directed action permits the specific assigned supervisory task without
+  // granting general access to the subject's unit or personnel record.
+  if (supervisoryActions.has(capability) && context.scopes.includes("directed_action")) {
+    return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier);
   }
 
-  if (capability === "view_audit_log") return context.actorTier === "Command";
+  if (supervisoryActions.has(capability)) {
+    return ["Command", "Supervisor", "Preliminary"].includes(context.actorTier) &&
+      hasAnyScope(context, scopedOperationalAuthority);
+  }
+
+  // Department audit visibility is intentionally not inherited by scoped
+  // 1st Lieutenant-and-below authority.
+  if (capability === "view_audit_log") return false;
 
   return false;
 }
