@@ -147,7 +147,6 @@ alter table public.directed_personnel_actions enable row level security;
 alter table public.personnel_recusals enable row level security;
 alter table public.personnel_career_events enable row level security;
 
--- Department-wide operational authority belongs to Sheriff, Undersheriff, Major, Captain.
 create or replace function app_private.current_has_department_operational_authority()
 returns boolean
 language sql
@@ -164,8 +163,6 @@ as $$
   ), false)
 $$;
 
--- Returns standing personnel purview only. Directed one-off actions are intentionally
--- excluded so a directed Guardian task cannot become broad personnel-file access.
 create or replace function public.get_personnel_in_my_purview()
 returns table (
   profile_id uuid,
@@ -185,7 +182,7 @@ stable
 security definer
 set search_path = ''
 as $$
-  with me as (
+  with recursive me as (
     select p.id, p.rank
     from public.personnel_profiles p
     where p.auth_user_id = (select auth.uid())
@@ -276,8 +273,6 @@ $$;
 revoke all on function public.get_personnel_in_my_purview() from public, anon;
 grant execute on function public.get_personnel_in_my_purview() to authenticated;
 
--- Read policies are intentionally narrow. Write paths will use controlled RPCs so
--- Command Structure changes are audited and rank/scope checked atomically.
 create policy organizational_units_read on public.organizational_units
 for select to authenticated using (active or app_private.current_access_tier() in ('Executive','Command'));
 
