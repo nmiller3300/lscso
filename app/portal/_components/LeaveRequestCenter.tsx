@@ -24,11 +24,12 @@ export function LeaveRequestCenter() {
   useEffect(() => {
     let cancelled = false;
     async function load() {
-      const { data } = await createClient().from("leave_requests")
+      const supabase = createClient() as any;
+      const { data } = await supabase.from("leave_requests")
         .select("id,request_number,leave_type,starts_on,expected_return_on,status,created_at")
         .eq("profile_id", profile.id)
         .order("created_at", { ascending: false });
-      if (!cancelled) setRequests((data ?? []).map((row) => ({ ...row, number: Number(row.request_number) })));
+      if (!cancelled) setRequests((data ?? []).map((row: any) => ({ ...row, number: Number(row.request_number) })));
     }
     void load();
     return () => { cancelled = true; };
@@ -45,7 +46,8 @@ export function LeaveRequestCenter() {
       return;
     }
     setSubmitting(true);
-    const { data, error } = await createClient().from("leave_requests").insert({
+    const supabase = createClient() as any;
+    const { data, error } = await supabase.from("leave_requests").insert({
       profile_id: profile.id,
       leave_type: String(form.get("leaveType") ?? "Personal"),
       starts_on: startsOn,
