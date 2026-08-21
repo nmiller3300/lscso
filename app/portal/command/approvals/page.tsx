@@ -25,11 +25,12 @@ export default async function ApprovalsPage() {
   const purview = departmentAuthority ? null : await loadPersonnelPurview(profile);
   const scopedIds = new Set((purview?.rows ?? []).map((row) => row.profileId));
   const allowed = (profileId: string | null | undefined) => departmentAuthority || Boolean(profileId && scopedIds.has(profileId));
+  const allowedDecision = (profileId: string | null | undefined) => Boolean(profileId && profileId !== profile.id && allowed(profileId));
 
-  const guardians = (guardiansResult.data ?? []).filter((row: any) => allowed(row.subject_profile_id));
-  const requests = (requestsResult.data ?? []).filter((row: any) => allowed(row.requester_profile_id));
-  const leave = (leaveResult.data ?? []).filter((row: any) => allowed(row.profile_id));
-  const certificationRequests = (certificationRequestsResult.data ?? []).filter((row: any) => allowed(row.profile_id));
+  const guardians = (guardiansResult.data ?? []).filter((row: any) => allowedDecision(row.subject_profile_id));
+  const requests = (requestsResult.data ?? []).filter((row: any) => allowedDecision(row.requester_profile_id));
+  const leave = (leaveResult.data ?? []).filter((row: any) => allowedDecision(row.profile_id));
+  const certificationRequests = (certificationRequestsResult.data ?? []).filter((row: any) => allowedDecision(row.profile_id));
 
   const names = new Map((profiles ?? []).map((item: any) => [item.id, item.display_name]));
   const guardianItems: CommandApprovalItem[] = guardians.map((record: any) => ({
