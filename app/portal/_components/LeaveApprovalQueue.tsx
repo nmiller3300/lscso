@@ -16,9 +16,9 @@ export function LeaveApprovalQueue({ items }: { items: LeaveItem[] }) {
     setPending(item.id);
     const supabase = createClient() as any;
     const { error } = await supabase.rpc("review_leave_request", {
-      record_id: item.id,
-      decision,
-      review_notes: notes[item.id]?.trim() || null,
+      p_record_id: item.id,
+      p_decision: decision,
+      p_review_notes: notes[item.id]?.trim() || null,
     });
     setPending(null);
     if (error) { setNotice(error.message); return; }
