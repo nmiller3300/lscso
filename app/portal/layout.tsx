@@ -8,6 +8,7 @@ import "./quick-find.css";
 import "./home-v2.css";
 import "./supervision-v2.css";
 import "./structure-v2.css";
+import "./timeline-v2.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
