@@ -25,22 +25,27 @@ export const rankAccess = [
   {
     tier: "Executive",
     ranks: ["Sheriff", "Undersheriff"],
-    scope: "Full command authority; only tier permitted to deactivate accounts.",
+    scope: "Department-wide executive authority.",
   },
   {
     tier: "Command",
-    ranks: ["Major", "Captain", "1st Lieutenant"],
-    scope: "Department-wide command review and approval authority.",
+    ranks: ["Major", "Captain"],
+    scope: "Standing department-wide command authority; home assignment sets responsibility, not access boundaries.",
+  },
+  {
+    tier: "Command",
+    ranks: ["1st Lieutenant"],
+    scope: "Command Staff authority within active organizational purview, command chain, assignment, or directed matter.",
   },
   {
     tier: "Supervisor",
     ranks: ["Lieutenant", "Sergeant"],
-    scope: "Issue direct Guardians and submit disciplinary Guardians for review.",
+    scope: "Supervisory authority within active organizational purview, command chain, assignment, or directed matter.",
   },
   {
     tier: "Preliminary",
     ranks: ["Corporal"],
-    scope: "Limited supervisory tools within assigned personnel scope.",
+    scope: "Limited supervisory authority over specifically assigned personnel and authorized directed matters.",
   },
   {
     tier: "Deputy",
