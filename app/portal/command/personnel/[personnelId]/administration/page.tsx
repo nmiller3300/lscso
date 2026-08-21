@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { PersonnelIdentityManager } from "../../../../_components/PersonnelIdentityManager";
 import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
@@ -7,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 type PageProps = { params: Promise<{ personnelId: string }> };
+const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
 
 export default async function PersonnelAdministrationPage({ params }: PageProps) {
   const profile = await getCurrentPortalProfile();
@@ -16,7 +18,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   if (!access.allowed) redirect("/portal/command/supervision");
 
   const supabase = await createClient() as any;
-  const { data: member } = await supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,division,status").eq("personnel_id", personnelId.toUpperCase()).maybeSingle();
+  const { data: member } = await supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,access_tier,division,status").eq("personnel_id", personnelId.toUpperCase()).maybeSingle();
   if (!member) notFound();
 
   const [flags, leave, requests] = await Promise.all([
@@ -25,9 +27,14 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
     supabase.from("personnel_requests").select("id,request_number,request_type,status,subject,created_at").eq("requester_profile_id", member.id).order("created_at", { ascending: false }),
   ]);
 
+  const canApprovePersonnelChanges = PERSONNEL_CHANGE_APPROVERS.has(profile.rank) && profile.id !== member.id;
+
   return (
-    <PortalShell active="personnel" eyebrow={`${member.personnel_id} · Administration`} title={`${member.display_name} · Administration`} description="Administrative flags, leave, and personnel requests." actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}>
+    <PortalShell active="personnel" eyebrow={`${member.personnel_id} · Administration`} title={`${member.display_name} · Administration`} description="Administrative flags, leave, personnel requests, and controlled personnel changes." actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}>
       <PersonnelRecordTabs personnelId={member.personnel_id} active="administration" />
+      {canApprovePersonnelChanges ? (
+        <PersonnelIdentityManager profileId={member.id} personnelId={member.personnel_id} displayName={member.display_name} currentRank={member.rank} currentStatus={member.status} />
+      ) : null}
       <div className="command-v2-workspace-grid">
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>Personnel status</p><h2>Administrative flags</h2></div><span>{flags.data?.length ?? 0}</span></div>
