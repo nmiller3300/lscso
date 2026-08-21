@@ -11,7 +11,7 @@ type PortalNavigationProps = {
 };
 
 const personalNavigation = [
-  { id: "record", href: "/portal/personnel", label: "My Office", mobileLabel: "My Office", glyph: "MO" },
+  { id: "record", href: "/portal/my-office", label: "My Office", mobileLabel: "My Office", glyph: "MO" },
 ] as const;
 
 const commandNavigation = [
@@ -33,10 +33,10 @@ const supervisorNavigation = [
 
 const deputyNavigation = [
   ...personalNavigation,
-  { id: "certifications", href: "/portal/personnel#certifications", label: "Certifications", mobileLabel: "Certs", glyph: "CE" },
-  { id: "awards", href: "/portal/personnel#awards", label: "Medals & awards", mobileLabel: "Awards", glyph: "AW" },
-  { id: "guardians", href: "/portal/personnel#guardians", label: "My Guardians", mobileLabel: "Guardians", glyph: "MG" },
-  { id: "requests", href: "/portal/personnel#requests", label: "Requests & LOA", mobileLabel: "Requests", glyph: "RQ" },
+  { id: "certifications", href: "/portal/my-office#certifications", label: "Certifications", mobileLabel: "Certs", glyph: "CE" },
+  { id: "awards", href: "/portal/my-office#awards", label: "Medals & awards", mobileLabel: "Awards", glyph: "AW" },
+  { id: "guardians", href: "/portal/my-office#guardians", label: "My Guardians", mobileLabel: "Guardians", glyph: "MG" },
+  { id: "requests", href: "/portal/my-office#requests", label: "Requests & LOA", mobileLabel: "Requests", glyph: "RQ" },
 ] as const;
 
 export function PortalNavigation({ active, audience }: PortalNavigationProps) {
