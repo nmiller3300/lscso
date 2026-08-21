@@ -4,23 +4,19 @@ import { loadPersonnelPurview } from "./load-personnel-purview";
 
 export type PersonnelRecordAccess = {
   allowed: boolean;
-  reason: "self" | "department" | "purview" | "unavailable" | "denied";
+  reason: "department" | "purview" | "unavailable" | "denied";
 };
 
 /**
- * Personnel-record visibility for V2.
+ * Command-facing personnel-record visibility for V2.
  * Captain+ standing authority is department-wide.
  * 1st Lieutenant and below require an active structured purview path.
- * A member may always access their own record through the appropriate personal portal.
+ * Self-service access belongs in My Info and is intentionally not granted here.
  * Legacy division/supervisor text is never used as authorization evidence.
  */
 export async function canAccessPersonnelRecord(profile: PortalProfile, targetPersonnelId: string): Promise<PersonnelRecordAccess> {
   const normalizedTarget = targetPersonnelId.trim().toUpperCase();
   if (!normalizedTarget) return { allowed: false, reason: "denied" };
-
-  if (profile.personnel_id.toUpperCase() === normalizedTarget) {
-    return { allowed: true, reason: "self" };
-  }
 
   const purview = await loadPersonnelPurview(profile);
   if (purview.standingDepartmentAuthority) {
