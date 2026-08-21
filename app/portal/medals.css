@@ -1,0 +1,142 @@
+.medal-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+  padding: 18px;
+}
+
+.medal-card {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 16px;
+  border: 1px solid var(--portal-line);
+  background: var(--portal-surface);
+}
+
+.medal-card__art {
+  width: 84px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: transparent;
+}
+
+.medal-card__art img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+}
+
+.medal-card__body {
+  min-width: 0;
+  display: grid;
+  gap: 7px;
+}
+
+.medal-card__body > strong {
+  color: var(--portal-ink);
+  font-size: 15px;
+  line-height: 1.25;
+}
+
+.medal-card__meta {
+  color: var(--portal-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.medal-card__type {
+  width: fit-content;
+  color: #40764f;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.medal-card details {
+  grid-column: 1 / -1;
+  border-top: 1px solid var(--portal-line);
+  padding-top: 11px;
+}
+
+.medal-card summary {
+  width: fit-content;
+  cursor: pointer;
+  list-style: none;
+  color: var(--portal-gold-dark);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.medal-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.medal-card summary::after {
+  content: " +";
+}
+
+.medal-card details[open] summary::after {
+  content: " −";
+}
+
+.medal-card__citation {
+  margin: 10px 0 0;
+  color: var(--portal-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.portal-root[data-theme="dark"] .medal-card {
+  border-color: var(--portal-line);
+  background: var(--portal-surface);
+}
+
+.portal-root[data-theme="dark"] .medal-card__type {
+  color: #8fc09c;
+}
+
+@media (max-width: 700px) {
+  #awards .portal-panel-heading {
+    display: grid;
+    gap: 8px;
+  }
+
+  #awards .portal-panel-heading > span {
+    max-width: 100%;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .medal-gallery {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .medal-card {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 12px;
+    padding: 13px;
+  }
+
+  .medal-card__art {
+    width: 72px;
+    height: 96px;
+  }
+
+  .medal-card__body > strong {
+    font-size: 14px;
+  }
+}
