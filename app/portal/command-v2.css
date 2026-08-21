@@ -192,6 +192,34 @@
   margin-bottom: 16px;
 }
 
+.command-v2-record-assignments {
+  margin-bottom: 16px;
+}
+
+.command-v2-assignment-chips {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.command-v2-assignment-chips > div {
+  min-width: 180px;
+  border: 1px solid rgba(82, 68, 51, 0.13);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.command-v2-assignment-chips strong,
+.command-v2-assignment-chips span {
+  display: block;
+}
+
+.command-v2-assignment-chips span {
+  margin-top: 3px;
+  font-size: 0.78rem;
+  opacity: 0.64;
+}
+
 .personnel-document-groups {
   display: grid;
   gap: 14px;
@@ -272,6 +300,15 @@
 
   .command-v2-personnel-results a > div:last-child {
     max-width: 38%;
+  }
+
+  .command-v2-assignment-chips {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .command-v2-assignment-chips > div {
+    min-width: 0;
   }
 
   .personnel-document-list article {
