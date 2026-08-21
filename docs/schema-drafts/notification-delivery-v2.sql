@@ -4,7 +4,7 @@
 
 alter table public.notifications
   add column if not exists event_key text,
-  add column if not exists category text check (category in ('Personnel','Guardians','Requests','Training','System')),
+  add column if not exists category text check (category in ('Personnel','Guardians','Requests','Training','Recognition','System')),
   add column if not exists priority text not null default 'Normal' check (priority in ('Critical','High','Normal','Low')),
   add column if not exists action_required boolean not null default false,
   add column if not exists source_type text,
@@ -19,6 +19,10 @@ create index if not exists notifications_action_queue_idx
 create index if not exists notifications_source_idx
   on public.notifications (source_type, source_record_id)
   where source_record_id is not null;
+
+create unique index if not exists notifications_recipient_event_unique
+  on public.notifications (recipient_profile_id, event_key)
+  where event_key is not null;
 
 create table if not exists public.notification_deliveries (
   id uuid primary key default gen_random_uuid(),
