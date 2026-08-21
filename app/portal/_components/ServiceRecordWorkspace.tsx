@@ -8,7 +8,7 @@ type Person = { id: string; display_name: string; rank: string; call_sign: strin
 type Flag = { id: string; profile_id: string; flag_type: string; notes: string | null; created_at: string };
 type Award = { id: string; profile_id: string; award_name: string; citation: string; awarded_on: string };
 
-const awardTypes = ["Medal of Valor","Medal of Merit","Life Saving Award","Distinguished Service Award","Deputy of the Month"];
+const awardTypes = ["Medal of Valor","Medal of Merit","Life Saving Award","Distinguished Service Award"];
 const flagTypes = ["Promotion Eligible","Promotion Hold","Training Required","Certification Deficiency","Administrative Review","Probationary","FTO Eligible","Supervisor Eligible","Command Review Required","Return From LOA Review","Restricted Duty","Separation Pending"];
 
 export function ServiceRecordWorkspace({ personnel, flags, awards }: { personnel: Person[]; flags: Flag[]; awards: Award[] }) {
@@ -30,7 +30,7 @@ export function ServiceRecordWorkspace({ personnel, flags, awards }: { personnel
     });
     setPending(false);
     if (error) { setNotice(error.message); return; }
-    setNotice("Award issued and added to the permanent service record.");
+    setNotice("Medal issued and added to the permanent service record.");
     router.refresh();
   }
 
@@ -80,10 +80,10 @@ export function ServiceRecordWorkspace({ personnel, flags, awards }: { personnel
       <section className="portal-panel">
         <div className="portal-panel-heading"><div><p>Awards & decorations</p><h2>Issue medal</h2></div><span>Separate from commendations</span></div>
         <form onSubmit={award}>
-          <div className="portal-form-grid"><label>Personnel<select required name="member" defaultValue=""><option disabled value="">Select personnel</option>{personnel.map(p=><option key={p.id} value={p.id}>{p.display_name} · {p.rank}</option>)}</select></label><label>Award<select name="award">{awardTypes.map(a=><option key={a}>{a}</option>)}</select></label></div>
+          <div className="portal-form-grid"><label>Personnel<select required name="member" defaultValue=""><option disabled value="">Select personnel</option>{personnel.map(p=><option key={p.id} value={p.id}>{p.display_name} · {p.rank}</option>)}</select></label><label>Medal<select name="award">{awardTypes.map(a=><option key={a}>{a}</option>)}</select></label></div>
           <label className="portal-call-sign-field">Citation<textarea required minLength={10} name="citation" rows={4} placeholder="Document why this decoration is being awarded..." /></label>
           <label>Award date<input name="awardDate" type="date" defaultValue={new Date().toISOString().slice(0,10)} /></label>
-          <div className="portal-modal-actions"><button className="portal-button portal-button--primary" disabled={pending}>Issue award</button></div>
+          <div className="portal-modal-actions"><button className="portal-button portal-button--primary" disabled={pending}>Issue medal</button></div>
         </form>
       </section>
 
@@ -109,7 +109,7 @@ export function ServiceRecordWorkspace({ personnel, flags, awards }: { personnel
 
     <section className="portal-panel"><div className="portal-panel-heading"><div><p>Active administration</p><h2>Personnel flags</h2></div><span>{flags.length} active</span></div><div className="deputy-request-history">{flags.map(flag=>{const person=personnel.find(p=>p.id===flag.profile_id);return <article key={flag.id}><span>PF</span><div><strong>{flag.flag_type}</strong><small>{person?.display_name ?? "Personnel"} · {flag.notes ?? "No note"}</small></div><button disabled={pending} onClick={()=>resolveFlag(flag.id)} type="button">Resolve</button></article>})}{!flags.length?<div className="portal-empty-state"><strong>No active personnel flags.</strong></div>:null}</div></section>
 
-    <section className="portal-panel"><div className="portal-panel-heading"><div><p>Permanent record</p><h2>Recent awards</h2></div><span>{awards.length} recorded</span></div><div className="deputy-request-history">{awards.map(a=>{const person=personnel.find(p=>p.id===a.profile_id);return <article key={a.id}><span>AW</span><div><strong>{a.award_name}</strong><small>{person?.display_name ?? "Personnel"} · {a.citation}</small></div><b>{new Date(a.awarded_on).toLocaleDateString()}</b></article>})}{!awards.length?<div className="portal-empty-state"><strong>No awards have been issued yet.</strong></div>:null}</div></section>
+    <section className="portal-panel"><div className="portal-panel-heading"><div><p>Permanent record</p><h2>Recent medals</h2></div><span>{awards.length} recorded</span></div><div className="deputy-request-history">{awards.map(a=>{const person=personnel.find(p=>p.id===a.profile_id);return <article key={a.id}><span>MD</span><div><strong>{a.award_name}</strong><small>{person?.display_name ?? "Personnel"} · {a.citation}</small></div><b>{new Date(a.awarded_on).toLocaleDateString()}</b></article>})}{!awards.length?<div className="portal-empty-state"><strong>No medals have been issued yet.</strong></div>:null}</div></section>
     {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
   </>;
 }
