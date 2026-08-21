@@ -23,7 +23,7 @@ export function CertificationWorkspace({ personnel, catalog, certifications }: {
     const certificationName = String(form.get("certification") ?? "");
     if (!targetProfileId || !certificationName) return;
     setPending(true);
-    const supabase = createClient();
+    const supabase = createClient() as any;
     const result = isCommand
       ? await supabase.rpc("issue_certification", {
           target_profile_id: targetProfileId,
@@ -39,11 +39,7 @@ export function CertificationWorkspace({ personnel, catalog, certifications }: {
           request_notes: String(form.get("notes") ?? "").trim() || null,
         });
     setPending(false);
-    if (result.error) {
-      setNotice(result.error.message);
-      return;
-    }
-    event.currentTarget.reset();
+    if (result.error) { setNotice(result.error.message); return; }
     setNotice(isCommand ? `${certificationName} issued and written to the personnel record.` : `${certificationName} submitted to Command for final issuance.`);
     router.refresh();
     window.setTimeout(() => setNotice(""), 4200);
