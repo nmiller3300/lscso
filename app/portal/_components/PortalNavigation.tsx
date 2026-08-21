@@ -20,6 +20,7 @@ const commandNavigation = [
   { id: "personnel", href: "/portal/command/personnel", label: "Personnel roster", mobileLabel: "Roster", glyph: "PR" },
   { id: "guardians", href: "/portal/command/guardians", label: "Guardian center", mobileLabel: "Guardians", glyph: "GC" },
   { id: "certifications", href: "/portal/command/certifications", label: "Certifications", mobileLabel: "Certs", glyph: "CE" },
+  { id: "awards", href: "/portal/command/service-records", label: "Service records", mobileLabel: "Records", glyph: "SR" },
   { id: "approvals", href: "/portal/command/approvals", label: "Approvals", mobileLabel: "Approvals", glyph: "AP" },
   { id: "activity", href: "/portal/command/activity", label: "Activity & audit", mobileLabel: "Activity", glyph: "AA" },
 ] as const;
