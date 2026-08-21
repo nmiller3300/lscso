@@ -6,10 +6,10 @@ type MedalAward = {
 };
 
 const medalAssets: Record<string, string> = {
-  "Medal of Valor": "/images/medals/medal-of-valor.webp?v=4",
-  "Medal of Merit": "/images/medals/medal-of-merit.webp?v=4",
-  "Life Saving Award": "/images/medals/life-saving-award.webp?v=4",
-  "Distinguished Service Award": "/images/medals/distinguished-service-award.png?v=4",
+  "Medal of Valor": "/images/medals/medal-of-valor.png?v=5",
+  "Medal of Merit": "/images/medals/medal-of-merit.png?v=5",
+  "Life Saving Award": "/images/medals/life-saving-award.png?v=5",
+  "Distinguished Service Award": "/images/medals/distinguished-service-award.png?v=5",
 };
 
 export function MedalGallery({ awards }: { awards: MedalAward[] }) {
