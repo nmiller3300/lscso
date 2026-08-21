@@ -1,4 +1,6 @@
-create or replace function public.review_leave_request(
+drop function if exists public.review_leave_request(uuid,text,text);
+
+create function public.review_leave_request(
   p_record_id uuid,
   p_decision text,
   p_review_notes text default null
