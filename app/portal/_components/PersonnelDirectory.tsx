@@ -17,24 +17,34 @@ type PersonnelDirectoryProps = {
 };
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
+const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
 
 export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
   const [query, setQuery] = useState("");
   const [division, setDivision] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
 
   useEffect(() => {
     try {
       const stored = JSON.parse(localStorage.getItem(RECENT_KEY) ?? "[]");
       if (Array.isArray(stored)) setRecentIds(stored.filter((item) => typeof item === "string").slice(0, 6));
+      const favorites = JSON.parse(localStorage.getItem(FAVORITES_KEY) ?? "[]");
+      if (Array.isArray(favorites)) setFavoriteIds(favorites.filter((item) => typeof item === "string").slice(0, 12));
     } catch {
       setRecentIds([]);
+      setFavoriteIds([]);
     }
   }, []);
 
   const recent = useMemo(
     () => recentIds.map((id) => personnel.find((member) => member.personnelId === id)).filter(Boolean) as DirectoryMember[],
     [personnel, recentIds],
+  );
+
+  const favorites = useMemo(
+    () => favoriteIds.map((id) => personnel.find((member) => member.personnelId === id)).filter(Boolean) as DirectoryMember[],
+    [favoriteIds, personnel],
   );
 
   const divisions = useMemo(() => {
@@ -89,7 +99,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
           <div className="command-v2-personnel-results">
             {filtered.map((member) => (
               <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}>
-                <div><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div>
+                <div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div>
                 <div><span>{member.division}</span><b>{member.status}</b></div>
               </Link>
             ))}
@@ -100,6 +110,11 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
 
       <div className="command-v2-workspace-grid command-v2-directory-lower">
         <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>
+          {favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}
+        </section>
+
+        <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
           {recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}
         </section>
@@ -108,12 +123,6 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
           <div className="portal-panel-heading"><div><p>Browse</p><h2>Department roster</h2></div></div>
           <p className="command-v2-compact-copy">Use the full roster when you need to browse everyone or manage credentials and account status.</p>
           <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">View full roster</Link></div>
-        </section>
-
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Records</p><h2>Service records</h2></div></div>
-          <p className="command-v2-compact-copy">Awards, personnel flags, and other permanent service-record actions remain available.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Open service records</Link></div>
         </section>
       </div>
     </div>
