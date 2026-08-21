@@ -41,17 +41,16 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
     >
       <section className="deputy-profile-card command-v2-record-header">
         <div className="deputy-profile-identity"><span>{member.display_name.split(/\s+/).map((part:string)=>part[0]).join("").slice(0,2).toUpperCase()}</span><div><small>Personnel record</small><h2>{member.display_name}</h2><p>{member.rank} · {member.call_sign ?? "No call sign"} · {member.personnel_id}</p></div></div>
-        <div className="deputy-profile-facts"><div><span>Division</span><strong>{member.division}</strong></div><div><span>Chain of command</span><strong>{member.supervisor_label}</strong></div><div><span>Status</span><strong>{member.status}</strong></div><div><span>Access</span><strong>{member.access_tier}</strong></div></div>
+        <div className="deputy-profile-facts"><div><span>Division</span><strong>{member.division}</strong></div><div><span>Legacy supervisor</span><strong>{member.supervisor_label}</strong></div><div><span>Status</span><strong>{member.status}</strong></div><div><span>Access</span><strong>{member.access_tier}</strong></div></div>
       </section>
 
       <nav className="command-v2-record-tabs" aria-label="Personnel record sections">
-        <span className="is-active">Overview</span>
+        <Link className="is-active" aria-current="page" href={`/portal/command/personnel/${member.personnel_id}`}>Overview</Link>
         <Link href={`/portal/command/personnel/${member.personnel_id}/timeline`}>Timeline</Link>
-        <span>Supervision</span>
-        <span>Training</span>
-        <span>Recognition</span>
-        <span>Documents</span>
-        <span>Administration</span>
+        <Link href={`/portal/command/personnel/${member.personnel_id}/supervision`}>Supervision</Link>
+        <Link href={`/portal/command/personnel/${member.personnel_id}/training`}>Training</Link>
+        <Link href={`/portal/command/personnel/${member.personnel_id}/recognition`}>Recognition</Link>
+        <Link href={`/portal/command/personnel/${member.personnel_id}/administration`}>Administration</Link>
       </nav>
 
       <div className="deputy-summary-grid command-v2-record-metrics">
@@ -63,9 +62,9 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
 
       <div className="command-v2-workspace-grid">
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Personnel</p><h2>Service record</h2></div></div>
-          <p className="command-v2-compact-copy">Awards, flags, and permanent personnel actions.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Open service records</Link></div>
+          <div className="portal-panel-heading"><div><p>History</p><h2>Personnel timeline</h2></div></div>
+          <p className="command-v2-compact-copy">One chronological view of career, training, recognition, accountability, and administrative events.</p>
+          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href={`/portal/command/personnel/${member.personnel_id}/timeline`}>Open timeline</Link></div>
         </section>
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Accountability</p><h2>Guardians</h2></div></div>
