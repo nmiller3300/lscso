@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isStrongPassword, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
+import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
 
 export function PasswordChangeDialog() {
   const [open, setOpen] = useState(false);
@@ -40,17 +41,11 @@ export function PasswordChangeDialog() {
         return;
       }
 
-      const { data, error: functionError } = await supabase.functions.invoke("personnel-admin", {
-        body: {
-          operation: "change_own_password",
-          current_password: currentPassword,
-          password: nextPassword,
-        },
+      await invokePersonnelAdmin({
+        operation: "change_own_password",
+        current_password: currentPassword,
+        password: nextPassword,
       });
-      if (functionError || data?.error) {
-        setError(String(data?.error ?? functionError?.message ?? "The password could not be updated."));
-        return;
-      }
 
       await supabase.auth.refreshSession();
       const { error: signOutError } = await supabase.auth.signOut({ scope: "others" });
@@ -62,8 +57,8 @@ export function PasswordChangeDialog() {
           ? "Password changed. Review active sessions from Command if another device should be signed out."
           : "Password changed. Other active sessions have been signed out.",
       );
-    } catch {
-      setError("The secure account service could not be reached. Please try again.");
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "The secure account service could not be reached. Please try again.");
     } finally {
       setPending(false);
     }

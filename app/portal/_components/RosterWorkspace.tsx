@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { isStrongPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
+import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
 import type { AccessTier, PersonnelRecord, PersonnelStatus } from "../_data/model";
 
 type RosterWorkspaceProps = {
@@ -67,10 +67,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
   }, [initialPersonnel]);
 
   async function runPersonnelAction(body: Record<string, unknown>) {
-    const { data, error } = await createClient().functions.invoke("personnel-admin", { body });
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(String(data.error));
-    return data as Record<string, unknown>;
+    return invokePersonnelAdmin(body);
   }
 
   const filteredPersonnel = useMemo(() => {
