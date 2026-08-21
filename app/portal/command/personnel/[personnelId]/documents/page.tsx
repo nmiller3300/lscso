@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
 import { PortalShell } from "../../../../_components/PortalShell";
+import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
@@ -20,11 +21,12 @@ const categories = [
 
 export default async function PersonnelDocumentsPage({ params }: PageProps) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
-    redirect("/portal/command/supervision");
-  }
+  if (!profile) redirect("/portal/login");
 
   const { personnelId } = await params;
+  const access = await canAccessPersonnelRecord(profile, personnelId);
+  if (!access.allowed) redirect("/portal/command/supervision");
+
   const supabase = await createClient() as any;
   const { data: member } = await supabase
     .from("personnel_profiles")
