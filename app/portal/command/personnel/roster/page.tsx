@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../../_components/PortalShell";
+import { RosterPersonnelControls } from "../../../_components/RosterPersonnelControls";
 import { RosterRowInteraction } from "../../../_components/RosterRowInteraction";
 import { RosterWorkspace } from "../../../_components/RosterWorkspace";
 import type { PersonnelRecord } from "../../../_data/model";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+
+const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
 
 export default async function FullRosterPage() {
   const profile = await getCurrentPortalProfile();
@@ -40,6 +43,16 @@ export default async function FullRosterPage() {
     credentialsAssigned: member.credentials_assigned ?? false,
   }));
 
+  const changeablePersonnel = (profiles ?? [])
+    .filter((member) => member.id !== profile.id)
+    .map((member) => ({
+      profileId: member.id,
+      personnelId: member.personnel_id,
+      displayName: member.display_name,
+      rank: member.rank,
+      status: member.status,
+    }));
+
   return (
     <PortalShell
       active="personnel"
@@ -47,6 +60,7 @@ export default async function FullRosterPage() {
       title="Full roster"
       description="Department-wide roster and credential management."
     >
+      {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
       <RosterRowInteraction />
       <RosterWorkspace personnel={personnel} />
     </PortalShell>
