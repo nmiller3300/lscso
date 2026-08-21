@@ -8,17 +8,24 @@ export default async function SupervisionWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) return null;
 
-  const [purview, guardianData] = await Promise.all([
-    loadPersonnelPurview(profile),
-    (async () => {
-      const supabase = await createClient() as any;
-      const { data } = await supabase
-        .from("guardian_records")
-        .select("id,guardian_number,title,status,follow_up_due_at,created_at")
-        .order("created_at", { ascending: false });
-      return data ?? [];
-    })(),
-  ]);
+  const purview = await loadPersonnelPurview(profile);
+  const supabase = await createClient() as any;
+  let guardianQuery = supabase
+    .from("guardian_records")
+    .select("id,guardian_number,subject_profile_id,title,status,follow_up_due_at,created_at")
+    .order("created_at", { ascending: false });
+
+  const scopedProfileIds = Array.from(new Set(purview.rows.map((row) => row.profileId)));
+  if (!purview.standingDepartmentAuthority) {
+    if (!purview.structuredAuthorityAvailable || !scopedProfileIds.length) {
+      guardianQuery = guardianQuery.limit(0);
+    } else {
+      guardianQuery = guardianQuery.in("subject_profile_id", scopedProfileIds);
+    }
+  }
+
+  const { data: guardianDataRaw } = await guardianQuery;
+  const guardianData = guardianDataRaw ?? [];
 
   const grouped = new Map<string, { personnelId:string; displayName:string; rank:string; callSign:string|null; status:string; paths:string[] }>();
   for (const row of purview.rows) {
@@ -69,7 +76,7 @@ export default async function SupervisionWorkspacePage() {
           ) : null}
 
           {!purview.structuredAuthorityAvailable && !purview.standingDepartmentAuthority ? (
-            <div className="command-v2-inline-state"><strong>No structured purview is active yet.</strong><span>No personnel are inferred from legacy supervisor text.</span></div>
+            <div className="command-v2-inline-state"><strong>No structured purview is active yet.</strong><span>No personnel or Guardian activity is inferred from legacy supervisor text.</span></div>
           ) : null}
 
           {purview.structuredAuthorityAvailable && !people.length ? <div className="portal-empty-state"><strong>No personnel are currently assigned within your purview.</strong></div> : null}
@@ -91,7 +98,7 @@ export default async function SupervisionWorkspacePage() {
 
       <section className="portal-panel command-v2-recent-supervision">
         <div className="portal-panel-heading"><div><p>Recent</p><h2>Guardian activity</h2></div><Link href="/portal/command/guardians">View Guardians</Link></div>
-        {recentGuardians.length ? <div className="command-v2-mini-list">{recentGuardians.map((record:any) => <Link href={`/portal/command/guardians/${record.guardian_number}`} key={record.id}><strong>G-{String(record.guardian_number).padStart(4,"0")} · {record.title}</strong><span>{record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No Guardian records found.</strong></div>}
+        {recentGuardians.length ? <div className="command-v2-mini-list">{recentGuardians.map((record:any) => <Link href={`/portal/command/guardians/${record.guardian_number}`} key={record.id}><strong>G-{String(record.guardian_number).padStart(4,"0")} · {record.title}</strong><span>{record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No Guardian records found in your current scope.</strong></div>}
       </section>
     </PortalShell>
   );
