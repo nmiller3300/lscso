@@ -11,7 +11,7 @@ const geist = localFont({
 });
 
 const siteUrl = "https://lscsogov.vercel.app";
-const socialPreview = `${siteUrl}/images/lscso-patch-color.png?v=discord-20260821`;
+const socialPreview = `${siteUrl}/images/lscso-social-preview.jpg?v=20260821-2`;
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -37,10 +37,10 @@ export const metadata: Metadata = {
     images: [
       {
         url: socialPreview,
-        width: 2048,
-        height: 2048,
-        type: "image/png",
-        alt: "Los Santos County Sheriff’s Office patch",
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
+        alt: "Los Santos County Sheriff’s Office — Driven to Protect. Dedicated to Serve.",
       },
     ],
   },
