@@ -5,8 +5,11 @@ export const alt = "Los Santos County Sheriff’s Office — Driven to Protect. 
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
-export default function OpenGraphImage() {
-  const patch = new URL("/images/lscso-patch-color.png", "https://lscsogov.vercel.app").toString();
+export default async function OpenGraphImage() {
+  const patchUrl = "https://lscsogov.vercel.app/images/lscso-patch-color.png";
+  const patchResponse = await fetch(patchUrl, { cache: "no-store" });
+  const patchBytes = await patchResponse.arrayBuffer();
+  const patch = `data:image/png;base64,${Buffer.from(patchBytes).toString("base64")}`;
 
   return new ImageResponse(
     (
@@ -23,71 +26,23 @@ export default function OpenGraphImage() {
           fontFamily: "Arial, Helvetica, sans-serif",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            left: 0,
-            top: 0,
-            right: 0,
-            height: 8,
-            background: "#c5a95c",
-          }}
-        />
+        <div style={{ position: "absolute", left: 0, top: 0, right: 0, height: 8, background: "#c5a95c" }} />
 
-        <div
-          style={{
-            width: 280,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 70,
-          }}
-        >
-          <img src={patch} width="245" height="245" style={{ objectFit: "contain" }} />
+        <div style={{ width: 280, display: "flex", alignItems: "center", justifyContent: "center", marginRight: 70 }}>
+          <img src={patch} width="245" height="300" style={{ objectFit: "contain" }} />
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              fontSize: 58,
-              lineHeight: 1.03,
-              fontWeight: 800,
-              letterSpacing: -1.5,
-              textTransform: "uppercase",
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", fontSize: 58, lineHeight: 1.03, fontWeight: 800, letterSpacing: -1.5, textTransform: "uppercase" }}>
             <span>Los Santos County</span>
             <span style={{ color: "#d4b96c", marginTop: 8 }}>Sheriff’s Office</span>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              marginTop: 46,
-              fontSize: 24,
-              fontWeight: 700,
-              letterSpacing: 7,
-              textTransform: "uppercase",
-              color: "#85827c",
-            }}
-          >
+          <div style={{ display: "flex", marginTop: 46, fontSize: 24, fontWeight: 700, letterSpacing: 7, textTransform: "uppercase", color: "#85827c" }}>
             Driven to Protect. Dedicated to Serve.
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              marginTop: 34,
-              fontSize: 18,
-              fontWeight: 700,
-              letterSpacing: 4,
-              textTransform: "uppercase",
-              color: "#c5a95c",
-            }}
-          >
+          <div style={{ display: "flex", alignItems: "center", marginTop: 34, fontSize: 18, fontWeight: 700, letterSpacing: 4, textTransform: "uppercase", color: "#c5a95c" }}>
             Established 1963 · State of San Andreas
           </div>
         </div>
