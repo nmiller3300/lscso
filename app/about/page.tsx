@@ -195,6 +195,7 @@ export default function AboutPage() {
         .history-heading h2 {
           max-width: 760px;
           margin: 0;
+          color: #fcfbf8;
           font-size: clamp(48px, 5.8vw, 76px);
           font-weight: 690;
           letter-spacing: -0.052em;
@@ -204,13 +205,13 @@ export default function AboutPage() {
 
         .history-heading > p {
           margin: 0;
-          color: rgba(255, 255, 255, 0.58);
+          color: rgba(255, 255, 255, 0.84);
           font-size: 16px;
           line-height: 1.72;
         }
 
         .history-list {
-          border-top: 1px solid rgba(255, 255, 255, 0.15);
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
         .history-entry {
@@ -219,11 +220,11 @@ export default function AboutPage() {
           gap: 36px;
           align-items: start;
           padding: 38px 0 40px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.16);
         }
 
         .history-years {
-          color: #d4be79;
+          color: #e1c978;
           font-size: 13px;
           font-weight: 760;
           letter-spacing: 0.1em;
@@ -237,7 +238,7 @@ export default function AboutPage() {
         }
 
         .history-administration span {
-          color: rgba(255, 255, 255, 0.38);
+          color: rgba(255, 255, 255, 0.66);
           font-size: 9px;
           font-weight: 760;
           letter-spacing: 0.15em;
@@ -246,13 +247,14 @@ export default function AboutPage() {
 
         .history-administration h3 {
           margin: 0;
+          color: #fcfbf8;
           font-size: 25px;
           font-weight: 660;
           letter-spacing: -0.025em;
         }
 
         .history-administration strong {
-          color: #d4be79;
+          color: #e1c978;
           font-size: 12px;
           font-weight: 720;
           letter-spacing: 0.05em;
@@ -261,7 +263,7 @@ export default function AboutPage() {
 
         .history-entry > p {
           margin: 0;
-          color: rgba(255, 255, 255, 0.62);
+          color: rgba(255, 255, 255, 0.84);
           font-size: 15px;
           line-height: 1.75;
         }
