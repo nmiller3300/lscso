@@ -26,13 +26,21 @@ export const metadata: Metadata = {
     title: "Los Santos County Sheriff’s Office",
     description: "Driven to Protect. Dedicated to Serve. Established 1963.",
     type: "website",
+    siteName: "Los Santos County Sheriff’s Office",
     images: [
       {
-        url: "/images/patrol-vehicle.png",
-        width: 1280,
-        height: 720,
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "Los Santos County Sheriff’s Office — Driven to Protect. Dedicated to Serve.",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Los Santos County Sheriff’s Office",
+    description: "Driven to Protect. Dedicated to Serve. Established 1963.",
+    images: ["/opengraph-image"],
   },
 };
 
