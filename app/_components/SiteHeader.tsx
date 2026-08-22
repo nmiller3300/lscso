@@ -7,7 +7,6 @@ const navigation = [
   { href: "/patrol", label: "Patrol" },
   { href: "/internal-affairs", label: "Internal Affairs" },
   { href: "/training-recruitment", label: "Training & Recruitment" },
-  { href: "/warrants", label: "Warrant Information" },
   { href: "/join", label: "Join LSCSO" },
   { href: "/portal", label: "Personnel Portal" },
 ];
