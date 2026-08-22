@@ -21,39 +21,44 @@ const administrations = [
   {
     years: "1963–1978",
     sheriff: "Sheriff Warren McCall",
+    undersheriff: "Undersheriff Arthur Bell",
     summary:
-      "Founding administration. McCall organized the county’s first unified sheriff’s patrol structure, established the Office’s permanent headquarters, and set the initial standards for countywide service.",
+      "The McCall–Bell administration established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization in 1963. The pair organized the first unified patrol structure, created a formal chain of command, opened the Office’s original headquarters, and established early standards for report writing, prisoner handling, and countywide calls for service as Los Santos County began a period of rapid growth.",
   },
   {
     years: "1978–1994",
     sheriff: "Sheriff Elena Vance",
+    undersheriff: "Undersheriff Raymond Cole",
     summary:
-      "Vance oversaw the Office through a period of major county growth, expanding patrol coverage, formalizing supervisory ranks, and creating dedicated training and professional-standards functions.",
+      "The Vance–Cole administration guided LSCSO through significant population growth and a steadily increasing service area. Patrol coverage was expanded, supervisory ranks were formalized, and specialized training became a regular part of deputy development. The administration also established early professional-standards practices and placed greater emphasis on consistent field supervision across the county.",
   },
   {
     years: "1994–2009",
     sheriff: "Sheriff Robert Hale",
+    undersheriff: "Undersheriff Teresa Navarro",
     summary:
-      "Hale modernized communications, fleet operations, and investigative coordination while strengthening relationships between LSCSO and municipal public-safety agencies across the county.",
+      "The Hale–Navarro administration pushed the Office into a more modern operational era. Radio communications, fleet management, evidence procedures, and investigative coordination were substantially improved while LSCSO developed stronger working relationships with municipal public-safety agencies. During this period, the Office also began consolidating records and administrative functions that had previously been handled independently by individual divisions.",
   },
   {
     years: "2009–2021",
     sheriff: "Sheriff Daniel Mercer",
+    undersheriff: "Undersheriff James Whitaker",
     summary:
-      "Mercer emphasized organizational accountability, standardized internal documentation, and expanded leadership development as the Office moved toward a more modern command structure.",
+      "The Mercer–Whitaker administration focused heavily on organizational accountability and professional development. Department documentation became more standardized, leadership development was expanded for supervisors and command staff, and internal review processes were strengthened. As technology became increasingly important to daily operations, the Office also began moving personnel, training, and administrative records into centralized digital systems.",
   },
   {
     years: "2021–2026",
     sheriff: "Sheriff Thomas Rourke",
+    undersheriff: "Undersheriff Marcus Ellison",
     summary:
-      "Rourke’s administration focused on operational consistency, field supervision, and rebuilding department-wide standards during a period of transition and changing service demands.",
+      "The Rourke–Ellison administration inherited an Office facing changing service demands and the need for greater consistency between divisions. Their tenure emphasized field supervision, clearer operational expectations, updated training practices, and rebuilding department-wide standards. The administration also laid much of the organizational groundwork that would support a broader modernization of LSCSO personnel management and command operations.",
   },
   {
     years: "2026–Present",
     sheriff: "Sheriff Nicholas Miller",
-    deputy: "Undersheriff Michael White",
+    undersheriff: "Undersheriff Michael White",
     summary:
-      "The Miller–White administration is centered on professional accountability, practical leadership, personnel development, and building an Office capable of supporting modern county operations without losing sight of service, judgment, and trust.",
+      "The Miller–White administration is focused on building a modern Sheriff’s Office without losing the practical traditions that shaped LSCSO. Current priorities include professional accountability, stronger personnel development, clearly defined supervisory authority, accessible command systems, and consistent standards across every division. The administration continues to expand the Office’s operational structure while emphasizing judgment, leadership, service, and trust at every level of the organization.",
   },
 ];
 
@@ -123,9 +128,10 @@ export default function AboutPage() {
               <h2>Six decades of county service.</h2>
             </div>
             <p>
-              Since 1963, each administration has shaped the Office around the
-              needs of its time while carrying forward the same responsibility:
-              serve Los Santos County with professionalism, judgment, and accountability.
+              Since 1963, each Sheriff and Undersheriff administration has shaped
+              the Office around the needs of its time while carrying forward the
+              same responsibility: serve Los Santos County with professionalism,
+              judgment, accountability, and respect for the community.
             </p>
           </div>
 
@@ -136,7 +142,7 @@ export default function AboutPage() {
                 <div className="history-administration">
                   <span>{index === 0 ? "Founding Administration" : index === administrations.length - 1 ? "Current Administration" : "Administration"}</span>
                   <h3>{administration.sheriff}</h3>
-                  {administration.deputy ? <strong>{administration.deputy}</strong> : null}
+                  <strong>{administration.undersheriff}</strong>
                 </div>
                 <p>{administration.summary}</p>
               </article>
@@ -212,7 +218,7 @@ export default function AboutPage() {
           grid-template-columns: 150px minmax(260px, 0.8fr) minmax(340px, 1.2fr);
           gap: 36px;
           align-items: start;
-          padding: 34px 0 36px;
+          padding: 38px 0 40px;
           border-bottom: 1px solid rgba(255, 255, 255, 0.12);
         }
 
@@ -227,7 +233,7 @@ export default function AboutPage() {
         .history-administration {
           display: flex;
           flex-direction: column;
-          gap: 6px;
+          gap: 7px;
         }
 
         .history-administration span {
@@ -255,9 +261,9 @@ export default function AboutPage() {
 
         .history-entry > p {
           margin: 0;
-          color: rgba(255, 255, 255, 0.59);
+          color: rgba(255, 255, 255, 0.62);
           font-size: 15px;
-          line-height: 1.68;
+          line-height: 1.75;
         }
 
         .history-entry--current {
@@ -289,7 +295,7 @@ export default function AboutPage() {
           .history-entry {
             grid-template-columns: 1fr;
             gap: 12px;
-            padding: 28px 0 30px;
+            padding: 30px 0 32px;
           }
 
           .history-entry--current::before {
