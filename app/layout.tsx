@@ -10,6 +10,8 @@ const geist = localFont({
   display: "swap",
 });
 
+const socialPreview = "/opengraph-image?v=lscso-badge-20260821";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://lscsogov.vercel.app"),
   title: {
@@ -29,7 +31,7 @@ export const metadata: Metadata = {
     siteName: "Los Santos County Sheriff’s Office",
     images: [
       {
-        url: "/opengraph-image",
+        url: socialPreview,
         width: 1200,
         height: 630,
         alt: "Los Santos County Sheriff’s Office — Driven to Protect. Dedicated to Serve.",
@@ -40,7 +42,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Los Santos County Sheriff’s Office",
     description: "Driven to Protect. Dedicated to Serve. Established 1963.",
-    images: ["/opengraph-image"],
+    images: [socialPreview],
   },
 };
 
