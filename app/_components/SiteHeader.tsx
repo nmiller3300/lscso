@@ -20,12 +20,12 @@ export function SiteHeader() {
           <span>Established 1963</span>
         </div>
       </div>
-      <div className="site-shell nav-shell">
-        <Link className="site-brand" href="/" aria-label="LSCSO homepage">
+      <div className="site-shell nav-shell refined-nav-shell">
+        <Link className="site-brand refined-site-brand" href="/" aria-label="LSCSO homepage">
           <Image src="/images/lscso-patch-color.png" alt="" width={72} height={72} priority />
           <span><strong>LSCSO</strong><small>Los Santos County Sheriff</small></span>
         </Link>
-        <nav className="desktop-navigation" aria-label="Primary navigation">
+        <nav className="desktop-navigation refined-desktop-navigation" aria-label="Primary navigation">
           {navigation.map((item) => <Link href={item.href} key={item.href}>{item.label}</Link>)}
         </nav>
         <details className="mobile-navigation">
@@ -36,6 +36,64 @@ export function SiteHeader() {
           </nav>
         </details>
       </div>
+      <style>{`
+        @media (min-width: 1061px) {
+          .refined-nav-shell {
+            height: 92px;
+            gap: 34px;
+          }
+
+          .refined-site-brand {
+            min-width: 250px;
+          }
+
+          .refined-site-brand img {
+            width: 64px;
+            height: 64px;
+          }
+
+          .refined-site-brand strong {
+            font-size: 23px;
+            letter-spacing: 0.15em;
+          }
+
+          .refined-site-brand small {
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            white-space: nowrap;
+          }
+
+          .refined-desktop-navigation {
+            flex: 1 1 auto;
+            justify-content: flex-end;
+            gap: clamp(14px, 1.35vw, 24px);
+            font-size: 11px;
+            letter-spacing: 0.065em;
+          }
+
+          .refined-desktop-navigation a {
+            flex: 0 0 auto;
+            white-space: nowrap;
+            padding-block: 14px;
+          }
+        }
+
+        @media (min-width: 1061px) and (max-width: 1240px) {
+          .refined-site-brand {
+            min-width: auto;
+          }
+
+          .refined-site-brand small {
+            display: none;
+          }
+
+          .refined-desktop-navigation {
+            gap: 12px;
+            font-size: 10px;
+            letter-spacing: 0.045em;
+          }
+        }
+      `}</style>
     </header>
   );
 }
