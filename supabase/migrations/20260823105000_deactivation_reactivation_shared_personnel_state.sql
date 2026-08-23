@@ -62,7 +62,7 @@ begin
     and status in ('Not Started','In Progress','Needs Improvement');
 
   update public.personnel_profiles
-  set status = 'Deactivated', call_sign = null, division = 'Unassigned', credentials_assigned = false,
+  set status = 'Deactivated', call_sign = null, division = 'Unassigned',
       deactivated_at = now(), deactivated_by = actor_profile_id
   where id = target_profile_id;
 
@@ -97,7 +97,7 @@ begin
   if v_target.auth_user_id is null then raise exception 'Assign new credentials before reactivating this account'; end if;
 
   update public.personnel_profiles
-  set status = 'Active', credentials_assigned = true, deactivated_at = null, deactivated_by = null, updated_at = now()
+  set status = 'Active', deactivated_at = null, deactivated_by = null, updated_at = now()
   where id = p_profile_id;
 
   insert into public.personnel_career_events(profile_id, event_type, effective_at, title, notes, recorded_by)
