@@ -21,7 +21,11 @@ type AccountAdministrationProps = {
   divisionOptions: string[];
 };
 
-const CALL_SIGN_PATTERN = /^S-4\d{2}$/;
+const STANDARD_PERSONNEL_ID = /^LS-[0-9]{3}$/;
+const TEST_PERSONNEL_ID = /^TA-[0-9]{3}$/;
+const STANDARD_CALL_SIGN = /^S-4[0-9]{2}$/;
+const TEST_CALL_SIGN = /^TA-[0-9]{1,3}$/;
+
 const ranks = [
   "Sheriff",
   "Undersheriff",
@@ -44,6 +48,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [testAccount, setTestAccount] = useState(false);
   const executive = profile.rank === "Sheriff" || profile.rank === "Undersheriff";
 
   const activeAccounts = useMemo(() => personnel.filter((member) => member.status !== "Deactivated"), [personnel]);
@@ -68,10 +73,14 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
     setNotice("");
 
     if (displayName.length < 2) return setError("Enter the member's department display name.");
-    if (!/^LS-[0-9]{3}$/.test(personnelId)) return setError("Personnel ID must use the LS-000 format.");
+    if (isTestAccount ? !TEST_PERSONNEL_ID.test(personnelId) : !STANDARD_PERSONNEL_ID.test(personnelId)) {
+      return setError(isTestAccount ? "Test personnel ID must use TA-000, such as TA-001." : "Personnel ID must use the LS-000 format.");
+    }
     if (!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)) return setError("Username must contain 3–32 lowercase letters, numbers, dots, underscores, or hyphens.");
     if (!isStrongPassword(password)) return setError(PASSWORD_REQUIREMENT);
-    if (!CALL_SIGN_PATTERN.test(callSign)) return setError("Call sign must use the S-4## format, such as S-417.");
+    if (isTestAccount ? !TEST_CALL_SIGN.test(callSign) : !STANDARD_CALL_SIGN.test(callSign)) {
+      return setError(isTestAccount ? "Test call sign must use TA-#, such as TA-1." : "Call sign must use S-4##, such as S-417.");
+    }
     if (!executive && (rank === "Sheriff" || rank === "Undersheriff")) return setError("Only Sheriff or Undersheriff may create an Executive account.");
     if (personnel.some((member) => member.personnelId === personnelId)) return setError(`${personnelId} is already assigned.`);
     if (personnel.some((member) => member.username === username)) return setError(`@${username} is already assigned.`);
@@ -91,7 +100,8 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
         is_test_account: isTestAccount,
       });
       formElement.reset();
-      setNotice(`${callSign} · ${displayName} was created and added to the department personnel system.`);
+      setTestAccount(false);
+      setNotice(`${callSign} · ${displayName} was created.`);
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "The personnel account could not be created.");
@@ -104,31 +114,30 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
     <div className="command-v2-workspace-grid">
       <section className="portal-panel" style={{ gridColumn: "span 2" }}>
         <div className="portal-panel-heading">
-          <div><p>Personnel accounts</p><h2>Create department account</h2></div>
-          <span>{credentialedAccounts.length} credentialed</span>
+          <div><p>Personnel accounts</p><h2>Create account</h2></div>
+          <span>{credentialedAccounts.length} with login access</span>
         </div>
-        <p className="command-v2-compact-copy">Create the personnel record and issued login together. Rank, call sign, and primary assignment are written into the shared personnel system during creation.</p>
 
         <form onSubmit={createAccount} style={{ marginTop: 18 }}>
           <div className="portal-form-grid">
             <label>Display name<input name="displayName" required placeholder="Department display name" /></label>
-            <label>Permanent personnel ID<input name="personnelId" pattern="LS-[0-9]{3}" required placeholder="LS-000" /></label>
+            <label>Permanent personnel ID<input name="personnelId" pattern={testAccount ? "TA-[0-9]{3}" : "LS-[0-9]{3}"} required placeholder={testAccount ? "TA-001" : "LS-000"} /></label>
             <label>Username<input name="username" required autoComplete="off" placeholder="first.last" /></label>
             <label>Temporary password<input name="password" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" /></label>
-            <label>Operational call sign<input defaultValue="S-4" maxLength={5} name="callSign" pattern="S-4[0-9]{2}" required placeholder="S-4##" /></label>
+            <label>Operational call sign<input defaultValue={testAccount ? "TA-" : "S-4"} key={testAccount ? "test" : "standard"} maxLength={6} name="callSign" pattern={testAccount ? "TA-[0-9]{1,3}" : "S-4[0-9]{2}"} required placeholder={testAccount ? "TA-1" : "S-4##"} /></label>
             <label>Rank<select defaultValue="Deputy" name="rank">{ranks.filter((rank) => executive || (rank !== "Sheriff" && rank !== "Undersheriff")).map((rank) => <option key={rank}>{rank}</option>)}</select></label>
             <label>Primary assignment<select defaultValue={divisionOptions.includes("Patrol Division") ? "Patrol Division" : divisionOptions[0]} name="division">{divisionOptions.map((division) => <option key={division}>{division}</option>)}</select></label>
           </div>
 
-          <div className="portal-form-protection" style={{ marginTop: 14 }}>
-            <strong>First sign-in protection is required.</strong>
-            <span>The temporary password must be changed by the member after secure sign-in.</span>
-          </div>
-
           <label className="portal-checkbox-row portal-checkbox-row--test" style={{ marginTop: 14 }}>
-            <input name="isTestAccount" type="checkbox" />
-            <span><strong>Mark as a test account</strong><small>Test activity stays out of official personnel reporting.</small></span>
+            <input checked={testAccount} name="isTestAccount" onChange={(event) => setTestAccount(event.target.checked)} type="checkbox" />
+            <span><strong>Test account</strong><small>Uses TA personnel IDs and TA call signs and stays out of official reporting.</small></span>
           </label>
+
+          <div className="portal-form-protection" style={{ marginTop: 14 }}>
+            <strong>Password change required on first sign-in</strong>
+            <span>The temporary password is only for initial access.</span>
+          </div>
 
           {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
           {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Account created</strong><span>{notice}</span></div> : null}
@@ -140,8 +149,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
       </section>
 
       <section className="portal-panel command-v2-launcher">
-        <div className="portal-panel-heading"><div><p>Account state</p><h2>Department access</h2></div><span>{activeAccounts.length}</span></div>
-        <p className="command-v2-compact-copy">Account creation lives here. Rank changes, assignments, training records, and personnel history remain in their own operational areas instead of being mixed into account setup.</p>
+        <div className="portal-panel-heading"><div><p>Account status</p><h2>Department access</h2></div><span>{activeAccounts.length}</span></div>
         <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
           {activeAccounts.slice(0, 8).map((member) => (
             <div key={member.profileId} style={{ padding: "10px 0", borderBottom: "1px solid rgba(82,68,51,.1)" }}>
