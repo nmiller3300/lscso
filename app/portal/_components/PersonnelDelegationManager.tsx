@@ -33,6 +33,13 @@ const baseDelegations = [
   "Division Administration",
 ] as const;
 
+const delegationDescriptions: Record<string, string> = {
+  "Personnel Administration": "Manage normal personnel records and organizational assignments without receiving protected account-deactivation authority.",
+  "Training Administration": "Manage FTO qualifications, trainee assignments, training progress, and department certifications.",
+  "Division Administration": "Manage personnel assignments inside one selected organizational area without receiving department-wide authority.",
+  "Temporary Command Authority": "Time-limited executive delegation for assignments, training, certifications, and personnel changes for 1st Lieutenant and below. It does not grant account deactivation authority.",
+};
+
 export function PersonnelDelegationManager({
   profileId,
   displayName,
@@ -122,7 +129,7 @@ export function PersonnelDelegationManager({
       </div>
 
       <p className="command-v2-compact-copy">
-        Give this member a defined responsibility without changing rank or manually configuring individual permissions.
+        Pick the responsibility they are being trusted to handle. The system applies the underlying permissions automatically.
       </p>
 
       <div className="portal-inline-form-grid">
@@ -132,6 +139,10 @@ export function PersonnelDelegationManager({
             {delegationOptions.map((item) => <option key={item}>{item}</option>)}
           </select>
         </label>
+
+        <p className="command-v2-compact-copy" style={{ alignSelf: "end", margin: 0 }}>
+          {delegationDescriptions[delegationType]}
+        </p>
 
         {delegationType === "Division Administration" ? (
           <label>
