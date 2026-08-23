@@ -59,6 +59,8 @@
 .personnel-record-qol-actions .portal-button { min-height:42px; }
 .personnel-record-qol-actions .portal-button.is-active { border-color:rgba(162,124,69,.55); background:rgba(162,124,69,.12); }
 
+.command-roster-account-create-hidden .portal-control-actions { display:none; }
+
 /* Roster personnel manager: keep the dialog contained and usable on phones. */
 .portal-modal-backdrop { box-sizing:border-box; padding:clamp(12px,3vw,28px); overflow-y:auto; overscroll-behavior:contain; }
 .portal-modal { box-sizing:border-box; width:min(680px,100%); max-width:100%; max-height:calc(100dvh - 24px); margin:auto; overflow-y:auto; overflow-x:hidden; }
