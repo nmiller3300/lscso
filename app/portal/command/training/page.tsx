@@ -12,13 +12,21 @@ export default async function TrainingWorkspacePage() {
   const ninetyDays = new Date(today);
   ninetyDays.setDate(today.getDate() + 90);
 
-  const [trainees, expiring, pending] = await Promise.all([
-    supabase
-      .from("training_progress")
-      .select("id,profile_id,program_type,phase,status,progress_percent,started_on,updated_at,personnel_profiles!training_progress_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
-      .eq("evaluator_profile_id", profile.id)
-      .in("status", ["Not Started", "In Progress", "Needs Improvement"])
-      .order("updated_at", { ascending: false }),
+  const { data: accessRows } = await supabase.rpc("get_my_roster_access");
+  const rosterAccess = accessRows?.[0];
+  const canManageTraining = Boolean(rosterAccess?.can_manage_training);
+  const canTrainAssigned = Boolean(rosterAccess?.can_train_assigned);
+
+  let traineeQuery = supabase
+    .from("training_progress")
+    .select("id,profile_id,program_type,phase,status,progress_percent,started_on,updated_at,evaluator_profile_id,personnel_profiles!training_progress_profile_id_fkey(personnel_id,display_name,rank,call_sign),trainer:personnel_profiles!training_progress_evaluator_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
+    .in("status", ["Not Started", "In Progress", "Needs Improvement"])
+    .order("updated_at", { ascending: false });
+
+  if (!canManageTraining) traineeQuery = traineeQuery.eq("evaluator_profile_id", profile.id);
+
+  const [trainees, expiring, pending, fieldTrainingOfficers] = await Promise.all([
+    canManageTraining || canTrainAssigned ? traineeQuery : Promise.resolve({ data: [] }),
     supabase
       .from("certifications")
       .select("id,name,expires_on,profile_id,personnel_profiles!certifications_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
@@ -33,18 +41,26 @@ export default async function TrainingWorkspacePage() {
       .in("status", ["Requested", "Pending"])
       .order("created_at", { ascending: false })
       .limit(8),
+    supabase
+      .from("certifications")
+      .select("id,profile_id,personnel_profiles!certifications_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
+      .eq("name", "Field Training Officer")
+      .eq("status", "Current")
+      .order("issued_on", { ascending: true }),
   ]);
 
   const traineeRows = trainees.data ?? [];
   const expiringRows = expiring.data ?? [];
   const pendingRows = pending.data ?? [];
+  const ftoRows = fieldTrainingOfficers.data ?? [];
 
   return (
     <PortalShell
       active="training"
       eyebrow="Training"
       title="Training"
-      description="Certifications, FTO activity, trainer oversight, and qualification status."
+      description={canManageTraining ? "Department-wide FTO, training, and qualification oversight." : "Your authorized training and qualification workspace."}
+      actions={canManageTraining ? <a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app/manage" target="_blank" rel="noreferrer">Manage Personnel Operations</a> : undefined}
     >
       <div className="command-v2-workspace-grid">
         <section className="portal-panel command-v2-launcher">
@@ -56,18 +72,30 @@ export default async function TrainingWorkspacePage() {
         </section>
 
         <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>FTO</p><h2>My trainees</h2></div><span>{traineeRows.length}</span></div>
+          <div className="portal-panel-heading"><div><p>FTO</p><h2>{canManageTraining ? "Department training board" : "My trainees"}</h2></div><span>{traineeRows.length}</span></div>
           <div className="command-v2-mini-list">
             {traineeRows.length ? traineeRows.map((row:any) => {
               const member = Array.isArray(row.personnel_profiles) ? row.personnel_profiles[0] : row.personnel_profiles;
+              const trainer = Array.isArray(row.trainer) ? row.trainer[0] : row.trainer;
               return (
                 <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
                   <div><strong>{member?.display_name ?? "Assigned trainee"}</strong><span>{row.program_type} · {row.phase} · {row.status}</span></div>
-                  <div><strong>{row.progress_percent}%</strong><span>{member?.call_sign ?? member?.personnel_id ?? ""}</span></div>
+                  <div><strong>{row.progress_percent}%</strong><span>{trainer?.display_name ? `Trainer: ${trainer.display_name}` : member?.call_sign ?? member?.personnel_id ?? ""}</span></div>
                 </Link>
               );
-            }) : <p className="command-v2-compact-copy">No active trainees assigned to you.</p>}
+            }) : <p className="command-v2-compact-copy">No active training assignments.</p>}
           </div>
+        </section>
+
+        <section className="portal-panel">
+          <div className="portal-panel-heading"><div><p>FTO staffing</p><h2>Qualified FTOs</h2></div><span>{ftoRows.length}</span></div>
+          <div className="command-v2-mini-list">
+            {ftoRows.length ? ftoRows.slice(0, 8).map((row:any) => {
+              const member = Array.isArray(row.personnel_profiles) ? row.personnel_profiles[0] : row.personnel_profiles;
+              return <div key={row.id}><strong>{member?.display_name ?? "Personnel"}</strong><span>{member?.rank ?? ""} · {member?.call_sign ?? member?.personnel_id ?? ""}</span></div>;
+            }) : <p className="command-v2-compact-copy">No FTO qualifications are currently recorded.</p>}
+          </div>
+          {canManageTraining ? <p className="command-v2-compact-copy" style={{ marginTop: 12 }}>Sheriff, Undersheriff, Major, and Captain may also serve as trainers through leadership authority.</p> : null}
         </section>
 
         <section className="portal-panel">
