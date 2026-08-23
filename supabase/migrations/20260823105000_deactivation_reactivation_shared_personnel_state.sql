@@ -67,7 +67,7 @@ begin
   where id = target_profile_id;
 
   insert into public.personnel_career_events(profile_id, event_type, effective_at, title, notes, recorded_by)
-  values (target_profile_id, 'Termination', now(), 'Department separation / account deactivated',
+  values (target_profile_id, 'Separation', now(), 'Department separation / account deactivated',
           'Operational assignments and access were closed at deactivation.', actor_profile_id);
 
   return jsonb_build_object('profile_id', target_profile_id, 'auth_user_id', target.auth_user_id, 'released_call_sign', target.call_sign);
@@ -101,7 +101,7 @@ begin
   where id = p_profile_id;
 
   insert into public.personnel_career_events(profile_id, event_type, effective_at, title, notes, recorded_by)
-  values (p_profile_id, 'Reactivation', now(), 'Returned to Active status', v_reason, v_actor);
+  values (p_profile_id, 'Reinstatement', now(), 'Returned to Active status', v_reason, v_actor);
 
   insert into public.audit_log(actor_user_id,actor_profile_id,action,table_name,record_id,old_data,new_data)
   values ((select auth.uid()), v_actor, 'ACCOUNT_REACTIVATED', 'personnel_profiles', p_profile_id::text,
