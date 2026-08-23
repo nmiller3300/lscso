@@ -37,6 +37,15 @@ begin
       reason = concat_ws(E'\n', nullif(reason,''), 'Revoked because personnel account was deactivated')
   where profile_id = target_profile_id and revoked_at is null;
 
+  update public.certifications
+  set status = 'Revoked',
+      approved_by = actor_profile_id,
+      approved_at = now(),
+      notes = concat_ws(E'\n', nullif(notes,''), 'FTO qualification revoked because personnel account was deactivated.')
+  where profile_id = target_profile_id
+    and name = 'Field Training Officer'
+    and status = 'Current';
+
   insert into public.training_events(training_progress_id, trainee_profile_id, trainer_profile_id, recorded_by, event_type, phase, status, progress_percent, notes)
   select tp.id, tp.profile_id, tp.evaluator_profile_id, actor_profile_id,
          'Training Withdrawn - Personnel Deactivated', tp.phase, 'Withdrawn', tp.progress_percent,
@@ -68,7 +77,7 @@ begin
 
   insert into public.personnel_career_events(profile_id, event_type, effective_at, title, notes, recorded_by)
   values (target_profile_id, 'Separation', now(), 'Department separation / account deactivated',
-          'Operational assignments and access were closed at deactivation.', actor_profile_id);
+          'Operational assignments, delegated authority, FTO authority, and system access were closed at deactivation.', actor_profile_id);
 
   return jsonb_build_object('profile_id', target_profile_id, 'auth_user_id', target.auth_user_id, 'released_call_sign', target.call_sign);
 end;
