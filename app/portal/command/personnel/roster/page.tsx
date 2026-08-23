@@ -178,7 +178,9 @@ export default async function FullRosterPage() {
       {EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
       {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
       <RosterRowInteraction />
-      <RosterWorkspace personnel={personnel} />
+      <div className="command-roster-account-create-hidden">
+        <RosterWorkspace personnel={personnel} />
+      </div>
     </PortalShell>
   );
 }
