@@ -10,12 +10,27 @@ export default async function CommandPersonnelPage() {
     redirect("/portal/command/supervision");
   }
 
-  const supabase = await createClient();
-  const { data: personnel } = await supabase
-    .from("personnel_profiles")
-    .select("personnel_id,display_name,rank,call_sign,division,status")
-    .neq("status", "Deactivated")
-    .order("display_name");
+  const supabase = await createClient() as any;
+  const [{ data: personnel }, { data: assignments }] = await Promise.all([
+    supabase
+      .from("personnel_profiles")
+      .select("id,personnel_id,display_name,rank,call_sign,division,status")
+      .neq("status", "Deactivated")
+      .order("display_name"),
+    supabase
+      .from("personnel_unit_assignments")
+      .select("profile_id,assignment_type,starts_at,organizational_units(name)")
+      .eq("assignment_type", "Primary")
+      .is("ends_at", null)
+      .order("starts_at", { ascending: false }),
+  ]);
+
+  const primaryAssignment = new Map<string, string>();
+  for (const assignment of assignments ?? []) {
+    if (primaryAssignment.has(assignment.profile_id)) continue;
+    const unit = Array.isArray(assignment.organizational_units) ? assignment.organizational_units[0] : assignment.organizational_units;
+    if (unit?.name) primaryAssignment.set(assignment.profile_id, unit.name);
+  }
 
   return (
     <PortalShell
@@ -23,13 +38,14 @@ export default async function CommandPersonnelPage() {
       eyebrow="Personnel"
       title="Personnel"
       description="Find, review, and manage authorized personnel records."
+      actions={<a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a>}
     >
-      <PersonnelDirectory personnel={(personnel ?? []).map((member) => ({
+      <PersonnelDirectory personnel={(personnel ?? []).map((member:any) => ({
         personnelId: member.personnel_id,
         displayName: member.display_name,
         rank: member.rank,
         callSign: member.call_sign,
-        division: member.division,
+        division: primaryAssignment.get(member.id) ?? member.division ?? "Unassigned",
         status: member.status,
       }))} />
     </PortalShell>
