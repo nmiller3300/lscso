@@ -36,7 +36,7 @@ export default async function AccountAdministrationPage() {
       .order("name"),
   ]);
 
-  const divisionOptions = Array.from(new Set((units ?? []).map((unit:any) => String(unit.name))));
+  const divisionOptions: string[] = Array.from(new Set<string>((units ?? []).map((unit:any) => String(unit.name))));
   if (!divisionOptions.length) divisionOptions.push("Patrol Division");
 
   return (
