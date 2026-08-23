@@ -80,7 +80,20 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
             reason: item.reason,
           }))}
         />
-      ) : null}
+      ) : (
+        <section className="portal-panel">
+          <div className="portal-panel-heading"><div><p>Delegated authority</p><h2>Administrative responsibility</h2></div><span>{activeDelegations.length} active</span></div>
+          <div className="command-v2-mini-list">
+            {activeDelegations.length ? activeDelegations.map((item: any) => (
+              <div key={item.id}>
+                <strong>{item.delegation_type}</strong>
+                <span>{item.organizational_unit_id ? `${String(unitNames.get(item.organizational_unit_id) ?? "Organizational area")} · ` : ""}{item.expires_at ? `Expires ${new Date(item.expires_at).toLocaleString()}` : "No expiration"}</span>
+                {item.reason ? <small>{item.reason}</small> : null}
+              </div>
+            )) : <p className="command-v2-compact-copy">No delegated authority is currently active.</p>}
+          </div>
+        </section>
+      )}
 
       <div className="command-v2-workspace-grid">
         <section className="portal-panel">
