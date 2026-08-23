@@ -42,18 +42,18 @@ const myInfo: NavigationItem = {
 };
 
 const commandNavigation: NavigationItem[] = [
-  myInfo,
   { id: "overview", href: "/portal/command/home", label: "Home", mobileLabel: "Home", glyph: "HM" },
   { id: "personnel", href: "/portal/command/personnel", label: "Personnel", mobileLabel: "Personnel", glyph: "PR", matches: ["awards"] },
   { id: "supervision", href: "/portal/command/supervision", label: "Supervision", mobileLabel: "Supervise", glyph: "SV", matches: ["guardians"] },
   { id: "training", href: "/portal/command/training", label: "Training", mobileLabel: "Training", glyph: "TR", matches: ["certifications"] },
   { id: "administration", href: "/portal/command/administration", label: "Administration", mobileLabel: "Admin", glyph: "AD", matches: ["approvals", "activity"] },
+  myInfo,
 ];
 
 const supervisorNavigation: NavigationItem[] = [
-  myInfo,
   { id: "supervision", href: "/portal/command/supervision", label: "My Personnel & Supervision", mobileLabel: "Supervise", glyph: "SV", matches: ["guardians"] },
   { id: "training", href: "/portal/command/training", label: "Training", mobileLabel: "Training", glyph: "TR", matches: ["certifications"] },
+  myInfo,
 ];
 
 const deputyNavigation: NavigationItem[] = [

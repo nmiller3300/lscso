@@ -1,8 +1,8 @@
 .portal-navigation a.is-personal-navigation {
-  margin-bottom: 12px;
-  border-bottom: 1px solid rgba(116, 89, 53, 0.18);
-  border-radius: 10px 10px 0 0;
-  padding-bottom: 16px;
+  margin-top: 12px;
+  border-top: 1px solid rgba(116, 89, 53, 0.18);
+  border-radius: 0 0 10px 10px;
+  padding-top: 16px;
 }
 
 .command-v2-workspace-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
@@ -27,6 +27,13 @@
 .command-v2-personnel-results a>div:last-child { text-align:right; flex:0 0 auto; }
 .command-v2-personnel-results b { display:block; margin-top:4px; font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
 .command-v2-directory-lower { margin-top:0; }
+.command-v2-common-tasks { margin-bottom:16px; }
+.command-v2-task-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.command-v2-task-grid>a { display:flex; flex-direction:column; min-height:132px; border:1px solid rgba(82,68,51,.14); border-radius:12px; padding:15px; text-decoration:none; color:inherit; background:rgba(116,89,53,.025); }
+.command-v2-task-grid>a:hover { border-color:rgba(82,68,51,.34); background:rgba(116,89,53,.055); }
+.command-v2-task-grid span { font-size:.69rem; font-weight:800; text-transform:uppercase; letter-spacing:.09em; opacity:.58; }
+.command-v2-task-grid strong { margin-top:8px; font-size:.96rem; }
+.command-v2-task-grid small { margin-top:7px; line-height:1.45; opacity:.66; }
 .command-v2-record-header { margin-bottom:14px; }
 .command-v2-record-tabs { display:flex; gap:6px; overflow-x:auto; padding:0 0 12px; margin-bottom:6px; scrollbar-width:thin; }
 .command-v2-record-tabs a,.command-v2-record-tabs span { flex:0 0 auto; border:1px solid rgba(82,68,51,.14); border-radius:999px; padding:8px 11px; font-size:.82rem; font-weight:650; opacity:.66; color:inherit; text-decoration:none; }
@@ -63,11 +70,11 @@
 .portal-modal select,.portal-modal input,.portal-modal textarea { max-width:100%; }
 .portal-modal .portal-modal-actions { width:100%; }
 
-@media (max-width:980px) { .command-v2-workspace-grid { grid-template-columns:1fr 1fr; } }
+@media (max-width:980px) { .command-v2-workspace-grid,.command-v2-task-grid { grid-template-columns:1fr 1fr; } }
 @media (max-width:620px) {
-  .command-v2-workspace-grid { grid-template-columns:1fr; }
-  .command-v2-launcher { min-height:0; }
-  .portal-navigation a.is-personal-navigation { margin-bottom:8px; }
+  .command-v2-workspace-grid,.command-v2-task-grid { grid-template-columns:1fr; }
+  .command-v2-launcher,.command-v2-task-grid>a { min-height:0; }
+  .portal-navigation a.is-personal-navigation { margin-top:8px; }
   .command-v2-personnel-results>a,.command-v2-mini-list>a { align-items:flex-start; }
   .command-v2-personnel-results a>div:last-child { max-width:38%; }
   .command-v2-assignment-chips { display:grid; grid-template-columns:1fr; }

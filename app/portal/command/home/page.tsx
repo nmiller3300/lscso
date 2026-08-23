@@ -52,20 +52,33 @@ export default async function CommandHomePage() {
       active="overview"
       eyebrow="Command"
       title="Home"
-      description="Current priorities and quick access within your authorized command scope."
+      description="What needs attention, who is in the department, and the most common Command tasks."
       actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}
     >
-      {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Structured purview is not active yet.</strong><span>Command Home will not infer personnel or pending work from legacy supervisor labels.</span></div> : null}
+      {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Your assigned command scope is not active yet.</strong><span>Ask Executive Command to assign your personnel or organizational responsibility before making personnel decisions.</span></div> : null}
+
       <div className="deputy-summary-grid command-v2-home-metrics">
-        <article><span>Active personnel</span><strong>{String(activePersonnel).padStart(2, "0")}</strong><small>{departmentAuthority ? "Department personnel" : "Within your purview"}</small></article>
-        <article><span>Needs attention</span><strong>{String(attentionTotal).padStart(2, "0")}</strong><small>Approvals, requests & follow-ups</small></article>
-        <article><span>Expiring certs</span><strong>{String(expiring.length).padStart(2, "0")}</strong><small>Next 30 days</small></article>
+        <article><span>Active personnel</span><strong>{String(activePersonnel).padStart(2, "0")}</strong><small>{departmentAuthority ? "Department personnel" : "Within your responsibility"}</small></article>
+        <article><span>Needs attention</span><strong>{String(attentionTotal).padStart(2, "0")}</strong><small>Items waiting on Command</small></article>
+        <article><span>Expiring certs</span><strong>{String(expiring.length).padStart(2, "0")}</strong><small>Within 30 days</small></article>
         <article><span>Open requests</span><strong>{String(pendingRequests.length + pendingLeave.length + pendingCertifications.length).padStart(2, "0")}</strong><small>Personnel, LOA & certification</small></article>
       </div>
 
+      <section className="portal-panel command-v2-common-tasks">
+        <div className="portal-panel-heading"><div><p>Common tasks</p><h2>What do you need to do?</h2></div><span>Direct links</span></div>
+        <div className="command-v2-task-grid">
+          <Link href="/portal/command/personnel"><span>Personnel</span><strong>Find a member</strong><small>Open their full personnel record.</small></Link>
+          <Link href="/portal/command/personnel/roster"><span>Roster</span><strong>Open the full roster</strong><small>Accounts, rank, status, callsigns, and department roster.</small></Link>
+          <Link href="/portal/command/guardians"><span>Supervision</span><strong>Find or create a Guardian</strong><small>Warnings, feedback, write-ups, and commendations.</small></Link>
+          <Link href="/portal/command/approvals"><span>Decisions</span><strong>Review pending requests</strong><small>Guardians, LOA, personnel, and certifications.</small></Link>
+          <Link href="/portal/command/training"><span>Training</span><strong>Training & FTO</strong><small>Trainees, FTOs, progress, and readiness.</small></Link>
+          <Link href="/portal/command/certifications"><span>Qualifications</span><strong>Manage certifications</strong><small>Issue, review, and monitor certifications.</small></Link>
+        </div>
+      </section>
+
       <div className="command-v2-home-layout">
         <section className="portal-panel command-v2-home-attention">
-          <div className="portal-panel-heading"><div><p>Priority</p><h2>Action required</h2></div><Link href="/portal/notifications#action-required">View Action Center</Link></div>
+          <div className="portal-panel-heading"><div><p>Priority</p><h2>Action required</h2></div><Link href="/portal/notifications#action-required">View all</Link></div>
 
           <div className="command-v2-attention-summary" aria-label="Pending Command work by category">
             <Link href="/portal/command/approvals#guardian-requests"><strong>{String(pendingGuardians.length).padStart(2, "0")}</strong><span>Guardian approvals</span></Link>
@@ -78,17 +91,16 @@ export default async function CommandHomePage() {
             {pendingGuardians.slice(0, 3).map((item:any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`g-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · {item.title}</strong><span>Pending approval</span></Link>)}
             {pendingRequests.slice(0, 2).map((item:any) => <Link href="/portal/command/approvals#personnel-requests" key={`r-${item.id}`}><strong>{item.subject}</strong><span>{item.request_type} · {item.status}</span></Link>)}
             {followUps.slice(0, 2).map((item:any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`f-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · Follow-up due</strong><span>{item.title}</span></Link>)}
-            {!attentionTotal ? <div className="portal-empty-state"><strong>No Command items require attention.</strong></div> : null}
+            {!attentionTotal ? <div className="portal-empty-state"><strong>Nothing requires Command action right now.</strong></div> : null}
           </div>
         </section>
 
         <aside className="command-v2-home-shortcuts">
-          <Link href="/portal/notifications"><span>Action & inbox</span><strong>Pending work and notifications</strong></Link>
-          <Link href="/portal/command/personnel"><span>Personnel</span><strong>Find a personnel record</strong></Link>
-          <Link href="/portal/command/supervision"><span>Supervision</span><strong>Guardians and oversight</strong></Link>
-          <Link href="/portal/command/training"><span>Training</span><strong>Certifications and FTO</strong></Link>
-          <Link href="/portal/command/administration"><span>Administration</span><strong>Approvals and audit</strong></Link>
-          <Link href="/portal/command"><span>Current system</span><strong>Open full legacy overview</strong></Link>
+          <Link href="/portal/notifications"><span>Inbox</span><strong>Notifications & action items</strong></Link>
+          <Link href="/portal/command/supervision"><span>Supervision</span><strong>Personnel oversight & Guardians</strong></Link>
+          <Link href="/portal/command/administration"><span>Administration</span><strong>Approvals, audit & department tools</strong></Link>
+          {profile.access_tier === "Executive" ? <Link href="/portal/command/administration/structure"><span>Department structure</span><strong>Units, assignments & authority</strong></Link> : null}
+          <Link href="/portal/my-office"><span>My Info</span><strong>My record, requests & certifications</strong></Link>
         </aside>
       </div>
     </PortalShell>

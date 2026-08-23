@@ -55,7 +55,6 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
 
   const filtered = useMemo(() => {
     const normalized = query.trim().toLowerCase();
-    if (!normalized && !division) return [];
     return personnel.filter((member) => {
       const matchesDivision = !division || member.division === division;
       const haystack = [member.displayName, member.personnelId, member.callSign, member.rank, member.division, member.status]
@@ -74,57 +73,53 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     });
   }
 
-  const showResults = query.trim().length > 0 || division !== null;
+  const isFiltered = query.trim().length > 0 || division !== null;
 
   return (
     <div className="command-v2-directory">
       <section className="portal-panel command-v2-directory-search">
-        <div className="portal-panel-heading"><div><p>Find personnel</p><h2>Personnel directory</h2></div><Link href="/portal/command/personnel/roster">Full roster</Link></div>
+        <div className="portal-panel-heading"><div><p>Personnel</p><h2>Find someone</h2></div><Link href="/portal/command/personnel/roster">Open full roster</Link></div>
         <label className="command-v2-search-field">
-          <span>Search</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, call sign, personnel ID, rank, division..." />
+          <span>Search personnel</span>
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Type a name, call sign, ID, rank, or assignment" />
         </label>
-        <div className="command-v2-division-browser" aria-label="Browse by division">
+        <div className="command-v2-division-browser" aria-label="Filter personnel by assignment">
           {divisions.map(([name, count]) => (
             <button className={division === name ? "is-active" : undefined} key={name} onClick={() => setDivision((current) => current === name ? null : name)} type="button">
               <strong>{name}</strong><span>{count}</span>
             </button>
           ))}
+          {division ? <button onClick={() => setDivision(null)} type="button"><strong>Clear filter</strong></button> : null}
         </div>
       </section>
 
-      {showResults ? (
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Results</p><h2>{filtered.length} found</h2></div>{division ? <button className="portal-text-button" onClick={() => setDivision(null)} type="button">Clear division</button> : null}</div>
-          <div className="command-v2-personnel-results">
-            {filtered.map((member) => (
-              <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}>
-                <div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div>
-                <div><span>{member.division}</span><b>{member.status}</b></div>
-              </Link>
-            ))}
-            {!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current search.</strong></div> : null}
-          </div>
-        </section>
-      ) : null}
+      <section className="portal-panel">
+        <div className="portal-panel-heading">
+          <div><p>{isFiltered ? "Search results" : "Department"}</p><h2>{isFiltered ? `${filtered.length} found` : `All personnel (${filtered.length})`}</h2></div>
+          <Link href="/portal/command/personnel/roster">Full roster & account tools</Link>
+        </div>
+        <div className="command-v2-personnel-results">
+          {filtered.map((member) => (
+            <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}>
+              <div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div>
+              <div><span>{member.division}</span><b>{member.status}</b></div>
+            </Link>
+          ))}
+          {!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current search or filter.</strong><span>Clear the filter or try a shorter search.</span></div> : null}
+        </div>
+      </section>
 
-      <div className="command-v2-workspace-grid command-v2-directory-lower">
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>
-          {favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}
-        </section>
+      {(favorites.length || recent.length) ? <div className="command-v2-workspace-grid command-v2-directory-lower">
+        {favorites.length ? <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Quick access</p><h2>Pinned personnel</h2></div></div>
+          <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div>
+        </section> : null}
 
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
-          {recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}
-        </section>
-
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Browse</p><h2>Department roster</h2></div></div>
-          <p className="command-v2-compact-copy">Use the full roster when you need to browse everyone or manage credentials and account status.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">View full roster</Link></div>
-        </section>
-      </div>
+        {recent.length ? <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Quick access</p><h2>Recently viewed</h2></div></div>
+          <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div>
+        </section> : null}
+      </div> : null}
     </div>
   );
 }

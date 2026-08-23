@@ -16,38 +16,38 @@ export default async function AdministrationWorkspacePage() {
       active="administration"
       eyebrow="Administration"
       title="Administration"
-      description="Approvals, leave, audit activity, and department administration."
+      description="Department decisions, records, audit history, and organization tools."
     >
       <div className="command-v2-workspace-grid">
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Decision queue</p><h2>Approvals</h2></div></div>
-          <p className="command-v2-compact-copy">Review pending Guardians, requests, and administrative actions.</p>
+          <div className="portal-panel-heading"><div><p>Waiting on Command</p><h2>Review approvals</h2></div></div>
+          <p className="command-v2-compact-copy">Approve or deny pending Guardians, personnel requests, LOA requests, and certification requests.</p>
           <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/approvals">Open approvals</Link>
+            <Link className="portal-button portal-button--primary" href="/portal/command/approvals">Review pending items</Link>
           </div>
         </section>
 
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Audit</p><h2>Activity</h2></div></div>
-          <p className="command-v2-compact-copy">Review recorded portal and personnel activity.</p>
+          <div className="portal-panel-heading"><div><p>Audit history</p><h2>See who changed what</h2></div></div>
+          <p className="command-v2-compact-copy">Review recorded portal actions and personnel changes when you need to verify what happened.</p>
           <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/activity">Open activity</Link>
+            <Link className="portal-button portal-button--primary" href="/portal/command/activity">View activity log</Link>
           </div>
         </section>
 
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Personnel admin</p><h2>Service records</h2></div></div>
-          <p className="command-v2-compact-copy">Administrative personnel actions remain available without crowding the landing page.</p>
+          <div className="portal-panel-heading"><div><p>Personnel history</p><h2>Service records</h2></div></div>
+          <p className="command-v2-compact-copy">Review permanent service and career information without digging through the full roster.</p>
           <div className="command-v2-action-row">
             <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Open service records</Link>
           </div>
         </section>
 
         {executive ? <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Organization</p><h2>Command Structure</h2></div><span>Executive</span></div>
-          <p className="command-v2-compact-copy">Review the department structure, assignments, and authority model.</p>
+          <div className="portal-panel-heading"><div><p>Department organization</p><h2>Structure & assignments</h2></div><span>Executive</span></div>
+          <p className="command-v2-compact-copy">Manage the department structure, unit assignments, and who holds organizational authority.</p>
           <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--secondary" href="/portal/command/administration/structure">Open structure</Link>
+            <Link className="portal-button portal-button--secondary" href="/portal/command/administration/structure">Open department structure</Link>
           </div>
         </section> : null}
       </div>
