@@ -81,12 +81,12 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
         </div>
         <div className="command-v2-workspace-grid">
           <div className="portal-panel">
-            <div className="portal-panel-heading"><div><p>FTO qualification</p><h2>{ftoQualified ? "Qualified" : "Not recorded"}</h2></div></div>
-            <p className="command-v2-compact-copy">Leadership training authority is separate from the Field Training Officer certification.</p>
+            <div className="portal-panel-heading"><div><p>FTO permissions</p><h2>{ftoQualified ? "Authorized" : "Not authorized"}</h2></div></div>
+            <p className="command-v2-compact-copy">A current Field Training Officer certification is the sole source of FTO permissions.</p>
           </div>
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Active trainer</p><h2>{activeTraining ? ((Array.isArray(activeTraining.trainer) ? activeTraining.trainer[0] : activeTraining.trainer)?.display_name ?? "Unassigned") : "None"}</h2></div></div>
-            <p className="command-v2-compact-copy">{activeTraining ? `${activeTraining.program_type} · ${activeTraining.phase} · ${activeTraining.progress_percent}%` : "No active FTO or training assignment is recorded."}</p>
+            <p className="command-v2-compact-copy">{activeTraining ? `${activeTraining.program_type} · ${activeTraining.phase} · ${activeTraining.progress_percent}%` : "No active training assignment is recorded."}</p>
           </div>
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Qualifications</p><h2>{currentCertifications.length} current</h2></div></div>
