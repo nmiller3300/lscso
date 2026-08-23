@@ -143,7 +143,6 @@ export default async function FullRosterPage() {
       eyebrow="Personnel"
       title="Full roster"
       description="Department-wide roster, personnel facts, and credential management. Shared organizational and training information is synchronized with Personnel Operations."
-      actions={<a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a>}
     >
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
