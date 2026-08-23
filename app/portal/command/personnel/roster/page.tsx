@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { DeactivatedAccountManager } from "../../../_components/DeactivatedAccountManager";
 import { PortalShell } from "../../../_components/PortalShell";
 import { RosterPersonnelControls } from "../../../_components/RosterPersonnelControls";
 import { RosterRowInteraction } from "../../../_components/RosterRowInteraction";
@@ -9,6 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
+const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff"]);
 const ACTIVE_TRAINING_STATUSES = new Set(["Not Started", "In Progress", "Needs Improvement"]);
 
 export default async function FullRosterPage() {
@@ -122,6 +124,17 @@ export default async function FullRosterPage() {
       status: member.status,
     }));
 
+  const deactivatedPersonnel = (profiles ?? [])
+    .filter((member:any) => member.status === "Deactivated" && !member.is_test_account)
+    .map((member:any) => ({
+      profileId: member.id,
+      personnelId: member.personnel_id,
+      displayName: member.display_name,
+      rank: member.rank,
+      username: member.username,
+      credentialsAssigned: member.credentials_assigned ?? false,
+    }));
+
   const operationalPersonnel = (profiles ?? []).filter((member:any) => member.status !== "Deactivated" && !member.is_test_account);
 
   return (
@@ -163,6 +176,7 @@ export default async function FullRosterPage() {
         </div>
       </section>
 
+      {EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
       {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
       <RosterRowInteraction />
       <RosterWorkspace personnel={personnel} />
