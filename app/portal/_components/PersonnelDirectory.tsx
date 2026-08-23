@@ -79,7 +79,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
   return (
     <div className="command-v2-directory">
       <section className="portal-panel command-v2-directory-search">
-        <div className="portal-panel-heading"><div><p>Find personnel</p><h2>Personnel directory</h2></div><Link href="/portal/command/personnel/roster">Full roster</Link></div>
+        <div className="portal-panel-heading"><div><p>Find personnel</p><h2>Personnel directory</h2></div></div>
         <label className="command-v2-search-field">
           <span>Search</span>
           <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Name, call sign, personnel ID, rank, division..." />
@@ -120,9 +120,12 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
         </section>
 
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Browse</p><h2>Department roster</h2></div></div>
-          <p className="command-v2-compact-copy">Use the full roster when you need to browse everyone or manage credentials and account status.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">View full roster</Link></div>
+          <div className="portal-panel-heading"><div><p>Roster access</p><h2>Department roster</h2></div></div>
+          <p className="command-v2-compact-copy">The live roster is the department-wide personnel view. The Command roster keeps internal personnel and account-status tools.</p>
+          <div className="command-v2-action-row">
+            <a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a>
+            <Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">Open Command roster</Link>
+          </div>
         </section>
       </div>
     </div>
