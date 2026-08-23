@@ -38,7 +38,6 @@ export default async function CommandPersonnelPage() {
       eyebrow="Personnel"
       title="Personnel"
       description="Find, review, and manage authorized personnel records."
-      actions={<a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a>}
     >
       <PersonnelDirectory personnel={(personnel ?? []).map((member:any) => ({
         personnelId: member.personnel_id,
