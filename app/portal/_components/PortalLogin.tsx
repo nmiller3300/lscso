@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/client";
 
 type ActiveProfile = { display_name: string; access_tier: string };
 
+const DEACTIVATED_MESSAGE = "This LSCSO account has been deactivated. If you believe this is a mistake, contact your system administrator.";
+
 function toInternalEmail(username: string) {
   return `${username.trim().toLowerCase()}@auth.lscso.internal`;
 }
@@ -47,6 +49,14 @@ export function PortalLogin() {
     return () => { cancelled = true; };
   }, []);
 
+  async function accountStateFor(usernameValue: string) {
+    const supabase = createClient() as any;
+    const { data } = await supabase.rpc("get_login_account_state", {
+      p_username: usernameValue.trim().toLowerCase(),
+    });
+    return data === "Deactivated" ? "Deactivated" : "Other";
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -60,7 +70,8 @@ export function PortalLogin() {
       });
 
       if (signInError || !data.user) {
-        setError("The username or password is incorrect, or this account is not active.");
+        const accountState = await accountStateFor(username).catch(() => "Other");
+        setError(accountState === "Deactivated" ? DEACTIVATED_MESSAGE : "The username or password is incorrect, or this account is not active.");
         return;
       }
 
@@ -72,7 +83,7 @@ export function PortalLogin() {
 
       if (profileError || !profile || !["Active", "Acting"].includes(profile.status)) {
         await supabase.auth.signOut({ scope: "local" });
-        setError("This account does not have an active LSCSO personnel profile.");
+        setError(profile?.status === "Deactivated" ? DEACTIVATED_MESSAGE : "This account does not have an active LSCSO personnel profile.");
         return;
       }
 
