@@ -11,7 +11,6 @@ type PersonnelRecordPageProps = {
   params: Promise<{ personnelId: string }>;
 };
 
-const LEADERSHIP_TRAINERS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 const ACTIVE_TRAINING_STATUSES = ["Not Started", "In Progress", "Needs Improvement"];
 
 function shortDate(value: string | null | undefined) {
@@ -98,7 +97,6 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const activeDelegations = delegations.data ?? [];
   const leaveRow = currentLeave.data?.[0];
   const ftoQualified = Boolean(ftoCertification.data?.length);
-  const leadershipTrainer = LEADERSHIP_TRAINERS.has(member.rank);
   const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
   const latestCareerRow = latestCareer.data?.[0];
 
@@ -133,8 +131,8 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
             <p className="command-v2-compact-copy">Baseline authority follows the member&apos;s current rank. Additional responsibility is granted through named delegation rather than raw permission toggles.</p>
           </div>
           <div className="portal-panel">
-            <div className="portal-panel-heading"><div><p>Training authority</p><h2>{leadershipTrainer ? "Leadership trainer" : ftoQualified ? "FTO qualified" : "No standing training role"}</h2></div><span>{activeTrainees ?? 0} trainees</span></div>
-            <p className="command-v2-compact-copy">{leadershipTrainer ? "Sheriff, Undersheriff, Major, and Captain may conduct training directly." : ftoQualified ? "This member may update training for trainees assigned to them." : "Training controls require qualification, assignment, or delegated authority."}</p>
+            <div className="portal-panel-heading"><div><p>FTO permissions</p><h2>{ftoQualified ? "Authorized" : "Not authorized"}</h2></div><span>{activeTrainees ?? 0} trainees</span></div>
+            <p className="command-v2-compact-copy">{ftoQualified ? "This member holds a current Field Training Officer certification and has FTO permissions for trainees assigned to them." : "No current Field Training Officer certification is recorded, so this member has no FTO permissions."}</p>
           </div>
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Operational status</p><h2>{displayStatus}</h2></div></div>
