@@ -85,9 +85,27 @@ Deno.serve(async (request) => {
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const operation = body?.operation;
-  const commandAllowed = ["Executive", "Command"].includes(caller.access_tier);
   const executiveAllowed = caller.access_tier === "Executive" &&
     ["Sheriff", "Undersheriff"].includes(caller.rank);
+  const standingPersonnelAdmin = ["Sheriff", "Undersheriff", "Major", "Captain"].includes(caller.rank);
+
+  let delegatedPersonnelAdmin = false;
+  if (!standingPersonnelAdmin) {
+    const { data: delegationRows } = await admin
+      .from("personnel_delegations")
+      .select("delegation_type,starts_at,expires_at,revoked_at")
+      .eq("profile_id", caller.id)
+      .is("revoked_at", null);
+
+    const now = Date.now();
+    delegatedPersonnelAdmin = (delegationRows ?? []).some((delegation) => {
+      const started = !delegation.starts_at || new Date(delegation.starts_at).getTime() <= now;
+      const unexpired = !delegation.expires_at || new Date(delegation.expires_at).getTime() > now;
+      return started && unexpired && ["Personnel Administration", "Temporary Command Authority"].includes(delegation.delegation_type);
+    });
+  }
+
+  const commandAllowed = standingPersonnelAdmin || delegatedPersonnelAdmin;
 
   const writeAudit = async (action: string, recordId: string | null, newData: unknown) => {
     await admin.from("audit_log").insert({
@@ -142,7 +160,7 @@ Deno.serve(async (request) => {
     return json({ success: true });
   }
 
-  if (!commandAllowed) return json({ error: "Command authority required" }, 403);
+  if (!commandAllowed) return json({ error: "Personnel administration authority required" }, 403);
 
   if (operation === "assign_credentials") {
     const profileId = typeof body?.profile_id === "string" ? body.profile_id : "";
