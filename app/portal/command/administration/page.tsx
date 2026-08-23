@@ -1,7 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../_components/PortalShell";
+import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+
+const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 
 export default async function AdministrationWorkspacePage() {
   const profile = await getCurrentPortalProfile();
@@ -10,6 +13,12 @@ export default async function AdministrationWorkspacePage() {
   }
 
   const executive = profile.access_tier === "Executive";
+  const supabase = await createClient() as any;
+  const { data: accessRows } = await supabase.rpc("get_my_roster_access");
+  const delegations = new Set<string>(accessRows?.[0]?.active_delegations ?? []);
+  const canManageAccounts = STANDING_ACCOUNT_ADMIN.has(profile.rank)
+    || delegations.has("Personnel Administration")
+    || delegations.has("Temporary Command Authority");
 
   return (
     <PortalShell
@@ -19,6 +28,14 @@ export default async function AdministrationWorkspacePage() {
       description="Approvals, leave, audit activity, and department administration."
     >
       <div className="command-v2-workspace-grid">
+        {canManageAccounts ? <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Personnel admin</p><h2>Personnel Accounts</h2></div></div>
+          <p className="command-v2-compact-copy">Create department accounts and issue initial login credentials from one administrative workspace.</p>
+          <div className="command-v2-action-row">
+            <Link className="portal-button portal-button--primary" href="/portal/command/administration/accounts">Open account administration</Link>
+          </div>
+        </section> : null}
+
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Decision queue</p><h2>Approvals</h2></div></div>
           <p className="command-v2-compact-copy">Review pending Guardians, requests, and administrative actions.</p>
