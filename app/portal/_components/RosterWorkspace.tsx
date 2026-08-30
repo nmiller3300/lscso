@@ -44,6 +44,18 @@ function normalizeCallSign(value: FormDataEntryValue | null) {
   return String(value ?? "").trim().toUpperCase();
 }
 
+function getNextPersonnelId(personnel: PersonnelRecord[], isTestAccount: boolean) {
+  const prefix = isTestAccount ? "TA" : "LS";
+  const pattern = isTestAccount ? /^TA-(\d{3})$/ : /^LS-(\d{3})$/;
+  const highest = personnel.reduce((current, member) => {
+    const match = member.id.match(pattern);
+    if (!match) return current;
+    return Math.max(current, Number(match[1]));
+  }, 0);
+  const next = highest + 1;
+  return next <= 999 ? `${prefix}-${String(next).padStart(3, "0")}` : null;
+}
+
 function appendHistory(member: PersonnelRecord, releasedCallSign: string) {
   if (!releasedCallSign) return member.callSignHistory ?? [];
   return Array.from(new Set([...(member.callSignHistory ?? []), releasedCallSign]));
@@ -126,13 +138,18 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const displayName = String(form.get("displayName") ?? "").trim();
-    const id = String(form.get("employeeId") ?? "").trim().toUpperCase();
     const username = String(form.get("username") ?? "").trim().toLowerCase();
     const password = String(form.get("password") ?? "");
     const callSign = normalizeCallSign(form.get("callSign"));
     const rank = String(form.get("rank") ?? "Deputy");
     const division = String(form.get("division") ?? "Patrol Division");
     const isTestAccount = form.get("isTestAccount") === "on";
+    const id = getNextPersonnelId(personnel, isTestAccount);
+
+    if (!id) {
+      setFormError("No personnel IDs remain available in this numbering series.");
+      return;
+    }
 
     if (rankAccess[rank] === "Executive" && !isExecutiveCaller) {
       setFormError("Only Sheriff or Undersheriff may create an Executive account.");
@@ -145,10 +162,6 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     }
     if (callSignIsReserved(callSign)) {
       setFormError(`${callSign} is currently assigned. Only released call signs may be recycled.`);
-      return;
-    }
-    if (personnel.some((member) => member.id === id)) {
-      setFormError(`${id} is already a permanent personnel ID.`);
       return;
     }
     if (personnel.some((member) => member.username === username)) {
@@ -203,7 +216,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     setPersonnel((current) => [...current, newMember]);
     setSelectedId(id);
     closeCreate();
-    showNotice(`${callSign} assigned to ${displayName}. The department roster was updated.`);
+    showNotice(`${id} created. ${callSign} assigned to ${displayName}.`);
     router.refresh();
   }
 
@@ -541,7 +554,6 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
             <form onSubmit={handleCreate}>
               <div className="portal-form-grid">
                 <label>Display name<input name="displayName" required placeholder="Department display name" /></label>
-                <label>Permanent personnel ID<input name="employeeId" pattern="LS-[0-9]{3}" required placeholder="LS-000" /></label>
                 <label>Assigned username<input name="username" required autoComplete="off" placeholder="first.last" /></label>
                 <label>Temporary password<input name="password" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" /></label>
                 <label>
@@ -552,6 +564,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                 <label>Rank<select defaultValue="Deputy" name="rank">{isExecutiveCaller ? <><option>Sheriff</option><option>Undersheriff</option></> : null}<option>Major</option><option>Captain</option><option>1st Lieutenant</option><option>Lieutenant</option><option>Sergeant</option><option>Corporal</option><option>Master Deputy</option><option>Deputy III</option><option>Deputy II</option><option>Deputy</option><option>Recruit</option></select></label>
                 <label>Primary division<select defaultValue="Patrol Division" name="division"><option>Office of the Sheriff</option><option>Field Operations</option><option>Patrol Division</option><option>Training & FTO</option><option>Internal Affairs</option><option>Academy</option></select></label>
               </div>
+              <div className="portal-form-protection"><strong>Personnel ID is automatic.</strong><span>The system assigns the next available LS-### number when the account is created. Permanent personnel IDs are never manually tracked or recycled.</span></div>
               <div className="portal-form-protection"><strong>First sign-in protection is required.</strong><span>Every new or reset credential must be changed by the member after secure sign-in.</span></div>
               <label className="portal-checkbox-row portal-checkbox-row--test"><input name="isTestAccount" type="checkbox" /><span><strong>Mark as a test account</strong><small>Clearly labels the profile and excludes its activity from official personnel reporting.</small></span></label>
               {formError ? <div className="portal-form-error" role="alert">{formError}</div> : null}
