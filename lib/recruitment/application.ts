@@ -1,6 +1,8 @@
 export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Interview", "Accepted", "Denied", "Withdrawn"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;
 
+export const APPLICATION_CERTIFICATION_TEXT = "Under penalty of perjury under the laws of the State of San Andreas, I certify that all information provided in this application is true, accurate, and complete to the best of my knowledge. I understand that any false, misleading, or intentionally omitted information may result in the denial or disqualification of my application.";
+
 export const applicationQuestions: Array<[string, string, string]> = [
   ["Applicant Information", "full_name", "What is your full name?"],
   ["Applicant Information", "discord_username", "What is your Discord username?"],
