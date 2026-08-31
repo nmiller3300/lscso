@@ -18,6 +18,7 @@ export function ApplicationForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [applicationNumber, setApplicationNumber] = useState<string | null>(null);
+  const [certified, setCertified] = useState(false);
   let questionNumber = 0;
 
   const setValue = (name: string, value: string) => setValues((v) => ({ ...v, [name]: value }));
@@ -27,7 +28,7 @@ export function ApplicationForm() {
     if (values.policy_agreement !== "Yes") { setError("You must agree to follow all LSCSO policies, procedures, orders, and training requirements."); return; }
     setSubmitting(true);
     try {
-      const res = await fetch("/api/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, applicant_certification: true }) });
+      const res = await fetch("/api/applications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...values, applicant_certification: certified }) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "The application could not be submitted.");
       setApplicationNumber(String(data.application_number)); window.scrollTo({ top: 0, behavior: "smooth" });
@@ -35,7 +36,7 @@ export function ApplicationForm() {
     finally { setSubmitting(false); }
   }
 
-  if (applicationNumber) return <section className="application-success"><p className="section-kicker section-kicker--dark">Application Received</p><h2>Thank you for applying.</h2><p>Your application has been submitted for LSCSO command review.</p><strong>Application #{applicationNumber}</strong><p>Keep this number for your records.</p></section>;
+  if (applicationNumber) return <section className="application-success"><p className="section-kicker section-kicker--dark">Application Received</p><h2>Thank you for applying.</h2><p>Your application has been submitted successfully for LSCSO Command review.</p><strong>Application Number: APP-{applicationNumber.padStart(4,"0")}</strong><p>Keep this number for your records.</p></section>;
 
   return <form className="application-form" onSubmit={submit}>
     {sections.map(([title, questions], sectionIndex) => <fieldset className="application-section" key={title}>
@@ -45,7 +46,7 @@ export function ApplicationForm() {
         {type === "textarea" ? <textarea id={name} required rows={5} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} /> : type === "choice" ? <select id={name} required value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)}><option value="">Select an answer</option><option>Yes</option><option>No</option></select> : <input id={name} required type={type} min={type === "number" ? 13 : undefined} max={type === "number" ? 100 : undefined} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} />}
       </div>; })}
     </fieldset>)}
-    <section className="application-certification"><h2>Applicant Certification</h2><p>I certify that the information provided in this application is truthful and accurate to the best of my knowledge. I understand that intentionally providing false information may result in denial of my application or removal from LSCSO.</p><label><input type="checkbox" required /> I certify that the information above is truthful and accurate.</label></section>
+    <section className="application-certification"><h2>Applicant Certification</h2><p>I certify that the information provided in this application is truthful and accurate to the best of my knowledge. I understand that intentionally providing false information may result in denial of my application or removal from LSCSO.</p><label><input type="checkbox" required checked={certified} onChange={(e) => setCertified(e.target.checked)} /> I certify that the information above is truthful and accurate.</label></section>
     {error && <p className="application-error" role="alert">{error}</p>}
     <button className="button button--dark" type="submit" disabled={submitting}>{submitting ? "Submitting Application…" : "Submit Application"}</button>
   </form>;

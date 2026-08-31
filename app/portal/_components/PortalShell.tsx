@@ -22,7 +22,8 @@ type PortalShellProps = {
     | "activity"
     | "certifications"
     | "awards"
-    | "notifications";
+    | "notifications"
+    | "applications";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
