@@ -4,6 +4,7 @@ import { PortalShell } from "../../_components/PortalShell";
 import { loadPersonnelPurview } from "@/lib/authorization/load-personnel-purview";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+import { applicationLabel } from "@/lib/recruitment/application";
 
 const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 
@@ -17,12 +18,13 @@ export default async function CommandHomePage() {
   const now = new Date();
   const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-  const [profilesResult, guardiansResult, certificationsResult, requestsResult, leaveResult] = await Promise.all([
+  const [profilesResult, guardiansResult, certificationsResult, requestsResult, leaveResult, applicationsResult] = await Promise.all([
     supabase.from("personnel_profiles").select("id,status,is_test_account"),
     supabase.from("guardian_records").select("id,status,subject_profile_id,follow_up_due_at,created_at,guardian_number,title").order("created_at", { ascending: false }),
     supabase.from("certifications").select("id,profile_id,status,expires_on"),
     supabase.from("personnel_requests").select("id,requester_profile_id,status,request_type,subject,created_at").order("created_at", { ascending: false }),
     supabase.from("leave_requests").select("id,status,profile_id,starts_on,expected_return_on,created_at").order("created_at", { ascending: false }),
+    supabase.from("recruitment_applications").select("id,application_number,full_name,discord_username,status,submitted_at").order("submitted_at", { ascending: false }).limit(100),
   ]);
 
   const departmentAuthority = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
@@ -37,15 +39,17 @@ export default async function CommandHomePage() {
   const certifications = certificationsResult.data ?? [];
   const requests = requestsResult.data ?? [];
   const leave = leaveResult.data ?? [];
+  const applications = applicationsResult.data ?? [];
 
   const activePersonnel = personnel.filter((item:any) => ["Active", "Acting"].includes(item.status) && !item.is_test_account).length;
   const pendingGuardians = guardians.filter((item:any) => allowedDecision(item.subject_profile_id) && item.status === "Pending Approval");
   const pendingRequests = requests.filter((item:any) => allowedDecision(item.requester_profile_id) && ["Submitted", "In Review"].includes(item.status));
   const pendingLeave = leave.filter((item:any) => allowedDecision(item.profile_id) && ["Submitted", "In Review"].includes(item.status));
   const pendingCertifications = certifications.filter((item:any) => allowedDecision(item.profile_id) && ["Requested", "Pending"].includes(item.status));
+  const pendingApplications = applications.filter((item:any) => item.status === "Submitted");
   const followUps = guardians.filter((item:any) => allowedDecision(item.subject_profile_id) && item.follow_up_due_at && new Date(item.follow_up_due_at) <= now && !["Acknowledged", "Closed"].includes(item.status));
   const expiring = certifications.filter((item:any) => allowedDecision(item.profile_id) && item.status === "Current" && item.expires_on && new Date(item.expires_on) <= thirtyDays);
-  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingCertifications.length + followUps.length;
+  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingCertifications.length + pendingApplications.length + followUps.length;
 
   return (
     <PortalShell
@@ -60,6 +64,7 @@ export default async function CommandHomePage() {
       <div className="deputy-summary-grid command-v2-home-metrics">
         <article><span>Active personnel</span><strong>{String(activePersonnel).padStart(2, "0")}</strong><small>{departmentAuthority ? "Department personnel" : "Within your responsibility"}</small></article>
         <article><span>Needs attention</span><strong>{String(attentionTotal).padStart(2, "0")}</strong><small>Items waiting on Command</small></article>
+        <article><span>New applications</span><strong>{String(pendingApplications.length).padStart(2, "0")}</strong><small>Awaiting initial review</small></article>
         <article><span>Expiring certs</span><strong>{String(expiring.length).padStart(2, "0")}</strong><small>Within 30 days</small></article>
         <article><span>Open requests</span><strong>{String(pendingRequests.length + pendingLeave.length + pendingCertifications.length).padStart(2, "0")}</strong><small>Personnel, LOA & certification</small></article>
       </div>
@@ -67,6 +72,7 @@ export default async function CommandHomePage() {
       <section className="portal-panel command-v2-common-tasks">
         <div className="portal-panel-heading"><div><p>Common tasks</p><h2>What do you need to do?</h2></div><span>Direct links</span></div>
         <div className="command-v2-task-grid">
+          <Link href="/portal/command/applications"><span>Recruitment</span><strong>Review applications</strong><small>Open signed applications, assign reviewers, schedule interviews, and record decisions.</small></Link>
           <Link href="/portal/command/personnel"><span>Personnel</span><strong>Find a member</strong><small>Open their full personnel record.</small></Link>
           <Link href="/portal/command/personnel/roster"><span>Roster</span><strong>Open the full roster</strong><small>Accounts, rank, status, callsigns, and department roster.</small></Link>
           <Link href="/portal/command/guardians"><span>Supervision</span><strong>Find or create a Guardian</strong><small>Warnings, feedback, write-ups, and commendations.</small></Link>
@@ -81,6 +87,7 @@ export default async function CommandHomePage() {
           <div className="portal-panel-heading"><div><p>Priority</p><h2>Action required</h2></div><Link href="/portal/notifications#action-required">View all</Link></div>
 
           <div className="command-v2-attention-summary" aria-label="Pending Command work by category">
+            <Link href="/portal/command/applications"><strong>{String(pendingApplications.length).padStart(2, "0")}</strong><span>New applications</span></Link>
             <Link href="/portal/command/approvals#guardian-requests"><strong>{String(pendingGuardians.length).padStart(2, "0")}</strong><span>Guardian approvals</span></Link>
             <Link href="/portal/command/approvals#personnel-requests"><strong>{String(pendingRequests.length).padStart(2, "0")}</strong><span>Personnel requests</span></Link>
             <Link href="/portal/command/approvals#leave-requests"><strong>{String(pendingLeave.length).padStart(2, "0")}</strong><span>LOA requests</span></Link>
@@ -88,6 +95,7 @@ export default async function CommandHomePage() {
           </div>
 
           <div className="command-v2-mini-list">
+            {pendingApplications.slice(0, 3).map((item:any) => <Link href={`/portal/command/applications/${item.id}`} key={`a-${item.id}`}><strong>{applicationLabel(item.application_number)} · {item.full_name}</strong><span>{item.discord_username} · New application</span></Link>)}
             {pendingGuardians.slice(0, 3).map((item:any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`g-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · {item.title}</strong><span>Pending approval</span></Link>)}
             {pendingRequests.slice(0, 2).map((item:any) => <Link href="/portal/command/approvals#personnel-requests" key={`r-${item.id}`}><strong>{item.subject}</strong><span>{item.request_type} · {item.status}</span></Link>)}
             {followUps.slice(0, 2).map((item:any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`f-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · Follow-up due</strong><span>{item.title}</span></Link>)}
@@ -96,6 +104,7 @@ export default async function CommandHomePage() {
         </section>
 
         <aside className="command-v2-home-shortcuts">
+          <Link href="/portal/command/applications"><span>Recruitment</span><strong>Applications & hiring review</strong></Link>
           <Link href="/portal/notifications"><span>Inbox</span><strong>Notifications & action items</strong></Link>
           <Link href="/portal/command/supervision"><span>Supervision</span><strong>Personnel oversight & Guardians</strong></Link>
           <Link href="/portal/command/administration"><span>Administration</span><strong>Approvals, audit & department tools</strong></Link>
