@@ -22,6 +22,14 @@ export async function POST(request: Request) {
     const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
     if (!url || !key) return NextResponse.json({ error: "Application service is not configured. Add SUPABASE_SECRET_KEY to the Vercel Production environment and redeploy." }, { status: 503 });
     const supabase = createServiceClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+    const { data: recruitmentStatus, error: recruitmentStatusError } = await supabase
+      .from("recruitment_settings")
+      .select("applications_open")
+      .eq("id", "applications")
+      .maybeSingle();
+    if (recruitmentStatusError || recruitmentStatus?.applications_open !== true) {
+      return NextResponse.json({ error: "LSCSO applications are currently closed. New submissions are not being accepted." }, { status: 403 });
+    }
     const sessionClient = await createServerClient();
     const { data: { user } } = await sessionClient.auth.getUser();
     const { data: recent } = await supabase.from("recruitment_applications").select("application_number").ilike("discord_username", body.discord_username.trim()).gte("created_at", new Date(Date.now() - 86400000).toISOString()).not("status", "in", "(Withdrawn,Archived)").limit(1).maybeSingle();

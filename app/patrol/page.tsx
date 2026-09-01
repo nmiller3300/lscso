@@ -30,14 +30,6 @@ export default function PatrolPage() {
         imagePosition="center 55%"
       />
 
-      <section className="status-ribbon">
-        <div className="site-shell">
-          <span className="status-dot" />
-          <strong>Recruitment Status</strong>
-          <span>Patrol Division is currently accepting deputy applicants.</span>
-        </div>
-      </section>
-
       <section className="content-section content-section--light">
         <div className="site-shell two-column-editorial">
           <div>
@@ -80,7 +72,10 @@ export default function PatrolPage() {
               <li key={responsibility}>{responsibility}</li>
             ))}
           </ul>
-          <RouteLink href="/training-recruitment">Recruitment & Training</RouteLink>
+          <div className="page-actions">
+            <RouteLink href="/join/application">Begin an Application</RouteLink>
+            <RouteLink href="/training-recruitment" variant="outline">Recruitment & Training</RouteLink>
+          </div>
         </div>
       </section>
     </>

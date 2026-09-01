@@ -1,0 +1,51 @@
+.application-page__hero--closed {
+  display: flex;
+  align-items: center;
+  padding-bottom: 90px;
+}
+
+.application-closed {
+  max-width: 900px;
+}
+
+.application-closed__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 28px;
+  padding: 9px 13px;
+  border: 1px solid rgba(224, 157, 157, 0.34);
+  background: rgba(125, 49, 49, 0.2);
+  color: #efb6b6;
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.application-closed__status i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d87575;
+  box-shadow: 0 0 0 5px rgba(216, 117, 117, 0.12);
+}
+
+.application-closed h1 {
+  max-width: 850px;
+  margin-bottom: 28px;
+}
+
+.application-closed > p:not(.section-kicker) {
+  max-width: 760px;
+  color: rgba(255, 255, 255, 0.66);
+  line-height: 1.72;
+}
+
+.application-closed .intro-serif {
+  color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.application-closed .button-row {
+  margin-top: 36px;
+}

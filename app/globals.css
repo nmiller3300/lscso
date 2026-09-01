@@ -1017,6 +1017,172 @@ p {
   box-shadow: 0 0 0 5px rgba(40, 50, 31, 0.13);
 }
 
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 19px;
+  border: 1px solid var(--gold-light);
+  background: var(--gold-light);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 780;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 170ms ease, border-color 170ms ease, color 170ms ease, transform 170ms ease;
+}
+
+.button:hover,
+.button:focus-visible {
+  transform: translateY(-1px);
+  border-color: var(--white);
+  background: var(--white);
+}
+
+.button--dark {
+  border-color: var(--gold-light);
+  background: var(--gold-light);
+  color: var(--ink);
+}
+
+.button--outline {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: transparent;
+  color: var(--white);
+}
+
+.button--outline-dark {
+  border-color: rgba(17, 17, 15, 0.34);
+  background: transparent;
+  color: var(--ink);
+}
+
+.button--outline:hover,
+.button--outline:focus-visible {
+  border-color: var(--gold-light);
+  background: transparent;
+  color: var(--gold-light);
+}
+
+.button--outline-dark:hover,
+.button--outline-dark:focus-visible {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--white);
+}
+
+.recruitment-status-panel {
+  position: relative;
+  overflow: hidden;
+  border-top: 6px solid #8b4a49;
+  border-bottom: 1px solid rgba(17, 17, 15, 0.18);
+  background: #ded5c4;
+  color: var(--ink);
+}
+
+.recruitment-status-panel--open {
+  border-top-color: #4d6845;
+}
+
+.recruitment-status-panel__layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: clamp(42px, 7vw, 100px);
+  align-items: center;
+  padding-block: 62px;
+}
+
+.recruitment-status-panel__mark {
+  aspect-ratio: 1;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  border: 1px solid rgba(17, 17, 15, 0.3);
+  outline: 1px solid rgba(17, 17, 15, 0.13);
+  outline-offset: -10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.recruitment-status-panel__mark span {
+  color: #713c3b;
+  font-size: 28px;
+  font-weight: 820;
+  letter-spacing: 0.12em;
+}
+
+.recruitment-status-panel--open .recruitment-status-panel__mark span {
+  color: #405c3b;
+}
+
+.recruitment-status-panel__mark small {
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.19em;
+  text-transform: uppercase;
+}
+
+.recruitment-status-panel__copy {
+  max-width: 810px;
+}
+
+.recruitment-status-panel__heading {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  margin: 12px 0 20px;
+}
+
+.recruitment-status-panel__heading .status-dot {
+  margin-top: 13px;
+  background: #8b4a49;
+  box-shadow: 0 0 0 6px rgba(139, 74, 73, 0.12);
+}
+
+.recruitment-status-panel--open .recruitment-status-panel__heading .status-dot {
+  background: #4d6845;
+  box-shadow: 0 0 0 6px rgba(77, 104, 69, 0.12);
+}
+
+.recruitment-status-panel h2 {
+  margin: 0;
+  font-size: clamp(34px, 4.5vw, 56px);
+  font-weight: 720;
+  letter-spacing: -0.045em;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+
+.recruitment-status-panel__copy > p:not(.section-kicker) {
+  max-width: 760px;
+  margin-bottom: 28px;
+  color: #514d45;
+  line-height: 1.7;
+}
+
+.recruitment-status-panel__unavailable {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  padding: 12px 17px;
+  border-left: 4px solid #8b4a49;
+  background: rgba(139, 74, 73, 0.09);
+  color: #643938;
+  font-size: 11px;
+  font-weight: 780;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
 .patrol-responsibilities {
   background: var(--brown);
 }
@@ -1500,6 +1666,20 @@ p {
     width: 100%;
     padding-left: 22px;
     line-height: 1.5;
+  }
+
+  .recruitment-status-panel__layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-block: 44px;
+  }
+
+  .recruitment-status-panel__mark {
+    width: 150px;
+  }
+
+  .recruitment-status-panel__heading .status-dot {
+    margin-top: 9px;
   }
 
   .footer-main {
