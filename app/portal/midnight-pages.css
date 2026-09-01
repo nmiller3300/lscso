@@ -1,0 +1,397 @@
+/* Page-level refinements for LSCSO Midnight Command. */
+
+/* Command Home */
+.portal-root .command-v2-home-metrics {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.portal-root .command-v2-home-metrics article {
+  min-height: 126px;
+}
+
+.portal-root .command-v2-common-tasks {
+  margin-bottom: 16px;
+}
+
+.portal-root .command-v2-task-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  padding: 13px;
+}
+
+.portal-root .command-v2-task-grid > a {
+  min-height: 128px;
+  padding: 15px;
+}
+
+.portal-root .command-v2-task-grid > a span {
+  color: #cbb362;
+}
+
+.portal-root .command-v2-home-layout {
+  gap: 14px;
+}
+
+.portal-root .command-v2-home-shortcuts {
+  gap: 8px;
+}
+
+.portal-root .command-v2-home-shortcuts > a {
+  overflow: hidden;
+  border: 1px solid var(--portal-line);
+  border-radius: 15px;
+  background: linear-gradient(155deg, #151815, #101310);
+}
+
+.portal-root .command-v2-home-shortcuts > a:hover {
+  border-color: rgba(218, 189, 112, .27);
+  background: #181c18;
+}
+
+.portal-root .command-v2-attention-summary {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+  padding: 13px 15px 4px;
+}
+
+.portal-root .command-v2-attention-summary > a {
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 10px 11px;
+  border: 1px solid var(--portal-line);
+  border-radius: 13px;
+  background: rgba(255,255,255,.016);
+}
+
+.portal-root .command-v2-attention-summary > a:hover {
+  border-color: rgba(218,189,112,.27);
+  background: rgba(201,173,93,.055);
+}
+
+.portal-root .command-v2-attention-summary strong {
+  color: #eff2ec;
+}
+
+.portal-root .command-v2-attention-summary span {
+  color: #858d83;
+}
+
+/* Administration landing */
+.command-admin-groups {
+  display: grid;
+  gap: 34px;
+}
+
+.command-admin-group {
+  display: grid;
+  gap: 12px;
+}
+
+.portal-root .command-admin-group > .portal-section-heading {
+  margin-bottom: 0;
+}
+
+.portal-root .command-admin-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.portal-root .command-admin-card {
+  min-height: 205px;
+}
+
+.portal-root .command-admin-card--featured {
+  border-color: rgba(218,189,112,.22);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(201,173,93,.08), transparent 16rem),
+    linear-gradient(180deg,#141714,#101310);
+}
+
+.portal-root .command-admin-card .command-v2-compact-copy {
+  padding: 16px 18px 0;
+  line-height: 1.62;
+}
+
+.portal-root .command-admin-card .command-v2-action-row {
+  padding: 19px 18px 18px;
+}
+
+.command-admin-executive-card {
+  min-height: 128px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 21px 22px;
+}
+
+.command-admin-executive-card > div {
+  max-width: 770px;
+}
+
+.command-admin-executive-card span {
+  display: inline-flex;
+  width: max-content;
+  margin-bottom: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(218,189,112,.2);
+  border-radius: 999px;
+  background: rgba(201,173,93,.07);
+  color: #d8bf70;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.command-admin-executive-card h3 {
+  margin: 0;
+  color: #f0f2ed;
+  font-size: 20px;
+}
+
+.command-admin-executive-card p {
+  margin: 7px 0 0;
+  color: var(--portal-muted);
+  line-height: 1.55;
+}
+
+/* Personnel directory */
+.portal-root .command-v2-directory-search {
+  padding-bottom: 16px;
+}
+
+.portal-root .command-v2-directory-search .command-v2-search-field {
+  padding: 0 18px;
+}
+
+.portal-root .command-v2-directory-search .command-v2-division-browser {
+  padding: 0 18px;
+}
+
+.portal-root .command-v2-division-browser button {
+  min-height: 38px;
+  border-color: var(--portal-line);
+  background: rgba(255,255,255,.018);
+  color: #b9c0b6;
+}
+
+.portal-root .command-v2-division-browser button:hover {
+  border-color: rgba(218,189,112,.26);
+  color: #fff;
+}
+
+.portal-root .command-v2-division-browser button.is-active {
+  border-color: rgba(218,189,112,.38);
+  background: rgba(201,173,93,.1);
+  color: #ead27e;
+}
+
+.portal-root .command-v2-personnel-results {
+  gap: 0;
+  padding: 6px 17px 14px;
+}
+
+.portal-root .command-v2-personnel-results > a {
+  min-height: 67px;
+  border: 0;
+  border-bottom: 1px solid rgba(235,239,231,.065);
+  border-radius: 0;
+  padding: 11px 4px;
+  background: transparent;
+}
+
+.portal-root .command-v2-personnel-results > a:last-child {
+  border-bottom: 0;
+}
+
+.portal-root .command-v2-personnel-results > a:hover {
+  padding-inline: 10px;
+  border-color: rgba(235,239,231,.065);
+  background: rgba(255,255,255,.018);
+}
+
+/* Approvals and Notification Center */
+.portal-root .portal-action-groups > section {
+  overflow: hidden;
+  border-color: var(--portal-line);
+  border-radius: 15px;
+  background: #101310;
+}
+
+.portal-root .portal-action-group-head {
+  padding: 11px 14px;
+  background: rgba(255,255,255,.018);
+}
+
+.portal-root .portal-action-list > a {
+  border-color: rgba(235,239,231,.065);
+}
+
+.portal-root .portal-action-list > a:hover {
+  background: rgba(255,255,255,.02);
+}
+
+.portal-root .portal-inbox-list > article {
+  border-color: var(--portal-line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.014);
+}
+
+.portal-root .portal-inbox-list > article:not(.is-read) {
+  border-color: rgba(218,189,112,.22);
+  background: linear-gradient(145deg,rgba(201,173,93,.055),rgba(255,255,255,.012));
+}
+
+.portal-root .portal-inbox-list > article.is-read {
+  opacity: .55;
+}
+
+.portal-root .portal-action-center-button {
+  border-color: var(--portal-line-strong);
+  border-radius: 999px;
+  background: rgba(255,255,255,.02);
+  color: #cbd1c8;
+}
+
+.portal-root .portal-action-center-button.has-actions {
+  border-color: rgba(224,107,99,.4);
+  background: rgba(224,107,99,.09);
+  color: #f0a19a;
+}
+
+.portal-root .portal-action-priority.is-critical,
+.portal-root .is-critical .portal-action-priority,
+.portal-root .portal-inbox-priority.is-critical {
+  color: #e37d76;
+}
+
+.portal-root .is-high .portal-action-priority,
+.portal-root .portal-inbox-priority.is-high {
+  color: #d9a45c;
+}
+
+.portal-root .is-normal .portal-action-priority,
+.portal-root .portal-inbox-priority.is-normal {
+  color: #d1ba69;
+}
+
+/* Training, supervision, and other command workspaces */
+.portal-root .command-v2-workspace-grid {
+  gap: 12px;
+}
+
+.portal-root .command-v2-supervision-layout {
+  gap: 14px;
+}
+
+.portal-root .command-v2-purview-list > a {
+  border-color: rgba(235,239,231,.065);
+}
+
+.portal-root .command-v2-purview-list > a:hover {
+  background: rgba(255,255,255,.018);
+}
+
+.portal-root .command-v2-recent-supervision {
+  margin-top: 14px;
+}
+
+/* Account administration */
+.portal-root .account-admin-create {
+  grid-column: span 2;
+}
+
+.portal-root .account-admin-create form {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.portal-root .account-admin-create .portal-form-grid {
+  margin: 0;
+}
+
+.portal-root .account-admin-access-list,
+.portal-root .sheriff-security-list {
+  padding-top: 3px;
+}
+
+.portal-root .sheriff-restricted-panel {
+  grid-column: 1 / -1;
+  border-color: rgba(224,107,99,.2);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(224,107,99,.055), transparent 18rem),
+    #111411;
+}
+
+.portal-root .sheriff-restricted-panel .portal-panel-heading p {
+  color: #e58c85;
+}
+
+.portal-root .sheriff-restricted-panel > :not(.portal-panel-heading) {
+  margin-right: 18px;
+  margin-left: 18px;
+}
+
+.portal-root .sheriff-restricted-panel > :last-child {
+  margin-bottom: 18px;
+}
+
+.portal-root .sheriff-secure-link {
+  display: grid;
+  gap: 10px;
+}
+
+.portal-root .sheriff-secure-link input {
+  width: 100%;
+}
+
+/* Avoid generic one-line empty copy looking like a broken layout. */
+.portal-root .command-v2-compact-copy:only-child {
+  padding-block: 11px;
+}
+
+@media (max-width: 1320px) {
+  .portal-root .command-v2-home-metrics {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+
+  .portal-root .command-v2-task-grid {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+
+  .portal-root .command-v2-attention-summary {
+    grid-template-columns: repeat(3,minmax(0,1fr));
+  }
+}
+
+@media (max-width: 920px) {
+  .portal-root .command-v2-home-metrics,
+  .portal-root .command-v2-task-grid,
+  .portal-root .command-admin-grid,
+  .portal-root .command-v2-attention-summary {
+    grid-template-columns: repeat(2,minmax(0,1fr));
+  }
+
+  .command-admin-executive-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 700px) {
+  .portal-root .command-v2-home-metrics,
+  .portal-root .command-v2-task-grid,
+  .portal-root .command-admin-grid,
+  .portal-root .command-v2-attention-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-root .account-admin-create {
+    grid-column: auto;
+  }
+}
