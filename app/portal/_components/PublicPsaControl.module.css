@@ -1,0 +1,95 @@
+.messageInput {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px 15px;
+  resize: vertical;
+  border: 1px solid var(--portal-line);
+  background: var(--portal-surface);
+  color: var(--portal-ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.55;
+  letter-spacing: 0;
+  text-transform: none;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.messageInput:focus {
+  border-color: var(--portal-gold);
+  box-shadow: 0 0 0 3px rgba(181, 155, 81, 0.12);
+}
+
+.preview {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  min-height: 54px;
+  margin-top: 16px;
+  overflow: hidden;
+  border: 1px solid #650b10;
+  background: linear-gradient(180deg, #c0181e, #991116);
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.previewLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 20px;
+  background: #760b0f;
+  white-space: nowrap;
+}
+
+.previewIcon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border-radius: 999px;
+  background: #fff;
+  color: #9e1116;
+  font-weight: 900;
+}
+
+.previewLabel strong {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.previewMessage {
+  min-width: 0;
+  align-self: center;
+  padding: 0 22px;
+  overflow: hidden;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .preview {
+    grid-template-columns: 1fr;
+  }
+
+  .previewLabel {
+    min-height: 40px;
+    justify-content: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .previewMessage {
+    min-height: 46px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    font-size: 11px;
+  }
+}
