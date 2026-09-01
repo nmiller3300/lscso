@@ -14,7 +14,7 @@ No service-role key or plaintext password belongs in this repository. Supabase A
 
 ## Portal interface
 
-The personnel portal uses the LSCSO Midnight dark-only interface and a shared responsive design system for Command and personnel workspaces.
+The personnel portal uses the LSCSO Midnight dark-only interface and a shared responsive design system for Command and personnel workspaces. The secure personnel gateway uses the current LSCSO patch and the same Midnight visual system as the authenticated portal.
 
 ## Local setup
 
