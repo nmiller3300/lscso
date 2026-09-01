@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePortalProfile } from "./PortalProfileProvider";
 
 type ActivePortalView =
@@ -113,6 +113,23 @@ export function PortalNavigation({ active, audience }: PortalNavigationProps) {
     ? navigation.filter((item) => !primaryMobile.includes(item))
     : [];
   const secondaryIsActive = secondaryMobile.some((item) => itemIsActive(item, active));
+
+  useEffect(() => {
+    if (!mobileMoreOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    function closeOnEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setMobileMoreOpen(false);
+    }
+
+    window.addEventListener("keydown", closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [mobileMoreOpen]);
 
   return (
     <>
