@@ -120,20 +120,21 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
   }
 
   return (
-    <div className="command-v2-workspace-grid">
-      <section className="portal-panel" style={{ gridColumn: "span 2" }}>
+    <div className="portal-account-admin">
+      <section className="portal-panel portal-account-create">
         <div className="portal-panel-heading">
           <div><p>Personnel accounts</p><h2>Create account</h2></div>
           <span>{credentialedAccounts.length} with login access</span>
         </div>
+        <p className="portal-account-admin__intro">Create the personnel record and initial portal credentials together. Permanent IDs are assigned automatically.</p>
 
-        <form onSubmit={createAccount} style={{ marginTop: 18 }}>
+        <form onSubmit={createAccount}>
           <div className="portal-form-grid">
             <label>Display name<input name="displayName" required placeholder="Department display name" /></label>
             <label>
               Permanent personnel ID
               <input aria-readonly="true" readOnly tabIndex={-1} value={nextPersonnelId ?? "Unavailable"} />
-              <small className="portal-field-help">Assigned automatically from the next available {testAccount ? "TA" : "LS"} number.</small>
+              <small className="portal-field-help">Next available {testAccount ? "test-account" : "official"} personnel number.</small>
             </label>
             <label>Username<input name="username" required autoComplete="off" placeholder="first.last" /></label>
             <label>Temporary password<input name="password" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" /></label>
@@ -142,38 +143,41 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
             <label>Primary assignment<select defaultValue={divisionOptions.includes("Patrol Division") ? "Patrol Division" : divisionOptions[0]} name="division">{divisionOptions.map((division) => <option key={division}>{division}</option>)}</select></label>
           </div>
 
-          <label className="portal-checkbox-row portal-checkbox-row--test" style={{ marginTop: 14 }}>
-            <input checked={testAccount} name="isTestAccount" onChange={(event) => setTestAccount(event.target.checked)} type="checkbox" />
-            <span><strong>Test account</strong><small>Uses TA personnel IDs and TA call signs and stays out of official reporting.</small></span>
-          </label>
-
-          <div className="portal-form-protection" style={{ marginTop: 14 }}>
-            <strong>Password change required on first sign-in</strong>
-            <span>The temporary password is only for initial access.</span>
+          <div className="portal-account-create__options">
+            <label className="portal-checkbox-row portal-checkbox-row--test">
+              <input checked={testAccount} name="isTestAccount" onChange={(event) => setTestAccount(event.target.checked)} type="checkbox" />
+              <span><strong>Test account</strong><small>Uses TA numbering and stays out of official reporting.</small></span>
+            </label>
+            <div className="portal-form-protection">
+              <strong>Password change required on first sign-in</strong>
+              <span>The temporary password is only for initial access.</span>
+            </div>
           </div>
 
-          {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
-          {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Account created</strong><span>{notice}</span></div> : null}
+          {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
+          {notice ? <div className="portal-form-success" role="status"><strong>Account created</strong><span>{notice}</span></div> : null}
 
-          <div className="command-v2-action-row" style={{ marginTop: 4 }}>
+          <div className="command-v2-action-row portal-account-create__actions">
             <button className="portal-button portal-button--primary" disabled={pending} type="submit">{pending ? "Creating…" : "Create personnel account"}</button>
           </div>
         </form>
       </section>
 
-      <section className="portal-panel command-v2-launcher">
+      <aside className="portal-panel portal-account-directory">
         <div className="portal-panel-heading"><div><p>Account status</p><h2>Department access</h2></div><span>{activeAccounts.length}</span></div>
-        <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
-          {activeAccounts.slice(0, 8).map((member) => (
-            <div key={member.profileId} style={{ padding: "10px 0", borderBottom: "1px solid rgba(82,68,51,.1)" }}>
-              <strong>{member.callSign || member.personnelId} · {member.displayName}</strong>
-              <span>{member.rank} · {member.username ? `@${member.username}` : "Credentials not assigned"}</span>
+        <p className="portal-account-admin__intro">A quick view of active personnel with portal credentials.</p>
+        <div className="portal-account-list">
+          {activeAccounts.slice(0, 10).map((member) => (
+            <div key={member.profileId}>
+              <span className="portal-account-list__avatar">{member.displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span>
+              <div><strong>{member.displayName}</strong><small>{member.callSign || member.personnelId} · {member.rank}</small></div>
+              <b>{member.username ? `@${member.username}` : "No login"}</b>
             </div>
           ))}
         </div>
-      </section>
+      </aside>
 
-      {profile.rank === "Sheriff" ? <SheriffAccountTestAccess accounts={personnel} /> : null}
+      {profile.rank === "Sheriff" ? <div className="portal-account-admin__sheriff"><SheriffAccountTestAccess accounts={personnel} /></div> : null}
     </div>
   );
 }
