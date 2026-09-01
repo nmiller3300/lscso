@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = "https://lscsogov.vercel.app";
+  // Department policy access is intentionally restricted to the authenticated Personnel Portal.
   const routes = [
     "",
     "/about",
