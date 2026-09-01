@@ -152,7 +152,7 @@ export function ApplicationForm() {
       <div className={`application-signature ${signed ? "is-signed" : ""}`}>
         <div>
           <span>Applicant signature</span>
-          {signed ? <><strong>{signatureName}</strong><small>Electronically signed {new Date(signedAt!).toLocaleString()}</small></> : <><strong>Not yet signed</strong><small>Your full name from Section 01 will be used as your electronic signature.</small></>}
+          {signed ? <><strong style={{ fontFamily: '"Segoe Script", "Brush Script MT", "Lucida Handwriting", cursive', fontWeight: 500, fontSize: "2rem", letterSpacing: "0.02em", lineHeight: 1.15, transform: "rotate(-2deg)", transformOrigin: "left center", display: "inline-block" }}>{signatureName}</strong><small>Electronically signed {new Date(signedAt!).toLocaleString()}</small></> : <><strong>Not yet signed</strong><small>Your full name from Section 01 will be used as your electronic signature.</small></>}
         </div>
         {signed ? <button className="application-signature__clear" type="button" onClick={clearSignature}>Clear signature</button> : <button className="application-signature__button" type="button" onClick={signApplication}>Click to Sign Application</button>}
       </div>
