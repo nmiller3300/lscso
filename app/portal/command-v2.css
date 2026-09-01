@@ -59,6 +59,120 @@
 .personnel-record-qol-actions .portal-button { min-height:42px; }
 .personnel-record-qol-actions .portal-button.is-active { border-color:rgba(162,124,69,.55); background:rgba(162,124,69,.12); }
 
+/* Personnel record: one shared, explainable frame across every record page. */
+.personnel-record-shell { margin-bottom:16px; border:1px solid var(--portal-line); background:var(--portal-surface,#fff); }
+.personnel-record-identity { display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:16px; align-items:center; padding:18px 20px; border-bottom:1px solid var(--portal-line); background:linear-gradient(115deg,#20231f 0,#20231f 44%,#292d28 100%); color:#fff; }
+.personnel-record-avatar { width:52px; height:52px; display:grid; place-items:center; border:1px solid rgba(216,194,125,.55); border-radius:50%; background:rgba(181,155,81,.12); color:#d8c27d; font-size:.76rem; font-weight:850; }
+.personnel-record-identity p,.personnel-record-identity h2,.personnel-record-identity>div>span { margin:0; }
+.personnel-record-identity p { color:#d8c27d; font-size:.66rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+.personnel-record-identity h2 { margin:3px 0; font-size:1.55rem; letter-spacing:-.035em; }
+.personnel-record-identity>div>span { color:rgba(255,255,255,.62); font-size:.8rem; }
+.personnel-record-identity-actions { display:flex; gap:10px; align-items:center; }
+.personnel-record-identity-actions>a,.personnel-record-status { border:1px solid rgba(255,255,255,.2); border-radius:999px; padding:7px 10px; color:#fff; font-size:.7rem; font-weight:750; text-decoration:none; }
+.personnel-record-status { border-color:rgba(216,194,125,.42); color:#d8c27d; text-transform:uppercase; letter-spacing:.06em; }
+.personnel-record-shell .command-v2-record-tabs { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:0; margin:0; padding:0; overflow:visible; }
+.personnel-record-shell .command-v2-record-tabs a { min-width:0; display:grid; gap:3px; border:0; border-right:1px solid var(--portal-line); border-bottom:3px solid transparent; border-radius:0; padding:13px 14px 11px; opacity:1; }
+.personnel-record-shell .command-v2-record-tabs a:nth-child(4),.personnel-record-shell .command-v2-record-tabs a:last-child { border-right:0; }
+.personnel-record-shell .command-v2-record-tabs a:nth-child(-n+4) { border-bottom-color:var(--portal-line); }
+.personnel-record-shell .command-v2-record-tabs a.is-active { border-bottom-color:var(--portal-gold,#a48b45); background:rgba(164,139,69,.09); }
+.personnel-record-shell .command-v2-record-tabs strong { font-size:.77rem; }
+.personnel-record-shell .command-v2-record-tabs span { border:0; border-radius:0; padding:0; font-size:.67rem; font-weight:500; opacity:.62; white-space:normal; }
+
+.personnel-section-intro { max-width:900px; margin:0 0 18px; color:var(--portal-muted); font-size:.88rem; line-height:1.6; }
+.personnel-guidance-note { display:grid; gap:4px; margin-bottom:18px; padding:13px 15px; border-left:3px solid var(--portal-gold); background:var(--portal-subtle); }
+.personnel-guidance-note strong { font-size:.78rem; }
+.personnel-guidance-note span { color:var(--portal-muted); font-size:.8rem; line-height:1.5; }
+.personnel-inline-notice { margin-top:14px; padding:12px 14px; border:1px solid rgba(164,139,69,.35); background:rgba(164,139,69,.08); font-size:.82rem; }
+
+.personnel-letter-layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr); gap:16px; margin-bottom:16px; align-items:start; }
+.personnel-letter-layout--history-only { grid-template-columns:1fr; }
+.personnel-letter-composer form,.service-record-form form { display:grid; gap:14px; }
+.personnel-letter-composer label,.service-record-form label { display:grid; gap:7px; color:var(--portal-muted); font-size:.72rem; font-weight:750; letter-spacing:.05em; text-transform:uppercase; }
+.personnel-letter-composer input,.personnel-letter-composer textarea,.service-record-form input,.service-record-form select,.service-record-form textarea { width:100%; box-sizing:border-box; border:1px solid var(--portal-line); border-radius:6px; background:var(--portal-input); color:var(--portal-text); padding:11px 12px; font:inherit; letter-spacing:normal; text-transform:none; }
+.personnel-document-list { gap:8px; }
+.personnel-document-list article { display:grid; grid-template-columns:auto minmax(0,1fr) auto; border:1px solid var(--portal-line); border-radius:8px; padding:12px; }
+.personnel-document-list article>div { min-width:0; text-align:left; }
+.personnel-document-list article p { display:-webkit-box; margin:8px 0 0; overflow:hidden; color:var(--portal-muted); font-size:.78rem; line-height:1.45; -webkit-box-orient:vertical; -webkit-line-clamp:3; white-space:pre-wrap; }
+.personnel-document-list article b { color:var(--portal-muted); font-size:.67rem; text-transform:uppercase; }
+.personnel-document-icon { width:34px; height:34px; display:grid!important; place-items:center; margin:0!important; border:1px solid rgba(164,139,69,.38); border-radius:50%; background:rgba(164,139,69,.1); color:var(--portal-gold-dark)!important; font-size:.65rem!important; font-weight:850; opacity:1!important; }
+.personnel-document-list--member article { grid-template-columns:auto minmax(0,1fr) auto auto; }
+.personnel-document-list--member button { border:0; background:transparent; color:var(--portal-gold-dark); cursor:pointer; font-size:.7rem; font-weight:800; text-transform:uppercase; }
+.personnel-letter-modal { width:min(760px,100%); }
+.personnel-letter-body { min-height:200px; padding:20px 4px; font-family:Georgia,serif; font-size:1rem; line-height:1.75; white-space:pre-wrap; }
+.personnel-letter-body p { margin:0 0 1em; }
+.personnel-letter-modal footer { display:grid; gap:3px; padding:18px 0; border-top:1px solid var(--portal-line); }
+.personnel-letter-modal footer span,.personnel-letter-modal footer small { color:var(--portal-muted); font-size:.76rem; }
+.personnel-vault-note { margin-bottom:16px; }
+
+.deputy-document-center,.deputy-certifications,.deputy-assignments { margin-bottom:17px; }
+.deputy-document-center>.deputy-guardian-panel { margin:22px -17px 0; border-right:0; border-left:0; }
+.deputy-document-summary { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; margin-bottom:22px; }
+.deputy-document-summary>div { display:grid; gap:5px; padding:13px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.deputy-document-summary span { color:var(--portal-muted); font-size:.68rem; font-weight:750; text-transform:uppercase; }
+.deputy-document-summary strong { font-size:1.35rem; }
+.personnel-subsection-heading { display:flex; justify-content:space-between; margin:20px 0 10px; }
+.personnel-subsection-heading span { color:var(--portal-gold-dark); font-size:.65rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.personnel-subsection-heading h3 { margin:3px 0 0; font-size:1rem; }
+.personnel-history-disclosure { margin-top:14px; border:1px solid var(--portal-line); }
+.personnel-history-disclosure summary { display:flex; justify-content:space-between; gap:12px; padding:13px 15px; background:var(--portal-subtle); cursor:pointer; font-size:.8rem; font-weight:750; }
+.personnel-history-disclosure summary span { color:var(--portal-muted); font-size:.7rem; font-weight:600; }
+.personnel-history-disclosure>.deputy-request-history,.personnel-history-disclosure>.personnel-compact-records { padding:10px; }
+.personnel-certification-summary { display:flex; gap:8px; margin-bottom:14px; }
+.personnel-certification-summary>div { min-width:110px; display:flex; align-items:baseline; gap:7px; padding:8px 11px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.personnel-certification-summary strong { font-size:1.05rem; }
+.personnel-certification-summary span { color:var(--portal-muted); font-size:.68rem; text-transform:uppercase; }
+.personnel-certification-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.personnel-certification-grid article { display:flex; min-height:145px; flex-direction:column; padding:14px; border:1px solid var(--portal-line); background:var(--portal-surface,#fff); }
+.personnel-certification-grid article>span { width:max-content; margin-bottom:9px; padding:3px 7px; border-radius:999px; background:rgba(64,118,79,.11); color:#40764f; font-size:.62rem; font-weight:800; text-transform:uppercase; }
+.personnel-certification-grid article>strong { font-size:.9rem; }
+.personnel-certification-grid article>small { margin-top:4px; color:var(--portal-muted); font-size:.72rem; }
+.personnel-certification-grid dl { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:auto 0 0; padding-top:14px; }
+.personnel-certification-grid dt { color:var(--portal-muted); font-size:.6rem; text-transform:uppercase; }
+.personnel-certification-grid dd { margin:3px 0 0; font-size:.72rem; font-weight:650; }
+.personnel-certification-grid--command { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.personnel-compact-records { display:grid; gap:7px; }
+.personnel-compact-records>div { display:flex; justify-content:space-between; gap:12px; padding:9px 10px; border-bottom:1px solid var(--portal-line); }
+.personnel-compact-records span { color:var(--portal-muted); font-size:.75rem; }
+
+.personnel-assignment-manager { margin-bottom:16px; scroll-margin-top:20px; }
+.personnel-assignment-form { display:grid; grid-template-columns:1.1fr .8fr 1.2fr auto; gap:10px; align-items:end; margin-bottom:16px; padding:14px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.personnel-assignment-form label { display:grid; gap:6px; }
+.personnel-assignment-form label>span { color:var(--portal-muted); font-size:.67rem; font-weight:750; text-transform:uppercase; }
+.personnel-assignment-form input,.personnel-assignment-form select { min-height:42px; width:100%; border:1px solid var(--portal-line); border-radius:5px; background:var(--portal-input); color:var(--portal-text); padding:8px 10px; font:inherit; }
+.personnel-assignment-list { display:grid; gap:8px; }
+.personnel-assignment-list article { display:flex; justify-content:space-between; gap:14px; align-items:center; padding:12px 14px; border:1px solid var(--portal-line); border-left:3px solid var(--portal-gold); background:var(--portal-surface,#fff); }
+.personnel-assignment-list article>div { display:grid; gap:3px; }
+.personnel-assignment-list article span { color:var(--portal-gold-dark); font-size:.62rem; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+.personnel-assignment-list article strong { font-size:.86rem; }
+.personnel-assignment-list article small { color:var(--portal-muted); font-size:.72rem; }
+.personnel-assignment-list article button { border:0; background:transparent; color:var(--portal-muted); cursor:pointer; font-size:.68rem; font-weight:750; text-transform:uppercase; }
+.personnel-assignment-list--member { margin:0 17px; }
+.personnel-record-two-column { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr); gap:16px; }
+.personnel-record-wide { grid-row:span 2; }
+
+/* Service Records: member -> action -> form. */
+.service-record-workspace { display:grid; gap:16px; }
+.service-record-subject-row { display:grid; grid-template-columns:minmax(260px,1fr) minmax(220px,.7fr) auto; gap:14px; align-items:end; }
+.service-record-subject-row label { display:grid; gap:7px; }
+.service-record-subject-row label>span,.service-record-subject-row>div>span { color:var(--portal-muted); font-size:.67rem; font-weight:750; text-transform:uppercase; }
+.service-record-subject-row select { min-height:46px; border:1px solid var(--portal-line); border-radius:6px; background:var(--portal-input); color:var(--portal-text); padding:9px 11px; font:inherit; }
+.service-record-subject-row>div { display:grid; gap:3px; }
+.service-record-subject-row>div small { color:var(--portal-muted); }
+.service-record-action-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.service-record-action-grid button { min-height:125px; display:flex; flex-direction:column; align-items:flex-start; padding:14px; border:1px solid var(--portal-line); border-radius:8px; background:var(--portal-surface,#fff); color:inherit; cursor:pointer; text-align:left; }
+.service-record-action-grid button.is-active { border-color:var(--portal-gold); box-shadow:inset 0 -3px var(--portal-gold); background:rgba(164,139,69,.07); }
+.service-record-action-grid span { color:var(--portal-gold-dark); font-size:.62rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.service-record-action-grid strong { margin-top:8px; font-size:.94rem; }
+.service-record-action-grid small { margin-top:6px; color:var(--portal-muted); line-height:1.45; }
+.service-record-main-grid { display:grid; grid-template-columns:minmax(0,1.2fr) minmax(330px,.8fr); gap:16px; align-items:start; }
+.service-record-activity { display:grid; gap:16px; }
+.service-record-compact-list { display:grid; gap:7px; }
+.service-record-compact-list article { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid var(--portal-line); }
+.service-record-compact-list article:last-child { border-bottom:0; }
+.service-record-compact-list article>div { display:grid; gap:3px; }
+.service-record-compact-list span,.service-record-compact-list small { color:var(--portal-muted); font-size:.72rem; }
+.service-record-compact-list button { align-self:center; border:0; background:transparent; color:var(--portal-gold-dark); cursor:pointer; font-size:.66rem; font-weight:800; text-transform:uppercase; }
+
 .command-roster-account-create-hidden .portal-control-actions { display:none; }
 
 /* Roster personnel manager: keep the dialog contained and usable on phones. */
@@ -72,7 +186,17 @@
 .portal-modal select,.portal-modal input,.portal-modal textarea { max-width:100%; }
 .portal-modal .portal-modal-actions { width:100%; }
 
-@media (max-width:980px) { .command-v2-workspace-grid,.command-v2-task-grid { grid-template-columns:1fr 1fr; } }
+@media (max-width:980px) {
+  .command-v2-workspace-grid,.command-v2-task-grid { grid-template-columns:1fr 1fr; }
+  .personnel-record-shell .command-v2-record-tabs { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .personnel-record-shell .command-v2-record-tabs a:nth-child(odd) { border-right:1px solid var(--portal-line); }
+  .personnel-record-shell .command-v2-record-tabs a:nth-child(even) { border-right:0; }
+  .personnel-record-shell .command-v2-record-tabs a:nth-child(-n+6) { border-bottom-color:var(--portal-line); }
+  .personnel-record-shell .command-v2-record-tabs a.is-active { border-bottom-color:var(--portal-gold,#a48b45); }
+  .personnel-letter-layout,.service-record-main-grid,.personnel-record-two-column { grid-template-columns:1fr; }
+  .personnel-assignment-form { grid-template-columns:1fr 1fr; }
+  .personnel-certification-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
 .recruitment-metrics{grid-template-columns:repeat(5,minmax(0,1fr))}.recruitment-directory{padding:0;overflow:hidden}.recruitment-filters,.recruitment-control-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:18px;border-bottom:1px solid var(--portal-line)}.recruitment-filters label,.recruitment-control-grid label,.recruitment-wide-label{display:grid;gap:7px;color:var(--portal-muted);font-size:.78rem;font-weight:700;text-transform:uppercase}.recruitment-filters input,.recruitment-filters select,.recruitment-control-grid input,.recruitment-control-grid select,.recruitment-wide-label textarea{width:100%;border:1px solid var(--portal-line);border-radius:6px;background:var(--portal-input);color:var(--portal-text);padding:10px;font:inherit;text-transform:none}.recruitment-list article{display:grid;grid-template-columns:1.3fr 1fr 1fr .8fr auto;gap:16px;align-items:center;padding:16px 18px;border-bottom:1px solid var(--portal-line)}.recruitment-list article span,.recruitment-list article>div{display:grid;gap:5px;color:var(--portal-muted);font-size:.82rem}.recruitment-list article strong{color:var(--portal-text)}.recruitment-status{display:inline-flex;width:max-content;padding:4px 8px;border-radius:999px;background:rgba(162,124,69,.14);color:var(--portal-text);font-size:.72rem}.recruitment-status--accepted{background:rgba(49,116,76,.18)}.recruitment-status--denied{background:rgba(150,58,58,.18)}.recruitment-status--interview{background:rgba(58,97,150,.18)}.recruitment-review{display:grid;gap:18px}.recruitment-applicant{display:flex;justify-content:space-between;gap:20px}.recruitment-applicant p,.recruitment-controls p{margin:0 0 5px;color:var(--portal-muted);text-transform:uppercase;font-size:.76rem;font-weight:700}.recruitment-applicant dl{display:grid;grid-template-columns:repeat(2,minmax(130px,1fr));gap:14px 28px;margin:0}.recruitment-applicant dt{font-size:.72rem;text-transform:uppercase;color:var(--portal-muted)}.recruitment-applicant dd{margin:4px 0 0}.recruitment-controls .recruitment-control-grid{padding:0;border:0;grid-template-columns:repeat(3,minmax(0,1fr))}.recruitment-control-grid>div{display:grid;gap:9px;align-content:start}.recruitment-wide-label{margin:14px 0}.recruitment-notes,.recruitment-history{display:grid;gap:10px;margin-top:16px}.recruitment-notes article,.recruitment-history article,.recruitment-answer-section article{border-left:3px solid var(--portal-line);padding:10px 14px;background:var(--portal-subtle)}.recruitment-notes span,.recruitment-history span,.recruitment-history small{display:block;color:var(--portal-muted);font-size:.8rem;margin-top:3px}.recruitment-notes p,.recruitment-answer-section p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}.recruitment-answer-section{margin-top:22px}.recruitment-answer-section h3{margin-bottom:10px}.recruitment-answer-section article{margin:8px 0}.recruitment-signature-record{display:grid;gap:18px}.recruitment-signature-record>p{margin:0;max-width:900px;line-height:1.65;color:var(--portal-muted)}.recruitment-signature-record dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0}.recruitment-signature-record dl>div{border:1px solid var(--portal-line);border-radius:8px;padding:12px;background:var(--portal-subtle)}.recruitment-signature-record dt{font-size:.7rem;font-weight:750;text-transform:uppercase;color:var(--portal-muted)}.recruitment-signature-record dd{margin:5px 0 0;font-weight:650;overflow-wrap:anywhere}
 .recruitment-availability{margin-bottom:18px;border-left:4px solid #865050}.recruitment-availability--open{border-left-color:#4c7659}.recruitment-availability__badge{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:.72rem;letter-spacing:.07em;text-transform:uppercase}.recruitment-availability__badge--open{background:rgba(49,116,76,.18);color:#8fc59e}.recruitment-availability__badge--closed{background:rgba(150,58,58,.18);color:#d79898}.recruitment-availability__layout{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,.75fr);gap:24px;align-items:start;margin-top:18px}.recruitment-availability__layout>div:first-child{display:grid;gap:8px}.recruitment-availability__layout p{max-width:760px;margin:0;color:var(--portal-muted);line-height:1.55}.recruitment-availability__layout p a{color:var(--portal-accent);text-decoration:underline;text-underline-offset:3px}.recruitment-availability__layout small{color:var(--portal-muted)}.recruitment-availability__controls{display:grid;gap:12px}.recruitment-availability .portal-form-error,.recruitment-availability .portal-form-protection{margin-top:16px}
 
@@ -88,6 +212,20 @@
   .personnel-document-list article>div:last-child { max-width:42%; }
   .personnel-record-qol-actions { display:grid; grid-template-columns:1fr 1fr; }
   .personnel-record-qol-actions .portal-button { width:100%; justify-content:center; }
+  .personnel-record-identity { grid-template-columns:auto minmax(0,1fr); padding:15px; }
+  .personnel-record-identity-actions { grid-column:1/-1; justify-content:space-between; }
+  .personnel-record-shell .command-v2-record-tabs { grid-template-columns:1fr; }
+  .personnel-record-shell .command-v2-record-tabs a,.personnel-record-shell .command-v2-record-tabs a:nth-child(n) { border-right:0; border-bottom:1px solid var(--portal-line); }
+  .personnel-record-shell .command-v2-record-tabs a.is-active { border-left:3px solid var(--portal-gold,#a48b45); border-bottom-color:var(--portal-line); }
+  .deputy-document-summary { grid-template-columns:1fr 1fr; }
+  .personnel-document-list article,.personnel-document-list--member article { grid-template-columns:auto minmax(0,1fr); }
+  .personnel-document-list article>b,.personnel-document-list article>button { grid-column:2; justify-self:start; }
+  .personnel-certification-summary { display:grid; grid-template-columns:repeat(3,1fr); }
+  .personnel-certification-summary>div { min-width:0; }
+  .personnel-certification-grid,.personnel-certification-grid--command { grid-template-columns:1fr; }
+  .personnel-compact-records>div { display:grid; }
+  .personnel-assignment-form,.service-record-subject-row,.service-record-action-grid { grid-template-columns:1fr; }
+  .service-record-action-grid button { min-height:0; }
 
   .portal-modal-backdrop { padding:10px; align-items:flex-start; }
   .portal-modal { width:100%; max-height:calc(100dvh - 20px); margin:0; border-radius:0; }

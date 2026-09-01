@@ -64,7 +64,7 @@ const deputyNavigation: NavigationItem[] = [
   myInfo,
   { id: "certifications", href: "/portal/my-office#certifications", label: "Certifications", mobileLabel: "Certs", glyph: "CE" },
   { id: "awards", href: "/portal/my-office#awards", label: "Medals & awards", mobileLabel: "Awards", glyph: "AW" },
-  { id: "guardians", href: "/portal/my-office#guardians", label: "My Guardians", mobileLabel: "Guardians", glyph: "MG" },
+  { id: "guardians", href: "/portal/my-office#documents", label: "My Documents", mobileLabel: "Documents", glyph: "MD" },
   { id: "requests", href: "/portal/my-office#requests", label: "Requests & LOA", mobileLabel: "Requests", glyph: "RQ" },
 ];
 

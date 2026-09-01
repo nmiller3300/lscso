@@ -64,7 +64,7 @@ export default async function NotificationsPage() {
       priority: "High",
       title: `Acknowledge G-${String(item.guardian_number).padStart(4, "0")}`,
       detail: item.title,
-      href: `/portal/my-office#guardians`,
+      href: `/portal/my-office#documents`,
       createdAt: item.created_at,
       status: "Acknowledgment required",
     });

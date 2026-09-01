@@ -149,7 +149,7 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
     <>
       <section className="portal-panel deputy-guardian-panel" id="guardians">
         <div className="portal-panel-heading">
-          <div><p>Personnel action record</p><h2>My Guardians</h2></div>
+          <div><p>Acknowledgment records</p><h2>Guardian documents</h2></div>
           <span>Acknowledgment confirms receipt—not agreement</span>
         </div>
         <div className="deputy-guardian-table">
