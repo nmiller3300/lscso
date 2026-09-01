@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { SiteFooter } from "./_components/SiteFooter";
 import { SiteHeader } from "./_components/SiteHeader";
+import { StatewideJurisdictionAlert } from "./_components/StatewideJurisdictionAlert";
 import "./globals.css";
 
 const geist = localFont({
@@ -63,6 +64,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" className={geist.variable}>
       <body>
         <SiteHeader />
+        <StatewideJurisdictionAlert />
         <main>{children}</main>
         <SiteFooter />
       </body>
