@@ -56,6 +56,7 @@ const commandNavigation: NavigationItem[] = [
 
 const supervisorNavigation: NavigationItem[] = [
   { id: "supervision", href: "/portal/command/supervision", label: "My Personnel & Supervision", mobileLabel: "Supervise", glyph: "SV", matches: ["guardians"] },
+  { id: "approvals", href: "/portal/command/approvals", label: "Assigned Requests", mobileLabel: "Requests", glyph: "RQ" },
   { id: "training", href: "/portal/command/training", label: "Training", mobileLabel: "Training", glyph: "TR", matches: ["certifications"] },
   myInfo,
 ];
