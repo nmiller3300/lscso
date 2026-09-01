@@ -12,6 +12,7 @@ import "./timeline-v2.css";
 import "./notifications-v2.css";
 import "./request-routing.css";
 import "./notification-attention.css";
+import "./midnight.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
@@ -24,15 +25,8 @@ export const metadata: Metadata = {
 
 export default function PortalLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
-    <>
-      <div className="portal-root" data-theme="light" id="lscso-portal-root" suppressHydrationWarning>
-        {children}
-      </div>
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `(function(){try{var t=localStorage.getItem("lscso.portal.theme:v1");if(t!=="dark"&&t!=="light"){t=window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"}var e=document.getElementById("lscso-portal-root");if(e)e.dataset.theme=t}catch(e){}})();`,
-        }}
-      />
-    </>
+    <div className="portal-root" data-theme="dark" id="lscso-portal-root">
+      {children}
+    </div>
   );
 }
