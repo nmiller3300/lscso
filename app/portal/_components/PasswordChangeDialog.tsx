@@ -5,7 +5,17 @@ import { createClient } from "@/lib/supabase/client";
 import { isStrongPassword, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
 
-export function PasswordChangeDialog() {
+type PasswordChangeDialogProps = {
+  triggerLabel?: string;
+  triggerClassName?: string;
+  onTrigger?: () => void;
+};
+
+export function PasswordChangeDialog({
+  triggerLabel = "My account",
+  triggerClassName = "portal-account-button",
+  onTrigger,
+}: PasswordChangeDialogProps = {}) {
   const [open, setOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [nextPassword, setNextPassword] = useState("");
@@ -13,6 +23,11 @@ export function PasswordChangeDialog() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
+
+  function openDialog() {
+    onTrigger?.();
+    setOpen(true);
+  }
 
   async function changePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -80,7 +95,7 @@ export function PasswordChangeDialog() {
 
   return (
     <>
-      <button className="portal-account-button" onClick={() => setOpen(true)} type="button">My account</button>
+      <button className={triggerClassName} onClick={openDialog} type="button">{triggerLabel}</button>
       {open ? (
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => {
           if (event.currentTarget === event.target) setOpen(false);
