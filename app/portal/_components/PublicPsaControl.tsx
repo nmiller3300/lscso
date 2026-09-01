@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import styles from "./PublicPsaControl.module.css";
 
 type PsaState = {
   message: string;
@@ -97,6 +98,7 @@ export function PublicPsaControl() {
             <label style={{ gridColumn: "1 / -1" }}>
               PSA message
               <textarea
+                className={styles.messageInput}
                 maxLength={240}
                 onChange={(event) => setPsa((current) => ({ ...current, message: event.target.value }))}
                 placeholder="Enter the public safety notice"
@@ -129,16 +131,12 @@ export function PublicPsaControl() {
             <div><p>Preview</p><h2>Public banner</h2></div>
             <span>{psa.isActive ? "Will display" : "Currently hidden"}</span>
           </div>
-          <div style={{ marginTop: 16, overflow: "hidden", borderRadius: 4, border: "1px solid #650b10", background: "linear-gradient(180deg,#c0181e,#991116)", color: "white", boxShadow: "0 6px 18px rgba(0,0,0,.18)" }}>
-            <div style={{ display: "flex", alignItems: "center", minHeight: 54 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, alignSelf: "stretch", padding: "0 20px", background: "#760b0f", whiteSpace: "nowrap" }}>
-                <span style={{ display: "grid", width: 24, height: 24, placeItems: "center", borderRadius: 999, background: "white", color: "#9e1116", fontWeight: 900 }}>!</span>
-                <strong style={{ fontSize: 11, letterSpacing: ".12em", textTransform: "uppercase" }}>Public Safety Notice</strong>
-              </div>
-              <div style={{ minWidth: 0, padding: "0 22px", fontSize: 13, fontWeight: 900, letterSpacing: ".08em", textTransform: "uppercase", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {psa.message || "Your PSA message will appear here"}
-              </div>
+          <div className={styles.preview}>
+            <div className={styles.previewLabel}>
+              <span className={styles.previewIcon}>!</span>
+              <strong>Public Safety Notice</strong>
             </div>
+            <div className={styles.previewMessage}>{psa.message || "Your PSA message will appear here"}</div>
           </div>
           <div className="portal-form-protection" style={{ marginTop: 14 }}>
             <strong>Last Command update</strong>
