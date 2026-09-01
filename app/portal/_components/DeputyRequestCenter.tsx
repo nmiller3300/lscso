@@ -112,7 +112,7 @@ export function DeputyRequestCenter() {
       supabase.from("organizational_units").select("id,name,unit_type,active").eq("active", true).eq("unit_type", "Division").order("sort_order").order("name"),
     ]);
 
-    const unitNames = new Map((unitResult.data ?? []).map((unit: any) => [unit.id, unit.name]));
+    const unitNames = new Map<string, string>((unitResult.data ?? []).map((unit: any): [string, string] => [String(unit.id), String(unit.name)]));
     const eventsByRequest = new Map<string, RouteEvent[]>();
     for (const event of eventResult.data ?? []) {
       const list = eventsByRequest.get(event.request_id) ?? [];
@@ -130,7 +130,7 @@ export function DeputyRequestCenter() {
 
     setDivisions((unitResult.data ?? [])
       .filter((unit: any) => unit.name !== profile.division && unit.name !== "Office of the Sheriff")
-      .map((unit: any) => ({ id: unit.id, name: unit.name })));
+      .map((unit: any) => ({ id: String(unit.id), name: String(unit.name) })));
 
     setRequests((requestRows ?? []).map((row: any): PersonnelRequest => {
       const kind = typeToKind[row.request_type] ?? "record";
@@ -144,7 +144,7 @@ export function DeputyRequestCenter() {
         routingStage: row.routing_stage ?? "Routing pending",
         routingLabel: row.routing_label ?? "Routing pending",
         reviewerLabel: row.current_reviewer_label ?? (row.status === "Approved" ? "Completed" : row.status === "Denied" ? "Closed" : "Command routing pending"),
-        requestedUnitName: row.requested_unit_id ? unitNames.get(row.requested_unit_id) ?? "Requested division" : null,
+        requestedUnitName: row.requested_unit_id ? unitNames.get(String(row.requested_unit_id)) ?? "Requested division" : null,
         events: eventsByRequest.get(row.id) ?? [],
       };
     }));
