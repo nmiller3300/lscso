@@ -28,14 +28,6 @@ export default function TrainingRecruitmentPage() {
         imagePosition="center 30%"
       />
 
-      <section className="status-ribbon status-ribbon--gold">
-        <div className="site-shell">
-          <span className="status-dot" />
-          <strong>Applications Open</strong>
-          <span>Current sworn recruitment is for the Patrol Division.</span>
-        </div>
-      </section>
-
       <section className="content-section content-section--light">
         <div className="site-shell two-column-editorial">
           <div>
@@ -101,7 +93,10 @@ export default function TrainingRecruitmentPage() {
             Patrol is the Office’s active operational division and the current
             route for candidates seeking a sworn deputy position.
           </p>
-          <RouteLink href="/patrol">Explore Patrol Division</RouteLink>
+          <div className="page-actions">
+            <RouteLink href="/join/application">Begin an Application</RouteLink>
+            <RouteLink href="/patrol" variant="outline">Explore Patrol Division</RouteLink>
+          </div>
         </div>
       </section>
     </>

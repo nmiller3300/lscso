@@ -74,6 +74,7 @@ export default function InternalAffairsPage() {
             ))}
           </div>
           <div className="page-actions">
+            <RouteLink href="/join/application">Begin with Patrol</RouteLink>
             <RouteLink href="/about#core-values" variant="outline">Review Our Core Values</RouteLink>
             <RouteLink href="/office-of-the-sheriff" variant="outline">Office Leadership</RouteLink>
           </div>

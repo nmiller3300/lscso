@@ -4,7 +4,7 @@ import Link from "next/link";
 const primaryNavigation = [
   { href: "/about", label: "About" },
   { href: "/office-of-the-sheriff", label: "Office of the Sheriff" },
-  { href: "/join/application", label: "Join LSCSO" },
+  { href: "/join", label: "Join LSCSO" },
   { href: "/portal", label: "Personnel Portal" },
 ];
 
@@ -56,7 +56,7 @@ export function SiteHeader() {
             </div>
           </details>
 
-          <Link href="/join/application">Join LSCSO</Link>
+          <Link href="/join">Join LSCSO</Link>
           <Link href="/portal">Personnel Portal</Link>
         </nav>
 
@@ -79,7 +79,7 @@ export function SiteHeader() {
               </div>
             </details>
 
-            <Link href="/join/application">Join LSCSO</Link>
+            <Link href="/join">Join LSCSO</Link>
             <Link href="/portal">Personnel Portal</Link>
           </nav>
         </details>
