@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrowserPushControl } from "./BrowserPushControl";
 import { CommandQuickFind } from "./CommandQuickFind";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
@@ -66,6 +67,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
             <div><p>{eyebrow}</p><h1>{title}</h1><span>{description}</span></div>
             {actions ? <div className="portal-page-actions">{actions}</div> : null}
           </div>
+          {active === "notifications" ? <BrowserPushControl /> : null}
           {children}
         </main>
       </section>
