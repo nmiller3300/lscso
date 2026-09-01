@@ -7,13 +7,51 @@ import { createClient } from "@/lib/supabase/client";
 type Person = { id: string; display_name: string; rank: string; call_sign: string | null };
 type Certification = { id: string; profile_id: string; name: string; status: string; issuer: string; certificate_number: string | null; issued_on: string | null; expires_on: string | null; notes: string | null };
 
+const expirationPolicy: Record<string, string> = {
+  "Advanced Criminal Investigations": "No expiration",
+  "CPR / AED": "1 year",
+  "Crisis Intervention Training": "1 year",
+  "Defensive Tactics Instructor": "2 years",
+  "Emergency Vehicle Operations": "No expiration",
+  "Field Training Officer": "No expiration",
+  "Firearms Specialist": "No expiration",
+  "Internal Affairs Investigator": "No expiration",
+  "Less-Lethal Certification": "1 year",
+  "Pursuit Intervention Technique": "No expiration",
+  "Stop the Bleed / First Aid": "1 year",
+  "SWAT Operator": "No expiration",
+  "Advanced Peace Officer": "No expiration",
+  "Crime Scene Investigation": "No expiration",
+  "Crisis Negotiator": "1 year",
+  "Drug Recognition Expert": "1 year",
+  "Evidence Handling": "No expiration",
+  "Firearm Certification": "2 years",
+  "FTO Instructor": "No expiration",
+  "Interview & Interrogation": "1 year",
+  "Less-Lethal Instructor": "1 year",
+  "Radar / LIDAR": "No expiration",
+  "Supervisor Certification": "No expiration",
+  "Taser / Conducted Energy Weapon Certification": "1 year",
+  "Basic Peace Officer": "No expiration",
+  "Criminal Investigations": "No expiration",
+  "De-Escalation Certification": "1 year",
+  "DUI / Standardized Field Sobriety Testing": "No expiration",
+  "EVOC Instructor": "2 years",
+  "Firearms Instructor": "2 years",
+  "General Instructor": "No expiration",
+  "K-9 Handler": "No expiration",
+  "OC Spray Certification": "No expiration",
+  "Search & Rescue": "2 years",
+  "SWAT Marksman": "1 year",
+  "Traffic Enforcement": "No expiration",
+};
+
 export function CertificationWorkspace({ personnel, catalog, certifications, canManageCertifications }: { personnel: Person[]; catalog: string[]; certifications: Certification[]; canManageCertifications: boolean }) {
   const router = useRouter();
   const canIssue = canManageCertifications;
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState(false);
   const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
-  const [noExpiration, setNoExpiration] = useState(false);
 
   function toggleCertification(name: string) {
     setSelectedCertifications((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
@@ -38,7 +76,7 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
           target_profile_id: targetProfileId,
           certification_names: selectedCertifications,
           issued_date: String(form.get("issuedOn") ?? "") || new Date().toISOString().slice(0, 10),
-          expiration_date: noExpiration ? null : (String(form.get("expiresOn") ?? "") || null),
+          expiration_date: null,
           issue_notes: String(form.get("notes") ?? "").trim() || null,
         })
       : await supabase.rpc("request_certification", {
@@ -52,9 +90,8 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
 
     if (canIssue) {
       const count = Array.isArray(result.data) ? result.data.length : selectedCertifications.length;
-      setNotice(`${count} certification${count === 1 ? "" : "s"} issued and written to the personnel record.`);
+      setNotice(`${count} certification${count === 1 ? "" : "s"} issued with LSCSO policy expiration and written to the personnel record.`);
       setSelectedCertifications([]);
-      setNoExpiration(false);
       formElement.reset();
     } else {
       setNotice(`${certificationName} submitted for final issuance.`);
@@ -88,12 +125,12 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
           <div className="portal-form-grid portal-form-grid--three">
             <label>Personnel member<select name="member" required defaultValue=""><option disabled value="">Select personnel</option>{personnel.map((person) => <option key={person.id} value={person.id}>{person.display_name} · {person.rank}{person.call_sign ? ` · ${person.call_sign}` : ""}</option>)}</select></label>
             {!canIssue ? <label>Certification<select name="certification" required defaultValue=""><option disabled value="">Select certification</option>{catalog.map((name) => <option key={name}>{name}</option>)}</select></label> : null}
-            {canIssue ? <div className="portal-form-protection"><strong>Certificate numbers automated</strong><span>Each selected certification receives its own unique LSCSO certificate number.</span></div> : <div className="portal-form-protection"><strong>Recommendation only</strong><span>This request does not add the certification until an authorized administrator issues it.</span></div>}
+            {canIssue ? <div className="portal-form-protection"><strong>Expiration policy automated</strong><span>Each certification is assigned its required expiration from the LSCSO certification policy. Command cannot override the policy at issuance.</span></div> : <div className="portal-form-protection"><strong>Recommendation only</strong><span>This request does not add the certification until an authorized administrator issues it.</span></div>}
           </div>
 
-          {canIssue ? <fieldset className="certification-picker"><legend>Select certifications <span>{selectedCertifications.length} selected</span></legend><div className="certification-picker__grid">{catalog.map((name) => <label className={selectedCertifications.includes(name) ? "is-selected" : undefined} key={name}><input checked={selectedCertifications.includes(name)} onChange={() => toggleCertification(name)} type="checkbox" /><span>{name}</span></label>)}</div></fieldset> : null}
+          {canIssue ? <fieldset className="certification-picker"><legend>Select certifications <span>{selectedCertifications.length} selected</span></legend><div className="certification-picker__grid">{catalog.map((name) => <label className={selectedCertifications.includes(name) ? "is-selected" : undefined} key={name}><input checked={selectedCertifications.includes(name)} onChange={() => toggleCertification(name)} type="checkbox" /><span>{name}<small>{expirationPolicy[name] ?? "No expiration"}</small></span></label>)}</div></fieldset> : null}
 
-          {canIssue ? <div className="portal-form-grid"><label>Issued on<input name="issuedOn" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label><label>Expiration date<input disabled={noExpiration} name="expiresOn" type="date" /></label><label className="certification-permanent-toggle"><input checked={noExpiration} onChange={(event) => setNoExpiration(event.target.checked)} type="checkbox" /><span><strong>No expiration</strong><small>Certification remains current until manually removed or otherwise changed.</small></span></label></div> : null}
+          {canIssue ? <div className="portal-form-grid"><label>Issued on<input name="issuedOn" type="date" defaultValue={new Date().toISOString().slice(0, 10)} /></label><div className="portal-form-protection"><strong>Expiration date</strong><span>Automatically calculated from the selected certification(s) and issue date.</span></div></div> : null}
           <label className="portal-call-sign-field">Notes <span>Optional</span><textarea name="notes" rows={4} placeholder={canIssue ? "Issuance notes or qualification basis..." : "Training completion, evaluator recommendation, or supporting details..."} /></label>
           <div className="portal-modal-actions"><button className="portal-button portal-button--primary" disabled={pending} type="submit">{pending ? "Saving…" : canIssue ? `Issue ${selectedCertifications.length || "selected"} certification${selectedCertifications.length === 1 ? "" : "s"}` : "Submit recommendation"}</button></div>
         </form>
