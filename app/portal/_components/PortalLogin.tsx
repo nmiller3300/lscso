@@ -22,6 +22,7 @@ export function PortalLogin() {
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [pending, setPending] = useState(false);
   const [activeProfile, setActiveProfile] = useState<ActiveProfile | null>(null);
@@ -102,42 +103,79 @@ export function PortalLogin() {
   }
 
   return (
-    <div className="portal-login-block" id="account-login">
-      <form className="portal-login-preview" onSubmit={handleSubmit} aria-label="LSCSO account sign-in">
-        <label>
-          Assigned username
-          <input
-            autoCapitalize="none"
-            autoComplete="username"
-            name="username"
-            onChange={(event) => setUsername(event.target.value)}
-            placeholder="Username assigned by Command"
-            required
-            spellCheck={false}
-            value={username}
-          />
-        </label>
-        <label>
-          Password
-          <input
-            autoComplete="current-password"
-            name="password"
-            onChange={(event) => setPassword(event.target.value)}
-            placeholder="Enter assigned password"
-            required
-            type="password"
-            value={password}
-          />
-        </label>
-        {error ? <p className="portal-login-error" role="alert">{error}</p> : null}
-        <button disabled={pending} type="submit">{pending ? "Verifying…" : "Sign in"}</button>
-      </form>
-
+    <div className="portal-auth" id="account-login">
       {activeProfile ? (
-        <button className="portal-continue-session" onClick={() => router.push(homeFor(activeProfile.access_tier))} type="button">
-          Continue {activeProfile.display_name} session →
+        <button className="portal-auth__resume" onClick={() => router.push(homeFor(activeProfile.access_tier))} type="button">
+          <span className="portal-auth__resume-dot" />
+          <div>
+            <small>Active secure session detected</small>
+            <strong>Continue as {activeProfile.display_name}</strong>
+          </div>
+          <b aria-hidden="true">→</b>
         </button>
       ) : null}
+
+      <form className="portal-auth__form" onSubmit={handleSubmit} aria-label="LSCSO account sign-in">
+        <label className="portal-auth__field">
+          <span className="portal-auth__field-label">Assigned username</span>
+          <div className="portal-auth__input-shell">
+            <span className="portal-auth__input-icon" aria-hidden="true">ID</span>
+            <input
+              autoCapitalize="none"
+              autoComplete="username"
+              name="username"
+              onChange={(event) => setUsername(event.target.value)}
+              placeholder="first.last"
+              required
+              spellCheck={false}
+              value={username}
+            />
+          </div>
+        </label>
+
+        <label className="portal-auth__field">
+          <span className="portal-auth__field-label">Password</span>
+          <div className="portal-auth__input-shell portal-auth__input-shell--password">
+            <span className="portal-auth__input-icon" aria-hidden="true">KY</span>
+            <input
+              autoComplete="current-password"
+              name="password"
+              onChange={(event) => setPassword(event.target.value)}
+              placeholder="Enter secure password"
+              required
+              type={showPassword ? "text" : "password"}
+              value={password}
+            />
+            <button
+              className="portal-auth__password-toggle"
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword((current) => !current)}
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </label>
+
+        {error ? (
+          <div className="portal-auth__error" role="alert">
+            <span aria-hidden="true">!</span>
+            <p>{error}</p>
+          </div>
+        ) : null}
+
+        <button className="portal-auth__submit" disabled={pending} type="submit">
+          <span>{pending ? "Authenticating secure session…" : "Enter Personnel Portal"}</span>
+          <b aria-hidden="true">→</b>
+        </button>
+      </form>
+
+      <div className="portal-auth__trust-row" aria-label="Authentication protections">
+        <span><i /> Encrypted authentication</span>
+        <span><i /> Role-based access</span>
+        <span><i /> Audited activity</span>
+      </div>
     </div>
   );
 }
