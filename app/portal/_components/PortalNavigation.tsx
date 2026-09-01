@@ -16,7 +16,8 @@ type ActivePortalView =
   | "certifications"
   | "awards"
   | "notifications"
-  | "applications";
+  | "applications"
+  | "psa";
 
 type PortalNavigationProps = {
   active: ActivePortalView;
@@ -46,6 +47,7 @@ const commandNavigation: NavigationItem[] = [
   { id: "overview", href: "/portal/command/home", label: "Home", mobileLabel: "Home", glyph: "HM" },
   { id: "personnel", href: "/portal/command/personnel", label: "Personnel", mobileLabel: "Personnel", glyph: "PR", matches: ["awards"] },
   { id: "applications", href: "/portal/command/applications", label: "Applications", mobileLabel: "Apply", glyph: "AP" },
+  { id: "psa", href: "/portal/command/psa", label: "Public PSA", mobileLabel: "PSA", glyph: "PS" },
   { id: "supervision", href: "/portal/command/supervision", label: "Supervision", mobileLabel: "Supervise", glyph: "SV", matches: ["guardians"] },
   { id: "training", href: "/portal/command/training", label: "Training", mobileLabel: "Training", glyph: "TR", matches: ["certifications"] },
   { id: "administration", href: "/portal/command/administration", label: "Administration", mobileLabel: "Admin", glyph: "AD", matches: ["approvals", "activity"] },
