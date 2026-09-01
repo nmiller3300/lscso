@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/patrol",
     "/internal-affairs",
     "/training-recruitment",
+    "/policies",
   ];
 
   return routes.map((route) => ({
