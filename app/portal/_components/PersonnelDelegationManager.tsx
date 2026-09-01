@@ -34,10 +34,10 @@ const baseDelegations = [
 ] as const;
 
 const delegationDescriptions: Record<string, string> = {
-  "Personnel Administration": "Manage normal personnel records and organizational assignments without receiving protected account-deactivation authority.",
+  "Personnel Administration": "Manage normal personnel records and organizational assignments without protected account-deactivation authority.",
   "Training Administration": "Manage FTO qualifications, trainee assignments, training progress, and department certifications.",
-  "Division Administration": "Manage personnel assignments inside one selected organizational area without receiving department-wide authority.",
-  "Temporary Command Authority": "Time-limited executive delegation for assignments, training, certifications, and personnel changes for 1st Lieutenant and below. It does not grant account deactivation authority.",
+  "Division Administration": "Manage personnel assignments inside one selected organizational area without department-wide authority.",
+  "Temporary Command Authority": "Time-limited executive delegation for assignments, training, certifications, and personnel changes for 1st Lieutenant and below. Account deactivation is never included.",
 };
 
 export function PersonnelDelegationManager({
@@ -119,76 +119,72 @@ export function PersonnelDelegationManager({
   }
 
   return (
-    <section className="portal-panel">
+    <section className="portal-panel personnel-admin-control personnel-admin-control--delegation">
       <div className="portal-panel-heading">
-        <div>
-          <p>Delegated authority</p>
-          <h2>Administrative responsibility</h2>
-        </div>
+        <div><p>Delegated authority</p><h2>Administrative responsibility</h2></div>
         <span>{delegations.length} active</span>
       </div>
+      <p className="personnel-admin-control__intro">Assign a clearly defined administrative responsibility. The portal applies the underlying permissions and expiration rules automatically.</p>
 
-      <p className="command-v2-compact-copy">
-        Pick the responsibility they are being trusted to handle. The system applies the underlying permissions automatically.
-      </p>
-
-      <div className="portal-inline-form-grid">
-        <label>
-          <span>Responsibility</span>
-          <select value={delegationType} onChange={(event) => setDelegationType(event.target.value)}>
-            {delegationOptions.map((item) => <option key={item}>{item}</option>)}
-          </select>
-        </label>
-
-        <p className="command-v2-compact-copy" style={{ alignSelf: "end", margin: 0 }}>
-          {delegationDescriptions[delegationType]}
-        </p>
-
-        {delegationType === "Division Administration" ? (
+      <div className="personnel-admin-delegation-layout">
+        <div className="personnel-admin-fields personnel-admin-fields--delegation">
           <label>
-            <span>Organizational area</span>
-            <select value={unitId} onChange={(event) => setUnitId(event.target.value)}>
-              {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name} · {unit.unitType}</option>)}
+            <span>Responsibility</span>
+            <select value={delegationType} onChange={(event) => setDelegationType(event.target.value)}>
+              {delegationOptions.map((item) => <option key={item}>{item}</option>)}
             </select>
           </label>
-        ) : null}
 
-        <label>
-          <span>Expiration {delegationType === "Temporary Command Authority" ? "(required)" : "(optional)"}</span>
-          <input type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} />
-        </label>
+          {delegationType === "Division Administration" ? (
+            <label>
+              <span>Organizational area</span>
+              <select value={unitId} onChange={(event) => setUnitId(event.target.value)}>
+                {units.map((unit) => <option key={unit.id} value={unit.id}>{unit.name} · {unit.unitType}</option>)}
+              </select>
+            </label>
+          ) : null}
 
-        <label>
-          <span>Why are they being delegated this?</span>
-          <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Example: Oversee recruitment this month" />
-        </label>
+          <label>
+            <span>Expiration {delegationType === "Temporary Command Authority" ? "(required)" : "(optional)"}</span>
+            <input type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} />
+          </label>
+
+          <label className="personnel-admin-reason">
+            <span>Reason</span>
+            <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Example: Oversee recruitment this month" />
+          </label>
+        </div>
+
+        <aside className="personnel-admin-context" aria-live="polite">
+          <span>What this grants</span>
+          <strong>{delegationType}</strong>
+          <p>{delegationDescriptions[delegationType]}</p>
+        </aside>
       </div>
 
-      <div className="portal-inline-actions">
+      <div className="personnel-admin-actions">
+        <span>Delegations are permission-scoped, auditable, and revocable.</span>
         <button className="portal-button portal-button--primary" disabled={pending === "grant"} onClick={() => void grant()} type="button">
           {pending === "grant" ? "Assigning…" : "Assign responsibility"}
         </button>
       </div>
 
       {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
-      {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
+      {notice ? <div className="portal-form-success" role="status"><strong>Authority updated</strong><span>{notice}</span></div> : null}
 
-      <div className="command-v2-mini-list" style={{ marginTop: 16 }}>
+      <div className="personnel-admin-active-list">
         {delegations.length ? delegations.map((item) => (
-          <div key={item.id}>
+          <article key={item.id}>
             <div>
+              <span>{item.unitName ?? "Department responsibility"}</span>
               <strong>{item.delegationType}</strong>
-              <span>
-                {item.unitName ? `${item.unitName} · ` : ""}
-                {item.expiresAt ? `Expires ${new Date(item.expiresAt).toLocaleString()}` : "No expiration"}
-              </span>
-              {item.reason ? <small>{item.reason}</small> : null}
+              <small>{item.expiresAt ? `Expires ${new Date(item.expiresAt).toLocaleString()}` : "No expiration"}{item.reason ? ` · ${item.reason}` : ""}</small>
             </div>
             <button className="portal-text-button" disabled={pending === item.id} onClick={() => void revoke(item.id, item.delegationType)} type="button">
               {pending === item.id ? "Revoking…" : "Revoke"}
             </button>
-          </div>
-        )) : <p className="command-v2-compact-copy">No delegated authority is currently active.</p>}
+          </article>
+        )) : <div className="portal-empty-state"><strong>No delegated authority is active.</strong><span>Assign a responsibility above when temporary administrative access is needed.</span></div>}
       </div>
     </section>
   );
