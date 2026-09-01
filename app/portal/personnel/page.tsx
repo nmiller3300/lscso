@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { DeputyGuardianRecords, DeputyRequestCenter } from "../_components/DeputyInteractions";
+import { DeputyGuardianRecords } from "../_components/DeputyInteractions";
+import { DeputyRequestCenter } from "../_components/DeputyRequestCenter";
 import { DeputyNotificationCenter, type PortalNotificationItem } from "../_components/CommandInteractions";
 import { DeputyCorrespondence } from "../_components/DeputyCorrespondence";
 import { LeaveRequestCenter } from "../_components/LeaveRequestCenter";
