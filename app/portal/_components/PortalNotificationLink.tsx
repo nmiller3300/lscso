@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
 
 const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const DISMISS_KEY = "lscso.portal.notification-attention:v1";
 
 export function PortalNotificationLink({ audience }: { audience: "command" | "deputy" }) {
   const profile = usePortalProfile();
   const [unreadCount, setUnreadCount] = useState(0);
   const [actionCount, setActionCount] = useState(0);
+  const [dismissedSignature, setDismissedSignature] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -78,20 +80,74 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
     };
   }, [audience, profile.id, profile.rank]);
 
+  const attentionSignature = useMemo(() => `${profile.id}:${actionCount}:${unreadCount}`, [profile.id, actionCount, unreadCount]);
+
+  useEffect(() => {
+    if (!actionCount && !unreadCount) {
+      setDismissedSignature("");
+      return;
+    }
+
+    try {
+      const stored = window.sessionStorage.getItem(DISMISS_KEY) ?? "";
+      setDismissedSignature(stored === attentionSignature ? attentionSignature : "");
+    } catch {
+      setDismissedSignature("");
+    }
+  }, [actionCount, attentionSignature, unreadCount]);
+
+  function dismissAttention() {
+    setDismissedSignature(attentionSignature);
+    try {
+      window.sessionStorage.setItem(DISMISS_KEY, attentionSignature);
+    } catch {
+      // Session storage is optional; the visual dismissal still works.
+    }
+  }
+
   const badgeCount = actionCount > 0 ? actionCount : unreadCount;
   const ariaLabel = actionCount > 0
     ? `${actionCount} items require action and ${unreadCount} unread notifications`
     : `${unreadCount} unread portal notifications`;
+  const hasAttention = actionCount > 0 || unreadCount > 0;
+  const showAttentionCard = hasAttention && dismissedSignature !== attentionSignature;
 
   return (
-    <Link
-      aria-label={ariaLabel}
-      className={`portal-notification-button${actionCount > 0 ? " has-actions" : ""}`}
-      href="/portal/notifications"
-      title={actionCount > 0 ? `${actionCount} action-required item${actionCount === 1 ? "" : "s"} · ${unreadCount} unread` : "Notifications"}
-    >
-      <span aria-hidden="true">{String(badgeCount).padStart(2, "0")}</span>
-      Notifications
-    </Link>
+    <>
+      <Link
+        aria-label={ariaLabel}
+        className={`portal-notification-button${actionCount > 0 ? " has-actions" : unreadCount > 0 ? " has-unread" : ""}`}
+        href="/portal/notifications"
+        title={actionCount > 0 ? `${actionCount} action-required item${actionCount === 1 ? "" : "s"} · ${unreadCount} unread` : unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}` : "Notifications"}
+      >
+        <span aria-hidden="true">{String(badgeCount).padStart(2, "0")}</span>
+        {actionCount > 0 ? "Action required" : "Notifications"}
+      </Link>
+
+      {showAttentionCard ? (
+        <aside
+          aria-live="polite"
+          className={`portal-notification-attention${actionCount > 0 ? " has-actions" : " has-unread"}`}
+          role="status"
+        >
+          <button aria-label="Dismiss notification alert" className="portal-notification-attention-close" onClick={dismissAttention} type="button">×</button>
+          <div className="portal-notification-attention-icon" aria-hidden="true">!</div>
+          <div className="portal-notification-attention-copy">
+            <small>{actionCount > 0 ? "LSCSO Action Required" : "New Portal Activity"}</small>
+            <strong>
+              {actionCount > 0
+                ? `${actionCount} item${actionCount === 1 ? "" : "s"} require${actionCount === 1 ? "s" : ""} your attention.`
+                : `${unreadCount} new notification${unreadCount === 1 ? "" : "s"} waiting.`}
+            </strong>
+            <span>
+              {actionCount > 0 && unreadCount > 0
+                ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"} also in your inbox.`
+                : "Open the Notification & Action Center to review the details."}
+            </span>
+          </div>
+          <Link className="portal-notification-attention-link" href="/portal/notifications">Review now →</Link>
+        </aside>
+      ) : null}
+    </>
   );
 }
