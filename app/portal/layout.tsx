@@ -14,6 +14,7 @@ import "./request-routing.css";
 import "./notification-attention.css";
 import "./midnight.css";
 import "./midnight-pages.css";
+import "./midnight-polish.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
