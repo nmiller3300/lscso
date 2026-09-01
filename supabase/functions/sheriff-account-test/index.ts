@@ -12,9 +12,9 @@ function json(body: unknown, status = 200) {
   return Response.json(body, { status, headers: corsHeaders });
 }
 
-function validPortalRedirect(value: unknown) {
+function validPortalOrigin(value: unknown) {
   if (typeof value !== "string" || !value.trim()) {
-    return "https://lscsogov.vercel.app/portal";
+    return "https://lscsogov.vercel.app";
   }
 
   try {
@@ -22,11 +22,11 @@ function validPortalRedirect(value: unknown) {
     const allowedHost = url.hostname === "lscsogov.vercel.app" ||
       url.hostname.endsWith("-nmiller3300s-projects.vercel.app");
     if (url.protocol !== "https:" || !allowedHost || !url.pathname.startsWith("/portal")) {
-      return "https://lscsogov.vercel.app/portal";
+      return "https://lscsogov.vercel.app";
     }
-    return url.toString();
+    return url.origin;
   } catch {
-    return "https://lscsogov.vercel.app/portal";
+    return "https://lscsogov.vercel.app";
   }
 }
 
@@ -139,27 +139,29 @@ Deno.serve(async (request) => {
       return json({ error: "The authentication account could not be resolved." }, 404);
     }
 
-    const redirectTo = validPortalRedirect(body?.redirect_to);
     const { data: linkData, error: linkError } = await admin.auth.admin.generateLink({
       type: "magiclink",
       email: authTarget.user.email,
-      options: { redirectTo },
     });
 
-    const actionLink = linkData?.properties?.action_link;
-    if (linkError || !actionLink) return json({ error: "A secure test login could not be generated." }, 500);
+    const hashedToken = linkData?.properties?.hashed_token;
+    if (linkError || !hashedToken) return json({ error: "A secure test login could not be generated." }, 500);
+
+    const portalOrigin = validPortalOrigin(body?.redirect_to);
+    const callback = new URL("/portal/test-login", portalOrigin);
+    callback.searchParams.set("token_hash", hashedToken);
 
     await writeAudit("SHERIFF_ACCOUNT_TEST_LINK_CREATED", target.id, {
       target_profile_id: target.id,
       target_personnel_id: target.personnel_id,
       target_username: target.username,
       target_rank: target.rank,
-      redirect_to: redirectTo,
+      callback_origin: portalOrigin,
     });
 
     return json({
       success: true,
-      action_link: actionLink,
+      action_link: callback.toString(),
       target: {
         profile_id: target.id,
         personnel_id: target.personnel_id,
