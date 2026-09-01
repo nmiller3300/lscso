@@ -1,0 +1,129 @@
+.request-routing-history {
+  margin-top: 20px;
+}
+
+.deputy-request-history > .request-routing-card {
+  align-items: start;
+}
+
+.request-routing-card .request-routing-main {
+  min-width: 0;
+}
+
+.request-routing-status {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.request-routing-status > div {
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(187, 164, 95, 0.18);
+  background: rgba(187, 164, 95, 0.045);
+}
+
+.request-routing-status span,
+.request-routing-status strong {
+  display: block;
+}
+
+.request-routing-status span {
+  margin-bottom: 4px;
+  color: var(--portal-muted);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.request-routing-status strong {
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.request-route-events {
+  margin-top: 11px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 9px;
+}
+
+.request-route-events > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--portal-gold);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.request-route-events > summary::-webkit-details-marker {
+  display: none;
+}
+
+.request-route-events > summary span {
+  color: var(--portal-muted);
+  font-weight: 700;
+}
+
+.request-route-events > div {
+  display: grid;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.request-route-events article {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: 3px 12px;
+  padding: 9px 10px;
+  border-left: 2px solid rgba(187, 164, 95, 0.5);
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.request-route-events article > span {
+  grid-row: 1 / span 3;
+  color: var(--portal-gold);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.request-route-events article > strong,
+.request-route-events article > small,
+.request-route-events article > p {
+  grid-column: 2;
+}
+
+.request-route-events article > small {
+  color: var(--portal-muted);
+}
+
+.request-route-events article > p {
+  margin: 2px 0 0;
+  color: var(--portal-muted);
+  line-height: 1.4;
+}
+
+@media (max-width: 820px) {
+  .request-routing-status {
+    grid-template-columns: 1fr;
+  }
+
+  .request-route-events article {
+    grid-template-columns: 1fr;
+  }
+
+  .request-route-events article > span,
+  .request-route-events article > strong,
+  .request-route-events article > small,
+  .request-route-events article > p {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
