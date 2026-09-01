@@ -19,6 +19,7 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
 
     async function refreshCounts() {
       const supabase = createClient() as any;
+      const fullCommandAccess = ["Executive", "Command"].includes(profile.access_tier);
 
       let notificationQuery = supabase.from("notifications")
         .select("id", { count: "exact", head: true })
@@ -62,8 +63,12 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
           const now = new Date().toISOString();
           const departmentResults = await Promise.all([
             applyScope(supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("status", "Pending Approval"), "subject_profile_id"),
-            applyScope(supabase.from("leave_requests").select("id", { count: "exact", head: true }).in("status", ["Submitted", "In Review"]), "profile_id"),
-            applyScope(supabase.from("certifications").select("id", { count: "exact", head: true }).in("status", ["Requested", "Pending"]), "profile_id"),
+            fullCommandAccess
+              ? applyScope(supabase.from("leave_requests").select("id", { count: "exact", head: true }).in("status", ["Submitted", "In Review"]), "profile_id")
+              : Promise.resolve({ count: 0 }),
+            fullCommandAccess
+              ? applyScope(supabase.from("certifications").select("id", { count: "exact", head: true }).in("status", ["Requested", "Pending"]), "profile_id")
+              : Promise.resolve({ count: 0 }),
             applyScope(supabase.from("guardian_records").select("id", { count: "exact", head: true }).lte("follow_up_due_at", now).not("status", "in", "(Acknowledged,Closed)"), "subject_profile_id"),
           ]);
           nextActionCount += departmentResults.reduce((sum, result) => sum + (result.count ?? 0), 0);
@@ -85,7 +90,7 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
       window.clearInterval(interval);
       window.removeEventListener("focus", onFocus);
     };
-  }, [audience, profile.id, profile.rank]);
+  }, [audience, profile.access_tier, profile.id, profile.rank]);
 
   const attentionSignature = useMemo(() => `${profile.id}:${actionCount}:${unreadCount}`, [profile.id, actionCount, unreadCount]);
 
