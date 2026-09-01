@@ -1,9 +1,10 @@
 .alert {
   position: relative;
-  z-index: 100;
+  z-index: 40;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 54px;
+  margin-top: 137px;
   overflow: hidden;
   border-top: 1px solid rgba(255, 255, 255, 0.24);
   border-bottom: 2px solid #51080b;
@@ -111,9 +112,16 @@
   }
 }
 
+@media (min-width: 1061px) {
+  .alert {
+    margin-top: 127px;
+  }
+}
+
 @media (max-width: 720px) {
   .alert {
     grid-template-columns: 1fr;
+    margin-top: 103px;
   }
 
   .label {
@@ -147,6 +155,12 @@
 
   .group span::after {
     margin-left: 38px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1060px) {
+  .alert {
+    margin-top: 137px;
   }
 }
 
