@@ -27,6 +27,7 @@ export function ApplicationForm() {
 
   const signed = Boolean(signatureName && signedAt);
   const currentSection = sections[step];
+  const questionOffset = sections.slice(0, step).reduce((total, [, questions]) => total + questions.length, 0);
 
   const setValue = (name: string, value: string) => {
     setValues((current) => ({ ...current, [name]: value }));
@@ -130,14 +131,14 @@ export function ApplicationForm() {
       <div className="application-progress__bar"><span style={{ width: `${((step + 1) / totalSteps) * 100}%` }} /></div>
       <div className="application-progress__steps">
         {sections.map(([title], index) => <button type="button" key={title} className={index === step ? "is-current" : index < step ? "is-complete" : ""} onClick={() => { if (index < step) { setError(""); setStep(index); } }} disabled={index >= step}>{String(index + 1).padStart(2,"0")} <span>{title}</span></button>)}
-        <button type="button" className={step === sections.length ? "is-current" : step > sections.length ? "is-complete" : ""} disabled>{String(totalSteps).padStart(2,"0")} <span>Certification</span></button>
+        <button type="button" className={step === sections.length ? "is-current" : ""} disabled>{String(totalSteps).padStart(2,"0")} <span>Certification</span></button>
       </div>
     </div>
 
     {step < sections.length ? <fieldset className="application-section">
       <legend><span>{String(step + 1).padStart(2,"0")}</span>{currentSection[0]}</legend>
       {currentSection[1].map(([name, question, type], questionIndex) => <div className="application-question" key={name}>
-        <label htmlFor={name}><strong>{questionIndex + 1}.</strong> {question}</label>
+        <label htmlFor={name}><strong>{questionOffset + questionIndex + 1}.</strong> {question}</label>
         {type === "textarea" ? <textarea id={name} required rows={5} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} /> : <input id={name} required type={type} min={type === "number" ? 13 : undefined} max={type === "number" ? 100 : undefined} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} />}
       </div>)}
       <div className="application-navigation">
