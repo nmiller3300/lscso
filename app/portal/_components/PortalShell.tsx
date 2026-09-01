@@ -3,13 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
 import { CommandQuickFind } from "./CommandQuickFind";
+import { PortalAccountMenu } from "./PortalAccountMenu";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
 import { PortalPolicyDirectory } from "./PortalPolicyDirectory";
-import { PasswordChangeDialog } from "./PasswordChangeDialog";
-import { PortalSessionIdentity } from "./PortalSessionIdentity";
-import { PortalSignOut } from "./PortalSignOut";
-import { ThemeToggle } from "./ThemeToggle";
 
 type PortalShellProps = {
   active:
@@ -56,11 +53,8 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
           <div className="portal-environment"><span>Internal</span><strong>{audience === "command" ? "Executive Command" : "Personnel Access"}</strong></div>
           <div className="portal-topbar-actions">
             {audience === "command" ? <CommandQuickFind /> : null}
-            <ThemeToggle compact />
             <PortalNotificationLink audience={audience} />
-            <PortalSessionIdentity />
-            <PasswordChangeDialog />
-            <PortalSignOut label="Sign out" />
+            <PortalAccountMenu />
           </div>
         </header>
         <main className="portal-content">
