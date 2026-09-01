@@ -119,7 +119,7 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
 
   return (
     <>
-      <section className="portal-panel" style={{ gridColumn: "1 / -1", borderColor: "rgba(130, 33, 33, .32)" }}>
+      <section className="portal-panel sheriff-restricted-panel">
         <div className="portal-panel-heading">
           <div>
             <p>Sheriff restricted</p>
@@ -128,12 +128,12 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
           <span>Sheriff only</span>
         </div>
 
-        <div className="portal-form-protection" style={{ marginTop: 16 }}>
+        <div className="portal-form-protection sheriff-security-notice">
           <strong>Passwords are never exposed or stored for Command review.</strong>
           <span>This creates a one-time passwordless test login for the selected account without changing the member&apos;s password. Generation is recorded in the department audit log.</span>
         </div>
 
-        <div className="portal-form-grid" style={{ marginTop: 16 }}>
+        <div className="portal-form-grid sheriff-account-select">
           <label>
             Personnel account
             <select value={selectedProfileId} onChange={(event) => setSelectedProfileId(event.target.value)}>
@@ -147,7 +147,7 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
           </label>
         </div>
 
-        <div className="command-v2-action-row" style={{ marginTop: 14 }}>
+        <div className="command-v2-action-row sheriff-account-actions">
           <button
             className="portal-button portal-button--primary"
             disabled={!selectedProfileId || pending}
@@ -159,28 +159,27 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
         </div>
 
         {secureLink ? (
-          <div className="portal-form-protection" style={{ marginTop: 14 }}>
+          <div className="portal-form-protection sheriff-secure-link">
             <strong>{linkTarget}</strong>
             <span>For isolation, copy this link and paste it into a Private/Incognito browser window. Opening it in your current browser profile can replace your active Sheriff session.</span>
             <input
               aria-label="One-time account test login link"
               onFocus={(event) => event.currentTarget.select()}
               readOnly
-              style={{ marginTop: 10, width: "100%" }}
               value={secureLink}
             />
-            <div className="command-v2-action-row" style={{ marginTop: 10 }}>
-              <button className="portal-button" onClick={() => void copySecureLink()} type="button">Copy secure login link</button>
-              <button className="portal-button" onClick={() => { setSecureLink(""); setLinkTarget(""); setNotice(""); }} type="button">Clear from screen</button>
+            <div className="command-v2-action-row">
+              <button className="portal-button portal-button--secondary" onClick={() => void copySecureLink()} type="button">Copy secure login link</button>
+              <button className="portal-button portal-button--secondary" onClick={() => { setSecureLink(""); setLinkTarget(""); setNotice(""); }} type="button">Clear from screen</button>
             </div>
           </div>
         ) : null}
 
-        {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
-        {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Account test access</strong><span>{notice}</span></div> : null}
+        {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
+        {notice ? <div className="portal-form-success" role="status"><strong>Account test access.</strong> {notice}</div> : null}
       </section>
 
-      <section className="portal-panel" style={{ gridColumn: "1 / -1" }}>
+      <section className="portal-panel sheriff-restricted-panel">
         <div className="portal-panel-heading">
           <div>
             <p>Sheriff restricted</p>
@@ -189,21 +188,21 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
           <span>{loadingActivity ? "Loading…" : `${activity.length} accounts`}</span>
         </div>
 
-        <div className="portal-form-protection" style={{ marginTop: 14 }}>
+        <div className="portal-form-protection sheriff-security-notice">
           <strong>Credential oversight without password disclosure</strong>
           <span>Shows credential assignment, password change/reset activity, and recorded sign-in activity. Password values are intentionally unavailable.</span>
         </div>
 
-        <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
+        <div className="command-v2-mini-list sheriff-security-list">
           {activity.map((account) => (
-            <div key={account.profile_id} style={{ padding: "12px 0", borderBottom: "1px solid rgba(82,68,51,.1)" }}>
+            <div key={account.profile_id}>
               <strong>{account.call_sign || account.personnel_id} · {account.display_name}</strong>
               <span>{account.rank} · {account.username ? `@${account.username}` : "No username"} · {account.status}</span>
               <span>{account.credentials_assigned ? credentialEventLabel(account.last_credential_event) : "Credentials not assigned"} · {formatDate(account.last_credential_at)}</span>
               <span>Last recorded sign-in: {formatDate(account.last_sign_in_at)}</span>
             </div>
           ))}
-          {!loadingActivity && !activity.length ? <span>No credential activity is available.</span> : null}
+          {!loadingActivity && !activity.length ? <div className="portal-empty-state"><strong>No credential activity is available.</strong></div> : null}
         </div>
       </section>
     </>
