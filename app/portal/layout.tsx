@@ -10,6 +10,8 @@ import "./supervision-v2.css";
 import "./structure-v2.css";
 import "./timeline-v2.css";
 import "./notifications-v2.css";
+import "./request-routing.css";
+import "./notification-attention.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
