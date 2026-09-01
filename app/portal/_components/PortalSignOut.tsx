@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export function PortalSignOut({ label }: { label: string }) {
+export function PortalSignOut({ label, className = "portal-signout" }: { label: string; className?: string }) {
   const router = useRouter();
 
   async function signOut() {
@@ -17,5 +17,5 @@ export function PortalSignOut({ label }: { label: string }) {
     router.refresh();
   }
 
-  return <button className="portal-signout" onClick={() => void signOut()} type="button">{label}</button>;
+  return <button className={className} onClick={() => void signOut()} type="button">{label}</button>;
 }
