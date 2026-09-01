@@ -15,6 +15,7 @@ export type CommandApprovalItem = {
   age: string;
   details: string;
   effectiveDate: string;
+  routingLabel?: string;
 };
 
 export function CommandApprovalQueue({ initialItems }: { initialItems: CommandApprovalItem[] }) {
@@ -26,11 +27,12 @@ export function CommandApprovalQueue({ initialItems }: { initialItems: CommandAp
 
   async function decideRequest(item: CommandApprovalItem, decision: "Approved" | "Denied") {
     if (reviewNotes.trim().length < 4) {
-      setNotice("Enter a short Command review note before deciding this request.");
+      setNotice("Enter a short review note before deciding this request.");
       return;
     }
+
     setPendingId(item.databaseId);
-    const { error } = await createClient().rpc("review_personnel_request", {
+    const { data, error } = await (createClient() as any).rpc("review_personnel_request", {
       record_id: item.databaseId,
       decision,
       review_notes: reviewNotes.trim(),
@@ -45,8 +47,14 @@ export function CommandApprovalQueue({ initialItems }: { initialItems: CommandAp
     setItems((current) => current.filter((candidate) => candidate.databaseId !== item.databaseId));
     setSelectedItem(null);
     setReviewNotes("");
-    setNotice(`${item.id} ${decision.toLowerCase()}. The member was notified and the action was audited.`);
-    window.setTimeout(() => setNotice(""), 4200);
+
+    if (decision === "Approved" && data?.status === "In Review") {
+      const nextReviewer = data.current_reviewer_label ?? data.routing_label ?? "the next reviewer";
+      setNotice(`${item.id} approved at your stage and routed to ${nextReviewer}.`);
+    } else {
+      setNotice(`${item.id} ${decision.toLowerCase()}. The member was notified and the decision was recorded.`);
+    }
+    window.setTimeout(() => setNotice(""), 5200);
   }
 
   return (
@@ -76,10 +84,9 @@ export function CommandApprovalQueue({ initialItems }: { initialItems: CommandAp
             )}
           </article>
         ))}
-        {items.length === 0 ? (
-          <div className="portal-empty-state"><strong>No command approvals are waiting.</strong></div>
-        ) : null}
+        {items.length === 0 ? <div className="portal-empty-state"><strong>No approvals are currently routed to you.</strong></div> : null}
       </div>
+
       {selectedItem ? (
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedItem(null); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="request-review-title">
@@ -90,13 +97,14 @@ export function CommandApprovalQueue({ initialItems }: { initialItems: CommandAp
             <div className="portal-request-review">
               <div><span>Submitted</span><strong>{selectedItem.age}</strong></div>
               <div><span>Preferred effective date</span><strong>{selectedItem.effectiveDate}</strong></div>
+              {selectedItem.routingLabel ? <div><span>Current routing stage</span><strong>{selectedItem.routingLabel}</strong></div> : null}
               <article><span>Member request</span><p>{selectedItem.details}</p></article>
-              <label className="portal-call-sign-field">Command review note<textarea autoFocus onChange={(event) => setReviewNotes(event.target.value)} placeholder="Record the reason for approval or denial..." required rows={4} value={reviewNotes} /></label>
+              <label className="portal-call-sign-field">Review note<textarea autoFocus onChange={(event) => setReviewNotes(event.target.value)} placeholder="Record the reason for approval or denial..." required rows={4} value={reviewNotes} /></label>
             </div>
             <div className="portal-modal-actions">
               <button className="portal-button portal-button--secondary" disabled={pendingId === selectedItem.databaseId} onClick={() => setSelectedItem(null)} type="button">Cancel</button>
               <button className="portal-button portal-button--danger" disabled={pendingId === selectedItem.databaseId || reviewNotes.trim().length < 4} onClick={() => decideRequest(selectedItem, "Denied")} type="button">{pendingId === selectedItem.databaseId ? "Saving…" : "Deny"}</button>
-              <button className="portal-button portal-button--primary" disabled={pendingId === selectedItem.databaseId || reviewNotes.trim().length < 4} onClick={() => decideRequest(selectedItem, "Approved")} type="button">{pendingId === selectedItem.databaseId ? "Saving…" : "Approve"}</button>
+              <button className="portal-button portal-button--primary" disabled={pendingId === selectedItem.databaseId || reviewNotes.trim().length < 4} onClick={() => decideRequest(selectedItem, "Approved")} type="button">{pendingId === selectedItem.databaseId ? "Saving…" : "Approve stage"}</button>
             </div>
           </section>
         </div>
