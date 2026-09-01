@@ -5,6 +5,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { isStrongPassword, PASSWORD_MIN_LENGTH, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
 import { usePortalProfile } from "./PortalProfileProvider";
+import { SheriffAccountTestAccess } from "./SheriffAccountTestAccess";
 
 type ExistingAccount = {
   profileId: string;
@@ -171,6 +172,8 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
           ))}
         </div>
       </section>
+
+      {profile.rank === "Sheriff" ? <SheriffAccountTestAccess accounts={personnel} /> : null}
     </div>
   );
 }
