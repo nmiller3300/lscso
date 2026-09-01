@@ -6,6 +6,15 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 
+type AdminTool = {
+  href: string;
+  code: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  badge?: string;
+};
+
 export default async function AdministrationWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
@@ -20,53 +29,83 @@ export default async function AdministrationWorkspacePage() {
     || delegations.has("Personnel Administration")
     || delegations.has("Temporary Command Authority");
 
+  const tools: AdminTool[] = [
+    ...(canManageAccounts ? [{
+      href: "/portal/command/administration/accounts",
+      code: "AC",
+      eyebrow: "Personnel administration",
+      title: "Personnel Accounts",
+      description: "Create department accounts, issue credentials, and manage account access.",
+    }] : []),
+    {
+      href: "/portal/command/approvals",
+      code: "AP",
+      eyebrow: "Decision queue",
+      title: "Approvals",
+      description: "Review routed Guardians, personnel requests, leave, and certification actions.",
+    },
+    {
+      href: "/portal/command/activity",
+      code: "AU",
+      eyebrow: "Audit",
+      title: "Activity",
+      description: "Review recorded portal, personnel, and administrative activity.",
+    },
+    {
+      href: "/portal/command/service-records",
+      code: "SR",
+      eyebrow: "Personnel administration",
+      title: "Service Records",
+      description: "Record administrative personnel actions without crowding individual personnel pages.",
+    },
+    ...(executive ? [{
+      href: "/portal/command/administration/structure",
+      code: "CS",
+      eyebrow: "Organization",
+      title: "Command Structure",
+      description: "Manage units, assignments, authority, and the department command structure.",
+      badge: "Executive",
+    }] : []),
+  ];
+
   return (
     <PortalShell
       active="administration"
       eyebrow="Administration"
       title="Administration"
-      description="Approvals, leave, audit activity, and department administration."
+      description="Department administration, approvals, personnel access, and organizational controls."
     >
-      <div className="command-v2-workspace-grid">
-        {canManageAccounts ? <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Personnel admin</p><h2>Personnel Accounts</h2></div></div>
-          <p className="command-v2-compact-copy">Create department accounts and issue initial login credentials from one administrative workspace.</p>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/administration/accounts">Open account administration</Link>
+      <div className="portal-admin-layout">
+        <section className="portal-panel portal-admin-directory">
+          <div className="portal-panel-heading">
+            <div><p>Department tools</p><h2>Administrative workspace</h2></div>
+            <span>{tools.length} available</span>
           </div>
-        </section> : null}
+          <p className="portal-admin-intro">Open the tool you need. Access remains controlled by your current rank, assignment, and delegated authority.</p>
 
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Decision queue</p><h2>Approvals</h2></div></div>
-          <p className="command-v2-compact-copy">Review pending Guardians, requests, and administrative actions.</p>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/approvals">Open approvals</Link>
+          <div className="portal-admin-tool-list">
+            {tools.map((tool) => (
+              <Link href={tool.href} key={tool.href}>
+                <span className="portal-admin-tool-code" aria-hidden="true">{tool.code}</span>
+                <div>
+                  <small>{tool.eyebrow}</small>
+                  <strong>{tool.title}</strong>
+                  <p>{tool.description}</p>
+                </div>
+                {tool.badge ? <b>{tool.badge}</b> : null}
+                <span className="portal-admin-tool-arrow" aria-hidden="true">→</span>
+              </Link>
+            ))}
           </div>
         </section>
 
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Audit</p><h2>Activity</h2></div></div>
-          <p className="command-v2-compact-copy">Review recorded portal and personnel activity.</p>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/activity">Open activity</Link>
-          </div>
-        </section>
-
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Personnel admin</p><h2>Service records</h2></div></div>
-          <p className="command-v2-compact-copy">Administrative personnel actions remain available without crowding the landing page.</p>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Open service records</Link>
-          </div>
-        </section>
-
-        {executive ? <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Organization</p><h2>Command Structure</h2></div><span>Executive</span></div>
-          <p className="command-v2-compact-copy">Review the department structure, assignments, and authority model.</p>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--secondary" href="/portal/command/administration/structure">Open structure</Link>
-          </div>
-        </section> : null}
+        <aside className="portal-panel portal-admin-access-note">
+          <div className="portal-panel-heading"><div><p>Access model</p><h2>Your authority</h2></div></div>
+          <strong>{profile.rank}</strong>
+          <span>{profile.access_tier} access</span>
+          <p>Administrative actions are permission-scoped and audited. Tools you are not authorized to use are intentionally omitted rather than shown as dead controls.</p>
+          <Link className="portal-button portal-button--secondary" href="/portal/my-office">Open My Info</Link>
+        </aside>
       </div>
     </PortalShell>
   );
