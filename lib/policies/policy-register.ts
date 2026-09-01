@@ -8,7 +8,7 @@ export type PolicyRegisterEntry = {
 };
 
 // Source of truth: LSCSO Policy Docu-Guide -> Policy Document Register in Notion.
-// The website is an index only. Policy Link always opens the controlling Notion directive.
+// The Personnel Portal is an index only. Policy Link always opens the controlling Notion directive.
 export const POLICY_REGISTER_SOURCE = "LSCSO Policy Docu-Guide";
 export const POLICY_REGISTER_SYNCED_AT = "2026-08-30T23:19:12Z";
 export const POLICY_DOCU_GUIDE_URL = "https://app.notion.com/p/3c2305c95585809fad29feb828d9833f?pvs=204";
