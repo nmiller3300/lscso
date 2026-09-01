@@ -18,8 +18,9 @@ export async function POST(request: Request) {
     if (body.signature_confirmed !== true || body.applicant_certification !== true) return NextResponse.json({ error: "You must electronically sign the applicant certification before submitting." }, { status: 400 });
     if (signatureName.length < 2 || signatureName.length > 120 || signatureName.toLocaleLowerCase() !== fullName.toLocaleLowerCase()) return NextResponse.json({ error: "Your electronic signature must match the full name on your application." }, { status: 400 });
 
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!url || !key) return NextResponse.json({ error: "Application service is not configured." }, { status: 503 });
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (!url || !key) return NextResponse.json({ error: "Application service is not configured. Add SUPABASE_SECRET_KEY to the Vercel Production environment and redeploy." }, { status: 503 });
     const supabase = createServiceClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
     const sessionClient = await createServerClient();
     const { data: { user } } = await sessionClient.auth.getUser();
