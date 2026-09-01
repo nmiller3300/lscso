@@ -12,6 +12,7 @@ export default async function NotificationsPage() {
   if (!profile) return null;
 
   const audience = profile.access_tier === "Deputy" ? "deputy" as const : "command" as const;
+  const fullCommandAccess = ["Executive", "Command"].includes(profile.access_tier);
   const supabase = await createClient() as any;
   const now = new Date();
   const departmentAuthority = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
@@ -42,8 +43,12 @@ export default async function NotificationsPage() {
   const [guardiansResult, requestsResult, leaveResult, certificationsResult] = await Promise.all([
     supabase.from("guardian_records").select("id,guardian_number,title,record_type,status,subject_profile_id,follow_up_due_at,created_at").order("created_at", { ascending: false }),
     supabase.from("personnel_requests").select("id,request_number,request_type,subject,status,requester_profile_id,current_reviewer_profile_id,current_reviewer_label,routing_fallback,routing_stage,routing_label,created_at").order("created_at", { ascending: false }),
-    supabase.from("leave_requests").select("id,request_number,leave_type,status,profile_id,starts_on,expected_return_on,created_at").order("created_at", { ascending: false }),
-    supabase.from("certifications").select("id,name,status,profile_id,created_at").order("created_at", { ascending: false }),
+    fullCommandAccess
+      ? supabase.from("leave_requests").select("id,request_number,leave_type,status,profile_id,starts_on,expected_return_on,created_at").order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
+    fullCommandAccess
+      ? supabase.from("certifications").select("id,name,status,profile_id,created_at").order("created_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
   ]);
 
   const guardians = guardiansResult.data ?? [];
@@ -114,11 +119,13 @@ export default async function NotificationsPage() {
       actionItems.push({ id: `followup-${item.id}`, category: "Guardians", priority: "High", title: `Guardian follow-up due`, detail: `G-${String(item.guardian_number).padStart(4, "0")} · ${item.title}`, href: `/portal/command/guardians/${item.guardian_number}`, createdAt: item.follow_up_due_at, status: "Follow-up due" });
     }
 
-    for (const item of leave.filter((row: any) => allowedDecision(row.profile_id) && ["Submitted", "In Review"].includes(row.status))) {
-      actionItems.push({ id: `approval-leave-${item.id}`, category: "Requests", priority: "Normal", title: `${item.leave_type} LOA request`, detail: `RQ-${String(item.request_number).padStart(4, "0")}`, href: "/portal/command/approvals#leave-requests", createdAt: item.created_at, status: item.status });
-    }
-    for (const item of certifications.filter((row: any) => allowedDecision(row.profile_id) && ["Requested", "Pending"].includes(row.status))) {
-      actionItems.push({ id: `approval-cert-${item.id}`, category: "Training", priority: "Normal", title: item.name, detail: "Certification request awaiting Command action", href: "/portal/command/approvals#certification-requests", createdAt: item.created_at, status: item.status });
+    if (fullCommandAccess) {
+      for (const item of leave.filter((row: any) => allowedDecision(row.profile_id) && ["Submitted", "In Review"].includes(row.status))) {
+        actionItems.push({ id: `approval-leave-${item.id}`, category: "Requests", priority: "Normal", title: `${item.leave_type} LOA request`, detail: `RQ-${String(item.request_number).padStart(4, "0")}`, href: "/portal/command/approvals#leave-requests", createdAt: item.created_at, status: item.status });
+      }
+      for (const item of certifications.filter((row: any) => allowedDecision(row.profile_id) && ["Requested", "Pending"].includes(row.status))) {
+        actionItems.push({ id: `approval-cert-${item.id}`, category: "Training", priority: "Normal", title: item.name, detail: "Certification request awaiting Command action", href: "/portal/command/approvals#certification-requests", createdAt: item.created_at, status: item.status });
+      }
     }
   }
 
