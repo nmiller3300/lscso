@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { RouteLink } from "./_components/RouteLink";
+import { StatewideJurisdictionAlert } from "./_components/StatewideJurisdictionAlert";
 
 export const metadata: Metadata = {
   title: "Los Santos County Sheriff’s Office",
@@ -43,6 +44,7 @@ const gateways = [
 export default function HomePage() {
   return (
     <>
+      <StatewideJurisdictionAlert />
       <section className="home-hero">
         <Image
           src="/images/patrol-vehicle.png"
