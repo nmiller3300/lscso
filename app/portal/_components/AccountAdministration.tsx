@@ -120,14 +120,14 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
   }
 
   return (
-    <div className="command-v2-workspace-grid">
-      <section className="portal-panel" style={{ gridColumn: "span 2" }}>
+    <div className="command-v2-workspace-grid account-admin-workspace">
+      <section className="portal-panel account-admin-create">
         <div className="portal-panel-heading">
           <div><p>Personnel accounts</p><h2>Create account</h2></div>
           <span>{credentialedAccounts.length} with login access</span>
         </div>
 
-        <form onSubmit={createAccount} style={{ marginTop: 18 }}>
+        <form className="account-admin-form" onSubmit={createAccount}>
           <div className="portal-form-grid">
             <label>Display name<input name="displayName" required placeholder="Department display name" /></label>
             <label>
@@ -142,30 +142,30 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
             <label>Primary assignment<select defaultValue={divisionOptions.includes("Patrol Division") ? "Patrol Division" : divisionOptions[0]} name="division">{divisionOptions.map((division) => <option key={division}>{division}</option>)}</select></label>
           </div>
 
-          <label className="portal-checkbox-row portal-checkbox-row--test" style={{ marginTop: 14 }}>
+          <label className="portal-checkbox-row portal-checkbox-row--test account-admin-test-toggle">
             <input checked={testAccount} name="isTestAccount" onChange={(event) => setTestAccount(event.target.checked)} type="checkbox" />
             <span><strong>Test account</strong><small>Uses TA personnel IDs and TA call signs and stays out of official reporting.</small></span>
           </label>
 
-          <div className="portal-form-protection" style={{ marginTop: 14 }}>
+          <div className="portal-form-protection">
             <strong>Password change required on first sign-in</strong>
             <span>The temporary password is only for initial access.</span>
           </div>
 
-          {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
-          {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Account created</strong><span>{notice}</span></div> : null}
+          {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
+          {notice ? <div className="portal-form-success" role="status"><strong>Account created.</strong> {notice}</div> : null}
 
-          <div className="command-v2-action-row" style={{ marginTop: 4 }}>
+          <div className="command-v2-action-row account-admin-submit">
             <button className="portal-button portal-button--primary" disabled={pending} type="submit">{pending ? "Creating…" : "Create personnel account"}</button>
           </div>
         </form>
       </section>
 
-      <section className="portal-panel command-v2-launcher">
+      <section className="portal-panel command-v2-launcher account-admin-access-list">
         <div className="portal-panel-heading"><div><p>Account status</p><h2>Department access</h2></div><span>{activeAccounts.length}</span></div>
-        <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
+        <div className="command-v2-mini-list">
           {activeAccounts.slice(0, 8).map((member) => (
-            <div key={member.profileId} style={{ padding: "10px 0", borderBottom: "1px solid rgba(82,68,51,.1)" }}>
+            <div key={member.profileId}>
               <strong>{member.callSign || member.personnelId} · {member.displayName}</strong>
               <span>{member.rank} · {member.username ? `@${member.username}` : "Credentials not assigned"}</span>
             </div>
