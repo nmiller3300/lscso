@@ -1,0 +1,44 @@
+name: Direct Vercel Production Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/vercel-direct-production.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_TOKEN_PRIMARY: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_TOKEN_ALT: ${{ secrets.VERCEL_ACCESS_TOKEN }}
+      VERCEL_TOKEN_API: ${{ secrets.VERCEL_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve Vercel token
+        shell: bash
+        run: |
+          set -euo pipefail
+          TOKEN="$VERCEL_TOKEN_PRIMARY"
+          if [ -z "$TOKEN" ]; then TOKEN="$VERCEL_TOKEN_ALT"; fi
+          if [ -z "$TOKEN" ]; then TOKEN="$VERCEL_TOKEN_API"; fi
+          if [ -z "$TOKEN" ]; then
+            echo "No Vercel API token secret is configured in GitHub Actions."
+            exit 2
+          fi
+          echo "VERCEL_TOKEN=$TOKEN" >> "$GITHUB_ENV"
+
+      - name: Link existing LSCSO Vercel project
+        shell: bash
+        run: |
+          mkdir -p .vercel
+          cat > .vercel/project.json <<'JSON'
+          {"orgId":"team_lCJ66YB3F7VONO3NzNRFiGKm","projectId":"prj_T3XokEqRLOZY3xw3NTziCh5XLnY0"}
+          JSON
+
+      - name: Deploy main directly to production
+        shell: bash
+        run: |
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
