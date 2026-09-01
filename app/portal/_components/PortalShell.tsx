@@ -5,6 +5,7 @@ import { BrowserPushControl } from "./BrowserPushControl";
 import { CommandQuickFind } from "./CommandQuickFind";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
+import { PortalPolicyDirectory } from "./PortalPolicyDirectory";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
 import { PortalSessionIdentity } from "./PortalSessionIdentity";
 import { PortalSignOut } from "./PortalSignOut";
@@ -68,6 +69,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
             {actions ? <div className="portal-page-actions">{actions}</div> : null}
           </div>
           {active === "notifications" ? <BrowserPushControl /> : null}
+          {active === "record" && audience === "deputy" ? <PortalPolicyDirectory /> : null}
           {children}
         </main>
       </section>
