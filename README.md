@@ -12,6 +12,10 @@ Public website and production personnel-operations portal for the Los Santos Cou
 
 No service-role key or plaintext password belongs in this repository. Supabase Auth stores password verifiers; the application never retrieves or displays a user’s password.
 
+## Portal interface
+
+The personnel portal uses the LSCSO Midnight dark-only interface and a shared responsive design system for Command and personnel workspaces.
+
 ## Local setup
 
 ```bash
