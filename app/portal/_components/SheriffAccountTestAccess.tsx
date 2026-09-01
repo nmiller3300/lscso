@@ -118,22 +118,17 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
   }
 
   return (
-    <>
-      <section className="portal-panel" style={{ gridColumn: "1 / -1", borderColor: "rgba(130, 33, 33, .32)" }}>
-        <div className="portal-panel-heading">
-          <div>
-            <p>Sheriff restricted</p>
-            <h2>Account Testing Access</h2>
-          </div>
-          <span>Sheriff only</span>
-        </div>
+    <section className="portal-panel portal-sheriff-security">
+      <div className="portal-panel-heading">
+        <div><p>Sheriff restricted</p><h2>Account Security & Testing</h2></div>
+        <span>Sheriff only</span>
+      </div>
+      <p className="portal-sheriff-security__intro">Test personnel access and review credential activity without exposing or resetting member passwords.</p>
 
-        <div className="portal-form-protection" style={{ marginTop: 16 }}>
-          <strong>Passwords are never exposed or stored for Command review.</strong>
-          <span>This creates a one-time passwordless test login for the selected account without changing the member&apos;s password. Generation is recorded in the department audit log.</span>
-        </div>
-
-        <div className="portal-form-grid" style={{ marginTop: 16 }}>
+      <div className="portal-sheriff-security__grid">
+        <div className="portal-sheriff-security__test">
+          <div className="portal-subheading"><span>Account testing</span><strong>Login as a personnel account</strong></div>
+          <p>Create a one-time passwordless test login. Generation is recorded in the department audit log.</p>
           <label>
             Personnel account
             <select value={selectedProfileId} onChange={(event) => setSelectedProfileId(event.target.value)}>
@@ -145,67 +140,41 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
               ))}
             </select>
           </label>
-        </div>
-
-        <div className="command-v2-action-row" style={{ marginTop: 14 }}>
-          <button
-            className="portal-button portal-button--primary"
-            disabled={!selectedProfileId || pending}
-            onClick={() => void generateTestLogin()}
-            type="button"
-          >
-            {pending ? "Generating secure access…" : "Generate one-time test login"}
+          <button className="portal-button portal-button--primary" disabled={!selectedProfileId || pending} onClick={() => void generateTestLogin()} type="button">
+            {pending ? "Generating secure access…" : "Generate test login"}
           </button>
-        </div>
 
-        {secureLink ? (
-          <div className="portal-form-protection" style={{ marginTop: 14 }}>
-            <strong>{linkTarget}</strong>
-            <span>For isolation, copy this link and paste it into a Private/Incognito browser window. Opening it in your current browser profile can replace your active Sheriff session.</span>
-            <input
-              aria-label="One-time account test login link"
-              onFocus={(event) => event.currentTarget.select()}
-              readOnly
-              style={{ marginTop: 10, width: "100%" }}
-              value={secureLink}
-            />
-            <div className="command-v2-action-row" style={{ marginTop: 10 }}>
-              <button className="portal-button" onClick={() => void copySecureLink()} type="button">Copy secure login link</button>
-              <button className="portal-button" onClick={() => { setSecureLink(""); setLinkTarget(""); setNotice(""); }} type="button">Clear from screen</button>
+          {secureLink ? (
+            <div className="portal-secure-link-result">
+              <strong>{linkTarget}</strong>
+              <span>Copy this into a Private/Incognito window so your Sheriff session stays isolated.</span>
+              <input aria-label="One-time account test login link" onFocus={(event) => event.currentTarget.select()} readOnly value={secureLink} />
+              <div className="command-v2-action-row">
+                <button className="portal-button" onClick={() => void copySecureLink()} type="button">Copy link</button>
+                <button className="portal-button" onClick={() => { setSecureLink(""); setLinkTarget(""); setNotice(""); }} type="button">Clear</button>
+              </div>
             </div>
+          ) : null}
+        </div>
+
+        <div className="portal-sheriff-security__activity">
+          <div className="portal-subheading"><span>Credential oversight</span><strong>Security activity</strong><b>{loadingActivity ? "Loading…" : `${activity.length} accounts`}</b></div>
+          <p>Password values are never available. This records credential assignment/change events and the latest recorded sign-in.</p>
+          <div className="portal-security-activity-list">
+            {activity.map((account) => (
+              <div key={account.profile_id}>
+                <div><strong>{account.display_name}</strong><span>{account.call_sign || account.personnel_id} · {account.rank}</span></div>
+                <div><small>{account.credentials_assigned ? credentialEventLabel(account.last_credential_event) : "Credentials not assigned"}</small><span>{formatDate(account.last_credential_at)}</span></div>
+                <div><small>Last sign-in</small><span>{formatDate(account.last_sign_in_at)}</span></div>
+              </div>
+            ))}
+            {!loadingActivity && !activity.length ? <div className="portal-empty-state"><strong>No credential activity is available.</strong></div> : null}
           </div>
-        ) : null}
-
-        {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
-        {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Account test access</strong><span>{notice}</span></div> : null}
-      </section>
-
-      <section className="portal-panel" style={{ gridColumn: "1 / -1" }}>
-        <div className="portal-panel-heading">
-          <div>
-            <p>Sheriff restricted</p>
-            <h2>Credential Security Activity</h2>
-          </div>
-          <span>{loadingActivity ? "Loading…" : `${activity.length} accounts`}</span>
         </div>
+      </div>
 
-        <div className="portal-form-protection" style={{ marginTop: 14 }}>
-          <strong>Credential oversight without password disclosure</strong>
-          <span>Shows credential assignment, password change/reset activity, and recorded sign-in activity. Password values are intentionally unavailable.</span>
-        </div>
-
-        <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
-          {activity.map((account) => (
-            <div key={account.profile_id} style={{ padding: "12px 0", borderBottom: "1px solid rgba(82,68,51,.1)" }}>
-              <strong>{account.call_sign || account.personnel_id} · {account.display_name}</strong>
-              <span>{account.rank} · {account.username ? `@${account.username}` : "No username"} · {account.status}</span>
-              <span>{account.credentials_assigned ? credentialEventLabel(account.last_credential_event) : "Credentials not assigned"} · {formatDate(account.last_credential_at)}</span>
-              <span>Last recorded sign-in: {formatDate(account.last_sign_in_at)}</span>
-            </div>
-          ))}
-          {!loadingActivity && !activity.length ? <span>No credential activity is available.</span> : null}
-        </div>
-      </section>
-    </>
+      {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
+      {notice ? <div className="portal-form-success" role="status"><strong>Account test access</strong><span>{notice}</span></div> : null}
+    </section>
   );
 }
