@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PersonnelRecordTabs } from "../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordHeader } from "../../../_components/PersonnelRecordHeader";
 import { PersonnelRecordUtilities } from "../../../_components/PersonnelRecordUtilities";
 import { PortalShell } from "../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
@@ -108,13 +108,8 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
       description={`${member.rank} · ${primaryUnitName}`}
       actions={<Link className="portal-button portal-button--secondary" href="/portal/command/personnel">Back to Personnel</Link>}
     >
-      <section className="deputy-profile-card command-v2-record-header">
-        <div className="deputy-profile-identity"><span>{member.display_name.split(/\s+/).map((part:string)=>part[0]).join("").slice(0,2).toUpperCase()}</span><div><small>Personnel record</small><h2>{member.display_name}</h2><p>{member.rank} · {member.call_sign ?? "No call sign"} · {member.personnel_id}</p></div></div>
-        <div className="deputy-profile-facts"><div><span>Primary assignment</span><strong>{primaryUnitName}</strong></div><div><span>Assignments</span><strong>{activeAssignments.length}</strong></div><div><span>Status</span><strong>{displayStatus}</strong></div><div><span>Access</span><strong>{member.access_tier}</strong></div></div>
-      </section>
-
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={primaryUnitName} status={displayStatus} active="overview" />
       <PersonnelRecordUtilities personnelId={member.personnel_id} displayName={member.display_name} />
-      <PersonnelRecordTabs personnelId={member.personnel_id} active="overview" />
 
       <div className="deputy-summary-grid command-v2-record-metrics">
         <article><span>Certifications</span><strong>{String(certifications ?? 0).padStart(2, "0")}</strong><small>Current</small></article>
@@ -158,7 +153,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
       </section>
 
       <section className="portal-panel command-v2-record-assignments">
-        <div className="portal-panel-heading"><div><p>Current service</p><h2>Active assignments</h2></div><span>{activeAssignments.length}</span></div>
+        <div className="portal-panel-heading"><div><p>Current service</p><h2>Divisions & assignments</h2></div><Link href={`/portal/command/personnel/${member.personnel_id}/administration#assignments`}>Manage assignments</Link></div>
         {activeAssignments.length ? (
           <div className="command-v2-assignment-chips">
             {activeAssignments.map((assignment:any) => (

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { createClient } from "@/lib/supabase/server";
@@ -16,7 +16,7 @@ export default async function PersonnelSupervisionPage({ params }: PageProps) {
   if (!access.allowed) redirect("/portal/command/supervision");
 
   const supabase = await createClient() as any;
-  const { data: member } = await supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,division,supervisor_label,status").eq("personnel_id", personnelId.toUpperCase()).maybeSingle();
+  const { data: member } = await supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,division,supervisor_label,status").eq("personnel_id", personnelId.toUpperCase()).maybeSingle();
   if (!member) notFound();
 
   const [guardians, points] = await Promise.all([
@@ -28,12 +28,12 @@ export default async function PersonnelSupervisionPage({ params }: PageProps) {
 
   return (
     <PortalShell active="personnel" eyebrow={`${member.personnel_id} · Supervision`} title={`${member.display_name} · Supervision`} description="Guardian history, accountability, and supervisory context." actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}>
-      <PersonnelRecordTabs personnelId={member.personnel_id} active="supervision" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={member.status} active="supervision" />
       <section className="portal-panel" style={{ marginBottom: 16 }}>
-        <div className="portal-panel-heading"><div><p>V2 authority</p><h2>Supervisory relationship</h2></div></div>
-        <div className="command-v2-inline-state"><strong>Structured purview controls authority.</strong><span>The legacy supervisor label ({member.supervisor_label || "none"}) is display-only and does not grant V2 permissions.</span></div>
+        <div className="portal-panel-heading"><div><p>Chain of command</p><h2>Who supervises this record?</h2></div></div>
+        <div className="command-v2-inline-state"><strong>{member.supervisor_label || "No supervisor label recorded"}</strong><span>Access to this record is controlled by the member&apos;s current organizational assignment and formal supervisory authority.</span></div>
       </section>
-      <div className="command-v2-workspace-grid">
+      <div className="personnel-record-two-column">
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>Accountability</p><h2>Guardian history</h2></div><span>{guardians.data?.length ?? 0}</span></div>
           <div className="command-v2-mini-list">

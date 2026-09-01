@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PersonnelTimeline, type PersonnelTimelineEvent } from "../../../../_components/PersonnelTimeline";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
@@ -31,7 +31,7 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
     .maybeSingle();
   if (!member) notFound();
 
-  const [calls, divisions, certs, guardians, awards, flags, leave, training, points, requests] = await Promise.all([
+  const [calls, divisions, certs, guardians, awards, flags, leave, training, points, requests, correspondence] = await Promise.all([
     supabase.from("call_sign_assignments").select("id,call_sign,assigned_at,released_at,release_reason").eq("profile_id", member.id),
     supabase.from("division_assignments").select("id,division,assignment_type,effective_at,ends_at,notes").eq("profile_id", member.id),
     supabase.from("certifications").select("id,name,certificate_number,status,issued_on,expires_on,created_at,updated_at").eq("profile_id", member.id),
@@ -42,6 +42,7 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
     supabase.from("training_progress").select("id,program_type,phase,status,started_on,completed_on,evaluation_notes,created_at,updated_at").eq("profile_id", member.id),
     supabase.from("disciplinary_point_events").select("id,event_type,delta,reason,effective_on,created_at,guardian_id").eq("profile_id", member.id),
     supabase.from("personnel_requests").select("id,request_number,request_type,status,subject,details,created_at,decided_at").eq("requester_profile_id", member.id),
+    supabase.from("personnel_correspondence").select("id,document_type,subject,sent_at").eq("recipient_profile_id", member.id).is("archived_at", null),
   ]);
 
   const events: PersonnelTimelineEvent[] = [];
@@ -101,6 +102,10 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
     add({ id: `request-${row.id}`, category: "Administrative", title: `${row.request_type} request · ${row.subject}`, detail: clean(row.details, `RQ-${String(row.request_number).padStart(4, "0")}`), occurredAt: row.created_at, status: row.status });
   }
 
+  for (const row of correspondence.data ?? []) {
+    add({ id: `correspondence-${row.id}`, category: "Administrative", title: `${row.document_type} delivered`, detail: row.subject, occurredAt: row.sent_at, href: `/portal/command/personnel/${member.personnel_id}/documents` });
+  }
+
   events.sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime());
 
   return (
@@ -111,7 +116,7 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
       description="Chronological service record."
       actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}
     >
-      <PersonnelRecordTabs personnelId={member.personnel_id} active="timeline" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={member.status} active="timeline" />
       <PersonnelTimeline events={events} />
     </PortalShell>
   );

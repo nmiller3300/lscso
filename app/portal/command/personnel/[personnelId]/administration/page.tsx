@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { PersonnelAssignmentManager } from "../../../../_components/PersonnelAssignmentManager";
 import { PersonnelDelegationManager } from "../../../../_components/PersonnelDelegationManager";
 import { PersonnelIdentityManager } from "../../../../_components/PersonnelIdentityManager";
-import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { createClient } from "@/lib/supabase/server";
@@ -22,19 +22,20 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   const supabase = await createClient() as any;
   const { data: member } = await supabase
     .from("personnel_profiles")
-    .select("id,personnel_id,display_name,rank,access_tier,division,status")
+    .select("id,personnel_id,display_name,rank,call_sign,access_tier,division,status")
     .eq("personnel_id", personnelId.toUpperCase())
     .maybeSingle();
   if (!member) notFound();
 
   const now = new Date();
   const nowIso = now.toISOString();
-  const [flags, leave, requests, delegations, units] = await Promise.all([
+  const [flags, leave, requests, delegations, units, assignments] = await Promise.all([
     supabase.from("personnel_flags").select("id,flag_type,notes,active,created_at,resolved_at").eq("profile_id", member.id).order("created_at", { ascending: false }),
     supabase.from("leave_requests").select("id,request_number,leave_type,starts_on,expected_return_on,status,created_at").eq("profile_id", member.id).order("created_at", { ascending: false }),
     supabase.from("personnel_requests").select("id,request_number,request_type,status,subject,created_at").eq("requester_profile_id", member.id).order("created_at", { ascending: false }),
     supabase.from("personnel_delegations").select("id,delegation_type,organizational_unit_id,starts_at,expires_at,reason,revoked_at").eq("profile_id", member.id).is("revoked_at", null).lte("starts_at", nowIso).order("created_at", { ascending: false }),
     supabase.from("organizational_units").select("id,name,unit_type,active").eq("active", true).order("sort_order").order("name"),
+    supabase.from("personnel_unit_assignments").select("id,organizational_unit_id,assignment_type,starts_at,notes,organizational_units(name,unit_type)").eq("profile_id", member.id).is("ends_at", null).order("starts_at", { ascending: true }),
   ]);
 
   const unitRows = (units.data ?? []).filter((item: any) => item.unit_type !== "Bureau");
@@ -44,6 +45,11 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   const canApprovePersonnelChanges = PERSONNEL_CHANGE_APPROVERS.has(profile.rank) && profile.id !== member.id;
   const canManageDelegations = DELEGATION_MANAGERS.has(profile.rank) && profile.id !== member.id;
   const canGrantTemporaryCommand = ["Sheriff", "Undersheriff"].includes(profile.rank);
+  const canManageAssignments = ["Executive", "Command"].includes(profile.access_tier);
+  const assignmentRows = (assignments.data ?? []).map((item: any) => {
+    const unit = Array.isArray(item.organizational_units) ? item.organizational_units[0] : item.organizational_units;
+    return { id: item.id, unitId: item.organizational_unit_id, unitName: unit?.name ?? "Unknown unit", unitType: unit?.unit_type ?? "Unit", assignmentType: item.assignment_type, startsAt: item.starts_at, notes: item.notes };
+  });
 
   return (
     <PortalShell
@@ -51,9 +57,16 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
       eyebrow={`${member.personnel_id} · Administration`}
       title={`${member.display_name} · Administration`}
       description="Administrative flags, leave, personnel requests, delegated authority, and controlled personnel changes."
-      actions={<Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to record</Link>}
     >
-      <PersonnelRecordTabs personnelId={member.personnel_id} active="administration" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={member.status} active="administration" />
+
+      <PersonnelAssignmentManager
+        profileId={member.id}
+        displayName={member.display_name}
+        canManage={canManageAssignments}
+        units={unitRows.map((item: any) => ({ id: item.id, name: item.name, unitType: item.unit_type }))}
+        assignments={assignmentRows}
+      />
 
       {canApprovePersonnelChanges ? (
         <PersonnelIdentityManager
@@ -95,7 +108,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
         </section>
       )}
 
-      <div className="command-v2-workspace-grid">
+      <div className="personnel-record-two-column">
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>Personnel status</p><h2>Administrative flags</h2></div><span>{flags.data?.length ?? 0}</span></div>
           <div className="command-v2-mini-list">

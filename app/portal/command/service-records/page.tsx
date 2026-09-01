@@ -9,7 +9,7 @@ export default async function ServiceRecordsPage() {
   if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/personnel");
   const supabase = await createClient() as any;
   const [{ data: personnel }, { data: flags }, { data: awards }] = await Promise.all([
-    supabase.from("personnel_profiles").select("id,display_name,rank,call_sign").in("status", ["Active", "Acting"]).order("display_name"),
+    supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign").in("status", ["Active", "Acting"]).order("display_name"),
     supabase.from("personnel_flags").select("id,profile_id,flag_type,notes,created_at").eq("active", true).order("created_at", { ascending: false }),
     supabase.from("personnel_awards").select("id,profile_id,award_name,citation,awarded_on").order("awarded_on", { ascending: false }).limit(50),
   ]);
@@ -19,7 +19,7 @@ export default async function ServiceRecordsPage() {
       active="awards"
       eyebrow="Personnel administration · Service records"
       title="Service Records"
-      description="Manage decorations, administrative personnel flags, and disciplinary point restoration without mixing those systems together."
+      description="Choose a member, select the action you need, and complete one clearly defined service-record task at a time."
     >
       <ServiceRecordWorkspace personnel={personnel ?? []} flags={flags ?? []} awards={awards ?? []} />
     </PortalShell>

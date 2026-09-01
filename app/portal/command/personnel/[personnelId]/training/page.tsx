@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { PersonnelRecordTabs } from "../../../../_components/PersonnelRecordTabs";
+import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { createClient } from "@/lib/supabase/server";
@@ -24,7 +24,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
   const supabase = await createClient() as any;
   const { data: member } = await supabase
     .from("personnel_profiles")
-    .select("id,personnel_id,display_name,rank,division")
+    .select("id,personnel_id,display_name,rank,call_sign,division,status")
     .eq("personnel_id", personnelId.toUpperCase())
     .maybeSingle();
   if (!member) notFound();
@@ -72,7 +72,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
         </>
       )}
     >
-      <PersonnelRecordTabs personnelId={member.personnel_id} active="training" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={member.status} active="training" />
 
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
@@ -95,16 +95,11 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
         </div>
       </section>
 
-      <div className="command-v2-workspace-grid">
-        <section className="portal-panel">
+      <div className="personnel-record-two-column">
+        <section className="portal-panel personnel-record-wide">
           <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certifications</h2></div><span>{certs.data?.length ?? 0}</span></div>
-          <div className="command-v2-mini-list">
-            {(certs.data ?? []).length ? (certs.data ?? []).map((item:any) => (
-              <div key={item.id}>
-                <strong>{item.name}</strong>
-                <span>{item.certificate_number ?? "Pending number"} · {item.status}{item.expires_on ? ` · Expires ${dateLabel(item.expires_on)}` : ""}</span>
-              </div>
-            )) : <p className="command-v2-compact-copy">No certification records.</p>}
+          <div className="personnel-certification-grid personnel-certification-grid--command">
+            {(certs.data ?? []).length ? (certs.data ?? []).map((item:any) => <article key={item.id}><span>{item.status}</span><strong>{item.name}</strong><small>{item.certificate_number ?? "No certificate number"}</small><dl><div><dt>Issued</dt><dd>{dateLabel(item.issued_on) ?? "Pending"}</dd></div><div><dt>Expires</dt><dd>{item.expires_on ? dateLabel(item.expires_on) : "No expiration"}</dd></div></dl></article>) : <p className="command-v2-compact-copy">No certification records.</p>}
           </div>
         </section>
 
