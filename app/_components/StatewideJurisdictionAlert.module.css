@@ -1,0 +1,97 @@
+.alert {
+  position: relative;
+  z-index: 20;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+  background: linear-gradient(180deg, #a51616 0%, #7f0f0f 100%);
+  color: #fff;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
+}
+
+.viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  min-width: 200%;
+  animation: statewideJurisdictionScroll 26s linear infinite;
+  will-change: transform;
+}
+
+.group {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 48px;
+  padding: 11px 48px 11px 0;
+}
+
+.group span {
+  position: relative;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.group span::after {
+  margin-left: 48px;
+  color: rgba(255, 255, 255, 0.72);
+  content: "◆";
+  font-size: 8px;
+  vertical-align: 1px;
+}
+
+.screenReaderOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes statewideJurisdictionScroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@media (max-width: 640px) {
+  .group {
+    gap: 36px;
+    padding: 10px 36px 10px 0;
+  }
+
+  .group span {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .group span::after {
+    margin-left: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+
+  .group:nth-child(2) {
+    display: none;
+  }
+}
