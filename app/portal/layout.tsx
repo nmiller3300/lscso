@@ -13,6 +13,7 @@ import "./notifications-v2.css";
 import "./request-routing.css";
 import "./notification-attention.css";
 import "./midnight.css";
+import "./midnight-pages.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
