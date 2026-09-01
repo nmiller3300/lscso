@@ -1,23 +1,15 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
+import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
-function serviceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return url && key
-    ? createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
-    : null;
+function publicClient() {
+  return createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 export async function GET() {
-  const supabase = serviceClient();
-  if (!supabase) {
-    return NextResponse.json(
-      { isActive: false, message: "" },
-      { status: 200, headers: { "Cache-Control": "no-store, max-age=0" } },
-    );
-  }
-
+  const supabase = publicClient();
   const { data, error } = await supabase
     .from("site_psa")
     .select("message,is_active,updated_at")
