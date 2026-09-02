@@ -8,6 +8,7 @@ type PersonnelRecordHeaderProps = {
   callSign?: string | null;
   assignment?: string | null;
   status?: string | null;
+  probationLabel?: string | null;
   active: PersonnelRecordSection;
 };
 
@@ -22,6 +23,7 @@ export function PersonnelRecordHeader({
   callSign,
   assignment,
   status,
+  probationLabel,
   active,
 }: PersonnelRecordHeaderProps) {
   return (
@@ -35,6 +37,7 @@ export function PersonnelRecordHeader({
         </div>
         <div className="personnel-record-identity-actions">
           {status ? <span className="personnel-record-status">{status}</span> : null}
+          {probationLabel ? <span className="personnel-record-status" title="15-day new-hire probation period">{probationLabel}</span> : null}
           <Link href="/portal/command/personnel">All personnel</Link>
         </div>
       </div>

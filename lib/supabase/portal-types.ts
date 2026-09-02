@@ -16,4 +16,7 @@ export type PortalProfile = Pick<
   | "status"
   | "is_test_account"
   | "credentials_assigned"
->;
+> & {
+  probation_started_at: string | null;
+  probation_ends_at: string | null;
+};

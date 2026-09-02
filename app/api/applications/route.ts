@@ -3,7 +3,7 @@ import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { APPLICATION_CERTIFICATION_TEXT, applicationLabel } from "@/lib/recruitment/application";
 
-const requiredFields = ["full_name","discord_username","age","timezone","fivem_experience","previous_departments","weekly_hours","upcoming_commitments","why_lscso","contribution","serious_roleplay_definition","reasonable_suspicion_probable_cause","use_of_force_factors","scenario_speeding_nervous","scenario_deputy_policy_violation","scenario_supervisor_order"];
+const requiredFields = ["full_name","discord_username","age","timezone","fivem_experience","previous_departments","weekly_hours","upcoming_commitments","why_lscso","contribution","drug_use_history","serious_roleplay_definition","reasonable_suspicion_probable_cause","use_of_force_factors","scenario_speeding_nervous","scenario_deputy_policy_violation","scenario_supervisor_order"];
 
 export async function POST(request: Request) {
   try {

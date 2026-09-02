@@ -8,6 +8,7 @@ import { RosterWorkspace } from "../../../_components/RosterWorkspace";
 import type { PersonnelRecord } from "../../../_data/model";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
 const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
 const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff"]);
@@ -159,15 +160,16 @@ export default async function FullRosterPage() {
             const leaveRow = currentLeave.get(member.id);
             const career = latestCareer.get(member.id);
             const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
+            const probation = getPersonnelProbationState(member.probation_ends_at, now);
             return (
               <Link href={`/portal/command/personnel/${member.personnel_id}`} key={member.id}>
                 <div>
-                  <strong>{member.call_sign || member.personnel_id} · {member.rank} {member.display_name}</strong>
+                  <strong>{member.call_sign || member.personnel_id} · {member.rank} {member.display_name}{probation.active ? <span className="personnel-record-status" style={{ marginLeft: 8 }}>PROBATION · {probation.daysRemaining}D</span> : null}</strong>
                   <span>{primaryAssignment.get(member.id) ?? member.division ?? "Unassigned"} · {displayStatus} · {memberCerts.length} certifications · {assignmentCount.get(member.id) ?? 0} assignments</span>
                 </div>
                 <div>
                   <strong>{trainingRow ? `${trainingRow.phase} · ${trainingRow.progress_percent}%` : ftoQualified ? "FTO Qualified" : "No active training"}</strong>
-                  <span>{trainingRow && trainer?.display_name ? `Trainer: ${trainer.display_name}` : `${activeDelegations.get(member.id) ?? 0} delegated roles`}{career ? ` · Latest: ${career.event_type}` : ""}</span>
+                  <span>{probation.active ? `Probation ends ${new Date(probation.endsAt!).toLocaleDateString()} · ` : ""}{trainingRow && trainer?.display_name ? `Trainer: ${trainer.display_name}` : `${activeDelegations.get(member.id) ?? 0} delegated roles`}{career ? ` · Latest: ${career.event_type}` : ""}</span>
                 </div>
               </Link>
             );

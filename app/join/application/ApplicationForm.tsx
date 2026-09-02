@@ -10,6 +10,7 @@ const sections: readonly ApplicationSection[] = [
   ["Applicant Information", [["full_name","What is your full name?","text"],["discord_username","What is your Discord username?","text"],["age","What is your age?","number"],["timezone","What is your timezone?","text"]]],
   ["Experience & Availability", [["fivem_experience","How long have you been playing FiveM and participating in serious roleplay?","textarea"],["previous_departments","What departments or factions have you previously been a member of?","textarea"],["weekly_hours","How many hours per week can you dedicate to LSCSO?","text"],["upcoming_commitments","Do you have any upcoming commitments that may affect your activity?","textarea"]]],
   ["Why LSCSO?", [["why_lscso","Why do you want to join the Los Santos County Sheriff's Office?","textarea"],["contribution","What do you believe you can contribute to LSCSO?","textarea"]]],
+  ["Background & Integrity", [["drug_use_history","Have you ever used illegal drugs, used prescription medication not prescribed to you, or otherwise misused a controlled substance? If yes, identify the substance(s), approximate date(s), frequency, and any relevant context. If no, enter No.","textarea"]]],
   ["Roleplay & Law Enforcement", [["serious_roleplay_definition","What does serious roleplay mean to you?","textarea"],["reasonable_suspicion_probable_cause","Explain the difference between reasonable suspicion and probable cause.","textarea"],["use_of_force_factors","What factors should an officer consider before using force?","textarea"]]],
   ["Scenarios", [["scenario_speeding_nervous","You stop a vehicle for speeding. The driver becomes increasingly nervous during the stop. What do you do?","textarea"],["scenario_deputy_policy_violation","You witness another deputy violating department policy. What do you do?","textarea"],["scenario_supervisor_order","A supervisor orders you to do something you believe violates department policy. How do you handle it?","textarea"]]],
 ] as const;
@@ -141,11 +142,21 @@ export function ApplicationForm() {
         <label htmlFor={name}><strong>{questionOffset + questionIndex + 1}.</strong> {question}</label>
         {type === "textarea" ? <textarea id={name} required rows={5} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} /> : <input id={name} required type={type} min={type === "number" ? 13 : undefined} max={type === "number" ? 100 : undefined} value={values[name] || ""} onChange={(e) => setValue(name,e.target.value)} />}
       </div>)}
+      {currentSection[0] === "Background & Integrity" ? <div className="application-screening-notice" role="note">
+        <span>Applicant Screening Notice</span>
+        <strong>LSCSO candidates are subject to additional screening.</strong>
+        <p>Candidates who advance in the selection process are subject to fingerprinting, blood testing, drug testing, and breathalyzer testing as part of LSCSO background and suitability screening.</p>
+      </div> : null}
       <div className="application-navigation">
         {step > 0 ? <button className="button application-navigation__back" type="button" onClick={previousStep}>Back</button> : <span />}
         <button className="button button--dark" type="button" onClick={nextStep}>Next Section <span aria-hidden="true">→</span></button>
       </div>
     </fieldset> : <section className="application-certification" aria-labelledby="application-certification-title">
+      <div className="application-screening-notice application-screening-notice--final" role="note">
+        <span>Applicant Screening Notice</span>
+        <strong>Fingerprinting and testing requirements</strong>
+        <p>LSCSO candidates are subject to fingerprinting, blood testing, drug testing, and breathalyzer testing as part of the department&apos;s background and suitability screening process.</p>
+      </div>
       <p className="application-certification__eyebrow">Final Section</p>
       <h2 id="application-certification-title">Applicant Certification</h2>
       <p className="application-certification__statement">{APPLICATION_CERTIFICATION_TEXT}</p>
@@ -156,7 +167,7 @@ export function ApplicationForm() {
         </div>
         {signed ? <button className="application-signature__clear" type="button" onClick={clearSignature}>Clear signature</button> : <button className="application-signature__button" type="button" onClick={signApplication}>Click to Sign Application</button>}
       </div>
-      <p className="application-certification__notice">By clicking to sign, you acknowledge the certification above and authorize LSCSO to retain this electronic signature with your application.</p>
+      <p className="application-certification__notice">By clicking to sign, you acknowledge the certification and applicant screening notice above and authorize LSCSO to retain this electronic signature with your application.</p>
       {error && <p className="application-error" role="alert">{error}</p>}
       <div className="application-navigation">
         <button className="button application-navigation__back" type="button" onClick={previousStep}>Back</button>

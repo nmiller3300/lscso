@@ -14,6 +14,7 @@ export const applicationQuestions: Array<[string, string, string]> = [
   ["Experience & Availability", "upcoming_commitments", "Do you have any upcoming commitments that may affect your activity?"],
   ["Why LSCSO?", "why_lscso", "Why do you want to join the Los Santos County Sheriff's Office?"],
   ["Why LSCSO?", "contribution", "What do you believe you can contribute to LSCSO?"],
+  ["Background & Integrity", "drug_use_history", "Have you ever used illegal drugs, used prescription medication not prescribed to you, or otherwise misused a controlled substance? If yes, identify the substance(s), approximate date(s), frequency, and any relevant context. If no, enter No."],
   ["Roleplay & Law Enforcement", "serious_roleplay_definition", "What does serious roleplay mean to you?"],
   ["Roleplay & Law Enforcement", "reasonable_suspicion_probable_cause", "Explain the difference between reasonable suspicion and probable cause."],
   ["Roleplay & Law Enforcement", "use_of_force_factors", "What factors should an officer consider before using force?"],

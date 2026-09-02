@@ -10,6 +10,7 @@ import { PortalShell } from "../_components/PortalShell";
 import { TestAccountBanner } from "../_components/TestAccountBanner";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
+import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
 function initials(name: string) {
   return name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
@@ -23,6 +24,7 @@ export default async function PersonnelPortalPage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) return null;
   const supabase = await createClient() as any;
+  const probation = getPersonnelProbationState(profile.probation_ends_at);
 
   const [certifications, assignments, guardians, requests, training, notifications, actingGrants, awards, flags, pointEvents, disciplinaryPoints, correspondence] = await Promise.all([
     supabase.from("certifications").select("*").eq("profile_id", profile.id).order("created_at", { ascending: false }),
@@ -43,7 +45,7 @@ export default async function PersonnelPortalPage() {
   const currentCertifications = certificationRows.filter((item: any) => item.status === "Current");
   const pendingCertifications = certificationRows.filter((item: any) => ["Requested", "Pending"].includes(item.status));
   const pastCertifications = certificationRows.filter((item: any) => !["Current", "Requested", "Pending"].includes(item.status));
-  const openRequests = (requests.data ?? []).filter((item: any) => !["Denied", "Cancelled", "Completed"].includes(item.status)).length;
+  const openRequests = (requests.data ?? []).filter((item: any) => !["Approved", "Denied", "Cancelled", "Completed"].includes(item.status)).length;
   const commandAccess = ["Executive", "Command"].includes(profile.access_tier);
   const pendingAcknowledgments = (guardians.data ?? []).filter((item: any) => !["Acknowledged", "Closed"].includes(item.status)).length;
   const letterRows = (correspondence.data ?? []).map((item: any) => {
@@ -64,9 +66,9 @@ export default async function PersonnelPortalPage() {
       <DeputyNotificationCenter notifications={(notifications.data ?? []).map((item: any): PortalNotificationItem => ({ id: item.id, time: new Date(item.created_at).toLocaleDateString(), title: item.title, detail: item.message, type: item.notification_type, href: item.href, read: Boolean(item.read_at) }))} />
 
       <section className="deputy-profile-card">
-        <div className="deputy-profile-identity"><span>{initials(profile.display_name)}</span><div><small>{profile.is_test_account ? "Test personnel" : "Department personnel"}</small><h2>{profile.display_name}</h2><p>{profile.rank} · {profile.call_sign ?? "No call sign"} · Personnel ID {profile.personnel_id}</p></div></div>
-        <div className="deputy-profile-facts"><div><span>Primary assignment</span><strong>{profile.division}</strong></div><div><span>Chain of command</span><strong>{profile.supervisor_label}</strong></div><div><span>Service status</span><strong>{profile.status}</strong></div><div><span>Access tier</span><strong>{profile.access_tier}</strong></div></div>
-        <div className="deputy-profile-seal"><strong>My Info</strong><span>Protected personnel record</span></div>
+        <div className="deputy-profile-identity"><span>{initials(profile.display_name)}</span><div><small>{profile.is_test_account ? "Test personnel" : "Department personnel"}</small><h2>{profile.display_name}</h2><p>{profile.rank} · {profile.call_sign ?? "No call sign"} · Personnel ID {profile.personnel_id}</p>{probation.active ? <span className="personnel-record-status" title={`Probation ends ${dateLabel(probation.endsAt)}`}>PROBATION · {probation.daysRemaining} DAYS REMAINING</span> : null}</div></div>
+        <div className="deputy-profile-facts"><div><span>Primary assignment</span><strong>{profile.division}</strong></div><div><span>Chain of command</span><strong>{profile.supervisor_label}</strong></div><div><span>Service status</span><strong>{profile.status}{probation.active ? " · Probation" : ""}</strong></div><div><span>Access tier</span><strong>{profile.access_tier}</strong></div></div>
+        <div className="deputy-profile-seal"><strong>My Info</strong><span>{probation.active ? `Probation through ${dateLabel(probation.endsAt)}` : "Protected personnel record"}</span></div>
       </section>
 
       <section className="deputy-summary-grid">

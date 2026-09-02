@@ -10,6 +10,9 @@ type DirectoryMember = {
   callSign: string | null;
   division: string;
   status: string;
+  probationary: boolean;
+  probationEndsAt: string | null;
+  probationDaysRemaining: number | null;
 };
 
 type PersonnelDirectoryProps = {
@@ -18,6 +21,12 @@ type PersonnelDirectoryProps = {
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
+
+function probationSummary(member: DirectoryMember) {
+  return member.probationary && member.probationDaysRemaining
+    ? `Probation · ${member.probationDaysRemaining}d remaining`
+    : null;
+}
 
 export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
   const [query, setQuery] = useState("");
@@ -58,7 +67,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     if (!normalized && !division) return [];
     return personnel.filter((member) => {
       const matchesDivision = !division || member.division === division;
-      const haystack = [member.displayName, member.personnelId, member.callSign, member.rank, member.division, member.status]
+      const haystack = [member.displayName, member.personnelId, member.callSign, member.rank, member.division, member.status, member.probationary ? "probation probationary" : ""]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
@@ -100,7 +109,13 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
             {filtered.map((member) => (
               <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}>
                 <div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div>
-                <div><span>{member.division}</span><b>{member.status}</b></div>
+                <div>
+                  <span>{member.division}</span>
+                  <span style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 6 }}>
+                    <b>{member.status}</b>
+                    {member.probationary ? <b title={member.probationEndsAt ? `Probation ends ${new Date(member.probationEndsAt).toLocaleDateString()}` : undefined} style={{ color: "var(--portal-gold-bright)" }}>PROBATION · {member.probationDaysRemaining}D</b> : null}
+                  </span>
+                </div>
               </Link>
             ))}
             {!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current search.</strong></div> : null}
@@ -111,12 +126,12 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
       <div className="command-v2-workspace-grid command-v2-directory-lower">
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>
-          {favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}
+          {favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}
         </section>
 
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
-          {recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}
+          {recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}
         </section>
 
         <section className="portal-panel command-v2-launcher">

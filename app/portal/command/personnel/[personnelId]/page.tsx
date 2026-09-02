@@ -6,6 +6,7 @@ import { PortalShell } from "../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
+import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
 type PersonnelRecordPageProps = {
   params: Promise<{ personnelId: string }>;
@@ -29,13 +30,14 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const supabase = await createClient() as any;
   const { data: member } = await supabase
     .from("personnel_profiles")
-    .select("id,personnel_id,display_name,rank,call_sign,division,supervisor_label,status,access_tier")
+    .select("id,personnel_id,display_name,rank,call_sign,division,supervisor_label,status,access_tier,probation_started_at,probation_ends_at")
     .eq("personnel_id", personnelId.toUpperCase())
     .maybeSingle();
 
   if (!member) notFound();
 
   const today = new Date().toISOString().slice(0, 10);
+  const probation = getPersonnelProbationState(member.probation_ends_at);
 
   const [
     { count: certifications },
@@ -99,6 +101,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const ftoQualified = Boolean(ftoCertification.data?.length);
   const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
   const latestCareerRow = latestCareer.data?.[0];
+  const probationLabel = probation.active ? `PROBATION · ${probation.daysRemaining}D` : null;
 
   return (
     <PortalShell
@@ -108,7 +111,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
       description={`${member.rank} · ${primaryUnitName}`}
       actions={<Link className="portal-button portal-button--secondary" href="/portal/command/personnel">Back to Personnel</Link>}
     >
-      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={primaryUnitName} status={displayStatus} active="overview" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={primaryUnitName} status={displayStatus} probationLabel={probationLabel} active="overview" />
       <PersonnelRecordUtilities personnelId={member.personnel_id} displayName={member.display_name} />
 
       <div className="deputy-summary-grid command-v2-record-metrics">
@@ -130,8 +133,8 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
             <p className="command-v2-compact-copy">{ftoQualified ? "This member holds a current Field Training Officer certification and has FTO permissions for trainees assigned to them." : "No current Field Training Officer certification is recorded, so this member has no FTO permissions."}</p>
           </div>
           <div className="portal-panel">
-            <div className="portal-panel-heading"><div><p>Operational status</p><h2>{displayStatus}</h2></div></div>
-            <p className="command-v2-compact-copy">{leaveRow ? `${leaveRow.leave_type} through ${shortDate(leaveRow.expected_return_on)}` : "No current approved leave changes this member&apos;s displayed operational status."}</p>
+            <div className="portal-panel-heading"><div><p>Operational status</p><h2>{displayStatus}{probation.active ? " · Probation" : ""}</h2></div></div>
+            <p className="command-v2-compact-copy">{leaveRow ? `${leaveRow.leave_type} through ${shortDate(leaveRow.expected_return_on)}${probation.active ? ` · Probation continues through ${shortDate(probation.endsAt)} (${probation.daysRemaining} days remaining)` : ""}` : probation.active ? `15-day probationary period ends ${shortDate(probation.endsAt)} · ${probation.daysRemaining} days remaining.` : "No current approved leave or probation marker changes this member's displayed operational status."}</p>
           </div>
         </div>
 
