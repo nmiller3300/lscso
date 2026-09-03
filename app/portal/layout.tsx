@@ -22,6 +22,7 @@ import "./portal-mobile-menu.css";
 import "./portal-primitives.css";
 import "./portal-ux-overhaul.css";
 import "./portal-ux-integrations.css";
+import "./portal-legacy-dialog-bridge.css";
 
 export const metadata: Metadata={title:"Personnel Operations Portal",description:"LSCSO command and deputy personnel operations portal.",robots:{index:false,follow:false}};
 export default function PortalLayout({children}:Readonly<{children:ReactNode}>){return <div className="portal-root" data-theme="dark" id="lscso-portal-root"><MaintenanceNotice scope="personnel_portal" variant="portal"/>{children}</div>}

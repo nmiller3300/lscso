@@ -1,0 +1,5 @@
+/* Shared compatibility layer for complex Portal workflows still using the established modal markup. Interaction behavior is centralized by LegacyPortalModalBridge. */
+.portal-dialog-field{display:grid;gap:7px;margin-top:14px;color:#d1d4d8;font-size:.72rem;font-weight:700}.portal-dialog-field>span{color:var(--portal-muted);font-size:.64rem;font-weight:600}.portal-dialog-field input,.portal-dialog-field textarea,.portal-dialog-field select{width:100%}
+.portal-modal-backdrop{z-index:500!important;background:rgba(3,5,8,.76)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.portal-modal-backdrop .portal-modal{outline:none}
+@media(max-width:760px){.portal-modal-backdrop{display:grid!important;place-items:end center!important;padding:0!important}.portal-modal-backdrop .portal-modal{width:100%!important;max-width:none!important;max-height:92dvh!important;margin:0!important;border-radius:22px 22px 0 0!important}.portal-modal-backdrop .portal-modal-actions{position:sticky;bottom:0;z-index:3;background:#12171d;padding-bottom:max(18px,env(safe-area-inset-bottom))}}

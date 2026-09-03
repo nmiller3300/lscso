@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
 import { CommandQuickFind } from "./CommandQuickFind";
+import { LegacyPortalModalBridge } from "./LegacyPortalModalBridge";
 import { MyInfoSectionNav } from "./MyInfoSectionNav";
 import { PortalAccountMenu } from "./PortalAccountMenu";
 import { PortalNavigation } from "./PortalNavigation";
@@ -21,6 +22,7 @@ type PortalShellProps = {
 
 export function PortalShell({ active, audience = "command", eyebrow, title, description, actions, children }: PortalShellProps) {
   return <div className="portal-app">
+    <LegacyPortalModalBridge />
     <aside className="portal-sidebar"><Link className="portal-brand" href="/portal" aria-label="LSCSO portal entry"><Image src="/images/lscso-patch-color.png" alt="" width={58} height={58} priority /><span><strong>LSCSO</strong><small>Personnel Operations</small></span></Link><div className="portal-sidebar-label">{audience === "command" ? "Command workspace" : "Personnel workspace"}</div><PortalNavigation active={active} audience={audience} /><div className="portal-sidebar-foot"><span className="portal-security-pulse" aria-hidden="true" /><div><strong>Restricted access</strong><small>Protected department records</small></div></div></aside>
     <section className="portal-workspace">
       <header className="portal-topbar"><div className="portal-environment"><span>Internal</span><strong>{eyebrow}</strong></div><div className="portal-topbar-actions"><div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>{audience === "command" ? <CommandQuickFind /> : null}<PortalNotificationLink audience={audience} /><PortalAccountMenu /></div></header>
