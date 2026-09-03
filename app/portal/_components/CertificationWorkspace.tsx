@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { PortalDialog } from "./PortalDialog";
 
 type Person = { id: string; display_name: string; rank: string; call_sign: string | null };
 type Certification = { id: string; profile_id: string; name: string; status: string; issuer: string; certificate_number: string | null; issued_on: string | null; expires_on: string | null; notes: string | null };
@@ -52,6 +53,7 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
   const [notice, setNotice] = useState("");
   const [pending, setPending] = useState(false);
   const [selectedCertifications, setSelectedCertifications] = useState<string[]>([]);
+  const [deleteTarget, setDeleteTarget] = useState<Certification | null>(null);
 
   function toggleCertification(name: string) {
     setSelectedCertifications((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
@@ -101,21 +103,20 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
     window.setTimeout(() => setNotice(""), 4200);
   }
 
-  async function removeCertification(certification: Certification) {
-    if (!canIssue || pending) return;
-    const person = personnel.find((item) => item.id === certification.profile_id);
-    const confirmed = window.confirm(`Delete ${certification.name} from ${person?.display_name ?? "this personnel record"}? This should only be used to correct an accidental issuance.`);
-    if (!confirmed) return;
-
+  async function confirmDeleteCertification() {
+    if (!deleteTarget || !canIssue || pending) return;
     setPending(true);
-    const supabase = createClient() as any;
-    const result = await supabase.rpc("delete_certification", { certification_id: certification.id });
+    const target = deleteTarget;
+    const result = await (createClient() as any).rpc("delete_certification", { certification_id: target.id });
     setPending(false);
     if (result.error) { setNotice(result.error.message); return; }
-    setNotice(`${certification.name} removed from the personnel record.`);
+    setDeleteTarget(null);
+    setNotice(`${target.name} removed from the personnel record.`);
     router.refresh();
     window.setTimeout(() => setNotice(""), 4200);
   }
+
+  const deletePerson = deleteTarget ? personnel.find((item) => item.id === deleteTarget.profile_id) : null;
 
   return (
     <>
@@ -141,11 +142,24 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
         <div className="deputy-certification-list certification-activity-list">
           {certifications.map((certification) => {
             const person = personnel.find((item) => item.id === certification.profile_id);
-            return <article key={certification.id}><span aria-hidden="true">{certification.status === "Current" ? "✓" : "…"}</span><div><strong>{certification.name}</strong><small>{person?.display_name ?? "Personnel"} · {certification.issuer}</small></div><div><small>Certificate number</small><strong>{certification.certificate_number ?? "Pending issuance"}</strong><small>{certification.expires_on ? `Expires ${certification.expires_on}` : certification.status === "Current" ? "No expiration" : ""}</small></div><b>{certification.status}</b>{canIssue ? <button className="certification-delete" disabled={pending} onClick={() => removeCertification(certification)} type="button">Delete</button> : null}</article>;
+            return <article key={certification.id}><span aria-hidden="true">{certification.status === "Current" ? "✓" : "…"}</span><div><strong>{certification.name}</strong><small>{person?.display_name ?? "Personnel"} · {certification.issuer}</small></div><div><small>Certificate number</small><strong>{certification.certificate_number ?? "Pending issuance"}</strong><small>{certification.expires_on ? `Expires ${certification.expires_on}` : certification.status === "Current" ? "No expiration" : ""}</small></div><b>{certification.status}</b>{canIssue ? <button className="certification-delete" disabled={pending} onClick={() => setDeleteTarget(certification)} type="button">Delete</button> : null}</article>;
           })}
           {!certifications.length ? <div className="portal-empty-state"><strong>No certification activity is on file.</strong></div> : null}
         </div>
       </section>
+
+      <PortalDialog
+        open={Boolean(deleteTarget)}
+        onClose={() => { if (!pending) setDeleteTarget(null); }}
+        eyebrow="Certification correction"
+        title="Remove issued certification?"
+        description="Use this only to correct an accidental issuance. The action is recorded in the protected personnel system."
+        dismissOnBackdrop={false}
+        footer={<><button className="portal-button portal-button--secondary" disabled={pending} onClick={() => setDeleteTarget(null)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pending} onClick={confirmDeleteCertification} type="button">{pending ? "Removing…" : "Remove certification"}</button></>}
+      >
+        <div className="portal-form-protection"><strong>{deleteTarget?.name ?? "Certification"}</strong><span>{deletePerson?.display_name ?? "Personnel record"} · This does not silently rewrite certification history.</span></div>
+      </PortalDialog>
+
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
     </>
   );
