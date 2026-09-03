@@ -17,6 +17,7 @@ import "./midnight-pages.css";
 import "./midnight-polish.css";
 import "./midnight-operations.css";
 import "./midnight-gateway.css";
+import "./portal-mobile-menu.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",

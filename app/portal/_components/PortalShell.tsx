@@ -52,6 +52,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
         <header className="portal-topbar">
           <div className="portal-environment"><span>Internal</span><strong>{audience === "command" ? "Executive Command" : "Personnel Access"}</strong></div>
           <div className="portal-topbar-actions">
+            <div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>
             {audience === "command" ? <CommandQuickFind /> : null}
             <PortalNotificationLink audience={audience} />
             <PortalAccountMenu />
