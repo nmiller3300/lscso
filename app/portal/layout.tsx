@@ -20,6 +20,7 @@ import "./midnight-operations.css";
 import "./midnight-gateway.css";
 import "./portal-mobile-menu.css";
 import "./portal-primitives.css";
+import "./portal-ux-overhaul.css";
 
 export const metadata: Metadata = { title: "Personnel Operations Portal", description: "LSCSO command and deputy personnel operations portal.", robots: { index: false, follow: false } };
 

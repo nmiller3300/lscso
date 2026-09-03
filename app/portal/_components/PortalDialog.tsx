@@ -19,21 +19,19 @@ const focusable = "button:not([disabled]), [href], input:not([disabled]), select
 export function PortalDialog({ open, onClose, eyebrow, title, description, children, footer, dismissOnBackdrop = true, className = "" }: PortalDialogProps) {
   const dialogRef = useRef<HTMLElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
 
   useEffect(() => {
     if (!open) return;
     previousFocus.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const oldOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
-
     const dialog = dialogRef.current;
-    window.requestAnimationFrame(() => {
-      const first = dialog?.querySelector<HTMLElement>(focusable);
-      (first ?? dialog)?.focus();
-    });
+    window.requestAnimationFrame(() => { const first = dialog?.querySelector<HTMLElement>(focusable); (first ?? dialog)?.focus(); });
 
     const keydown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") { event.preventDefault(); onClose(); return; }
+      if (event.key === "Escape") { event.preventDefault(); closeRef.current(); return; }
       if (event.key !== "Tab" || !dialog) return;
       const items = Array.from(dialog.querySelectorAll<HTMLElement>(focusable)).filter((item) => !item.hasAttribute("disabled"));
       if (!items.length) { event.preventDefault(); dialog.focus(); return; }
@@ -47,16 +45,8 @@ export function PortalDialog({ open, onClose, eyebrow, title, description, child
       document.removeEventListener("keydown", keydown);
       window.requestAnimationFrame(() => previousFocus.current?.focus());
     };
-  }, [onClose, open]);
+  }, [open]);
 
   if (!open) return null;
-  return (
-    <div className="portal-dialog-backdrop" role="presentation" onMouseDown={(event) => { if (dismissOnBackdrop && event.currentTarget === event.target) onClose(); }}>
-      <section ref={dialogRef} className={`portal-dialog ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby="portal-dialog-title" tabIndex={-1}>
-        <header><div>{eyebrow ? <span>{eyebrow}</span> : null}<h2 id="portal-dialog-title">{title}</h2>{description ? <p>{description}</p> : null}</div><button type="button" onClick={onClose} aria-label="Close dialog">×</button></header>
-        <div className="portal-dialog__body">{children}</div>
-        {footer ? <footer>{footer}</footer> : null}
-      </section>
-    </div>
-  );
+  return <div className="portal-dialog-backdrop" role="presentation" onMouseDown={(event) => { if (dismissOnBackdrop && event.currentTarget === event.target) onClose(); }}><section ref={dialogRef} className={`portal-dialog ${className}`.trim()} role="dialog" aria-modal="true" aria-labelledby="portal-dialog-title" tabIndex={-1}><header><div>{eyebrow ? <span>{eyebrow}</span> : null}<h2 id="portal-dialog-title">{title}</h2>{description ? <p>{description}</p> : null}</div><button type="button" onClick={onClose} aria-label="Close dialog">×</button></header><div className="portal-dialog__body">{children}</div>{footer ? <footer>{footer}</footer> : null}</section></div>;
 }
