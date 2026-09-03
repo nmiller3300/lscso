@@ -24,7 +24,9 @@ export function PortalAccountMenu() {
       </summary>
       <div className="portal-account-menu__popover">
         <div className="portal-account-menu__header">
-          <span className="portal-account-menu__avatar portal-account-menu__avatar--large">{initials(profile.display_name)}</span>
+          <span className="portal-account-menu__avatar portal-account-menu__avatar--large">
+            {initials(profile.display_name)}
+          </span>
           <div>
             <strong>{profile.display_name}</strong>
             <small>{profile.rank} · {profile.personnel_id}</small>
@@ -32,7 +34,11 @@ export function PortalAccountMenu() {
           </div>
         </div>
         <Link href="/portal/my-office">My Info</Link>
-        <PasswordChangeDialog triggerLabel="Change password" triggerClassName="portal-account-menu__action" />
+        <Link href="/portal/account">FiveM connection</Link>
+        <PasswordChangeDialog
+          triggerLabel="Change password"
+          triggerClassName="portal-account-menu__action"
+        />
         <PortalSignOut label="Sign out" />
       </div>
     </details>

@@ -1,0 +1,179 @@
+.onboarding-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(187, 164, 95, 0.12), transparent 40%),
+    #0d0d0c;
+}
+
+.onboarding-card {
+  width: min(760px, 100%);
+  border: 1px solid rgba(187, 164, 95, 0.25);
+  border-radius: 18px;
+  background: rgba(20, 19, 16, 0.96);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+}
+
+.onboarding-brand {
+  padding: 30px 32px 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.onboarding-brand span,
+.onboarding-step-heading span,
+.fivem-connect-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: #d4be79;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.onboarding-brand h1,
+.onboarding-step-heading h2,
+.fivem-connect-heading h2 {
+  margin: 0;
+}
+
+.onboarding-brand p,
+.onboarding-step-heading p,
+.fivem-connect-heading p,
+.fivem-connect-note {
+  margin: 8px 0 0;
+  color: rgba(243, 240, 232, 0.68);
+  line-height: 1.55;
+}
+
+.onboarding-step {
+  padding: 28px 32px 32px;
+}
+
+.onboarding-step .portal-dialog-form {
+  margin-top: 22px;
+}
+
+.onboarding-step .portal-button {
+  margin-top: 6px;
+}
+
+.fivem-connect-card {
+  padding: 24px;
+  border: 1px solid rgba(187, 164, 95, 0.22);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.onboarding-step > .fivem-connect-card {
+  margin-top: 20px;
+}
+
+.fivem-connect-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.fivem-connect-badge {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(243, 240, 232, 0.72);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.fivem-connect-badge--connected {
+  border-color: rgba(132, 202, 149, 0.32);
+  color: #9fd8ac;
+  background: rgba(78, 145, 94, 0.11);
+}
+
+.fivem-connect-status {
+  color: rgba(243, 240, 232, 0.72);
+}
+
+.fivem-pairing-code-wrap {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.24);
+  text-align: center;
+}
+
+.fivem-pairing-code-wrap > span {
+  display: block;
+  margin-bottom: 8px;
+  color: rgba(243, 240, 232, 0.56);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fivem-pairing-code {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #d4be79;
+  cursor: pointer;
+  font: inherit;
+  font-size: clamp(2rem, 7vw, 3.1rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.fivem-pairing-code-wrap p {
+  margin: 12px 0 6px;
+  color: rgba(243, 240, 232, 0.8);
+}
+
+.fivem-pairing-code-wrap code {
+  color: #f3f0e8;
+  font-weight: 700;
+}
+
+.fivem-pairing-code-wrap small,
+.fivem-connect-meta {
+  display: block;
+  margin-top: 5px;
+  color: rgba(243, 240, 232, 0.5);
+}
+
+.fivem-connect-note {
+  margin-top: 20px;
+}
+
+.fivem-connect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+@media (max-width: 640px) {
+  .onboarding-shell {
+    padding: 16px;
+  }
+
+  .onboarding-brand,
+  .onboarding-step {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .fivem-connect-heading {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .fivem-connect-actions .portal-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
