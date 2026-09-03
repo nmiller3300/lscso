@@ -1,4 +1,4 @@
-name: Generate Next lockfile
+name: Finalize Next.js upgrade
 
 on:
   push:
@@ -6,22 +6,26 @@ on:
     paths: [.github/workflows/generate-next-lock.yml]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  lockfile:
+  finalize:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - run: npm install next@16.3.4 --package-lock-only --ignore-scripts
-      - uses: actions/upload-artifact@v4
-        with:
-          name: next-16.3.4-lockfile
-          path: |
-            package.json
-            package-lock.json
-          if-no-files-found: error
+      - name: Generate exact dependency metadata
+        run: npm install next@16.3.4 --package-lock-only --ignore-scripts
+      - name: Commit generated dependency files and remove helper
+        run: |
+          rm .github/workflows/generate-next-lock.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json .github/workflows/generate-next-lock.yml
+          git commit -m "Upgrade Next.js to 16.3.4"
+          git push origin HEAD:command-portal-v2-preview
