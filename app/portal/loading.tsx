@@ -1,8 +1,3 @@
 export default function PortalLoading() {
-  return (
-    <div className="portal-auth-check" role="status" aria-live="polite">
-      <span aria-hidden="true" />
-      <strong>Loading secure workspace…</strong>
-    </div>
-  );
+  return <div className="portal-loading-shell" role="status" aria-live="polite" aria-label="Loading secure workspace"><aside><div className="portal-loading-brand" /><div className="portal-loading-line is-wide" /><div className="portal-loading-line" /><div className="portal-loading-line" /><div className="portal-loading-line" /></aside><section><header><div className="portal-loading-line" /><div className="portal-loading-circle" /></header><main><div className="portal-loading-eyebrow" /><div className="portal-loading-title" /><div className="portal-loading-copy" /><div className="portal-loading-metrics">{[0,1,2,3,4].map((item)=><span key={item}/>)}</div><div className="portal-loading-panel" /><div className="portal-loading-panel is-short" /></main></section><span className="portal-sr-only">Loading secure workspace…</span></div>;
 }

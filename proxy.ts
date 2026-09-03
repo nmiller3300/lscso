@@ -4,32 +4,10 @@ import { updateSession } from "@/lib/supabase/proxy";
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from "@/lib/supabase/config";
 
 type MaintenanceRow = { scope: "public_site" | "personnel_portal"; effective_mode: "operational" | "scheduled" | "maintenance" };
-
-function maintenanceClient(request: NextRequest) {
-  return createServerClient<any>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { cookies: { getAll: () => request.cookies.getAll(), setAll: () => undefined } });
-}
-
-async function maintenanceStates(request: NextRequest): Promise<MaintenanceRow[]> {
-  try {
-    const { data } = await maintenanceClient(request).rpc("get_system_maintenance_state");
-    return data ?? [];
-  } catch { return []; }
-}
-
-async function hasExecutiveBypass(request: NextRequest) {
-  try {
-    const supabase = maintenanceClient(request);
-    const { data: userData } = await supabase.auth.getUser();
-    if (!userData.user) return false;
-    const { data: profile } = await supabase.from("personnel_profiles").select("access_tier,status").eq("auth_user_id", userData.user.id).maybeSingle();
-    return profile?.access_tier === "Executive" && ["Active", "Acting"].includes(profile.status);
-  } catch { return false; }
-}
-
-function copyCookies(source: NextResponse, target: NextResponse) {
-  for (const cookie of source.cookies.getAll()) target.cookies.set(cookie.name, cookie.value, cookie);
-  return target;
-}
+function maintenanceClient(request: NextRequest) { return createServerClient<any>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, { cookies: { getAll: () => request.cookies.getAll(), setAll: () => undefined } }); }
+async function maintenanceStates(request: NextRequest): Promise<MaintenanceRow[]> { try { const { data } = await maintenanceClient(request).rpc("get_public_maintenance_state"); return data ?? []; } catch { return []; } }
+async function hasExecutiveBypass(request: NextRequest) { try { const supabase = maintenanceClient(request); const { data: userData } = await supabase.auth.getUser(); if (!userData.user) return false; const { data: profile } = await supabase.from("personnel_profiles").select("access_tier,status").eq("auth_user_id", userData.user.id).maybeSingle(); return profile?.access_tier === "Executive" && ["Active", "Acting"].includes(profile.status); } catch { return false; } }
+function copyCookies(source: NextResponse, target: NextResponse) { for (const cookie of source.cookies.getAll()) target.cookies.set(cookie); return target; }
 
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
@@ -50,6 +28,4 @@ export async function proxy(request: NextRequest) {
   return copyCookies(sessionResponse, NextResponse.redirect(url));
 }
 
-export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
-};
+export const config = { matcher: ["/((?!api|_next/static|_next/image|images|favicon.ico|robots.txt|sitemap.xml|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"] };
