@@ -14,7 +14,7 @@ export default function PortalEntryPage() {
 
         <Image
           className="portal-gateway__watermark"
-          src="/images/lscso-portal-patch.webp"
+          src="/images/lscso-patch-color.png"
           alt=""
           width={768}
           height={768}
@@ -25,7 +25,7 @@ export default function PortalEntryPage() {
         <header className="portal-gateway__agency">
           <div className="portal-gateway__agency-mark">
             <Image
-              src="/images/lscso-portal-patch.webp"
+              src="/images/lscso-patch-color.png"
               alt="Los Santos County Sheriff’s Office patch"
               width={84}
               height={84}
@@ -83,7 +83,7 @@ export default function PortalEntryPage() {
 
           <div className="portal-gateway__mobile-mark">
             <Image
-              src="/images/lscso-portal-patch.webp"
+              src="/images/lscso-patch-color.png"
               alt="Los Santos County Sheriff’s Office patch"
               width={96}
               height={96}
