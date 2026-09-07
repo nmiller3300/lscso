@@ -57,13 +57,13 @@ export function SiteFooter() {
               alt="Bright RP logo"
               width={64}
               height={64}
+              unoptimized
               style={{
                 width: 64,
                 height: 64,
                 objectFit: "contain",
                 display: "block",
                 flex: "0 0 auto",
-                overflow: "visible",
                 filter: "drop-shadow(0 5px 12px rgba(0,0,0,0.28))",
               }}
             />
