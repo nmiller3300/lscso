@@ -16,7 +16,19 @@ export function SiteFooter() {
           <div><span>Operations</span><Link href="/patrol">Patrol Division</Link><Link href="/training-recruitment">Training & Recruitment</Link></div>
         </div>
       </div>
-      <div className="site-shell footer-legal"><span>© 2026 Los Santos County Sheriff’s Office</span><span>Established 1963 · State of San Andreas</span></div>
+      <div className="site-shell footer-legal">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <Image
+            src="/images/bright-rp-logo.png"
+            alt="Bright RP logo"
+            width={24}
+            height={24}
+            style={{ width: 24, height: 24, objectFit: "contain", opacity: 0.82, flex: "0 0 auto" }}
+          />
+          <span>© 2026 Los Santos County Sheriff’s Office | A Development of Bright Roleplay</span>
+        </div>
+        <span>Established 1963 · State of San Andreas</span>
+      </div>
     </footer>
   );
 }
