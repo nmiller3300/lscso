@@ -52,12 +52,11 @@ export function SiteFooter() {
               minWidth: 0,
             }}
           >
-            <Image
-              src="/images/bright-rp-logo.png"
+            <img
+              src="/images/bright-rp-logo-footer.svg"
               alt="Bright RP logo"
               width={64}
               height={64}
-              unoptimized
               style={{
                 width: 64,
                 height: 64,
