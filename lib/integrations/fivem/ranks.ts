@@ -29,8 +29,8 @@ export function isLscsoGrade(value: unknown): value is LscsoGrade {
   return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 12;
 }
 
-export function getLscsoRankForGrade(grade: LscsoGrade) {
-  return LSCSO_GRADES[grade];
+export function getLscsoRankForGrade(grade: number) {
+  return LSCSO_GRADES[grade as LscsoGrade];
 }
 
 export function getComputerAccessBand(grade: LscsoGrade): ComputerAccessBand {
