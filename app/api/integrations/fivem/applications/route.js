@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { authorizeFiveMIntegration } from "@/lib/integrations/fivem/auth";
 import { isLscsoGrade, LSCSO_JOB_NAME } from "@/lib/integrations/fivem/ranks";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { APPLICATION_STATUSES, INTERVIEW_STATUSES, applicationQuestions } from "@/lib/recruitment/application";
+import { APPLICATION_CERTIFICATION_TEXT, APPLICATION_STATUSES, INTERVIEW_STATUSES, applicationQuestions } from "@/lib/recruitment/application";
 
 export const dynamic = "force-dynamic";
 
@@ -163,6 +163,13 @@ async function loadApplication(admin, applicationId) {
   return {
     application,
     answers,
+    certification: {
+      text: application.applicant_certification_text || APPLICATION_CERTIFICATION_TEXT,
+      signed: Boolean(application.applicant_signature_name && application.applicant_signed_at),
+      signedBy: application.applicant_signature_name || null,
+      signedAt: application.applicant_signed_at || null,
+      method: application.applicant_signature_method || null,
+    },
     notes: (notes || []).map((note) => ({ ...note, authorName: names[note.author_profile_id] || "Command" })),
     history: (history || []).map((event) => ({ ...event, actorName: names[event.actor_profile_id] || "System" })),
     reviewers,
