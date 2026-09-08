@@ -146,7 +146,7 @@ export function GuardianWorkspace() {
     let cancelled = false;
 
     async function loadGuardianData() {
-      const supabase = createClient();
+      const supabase = createClient() as any;
       const [
         { data: profileRows, error: profileError },
         { data: purviewRows, error: purviewError },
@@ -166,8 +166,8 @@ export function GuardianWorkspace() {
       }
       setLoadError("");
 
-      const profileById = new Map((profileRows ?? []).map((profile) => [profile.id, profile]));
-      const names = new Map((profileRows ?? []).map((profile) => [profile.id, profile.display_name]));
+      const profileById = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile]));
+      const names = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile.display_name]));
       const purviewByProfile = new Map<string, { row: any; labels: Set<string> }>();
       for (const row of purviewRows ?? []) {
         if (!row.profile_id || row.profile_id === currentProfile.id) continue;
@@ -182,7 +182,7 @@ export function GuardianWorkspace() {
 
       const options: PersonnelOption[] = [...purviewByProfile.values()]
         .map(({ row, labels }) => {
-          const profile = profileById.get(row.profile_id);
+          const profile = profileById.get(row.profile_id) as any;
           return {
             id: row.profile_id,
             displayName: row.display_name,
@@ -195,7 +195,7 @@ export function GuardianWorkspace() {
         .sort((a, b) => a.displayName.localeCompare(b.displayName));
 
       setPersonnel(options);
-      setPointTiers((tierRows ?? []).map((tier) => ({
+      setPointTiers((tierRows ?? []).map((tier: any) => ({
         id: tier.id,
         minPoints: tier.min_points,
         maxPoints: tier.max_points,
@@ -203,7 +203,7 @@ export function GuardianWorkspace() {
         action: tier.action_required,
         color: tier.color_key,
       })));
-      setRecords((guardianRows ?? []).map((record) => ({
+      setRecords((guardianRows ?? []).map((record: any) => ({
         databaseId: record.id,
         id: `G-${String(record.guardian_number).padStart(4, "0")}`,
         type: record.record_type,
