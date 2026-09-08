@@ -15,7 +15,7 @@ type Props = {
 const ranks = [
   "Sheriff","Undersheriff","Major","Captain","1st Lieutenant","Lieutenant","Sergeant","Corporal","Master Deputy","Deputy III","Deputy II","Deputy","Recruit",
 ];
-const statuses = ["Active","Acting","Suspended","Deactivated"];
+const statuses = ["Active","Acting","Suspended"];
 const tierForRank: Record<string,string> = {
   Sheriff:"Executive",Undersheriff:"Executive",Major:"Command",Captain:"Command","1st Lieutenant":"Command",Lieutenant:"Supervisor",Sergeant:"Supervisor",Corporal:"Preliminary","Master Deputy":"Deputy","Deputy III":"Deputy","Deputy II":"Deputy",Deputy:"Deputy",Recruit:"Deputy",
 };
@@ -35,18 +35,23 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
     setPending(true);
     setError("");
     setNotice("");
-    const { error: rpcError } = await (createClient() as any).rpc("v2_update_personnel_identity", {
+
+    const reasons: string[] = [];
+    if (rank !== currentRank) reasons.push(`Rank change: ${currentRank} to ${rank}`);
+    if (status !== currentStatus) reasons.push(`Status change: ${currentStatus} to ${status}`);
+
+    const { error: rpcError } = await (createClient() as any).rpc("roster_update_personnel_rank_status", {
       p_profile_id: profileId,
       p_rank: rank,
       p_status: status,
-      p_reason: "Roster personnel change",
+      p_reason: reasons.join("; ") || "Roster personnel change",
     });
     setPending(false);
     if (rpcError) {
       setError(rpcError.message);
       return;
     }
-    setNotice(`${displayName} updated.`);
+    setNotice(`${displayName} updated. FiveM/QBox synchronization is queued automatically when a linked character exists.`);
     router.refresh();
   }
 
@@ -56,7 +61,7 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
         <div><p>Personnel management</p><h2>Rank & status</h2></div>
         <span>{personnelId}</span>
       </div>
-      <p className="personnel-admin-control__intro">Change the member&apos;s official rank or service status. Portal access tier is derived automatically from rank and cannot drift out of sync.</p>
+      <p className="personnel-admin-control__intro">Change the member&apos;s official rank or service status. Portal access and the linked LSCSO QBox job are synchronized from this roster record.</p>
 
       <div className="personnel-admin-fields personnel-admin-fields--identity">
         <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
