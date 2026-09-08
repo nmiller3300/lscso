@@ -33,6 +33,7 @@ type PersonnelOption = {
   rank: string;
   callSign: string | null;
   isTestAccount: boolean;
+  authorityLabel: string;
 };
 
 type PointTier = {
@@ -146,27 +147,54 @@ export function GuardianWorkspace() {
 
     async function loadGuardianData() {
       const supabase = createClient();
-      const [{ data: profileRows, error: profileError }, { data: guardianRows, error: guardianError }, { data: tierRows, error: tierError }] = await Promise.all([
+      const [
+        { data: profileRows, error: profileError },
+        { data: purviewRows, error: purviewError },
+        { data: guardianRows, error: guardianError },
+        { data: tierRows, error: tierError },
+      ] = await Promise.all([
         supabase.from("personnel_profiles").select("id,display_name,rank,call_sign,is_test_account").neq("status", "Deactivated").order("personnel_id"),
+        supabase.rpc("get_personnel_in_my_purview"),
         supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,record_type,status,follow_up_due_at,created_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,points_assessed,escalation_override").order("created_at", { ascending: false }),
         supabase.from("disciplinary_point_tiers").select("id,min_points,max_points,tier_name,action_required,color_key").order("sort_order"),
       ]);
 
       if (cancelled) return;
-      if (profileError || guardianError || tierError) {
-        setLoadError(profileError?.message ?? guardianError?.message ?? tierError?.message ?? "Guardian records could not be loaded.");
+      if (profileError || purviewError || guardianError || tierError) {
+        setLoadError(profileError?.message ?? purviewError?.message ?? guardianError?.message ?? tierError?.message ?? "Guardian records could not be loaded.");
         return;
       }
       setLoadError("");
-      const options = (profileRows ?? []).map((profile) => ({
-        id: profile.id,
-        displayName: profile.display_name,
-        rank: profile.rank,
-        callSign: profile.call_sign,
-        isTestAccount: profile.is_test_account,
-      }));
-      const names = new Map(options.map((profile) => [profile.id, profile.displayName]));
-      setPersonnel(options.filter((profile) => profile.id !== currentProfile.id));
+
+      const profileById = new Map((profileRows ?? []).map((profile) => [profile.id, profile]));
+      const names = new Map((profileRows ?? []).map((profile) => [profile.id, profile.display_name]));
+      const purviewByProfile = new Map<string, { row: any; labels: Set<string> }>();
+      for (const row of purviewRows ?? []) {
+        if (!row.profile_id || row.profile_id === currentProfile.id) continue;
+        if (!names.has(row.profile_id)) names.set(row.profile_id, row.display_name);
+        const unit = row.organizational_unit_name || (row.scope === "department" ? "Department-wide" : "Direct assignment");
+        const authority = row.authority_type || "Supervisory authority";
+        const label = row.scope === "department" ? "Department-wide command authority" : `${unit} · ${authority}`;
+        const existing = purviewByProfile.get(row.profile_id);
+        if (existing) existing.labels.add(label);
+        else purviewByProfile.set(row.profile_id, { row, labels: new Set([label]) });
+      }
+
+      const options: PersonnelOption[] = [...purviewByProfile.values()]
+        .map(({ row, labels }) => {
+          const profile = profileById.get(row.profile_id);
+          return {
+            id: row.profile_id,
+            displayName: row.display_name,
+            rank: row.rank,
+            callSign: row.call_sign,
+            isTestAccount: profile?.is_test_account === true,
+            authorityLabel: [...labels].join(" / "),
+          };
+        })
+        .sort((a, b) => a.displayName.localeCompare(b.displayName));
+
+      setPersonnel(options);
       setPointTiers((tierRows ?? []).map((tier) => ({
         id: tier.id,
         minPoints: tier.min_points,
@@ -242,7 +270,7 @@ export function GuardianWorkspace() {
     const form = formRef.current ? new FormData(formRef.current) : new FormData();
     const subjectProfileId = String(form.get("member") ?? "");
     const subject = personnel.find((member) => member.id === subjectProfileId);
-    if (!subject) throw new Error("Select a personnel member before saving this Guardian.");
+    if (!subject) throw new Error("Select a personnel member within your supervisory purview before saving this Guardian.");
     if (selectedCategories.length === 0) throw new Error("Select at least one Guardian category.");
 
     const eventDate = String(form.get("eventDate") ?? new Date().toISOString().slice(0, 10));
@@ -429,16 +457,16 @@ export function GuardianWorkspace() {
             <div className="guardian-form-section">
               <div className="guardian-step-heading">
                 <span>Step 02</span>
-                <div><strong>Member and event</strong><small>Establish who, when, and where.</small></div>
+                <div><strong>Member and event</strong><small>Only personnel within your current supervisory purview are available.</small></div>
               </div>
               <div className="portal-form-grid portal-form-grid--three">
                 <label>
                   Personnel member
                   <select name="member" onChange={(event) => setSelectedMemberId(event.target.value)} required value={selectedMemberId}>
-                    <option disabled value="">Select from assigned personnel</option>
+                    <option disabled value="">{personnel.length ? "Select from assigned personnel" : "No personnel currently in your Guardian purview"}</option>
                     {personnel.map((member) => (
                       <option key={member.id} value={member.id}>
-                        {member.displayName} · {member.rank}{member.isTestAccount ? " · Test Account" : ""}
+                        {member.displayName} · {member.rank}{member.isTestAccount ? " · Test Account" : ""} · {member.authorityLabel}
                       </option>
                     ))}
                   </select>
