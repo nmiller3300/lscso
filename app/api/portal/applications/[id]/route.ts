@@ -6,6 +6,7 @@ import { APPLICATION_STATUSES, INTERVIEW_STATUSES } from "@/lib/recruitment/appl
 const allowedTiers = new Set(["Executive", "Command"]);
 const statuses = new Set<string>(APPLICATION_STATUSES);
 const interviewStatuses = new Set<string>(INTERVIEW_STATUSES);
+const finalStatuses = new Set(["Accepted", "Denied", "Withdrawn"]);
 
 function serviceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -33,10 +34,12 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       if (!reviewer || !allowedTiers.has(reviewer.access_tier) || !["Active", "Acting"].includes(reviewer.status)) return NextResponse.json({ error: "The selected reviewer is unavailable." }, { status: 400 });
       update = { reviewer_profile_id: reviewer.id }; eventType = "Reviewer Assigned"; details = { reviewer_profile_id: reviewer.id, reviewer: reviewer.display_name };
     } else if (action === "status") {
+      if (finalStatuses.has(application.status)) return NextResponse.json({ error: "Finalized applications cannot be moved back into active review." }, { status: 409 });
       const status = clean(body.status, 30);
       if (!statuses.has(status) || ["Accepted", "Denied"].includes(status)) return NextResponse.json({ error: "Use the documented decision controls for acceptance or denial." }, { status: 400 });
       update = { status }; eventType = "Status Changed"; details = { from: application.status, to: status };
     } else if (action === "decision") {
+      if (finalStatuses.has(application.status)) return NextResponse.json({ error: "This application already has a final disposition." }, { status: 409 });
       const status = clean(body.status, 20);
       const reason = clean(body.reason);
       if (!["Accepted", "Denied"].includes(status)) return NextResponse.json({ error: "Invalid decision." }, { status: 400 });
