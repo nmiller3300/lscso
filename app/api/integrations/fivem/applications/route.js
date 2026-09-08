@@ -8,6 +8,7 @@ export const dynamic = "force-dynamic";
 
 const APPLICATION_STATUS_SET = new Set(APPLICATION_STATUSES);
 const INTERVIEW_STATUS_SET = new Set(INTERVIEW_STATUSES);
+const FINAL_APPLICATION_STATUSES = new Set(["Accepted", "Denied", "Withdrawn"]);
 
 function cleanString(value, maxLength = 8000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -194,6 +195,10 @@ function requireCapability(capabilities, key, message) {
   return NextResponse.json({ ok: false, error: message, code: "permission_denied" }, { status: 403 });
 }
 
+function finalizedResponse(message) {
+  return NextResponse.json({ ok: false, error: message, code: "application_finalized" }, { status: 409 });
+}
+
 export async function POST(request) {
   const auth = authorizeFiveMIntegration(request);
   if (!auth.ok) return NextResponse.json({ ok: false, error: auth.error }, { status: auth.status });
@@ -279,6 +284,9 @@ export async function POST(request) {
     }
 
     if (action === "status") {
+      if (FINAL_APPLICATION_STATUSES.has(current.status)) {
+        return finalizedResponse("Finalized applications cannot be moved back into active review.");
+      }
       const nextStatus = cleanString(body.status, 30);
       if (!APPLICATION_STATUS_SET.has(nextStatus) || ["Accepted", "Denied"].includes(nextStatus)) {
         return NextResponse.json({ ok: false, error: "Use the final decision control for acceptance or denial." }, { status: 400 });
@@ -290,6 +298,9 @@ export async function POST(request) {
     }
 
     if (action === "decision") {
+      if (FINAL_APPLICATION_STATUSES.has(current.status)) {
+        return finalizedResponse("This application already has a final disposition.");
+      }
       const decision = cleanString(body.status, 20);
       const reason = cleanString(body.reason);
       if (!["Accepted", "Denied"].includes(decision)) return NextResponse.json({ ok: false, error: "Invalid decision." }, { status: 400 });
