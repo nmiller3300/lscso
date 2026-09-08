@@ -90,7 +90,7 @@ async function getReviewers(admin) {
 async function loadDirectory(admin) {
   const [{ data: applications, error: applicationError }, reviewers, { data: settings, error: settingsError }] = await Promise.all([
     admin.from("recruitment_applications")
-      .select("id,application_number,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id,interview_status,interview_scheduled_at,decided_at")
+      .select("id,application_number,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id,interview_status,interview_scheduled_at,decided_at,hired_profile_id,hired_at")
       .order("submitted_at", { ascending: false })
       .limit(250),
     getReviewers(admin),
@@ -117,6 +117,8 @@ async function loadDirectory(admin) {
       interviewStatus: item.interview_status,
       interviewScheduledAt: item.interview_scheduled_at,
       decidedAt: item.decided_at,
+      hiredProfileId: item.hired_profile_id || null,
+      hiredAt: item.hired_at || null,
     })),
     reviewers,
     applicationsOpen: settings?.applications_open === true,
@@ -140,6 +142,7 @@ async function loadApplication(admin, applicationId) {
   if (application.reviewer_profile_id) peopleIds.add(application.reviewer_profile_id);
   if (application.interviewer_profile_id) peopleIds.add(application.interviewer_profile_id);
   if (application.decided_by_profile_id) peopleIds.add(application.decided_by_profile_id);
+  if (application.hired_by_profile_id) peopleIds.add(application.hired_by_profile_id);
   for (const note of notes || []) if (note.author_profile_id) peopleIds.add(note.author_profile_id);
   for (const event of history || []) if (event.actor_profile_id) peopleIds.add(event.actor_profile_id);
 
@@ -180,7 +183,7 @@ async function loadApplication(admin, applicationId) {
 async function getApplicationStatus(admin, applicationId) {
   const { data, error } = await admin
     .from("recruitment_applications")
-    .select("id,application_number,full_name,status")
+    .select("id,application_number,full_name,status,hired_profile_id,hired_citizen_id")
     .eq("id", applicationId)
     .maybeSingle();
   if (error) throw error;
@@ -371,6 +374,7 @@ export async function POST(request) {
       const hireDenied = requireCapability(capabilities, "hireWorkers", "You do not have permission to hire employees.");
       if (hireDenied) return hireDenied;
       if (current.status !== "Accepted") return NextResponse.json({ ok: false, error: "Only accepted applicants can be hired in-game." }, { status: 409 });
+      if (current.hired_profile_id) return NextResponse.json({ ok: false, error: "This application has already been hired.", code: "already_hired" }, { status: 409 });
       return NextResponse.json({ ok: true, application: current });
     }
 
@@ -378,19 +382,31 @@ export async function POST(request) {
       const hireDenied = requireCapability(capabilities, "hireWorkers", "You do not have permission to hire employees.");
       if (hireDenied) return hireDenied;
       if (current.status !== "Accepted") return NextResponse.json({ ok: false, error: "Only accepted applicants can be hired in-game." }, { status: 409 });
+
       const targetCitizenId = cleanString(body.targetCitizenId, 100);
+      const targetLicense = cleanString(body.targetLicense, 160);
       const targetName = cleanString(body.targetName, 120);
       const targetServerId = Number(body.targetServerId);
       if (!targetCitizenId) return NextResponse.json({ ok: false, error: "The hired FiveM identity is missing." }, { status: 400 });
-      await writeHistory(admin, applicationId, identity.profile.id, "Hired In Game", {
-        application_number: current.application_number,
-        target_citizen_id: targetCitizenId,
-        target_name: targetName || null,
-        target_server_id: Number.isFinite(targetServerId) ? targetServerId : null,
-        job: LSCSO_JOB_NAME,
-        grade: 0,
+
+      const { data: hireRecord, error: hireError } = await admin.rpc("record_recruit_hire", {
+        p_application_id: applicationId,
+        p_actor_profile_id: identity.profile.id,
+        p_target_citizen_id: targetCitizenId,
+        p_target_license_identifier: targetLicense || null,
+        p_target_name: targetName || null,
+        p_target_server_id: Number.isFinite(targetServerId) ? targetServerId : null,
       });
-      return NextResponse.json({ ok: true });
+      if (hireError) {
+        console.error("[FiveM Applications] recruit hire handoff failed", hireError);
+        return NextResponse.json({
+          ok: false,
+          error: hireError.message || "The recruit personnel record could not be created.",
+          code: "hire_record_failed",
+        }, { status: 409 });
+      }
+
+      return NextResponse.json({ ok: true, personnel: hireRecord || null });
     }
 
     return NextResponse.json({ ok: false, error: "Invalid application action." }, { status: 400 });
