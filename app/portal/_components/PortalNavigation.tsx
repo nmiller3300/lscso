@@ -10,6 +10,7 @@ type PortalNavigationProps = { active: ActivePortalView; audience: "command" | "
 type NavigationItem = { id: ActivePortalView | "requests"; href: string; label: string; mobileLabel: string; glyph: string; section: string; detail: string; personal?: boolean; matches?: ActivePortalView[] };
 
 const myInfo: NavigationItem = { id:"record", href:"/portal/my-office", label:"My Info", mobileLabel:"My Info", glyph:"MI", section:"Personal", detail:"Your record, requests, documents, and certifications", personal:true };
+const myRequests: NavigationItem = { id:"requests", href:"/portal/my-office#leave-requests", label:"Requests & LOA", mobileLabel:"Requests", glyph:"RQ", section:"Personal", detail:"Submit personnel requests and manage leave of absence", personal:true };
 const commandNavigation: NavigationItem[] = [
   { id:"overview",href:"/portal/command/home",label:"Home",mobileLabel:"Home",glyph:"HM",section:"Command",detail:"Command overview and priority work" },
   { id:"personnel",href:"/portal/command/personnel",label:"Personnel",mobileLabel:"Personnel",glyph:"PR",section:"Command",detail:"Personnel records, standing, and assignments",matches:["awards"] },
@@ -17,7 +18,7 @@ const commandNavigation: NavigationItem[] = [
   { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Command",detail:"FTO, progression, and qualifications",matches:["certifications"] },
   { id:"applications",href:"/portal/command/applications",label:"Applications",mobileLabel:"Applications",glyph:"AP",section:"Department",detail:"Recruitment applications and hiring review" },
   { id:"psa",href:"/portal/command/psa",label:"Public PSA",mobileLabel:"Public PSA",glyph:"PS",section:"Department",detail:"Public information and department notices" },
-  { id:"administration",href:"/portal/command/administration",label:"Administration",mobileLabel:"Admin",glyph:"AD",section:"Administration",detail:"Approvals, audit, accounts, and structure",matches:["approvals","activity"] }, myInfo,
+  { id:"administration",href:"/portal/command/administration",label:"Administration",mobileLabel:"Admin",glyph:"AD",section:"Administration",detail:"Approvals, audit, accounts, and structure",matches:["approvals","activity"] }, myInfo, myRequests,
 ];
 const supervisorNavigation: NavigationItem[] = [
   { id:"supervision",href:"/portal/command/supervision",label:"My Personnel & Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Work",detail:"Assigned personnel, Guardians, and follow-up",matches:["guardians"] },
