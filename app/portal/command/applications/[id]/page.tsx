@@ -7,6 +7,7 @@ import { applicationLabel } from "@/lib/recruitment/application";
 import { ApplicationReview } from "./ApplicationReview";
 import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
 import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
+import { DeleteApplicationButton } from "./DeleteApplicationButton";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
@@ -22,10 +23,17 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   if (!application) notFound();
   const reviewerList = (people ?? []).map((person: any) => ({ id: person.id, name: person.display_name }));
   const names = Object.fromEntries(reviewerList.map((person: any) => [person.id, person.name]));
+  const canDeleteApplication = ["Sheriff", "Undersheriff"].includes(profile.rank) && !application.hired_profile_id && application.status !== "Hired";
+  const label = applicationLabel(application.application_number);
 
   return (
-    <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={applicationLabel(application.application_number)} description="Review the submitted application and record each Command action.">
-      <div className="portal-page-actions"><Link href="/portal/command/applications" className="portal-button">Back to applications</Link></div>
+    <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Review the submitted application and record each Command action.">
+      <div className="portal-page-actions">
+        <Link href="/portal/command/applications" className="portal-button">Back to applications</Link>
+        {canDeleteApplication ? (
+          <DeleteApplicationButton applicationId={application.id} applicationNumber={label} applicantName={application.full_name} />
+        ) : null}
+      </div>
       <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
       <ApplicantStatusMessage
         applicationId={application.id}
