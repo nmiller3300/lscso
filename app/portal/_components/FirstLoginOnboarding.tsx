@@ -1,10 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { isStrongPassword, PASSWORD_REQUIREMENT } from "@/lib/auth/password-policy";
 import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
-import { FiveMConnectionPanel } from "./FiveMConnectionPanel";
 
 type FirstLoginOnboardingProps = {
   displayName: string;
@@ -88,9 +88,9 @@ export function FirstLoginOnboarding({
         {!passwordComplete ? (
           <section className="onboarding-step">
             <div className="onboarding-step-heading">
-              <span>Required · Step 1</span>
+              <span>Required</span>
               <h2>Change your temporary password</h2>
-              <p>Your FiveM connection comes next and can be skipped until you are ready.</p>
+              <p>Set your permanent portal password to complete account setup.</p>
             </div>
             <form className="portal-dialog-form" onSubmit={changePassword}>
               <label>
@@ -135,14 +135,16 @@ export function FirstLoginOnboarding({
             </form>
           </section>
         ) : (
-          <div className="onboarding-step">
+          <section className="onboarding-step">
             <div className="onboarding-step-heading">
-              <span>Optional · Step 2</span>
-              <h2>Connect your FiveM account</h2>
-              <p>You can do this now or come back later from your portal account menu.</p>
+              <span>Complete</span>
+              <h2>Your portal account is ready.</h2>
+              <p>No game or computer connection is required to use the LSCSO Personnel Portal.</p>
             </div>
-            <FiveMConnectionPanel allowSkip continueHref={homeHref} />
-          </div>
+            <Link className="portal-button portal-button--primary" href={homeHref}>
+              Continue to Personnel Portal
+            </Link>
+          </section>
         )}
       </div>
     </div>
