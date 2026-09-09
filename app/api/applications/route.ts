@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { APPLICATION_CERTIFICATION_TEXT } from "@/lib/recruitment/application";
+import { APPLICATION_AI_POLICY_TEXT, APPLICATION_CERTIFICATION_TEXT } from "@/lib/recruitment/application";
 import { getRecruitmentApplicationQuestions } from "@/lib/recruitment/questions.server";
 
 function cleanAnswer(value: unknown) {
@@ -18,6 +18,7 @@ function rpcErrorStatus(message: string) {
     normalized.includes("select yes or no") ||
     normalized.includes("select a valid answer") ||
     normalized.includes("certification is invalid") ||
+    normalized.includes("ai use policy") ||
     normalized.includes("cannot exceed")
   ) return 400;
   return 500;
@@ -28,6 +29,13 @@ export async function POST(request: Request) {
     const body = await request.json();
     if (!body || typeof body !== "object") {
       return NextResponse.json({ error: "Invalid application." }, { status: 400 });
+    }
+
+    if (body.ai_policy_acknowledged !== true) {
+      return NextResponse.json({
+        error: "You must acknowledge the LSCSO AI Use Policy before continuing with the application.",
+        policy: APPLICATION_AI_POLICY_TEXT,
+      }, { status: 400 });
     }
 
     const supabase = await createServerClient() as any;
@@ -105,6 +113,7 @@ export async function POST(request: Request) {
         p_signature_name: signatureName,
         p_certification_text: APPLICATION_CERTIFICATION_TEXT,
         p_tracking_token_hash: trackingTokenHash,
+        p_ai_policy_acknowledged: true,
       })
       .single();
 
