@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { PersonnelAssignmentManager } from "../../../../_components/PersonnelAssignmentManager";
 import { PersonnelDelegationManager } from "../../../../_components/PersonnelDelegationManager";
 import { PersonnelIdentityManager } from "../../../../_components/PersonnelIdentityManager";
+import { PersonnelLoaManager } from "../../../../_components/PersonnelLoaManager";
 import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
@@ -29,6 +30,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
 
   const now = new Date();
   const nowIso = now.toISOString();
+  const today = nowIso.slice(0, 10);
   const [flags, leave, requests, delegations, units, assignments] = await Promise.all([
     supabase.from("personnel_flags").select("id,flag_type,notes,active,created_at,resolved_at").eq("profile_id", member.id).order("created_at", { ascending: false }),
     supabase.from("leave_requests").select("id,request_number,leave_type,starts_on,expected_return_on,status,created_at").eq("profile_id", member.id).order("created_at", { ascending: false }),
@@ -41,8 +43,16 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   const unitRows = (units.data ?? []).filter((item: any) => item.unit_type !== "Bureau");
   const unitNames = new Map(unitRows.map((item: any) => [item.id, item.name]));
   const activeDelegations = (delegations.data ?? []).filter((item: any) => !item.expires_at || new Date(item.expires_at) > now);
+  const activeOrUpcomingLeave = (leave.data ?? [])
+    .filter((item: any) => item.status === "Approved" && item.expected_return_on >= today)
+    .sort((a: any, b: any) => {
+      const aActive = a.starts_on <= today && a.expected_return_on >= today ? 0 : 1;
+      const bActive = b.starts_on <= today && b.expected_return_on >= today ? 0 : 1;
+      return aActive - bActive || String(a.starts_on).localeCompare(String(b.starts_on));
+    })[0] ?? null;
 
   const canApprovePersonnelChanges = PERSONNEL_CHANGE_APPROVERS.has(profile.rank) && profile.id !== member.id;
+  const canManageLoa = PERSONNEL_CHANGE_APPROVERS.has(profile.rank);
   const canManageDelegations = DELEGATION_MANAGERS.has(profile.rank) && profile.id !== member.id;
   const canGrantTemporaryCommand = ["Sheriff", "Undersheriff"].includes(profile.rank);
   const canManageAssignments = ["Executive", "Command"].includes(profile.access_tier);
@@ -75,6 +85,20 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
           displayName={member.display_name}
           currentRank={member.rank}
           currentStatus={member.status}
+        />
+      ) : null}
+
+      {canManageLoa ? (
+        <PersonnelLoaManager
+          profileId={member.id}
+          personnelId={member.personnel_id}
+          displayName={member.display_name}
+          activeLeave={activeOrUpcomingLeave ? {
+            id: activeOrUpcomingLeave.id,
+            leaveType: activeOrUpcomingLeave.leave_type,
+            startsOn: activeOrUpcomingLeave.starts_on,
+            expectedReturnOn: activeOrUpcomingLeave.expected_return_on,
+          } : null}
         />
       ) : null}
 
