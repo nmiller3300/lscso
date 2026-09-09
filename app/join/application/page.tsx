@@ -69,7 +69,7 @@ export default async function ApplicationPage() {
             <article><span>Step 01</span><strong>Submit Application</strong><small>Complete and electronically sign your candidate packet.</small></article>
             <article><span>Step 02</span><strong>Command Review</strong><small>Captain+ staff screen the application and record a decision.</small></article>
             <article><span>Step 03</span><strong>Interview</strong><small>Accepted applicants are contacted on Discord to schedule an interview.</small></article>
-            <article><span>Step 04</span><strong>Recruit Onboarding</strong><small>A passed interview clears the applicant for the hiring handoff.</small></article>
+            <article><span>Step 04</span><strong>Recruit Appointment</strong><small>A passed interview clears the applicant for final appointment as an LSCSO Recruit.</small></article>
           </div>
 
           {questions.length ? <ApplicationForm questions={questions} /> : (
