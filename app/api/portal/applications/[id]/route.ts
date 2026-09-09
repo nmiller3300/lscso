@@ -1,18 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient as createServiceClient } from "@supabase/supabase-js";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+import { createClient } from "@/lib/supabase/server";
 import { APPLICATION_REVIEW_STATUSES, INTERVIEW_STATUSES } from "@/lib/recruitment/application";
 
 const allowedTiers = new Set(["Executive", "Command"]);
 const reviewStatuses = new Set<string>(APPLICATION_REVIEW_STATUSES);
 const interviewStatuses = new Set<string>(INTERVIEW_STATUSES);
 const finalizedApplicationStatuses = new Set(["Accepted", "Denied", "Hired", "Withdrawn"]);
-
-function serviceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return url && key ? createServiceClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }) : null;
-}
 
 function clean(value: unknown, max = 8000) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -24,9 +18,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     return NextResponse.json({ error: "You do not have permission to perform this action." }, { status: 403 });
   }
 
-  const supabase = serviceClient();
-  if (!supabase) return NextResponse.json({ error: "Application service is not configured." }, { status: 503 });
-
+  const supabase = await createClient() as any;
   const { id } = await params;
 
   try {
