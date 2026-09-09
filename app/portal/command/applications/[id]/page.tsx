@@ -8,6 +8,7 @@ import { ApplicationReview } from "./ApplicationReview";
 import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
 import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
+import "./communications.css";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
