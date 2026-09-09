@@ -6,8 +6,8 @@ import "./application.css";
 import "./application-closed.css";
 
 export const metadata: Metadata = {
-  title: "LSCSO Application",
-  description: "Apply to join the Los Santos County Sheriff’s Office.",
+  title: "LSCSO Deputy Application",
+  description: "Apply to join the Los Santos County Sheriff’s Office and begin the deputy candidate selection process.",
 };
 
 export const revalidate = 0;
@@ -39,13 +39,31 @@ export default async function ApplicationPage() {
     <main className="application-page">
       <section className="application-page__hero">
         <div className="site-shell">
-          <div className="two-column-editorial">
-            <div><p className="section-kicker">Careers & Recruitment</p><h1>LSCSO Application</h1></div>
-            <div className="reading-column">
-              <p className="intro-serif">Tell us who you are, how you roleplay, and why you want to serve with LSCSO.</p>
-              <p>Answer every question honestly and thoughtfully. Your application may be reviewed by LSCSO Command and Training & Recruitment personnel.</p>
+          <div className="application-page__masthead">
+            <div>
+              <p className="section-kicker">Careers & Recruitment</p>
+              <span className="application-page__badge">Deputy Candidate Selection</span>
+              <h1>Earn your place in the Sheriff&apos;s Office.</h1>
+              <p className="intro-serif">This is your formal candidate packet for the Los Santos County Sheriff&apos;s Office. Take your time, answer in your own words, and give Command a clear picture of your judgment, integrity, and roleplay standards.</p>
+              <div className="application-page__metrics" aria-label="Application overview">
+                <article><strong>18</strong><span>Application Questions</span></article>
+                <article><strong>07</strong><span>Guided Sections</span></article>
+                <article><strong>01</strong><span>Required Interview</span></article>
+              </div>
             </div>
+            <aside className="application-page__seal" aria-label="Official recruitment packet">
+              <img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" />
+              <div><span>Official Candidate Packet</span><strong>Los Santos County Sheriff&apos;s Office</strong><small>Patrol Division · Recruit Selection Process</small></div>
+            </aside>
           </div>
+
+          <div className="application-process-strip" aria-label="Recruitment process">
+            <article><span>Step 01</span><strong>Submit Application</strong><small>Complete and electronically sign your candidate packet.</small></article>
+            <article><span>Step 02</span><strong>Command Review</strong><small>Captain+ staff screen the application and record a decision.</small></article>
+            <article><span>Step 03</span><strong>Interview</strong><small>Accepted applicants are contacted on Discord to schedule an interview.</small></article>
+            <article><span>Step 04</span><strong>Recruit Onboarding</strong><small>A passed interview clears the applicant for the hiring handoff.</small></article>
+          </div>
+
           <ApplicationForm />
         </div>
       </section>
