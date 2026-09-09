@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+import { createClient } from "@/lib/supabase/server";
 import { APPLICATION_QUESTION_TYPES, type ApplicationQuestionType } from "@/lib/recruitment/application";
-import { getRecruitmentQuestionServiceClient } from "@/lib/recruitment/questions.server";
 
 const EDITOR_RANKS = new Set(["Sheriff", "Undersheriff"]);
 const QUESTION_TYPES = new Set<string>(APPLICATION_QUESTION_TYPES);
@@ -34,8 +34,7 @@ async function authorize() {
 export async function POST(request: Request) {
   const profile = await authorize();
   if (!profile) return NextResponse.json({ error: "Only the Sheriff or Undersheriff may edit the application form." }, { status: 403 });
-  const supabase = getRecruitmentQuestionServiceClient();
-  if (!supabase) return NextResponse.json({ error: "Recruitment editor service is unavailable." }, { status: 503 });
+  const supabase = await createClient() as any;
 
   try {
     const body = await request.json();
