@@ -1,97 +1,36 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { APPLICATION_CERTIFICATION_TEXT } from "@/lib/recruitment/application";
-
-type Question = {
-  name: string;
-  prompt: string;
-  type: "text" | "number" | "textarea";
-  hint?: string;
-  placeholder?: string;
-  compact?: boolean;
-  scenario?: boolean;
-};
+import { FormEvent, useMemo, useState } from "react";
+import { APPLICATION_CERTIFICATION_TEXT, type RecruitmentApplicationQuestion } from "@/lib/recruitment/application";
 
 type ApplicationSection = {
   title: string;
   shortTitle: string;
   eyebrow: string;
   description: string;
-  questions: readonly Question[];
+  questions: RecruitmentApplicationQuestion[];
 };
 
-const sections: readonly ApplicationSection[] = [
-  {
-    title: "Applicant Information",
-    shortTitle: "Identity",
-    eyebrow: "Candidate Record",
-    description: "Start with the information Command will use to identify you and contact you during the selection process.",
-    questions: [
-      { name: "full_name", prompt: "What is your full name?", type: "text", placeholder: "First and last name", compact: true },
-      { name: "discord_username", prompt: "What is your Discord username?", type: "text", placeholder: "Your Discord username", compact: true },
-      { name: "age", prompt: "What is your age?", type: "number", placeholder: "Age", compact: true },
-      { name: "timezone", prompt: "What is your timezone?", type: "text", placeholder: "Example: EST / America/New_York", compact: true },
-    ],
-  },
-  {
-    title: "Experience & Availability",
-    shortTitle: "Experience",
-    eyebrow: "Service Readiness",
-    description: "Give Command a clear picture of your roleplay background, prior department experience, and realistic availability.",
-    questions: [
-      { name: "fivem_experience", prompt: "How long have you been playing FiveM and participating in serious roleplay?", type: "textarea", hint: "Tell us about the kind of communities, roles, and scenarios you have experience with.", placeholder: "Describe your FiveM and serious roleplay experience…" },
-      { name: "previous_departments", prompt: "What departments or factions have you previously been a member of?", type: "textarea", hint: "Include the community, department, approximate rank, and why you left when relevant.", placeholder: "List prior departments or factions, or enter None…" },
-      { name: "weekly_hours", prompt: "How many hours per week can you dedicate to LSCSO?", type: "text", placeholder: "Example: 8–12 hours", compact: true },
-      { name: "upcoming_commitments", prompt: "Do you have any upcoming commitments that may affect your activity?", type: "textarea", hint: "School, work, travel, or other known commitments are fine — accuracy matters more than a perfect schedule.", placeholder: "Explain any upcoming commitments, or enter None…" },
-    ],
-  },
-  {
-    title: "Why LSCSO?",
-    shortTitle: "Motivation",
-    eyebrow: "Department Fit",
-    description: "This is where we want to hear your reasoning, not a canned law-enforcement answer. Tell us why this department fits you.",
-    questions: [
-      { name: "why_lscso", prompt: "Why do you want to join the Los Santos County Sheriff's Office?", type: "textarea", hint: "Be specific about LSCSO, the type of roleplay you want, and what you hope to learn.", placeholder: "Tell Command why LSCSO is the department you want to serve with…" },
-      { name: "contribution", prompt: "What do you believe you can contribute to LSCSO?", type: "textarea", hint: "Think beyond rank. Reliability, judgment, roleplay quality, teamwork, and initiative all matter.", placeholder: "Describe what you would bring to the department…" },
-    ],
-  },
-  {
-    title: "Background & Integrity",
-    shortTitle: "Integrity",
-    eyebrow: "Suitability Review",
-    description: "Answer this section completely and honestly. Command uses it as part of the applicant suitability review.",
-    questions: [
-      { name: "drug_use_history", prompt: "Have you ever used illegal drugs, used prescription medication not prescribed to you, or otherwise misused a controlled substance? If yes, identify the substance(s), approximate date(s), frequency, and any relevant context. If no, enter No.", type: "textarea", hint: "Do not omit information because you think it will automatically disqualify you. Accuracy and integrity are being evaluated.", placeholder: "Provide a complete answer…" },
-    ],
-  },
-  {
-    title: "Roleplay & Law Enforcement",
-    shortTitle: "LE Knowledge",
-    eyebrow: "Foundational Judgment",
-    description: "You do not need to write a textbook. We are looking for a working understanding of serious roleplay and basic law-enforcement decision making.",
-    questions: [
-      { name: "serious_roleplay_definition", prompt: "What does serious roleplay mean to you?", type: "textarea", hint: "Explain how you approach character decisions, consequences, realism, and collaborative scenes.", placeholder: "Describe your standard for serious roleplay…" },
-      { name: "reasonable_suspicion_probable_cause", prompt: "Explain the difference between reasonable suspicion and probable cause.", type: "textarea", hint: "Use your own words. We are looking for your understanding, not copied legal language.", placeholder: "Explain the distinction and how each affects an officer's actions…" },
-      { name: "use_of_force_factors", prompt: "What factors should an officer consider before using force?", type: "textarea", hint: "Think about threat, resistance, proportionality, available options, and the totality of the circumstances.", placeholder: "Walk through the factors you would evaluate…" },
-    ],
-  },
-  {
-    title: "Scenarios",
-    shortTitle: "Scenarios",
-    eyebrow: "Field Judgment",
-    description: "Treat each prompt like a live roleplay situation. Explain what you would notice, what you would do, and why.",
-    questions: [
-      { name: "scenario_speeding_nervous", prompt: "You stop a vehicle for speeding. The driver becomes increasingly nervous during the stop. What do you do?", type: "textarea", hint: "Show how you balance officer safety, lawful authority, observation, and escalation decisions.", placeholder: "Talk Command through your actions from the stop forward…", scenario: true },
-      { name: "scenario_deputy_policy_violation", prompt: "You witness another deputy violating department policy. What do you do?", type: "textarea", hint: "Consider immediate safety, professionalism, documentation, and the chain of command.", placeholder: "Explain how you would handle the violation…", scenario: true },
-      { name: "scenario_supervisor_order", prompt: "A supervisor orders you to do something you believe violates department policy. How do you handle it?", type: "textarea", hint: "Explain how you would clarify the order, protect the scene, and address the policy concern appropriately.", placeholder: "Explain your decision-making and communication…", scenario: true },
-    ],
-  },
-] as const;
+export function ApplicationForm({ questions }: { questions: RecruitmentApplicationQuestion[] }) {
+  const sections = useMemo<ApplicationSection[]>(() => {
+    const result: ApplicationSection[] = [];
+    for (const question of [...questions].filter((item) => item.active).sort((a, b) => a.sortOrder - b.sortOrder)) {
+      let section = result.find((item) => item.title === question.sectionTitle);
+      if (!section) {
+        section = {
+          title: question.sectionTitle,
+          shortTitle: question.sectionShortTitle || question.sectionTitle,
+          eyebrow: question.sectionEyebrow || "Candidate Review",
+          description: question.sectionDescription || "Complete each question carefully and answer in your own words.",
+          questions: [],
+        };
+        result.push(section);
+      }
+      section.questions.push(question);
+    }
+    return result;
+  }, [questions]);
 
-const totalSteps = sections.length + 1;
-
-export function ApplicationForm() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [step, setStep] = useState(0);
   const [submitting, setSubmitting] = useState(false);
@@ -100,6 +39,7 @@ export function ApplicationForm() {
   const [signatureName, setSignatureName] = useState("");
   const [signedAt, setSignedAt] = useState<string | null>(null);
 
+  const totalSteps = sections.length + 1;
   const signed = Boolean(signatureName && signedAt);
   const currentSection = step < sections.length ? sections[step] : null;
   const questionOffset = sections.slice(0, step).reduce((total, section) => total + section.questions.length, 0);
@@ -124,12 +64,16 @@ export function ApplicationForm() {
 
     if (!currentSection) return false;
     for (const question of currentSection.questions) {
-      const value = values[question.name]?.trim() ?? "";
-      if (!value) {
-        setError("Please answer every question in this section before continuing.");
+      const value = values[question.questionKey]?.trim() ?? "";
+      if (question.required && !value) {
+        setError("Please answer every required question in this section before continuing.");
         return false;
       }
-      if (question.name === "age") {
+      if (value.length > 8000) {
+        setError("Application answers cannot exceed 8,000 characters.");
+        return false;
+      }
+      if (question.questionKey === "age" && question.questionType === "short_text" && value) {
         const age = Number(value);
         if (!Number.isInteger(age) || age < 13 || age > 100) {
           setError("Please enter a valid age between 13 and 100.");
@@ -140,22 +84,28 @@ export function ApplicationForm() {
     return true;
   }
 
+  function scrollToWorkspace() {
+    const top = document.querySelector(".application-workspace")?.getBoundingClientRect().top ?? 0;
+    window.scrollTo({ top: Math.max(0, top + window.scrollY - 96), behavior: "smooth" });
+  }
+
   function nextStep() {
     if (!validateCurrentStep()) return;
     setStep((current) => Math.min(current + 1, totalSteps - 1));
-    window.scrollTo({ top: Math.max(0, document.querySelector(".application-workspace")?.getBoundingClientRect().top ?? 0) + window.scrollY - 96, behavior: "smooth" });
+    scrollToWorkspace();
   }
 
   function previousStep() {
     setError("");
     setStep((current) => Math.max(current - 1, 0));
-    window.scrollTo({ top: Math.max(0, document.querySelector(".application-workspace")?.getBoundingClientRect().top ?? 0) + window.scrollY - 96, behavior: "smooth" });
+    scrollToWorkspace();
   }
 
   function goBackTo(index: number) {
     if (index >= step) return;
     setError("");
     setStep(index);
+    scrollToWorkspace();
   }
 
   function signApplication() {
@@ -184,10 +134,7 @@ export function ApplicationForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...values,
-          mandatory_training: "Yes",
-          prior_discipline: "No",
-          prior_discipline_explanation: "",
+          answers: values,
           applicant_certification: true,
           signature_confirmed: true,
           applicant_signature_name: signatureName,
@@ -238,7 +185,7 @@ export function ApplicationForm() {
         </div>
         <ol className="application-briefing__steps">
           {sections.map((section, index) => (
-            <li key={section.title} className={index === step ? "is-current" : index < step ? "is-complete" : ""}>
+            <li key={`${section.title}-${index}`} className={index === step ? "is-current" : index < step ? "is-complete" : ""}>
               <button type="button" onClick={() => goBackTo(index)} disabled={index >= step}>
                 <span>{String(index + 1).padStart(2, "0")}</span><div><strong>{section.shortTitle}</strong><small>{index < step ? "Completed" : index === step ? "In progress" : "Pending"}</small></div>
               </button>
@@ -254,7 +201,7 @@ export function ApplicationForm() {
 
       <form className="application-form" onSubmit={submit}>
         <div className="application-progress" aria-label={`Application section ${step + 1} of ${totalSteps}`}>
-          <div className="application-progress__top"><div><span>Candidate Packet Progress</span><strong>{step < sections.length ? sections[step].title : "Applicant Certification"}</strong></div><b>{step + 1} / {totalSteps}</b></div>
+          <div className="application-progress__top"><div><span>Candidate Packet Progress</span><strong>{currentSection?.title ?? "Applicant Certification"}</strong></div><b>{step + 1} / {totalSteps}</b></div>
           <div className="application-progress__bar"><span style={{ width: `${((step + 1) / totalSteps) * 100}%` }} /></div>
         </div>
 
@@ -266,31 +213,37 @@ export function ApplicationForm() {
               <div><p>{currentSection.eyebrow}</p><h2>{currentSection.title}</h2><span>{currentSection.description}</span></div>
             </header>
 
-            <div className={`application-question-grid ${currentSection.questions.every((question) => question.compact) ? "application-question-grid--compact" : ""}`}>
+            <div className={`application-question-grid ${currentSection.questions.every((question) => question.questionType === "short_text") ? "application-question-grid--compact" : ""}`}>
               {currentSection.questions.map((question, questionIndex) => {
-                const value = values[question.name] || "";
+                const value = values[question.questionKey] || "";
+                const scenario = currentSection.title.toLowerCase().includes("scenario");
+                const compact = question.questionType === "short_text";
+                const options = question.questionType === "yes_no" ? ["Yes", "No"] : question.options;
                 return (
-                  <div className={`application-question ${question.compact ? "application-question--compact" : ""} ${question.scenario ? "application-question--scenario" : ""}`} key={question.name}>
+                  <div className={`application-question ${compact ? "application-question--compact" : ""} ${scenario ? "application-question--scenario" : ""}`} key={question.id}>
                     <div className="application-question__heading">
                       <span className="application-question__number">{String(questionOffset + questionIndex + 1).padStart(2, "0")}</span>
-                      <div>{question.scenario ? <b>Field Scenario</b> : null}<label htmlFor={question.name}>{question.prompt}</label>{question.hint ? <small>{question.hint}</small> : null}</div>
+                      <div>{scenario ? <b>Field Scenario</b> : null}<label id={`${question.questionKey}-label`} htmlFor={question.questionType === "short_text" || question.questionType === "long_text" ? question.questionKey : undefined}>{question.prompt}{question.required ? <em className="application-required"> Required</em> : null}</label>{question.helpText ? <small>{question.helpText}</small> : null}</div>
                     </div>
-                    {question.type === "textarea" ? (
-                      <><textarea id={question.name} required rows={6} maxLength={8000} placeholder={question.placeholder} value={value} onChange={(event) => setValue(question.name, event.target.value)} /><span className="application-question__count">{value.length.toLocaleString()} / 8,000</span></>
+
+                    {question.questionType === "long_text" ? (
+                      <><textarea id={question.questionKey} required={question.required} rows={6} maxLength={8000} placeholder={question.placeholder ?? undefined} value={value} onChange={(event) => setValue(question.questionKey, event.target.value)} /><span className="application-question__count">{value.length.toLocaleString()} / 8,000</span></>
+                    ) : question.questionType === "short_text" ? (
+                      <input id={question.questionKey} required={question.required} type={question.questionKey === "age" ? "number" : "text"} min={question.questionKey === "age" ? 13 : undefined} max={question.questionKey === "age" ? 100 : undefined} maxLength={question.questionKey === "age" ? undefined : 8000} placeholder={question.placeholder ?? undefined} value={value} onChange={(event) => setValue(question.questionKey, event.target.value)} />
                     ) : (
-                      <input id={question.name} required type={question.type} min={question.type === "number" ? 13 : undefined} max={question.type === "number" ? 100 : undefined} placeholder={question.placeholder} value={value} onChange={(event) => setValue(question.name, event.target.value)} />
+                      <div className="application-choice-grid" role="radiogroup" aria-labelledby={`${question.questionKey}-label`}>
+                        {options.map((option) => (
+                          <label className={`application-choice ${value === option ? "is-selected" : ""}`} key={option}>
+                            <input type="radio" name={question.questionKey} value={option} checked={value === option} required={question.required} onChange={() => setValue(question.questionKey, option)} />
+                            <span>{option}</span>
+                          </label>
+                        ))}
+                      </div>
                     )}
                   </div>
                 );
               })}
             </div>
-
-            {currentSection.title === "Background & Integrity" ? (
-              <div className="application-screening-notice" role="note">
-                <div className="application-screening-notice__icon" aria-hidden="true">!</div>
-                <div><span>Applicant Screening Notice</span><strong>Additional suitability screening applies to advancing candidates.</strong><p>Candidates who advance in the selection process are subject to fingerprinting, blood testing, drug testing, and breathalyzer testing as part of LSCSO background and suitability screening.</p></div>
-              </div>
-            ) : null}
 
             {error ? <p className="application-error" role="alert">{error}</p> : null}
             <div className="application-navigation">
@@ -313,7 +266,7 @@ export function ApplicationForm() {
             <div className="application-certification__statement"><span>Certification statement</span><p>{APPLICATION_CERTIFICATION_TEXT}</p></div>
 
             <div className={`application-signature ${signed ? "is-signed" : ""}`}>
-              <div className="application-signature__status"><span>Electronic Signature</span>{signed ? <><strong className="application-signature__script">{signatureName}</strong><small>Signed {new Date(signedAt!).toLocaleString()}</small></> : <><strong>Signature required</strong><small>Your full name from Section 01 will be used as your electronic signature.</small></>}</div>
+              <div className="application-signature__status"><span>Electronic Signature</span>{signed ? <><strong className="application-signature__script">{signatureName}</strong><small>Signed {new Date(signedAt!).toLocaleString()}</small></> : <><strong>Signature required</strong><small>Your full name from the application will be used as your electronic signature.</small></>}</div>
               {signed ? <button className="application-signature__clear" type="button" onClick={clearSignature}>Clear signature</button> : <button className="application-signature__button" type="button" onClick={signApplication}>Apply Electronic Signature</button>}
             </div>
 
