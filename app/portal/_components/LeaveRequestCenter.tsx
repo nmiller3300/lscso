@@ -123,7 +123,7 @@ export function LeaveRequestCenter() {
       >
         <form className="portal-dialog-form" id="leave-request-form" onSubmit={submit}>
           <div className="portal-form-grid portal-form-grid--three">
-            <label>Leave type<select name="leaveType" defaultValue="Personal"><option>Personal</option><option>Medical</option><option>Military</option><option>Family</option><option>Paternity</option><option>Administrative</option><option>Other</option></select></label>
+            <label>Leave type<select name="leaveType" defaultValue="Personal"><option>Personal</option><option>Medical</option><option>Military</option><option>Family</option><option>Paternity</option><option>Maternity</option><option>Administrative</option><option>Other</option></select></label>
             <label>Start date<input name="startsOn" required type="date" /></label>
             <label>Expected return<input name="returnOn" required type="date" /></label>
           </div>
