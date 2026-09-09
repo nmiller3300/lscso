@@ -53,7 +53,7 @@ export function DeleteApplicationButton({
           setOpen(true);
         }}
       >
-        Delete application
+        Delete test / invalid application
       </button>
 
       <PortalDialog
@@ -63,7 +63,7 @@ export function DeleteApplicationButton({
         }}
         eyebrow="Administrative cleanup"
         title={`Delete ${applicationNumber}?`}
-        description="This permanently removes the application, its private tracking link, internal notes, and recruitment history. It is intended for test or invalid submissions only. Applications that already created a Recruit record cannot be deleted."
+        description="This permanently removes the application, its private tracking link, applicant communications, internal notes, and recruitment history. Accepted and interview-stage applications may still be deleted as long as no Recruit/personnel record has been created."
         dismissOnBackdrop={!busy}
         footer={
           <>
