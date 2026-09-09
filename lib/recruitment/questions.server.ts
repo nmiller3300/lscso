@@ -1,11 +1,5 @@
-import { createClient as createServiceClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
 import type { RecruitmentApplicationQuestion } from "./application";
-
-function serviceClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
-  return url && key ? createServiceClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } }) : null;
-}
 
 function mapQuestion(row: any): RecruitmentApplicationQuestion {
   return {
@@ -29,8 +23,7 @@ function mapQuestion(row: any): RecruitmentApplicationQuestion {
 }
 
 export async function getRecruitmentApplicationQuestions(includeInactive = false): Promise<RecruitmentApplicationQuestion[]> {
-  const supabase = serviceClient();
-  if (!supabase) return [];
+  const supabase = await createClient() as any;
 
   let query = supabase
     .from("recruitment_application_questions")
@@ -42,8 +35,4 @@ export async function getRecruitmentApplicationQuestions(includeInactive = false
   const { data, error } = await query;
   if (error || !data) return [];
   return data.map(mapQuestion);
-}
-
-export function getRecruitmentQuestionServiceClient() {
-  return serviceClient();
 }
