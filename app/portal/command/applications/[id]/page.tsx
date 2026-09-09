@@ -5,10 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
 import { ApplicationReview } from "./ApplicationReview";
-import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
-import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
-import { RecruitHireHandoff } from "./RecruitHireHandoff";
 import "./communications.css";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -24,10 +21,9 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
     supabase.from("recruitment_applicant_messages").select("id,application_id,author_profile_id,content,created_at").eq("application_id", id).order("created_at", { ascending: true }),
   ]);
   if (!application) notFound();
+
   const reviewerList = (people ?? []).map((person: any) => ({ id: person.id, name: person.display_name }));
   const names = Object.fromEntries(reviewerList.map((person: any) => [person.id, person.name]));
-  const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
-  const hireEligible = application.status === "Accepted" && application.interview_status === "Passed" && !isHired;
   const canDeleteApplication = ["Sheriff", "Undersheriff"].includes(profile.rank) && !application.hired_profile_id && application.status !== "Hired";
   const label = applicationLabel(application.application_number);
 
@@ -54,19 +50,14 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
         </section>
       ) : null}
 
-      <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
-      <RecruitHireHandoff
-        applicationId={application.id}
-        applicantName={application.full_name}
-        eligible={hireEligible}
-        hired={isHired}
-      />
-      <ApplicantStatusMessage
-        applicationId={application.id}
-        messages={applicantMessages ?? []}
+      <ApplicationReview
+        application={application}
+        reviewers={reviewerList}
         names={names}
+        notes={notes ?? []}
+        history={history ?? []}
+        applicantMessages={applicantMessages ?? []}
       />
-      <ApplicationDynamicAnswers application={application} />
     </PortalShell>
   );
 }
