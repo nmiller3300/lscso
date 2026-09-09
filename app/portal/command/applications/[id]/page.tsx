@@ -8,6 +8,7 @@ import { ApplicationReview } from "./ApplicationReview";
 import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
 import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
+import { RecruitHireHandoff } from "./RecruitHireHandoff";
 import "./communications.css";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +26,8 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   if (!application) notFound();
   const reviewerList = (people ?? []).map((person: any) => ({ id: person.id, name: person.display_name }));
   const names = Object.fromEntries(reviewerList.map((person: any) => [person.id, person.name]));
+  const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
+  const hireEligible = application.status === "Accepted" && application.interview_status === "Passed" && !isHired;
   const canDeleteApplication = ["Sheriff", "Undersheriff"].includes(profile.rank) && !application.hired_profile_id && application.status !== "Hired";
   const label = applicationLabel(application.application_number);
 
@@ -52,6 +55,12 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
       ) : null}
 
       <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
+      <RecruitHireHandoff
+        applicationId={application.id}
+        applicantName={application.full_name}
+        eligible={hireEligible}
+        hired={isHired}
+      />
       <ApplicantStatusMessage
         applicationId={application.id}
         messages={applicantMessages ?? []}
