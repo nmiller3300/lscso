@@ -25,7 +25,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const body = await request.json();
     const { data: application } = await supabase
       .from("recruitment_applications")
-      .select("id,status,interview_status,hired_profile_id")
+      .select("id,status,interview_status,hired_profile_id,applicant_status_message")
       .eq("id", id)
       .maybeSingle();
 
@@ -102,6 +102,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       if (error) throw error;
       eventType = "Note Added";
       details = { preview: content.slice(0, 160) };
+    } else if (action === "applicant_message") {
+      const content = clean(body.content, 2000);
+      update = {
+        applicant_status_message: content || null,
+        applicant_status_message_updated_at: new Date().toISOString(),
+        applicant_status_message_updated_by_profile_id: profile.id,
+      };
+      eventType = content ? "Applicant Status Message Updated" : "Applicant Status Message Cleared";
+      details = content ? { preview: content.slice(0, 180) } : {};
     } else if (action === "interview") {
       if (application.status !== "Accepted") {
         return NextResponse.json({ error: "The application must be accepted before an interview can be scheduled or recorded." }, { status: 409 });
