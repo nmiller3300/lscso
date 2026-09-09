@@ -8,7 +8,7 @@ import "../../application.css";
 import "./status.css";
 
 export const metadata: Metadata = {
-  title: "Application Status | LSCSO",
+  title: "Application Status",
   description: "Private LSCSO recruitment application status.",
   robots: { index: false, follow: false },
 };
