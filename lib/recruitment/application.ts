@@ -1,4 +1,5 @@
-export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Interview", "Accepted", "Denied", "Withdrawn"] as const;
+export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Interview", "Denied", "Hired", "Withdrawn"] as const;
+export const APPLICATION_REVIEW_STATUSES = ["Submitted", "Under Review"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;
 
 export const APPLICATION_CERTIFICATION_TEXT = "Under penalty of perjury under the laws of the State of San Andreas, I certify that all information provided in this application is true, accurate, and complete to the best of my knowledge. I understand that any false, misleading, or intentionally omitted information may result in the denial or disqualification of my application.";
@@ -23,4 +24,33 @@ export const applicationQuestions: Array<[string, string, string]> = [
   ["Scenarios", "scenario_supervisor_order", "A supervisor orders you to do something you believe violates department policy. How do you handle it?"],
 ];
 
-export function applicationLabel(applicationNumber: number | string) { return `APP-${String(applicationNumber).padStart(4, "0")}`; }
+export function applicationLabel(applicationNumber: number | string) {
+  return `APP-${String(applicationNumber).padStart(4, "0")}`;
+}
+
+export function applicationStatusLabel(status: string) {
+  switch (status) {
+    case "Accepted": return "Application Accepted";
+    case "Interview": return "Interview Stage";
+    case "Hired": return "Hired · Recruit";
+    default: return status;
+  }
+}
+
+export function applicationNextAction(status: string, interviewStatus?: string | null, hired = false) {
+  if (hired || status === "Hired") return "Recruit record created — continue onboarding and training.";
+  if (status === "Denied") return "Application closed — no interview will be scheduled.";
+  if (status === "Withdrawn") return "Application withdrawn — no further action required.";
+  if (status === "Submitted") return "Assign a Captain+ reviewer and begin Command screening.";
+  if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
+  if (status === "Accepted") {
+    if (interviewStatus === "Passed") return "Interview passed — applicant is cleared for the Recruit hire handoff.";
+    if (interviewStatus === "Failed") return "Interview failed — document the outcome and deny or otherwise close the application.";
+    if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
+    if (interviewStatus === "No Show") return "Applicant did not attend — reschedule or close the application.";
+    if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail before hiring.";
+    return "Contact the applicant on Discord and schedule the required interview.";
+  }
+  if (status === "Interview") return "Complete the interview record before any Recruit hire handoff.";
+  return "Continue the documented recruitment workflow.";
+}
