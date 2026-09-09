@@ -4,6 +4,7 @@ import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import { getRecruitmentApplicationQuestions } from "@/lib/recruitment/questions.server";
 import { ApplicationForm } from "./ApplicationForm";
 import "./application.css";
+import "./application-dynamic.css";
 import "./application-closed.css";
 
 export const metadata: Metadata = {
