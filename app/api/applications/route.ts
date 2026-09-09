@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
 import { APPLICATION_CERTIFICATION_TEXT } from "@/lib/recruitment/application";
@@ -95,11 +96,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Your electronic signature must match the full name on your application." }, { status: 400 });
     }
 
+    const trackingToken = randomBytes(32).toString("base64url");
+    const trackingTokenHash = createHash("sha256").update(trackingToken).digest("hex");
+
     const { data, error } = await supabase
       .rpc("submit_recruitment_application", {
         p_answers: normalizedAnswers,
         p_signature_name: signatureName,
         p_certification_text: APPLICATION_CERTIFICATION_TEXT,
+        p_tracking_token_hash: trackingTokenHash,
       })
       .single();
 
@@ -110,7 +115,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: status >= 500 ? "The application could not be saved." : message }, { status });
     }
 
-    return NextResponse.json({ success: true, application_number: data.application_number });
+    return NextResponse.json({
+      success: true,
+      application_number: data.application_number,
+      tracking_token: trackingToken,
+    });
   } catch (error) {
     console.error("Recruitment application submission failed", error);
     return NextResponse.json({ error: "The application could not be submitted. Please try again." }, { status: 500 });
