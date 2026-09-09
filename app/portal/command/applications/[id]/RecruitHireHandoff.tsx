@@ -16,10 +16,6 @@ export function RecruitHireHandoff({
   hired: boolean;
 }) {
   const router = useRouter();
-  const [citizenId, setCitizenId] = useState("");
-  const [characterName, setCharacterName] = useState(applicantName);
-  const [licenseIdentifier, setLicenseIdentifier] = useState("");
-  const [serverId, setServerId] = useState("");
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -28,27 +24,22 @@ export function RecruitHireHandoff({
   if (!eligible && !hired) return null;
 
   async function createRecruit() {
-    if (!citizenId.trim() || busy) return;
+    if (busy) return;
     setBusy(true);
     setError("");
     try {
       const response = await fetch(`/api/portal/applications/${applicationId}/hire`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          citizenId: citizenId.trim(),
-          characterName: characterName.trim(),
-          licenseIdentifier: licenseIdentifier.trim(),
-          serverId: serverId.trim(),
-        }),
+        body: JSON.stringify({}),
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The Recruit record could not be created.");
+      if (!response.ok) throw new Error(data.error || "The Recruit personnel record could not be created.");
       setCreatedPersonnelId(data?.hire?.personnelId || "");
       setConfirmOpen(false);
       router.refresh();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The Recruit record could not be created.");
+      setError(caught instanceof Error ? caught.message : "The Recruit personnel record could not be created.");
     } finally {
       setBusy(false);
     }
@@ -62,7 +53,7 @@ export function RecruitHireHandoff({
           <span>Complete</span>
         </div>
         <p>
-          The applicant has been converted into an LSCSO Recruit personnel record. This application is now part of the permanent hiring record and can no longer be deleted as a test application.
+          The applicant has been added to LSCSO personnel as a Recruit. No FiveM, QBox, or computer-system link was created.
         </p>
         {createdPersonnelId ? <p><strong>Personnel ID:</strong> {createdPersonnelId}</p> : null}
       </section>
@@ -75,43 +66,26 @@ export function RecruitHireHandoff({
         <div className="portal-panel-heading">
           <div>
             <p>Final Recruit appointment</p>
-            <h2>Interview passed — Recruit record ready</h2>
+            <h2>Interview passed — Recruit personnel record ready</h2>
           </div>
-          <span>Ready to hire</span>
+          <span>Ready to appoint</span>
         </div>
         <p>
-          This is the actual hiring handoff. Completing it creates the applicant&apos;s LSCSO Recruit personnel record and links the FiveM identity below. It is different from accepting the application.
+          This is the actual website hiring action. It creates an LSCSO personnel record for {applicantName} at the rank of Recruit.
+          Computer/FiveM integration is currently disabled and is not part of this action.
         </p>
-        <div className="recruitment-control-grid">
-          <label>
-            FiveM citizen ID
-            <input value={citizenId} onChange={(event) => setCitizenId(event.target.value)} placeholder="Required" />
-          </label>
-          <label>
-            Character name
-            <input value={characterName} onChange={(event) => setCharacterName(event.target.value)} placeholder={applicantName} />
-          </label>
-          <label>
-            License identifier
-            <input value={licenseIdentifier} onChange={(event) => setLicenseIdentifier(event.target.value)} placeholder="Optional" />
-          </label>
-          <label>
-            Current server ID
-            <input inputMode="numeric" value={serverId} onChange={(event) => setServerId(event.target.value)} placeholder="Optional" />
-          </label>
-        </div>
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         <div className="recruitment-interview-actions">
           <button
             className="portal-button portal-button--primary"
             type="button"
-            disabled={busy || !citizenId.trim()}
+            disabled={busy}
             onClick={() => {
               setError("");
               setConfirmOpen(true);
             }}
           >
-            Create Recruit Record
+            Create Recruit Personnel Record
           </button>
           <span className="is-ready">Passed interview requirement satisfied</span>
         </div>
@@ -121,13 +95,13 @@ export function RecruitHireHandoff({
         open={confirmOpen}
         onClose={() => { if (!busy) setConfirmOpen(false); }}
         eyebrow="Final hiring action"
-        title={`Create Recruit record for ${applicantName}?`}
-        description="This is the actual Recruit appointment. It creates a personnel record and FiveM identity link. After this succeeds, the application cannot be deleted as a test submission."
+        title={`Appoint ${applicantName} as an LSCSO Recruit?`}
+        description="This creates the permanent website personnel record. It does not connect to FiveM or the computer script. After it succeeds, this application can no longer be deleted as a disposable test submission."
         dismissOnBackdrop={!busy}
         footer={
           <>
             <button className="portal-button portal-button--secondary" type="button" disabled={busy} onClick={() => setConfirmOpen(false)}>Cancel</button>
-            <button className="portal-button portal-button--primary" type="button" disabled={busy || !citizenId.trim()} onClick={() => void createRecruit()}>
+            <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => void createRecruit()}>
               {busy ? "Creating Recruit…" : "Confirm Recruit Appointment"}
             </button>
           </>
@@ -135,9 +109,9 @@ export function RecruitHireHandoff({
       >
         <div className="recruitment-decision-review">
           <div><span>Applicant</span><strong>{applicantName}</strong></div>
-          <div><span>FiveM citizen ID</span><strong>{citizenId || "Not entered"}</strong></div>
-          <div><span>Character name</span><strong>{characterName || applicantName}</strong></div>
-          <p><strong>Do not use this final action for a disposable test application</strong> unless you intend to keep the resulting Recruit personnel record.</p>
+          <div><span>Portal rank</span><strong>Recruit</strong></div>
+          <div><span>Computer / FiveM action</span><strong>None</strong></div>
+          <p><strong>Testing?</strong> If you only want to inspect the Passed applicant view, stop here and use the Sheriff/Undersheriff delete control instead of creating a personnel record.</p>
           {error ? <p className="application-error" role="alert">{error}</p> : null}
         </div>
       </PortalDialog>
