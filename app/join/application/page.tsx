@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import { getRecruitmentApplicationQuestions } from "@/lib/recruitment/questions.server";
@@ -59,7 +60,7 @@ export default async function ApplicationPage() {
               </div>
             </div>
             <aside className="application-page__seal" aria-label="Official recruitment packet">
-              <img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" />
+              <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={180} height={180} priority />
               <div><span>Official Candidate Packet</span><strong>Los Santos County Sheriff&apos;s Office</strong><small>Patrol Division · Recruit Selection Process</small></div>
             </aside>
           </div>
