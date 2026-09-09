@@ -11,10 +11,13 @@ import {
   applicationStatusLabel,
 } from "@/lib/recruitment/application";
 import { PortalDialog } from "../../../_components/PortalDialog";
+import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
+import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
+import { RecruitHireHandoff } from "./RecruitHireHandoff";
 
 type Decision = "Accepted" | "Denied";
 
-export function ApplicationReview({ application, reviewers, names, notes, history }: any) {
+export function ApplicationReview({ application, reviewers, names, notes, history, applicantMessages }: any) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -82,6 +85,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const isAccepted = application.status === "Accepted";
   const isDenied = application.status === "Denied";
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
+  const hireEligible = isAccepted && application.interview_status === "Passed" && !isHired;
   const interviewPassed = application.interview_status === "Passed";
   const interviewNeedsSchedule = interview.status === "Scheduled" && !interview.scheduled;
   const interviewNeedsFinalDetails = ["Passed", "Failed"].includes(interview.status)
@@ -118,6 +122,13 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
           {isDenied ? <span>No interview is scheduled for a denied application. The reason remains in the permanent recruitment record and audit history.</span> : null}
           {isHired ? <span>The application, passed interview, and Recruit appointment are complete.</span> : null}
         </div>
+      </section>
+
+      <ApplicationDynamicAnswers application={application} />
+
+      <section className="portal-panel">
+        <div className="portal-panel-heading"><div><p>Applicant certification</p><h2>Electronic signature</h2></div><b className={`recruitment-status ${signed ? "recruitment-status--accepted" : "recruitment-status--denied"}`}>{signed ? "Signed" : "Signature unavailable"}</b></div>
+        <div className="recruitment-signature-record"><p>{certificationText}</p><dl><div><dt>Signed by</dt><dd>{application.applicant_signature_name || "Not recorded"}</dd></div><div><dt>Signed at</dt><dd>{application.applicant_signed_at ? new Date(application.applicant_signed_at).toLocaleString() : "Not recorded"}</dd></div><div><dt>Method</dt><dd>{application.applicant_signature_method || "Not recorded"}</dd></div></dl></div>
       </section>
 
       {isReviewing ? (
@@ -163,65 +174,75 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
       ) : null}
 
       {isAccepted || isHired ? (
-        <section className="portal-panel recruitment-interview-panel">
-          <div className="portal-panel-heading">
-            <div><p>Required interview</p><h2>{isHired ? "Interview completed" : "Interview scheduling & result"}</h2></div>
-            <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
-          </div>
-          {!isHired ? <div className="recruitment-interview-callout"><strong>Application accepted — interview is now required.</strong><span>Contact <b>{application.discord_username}</b> on Discord, schedule the interview, and record the result here. The final Recruit appointment stays locked until a Passed result is saved.</span></div> : null}
-          <div className="recruitment-control-grid">
-            <label>
-              Interview status
-              <select value={interview.status} onChange={(event) => setInterview({ ...interview, status: event.target.value })} disabled={isHired}>
-                {INTERVIEW_STATUSES.map((item) => <option key={item}>{item}</option>)}
-              </select>
-            </label>
-            <label>
-              Interviewer
-              <select value={interview.interviewer} onChange={(event) => setInterview({ ...interview, interviewer: event.target.value })} disabled={isHired}>
-                <option value="">Not assigned</option>
-                {reviewers.map((person: any) => <option key={person.id} value={person.id}>{person.name}</option>)}
-              </select>
-            </label>
-            <label>
-              Scheduled date & time
-              <input type="datetime-local" value={interview.scheduled} onChange={(event) => setInterview({ ...interview, scheduled: event.target.value })} disabled={isHired} />
-            </label>
-            <label>
-              Result summary
-              <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail" disabled={isHired} />
-            </label>
-          </div>
-          <label className="recruitment-wide-label">Interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired} placeholder="Document interview observations, strengths, concerns, and follow-up items." /></label>
-          {!isHired ? (
-            <div className="recruitment-interview-actions">
-              <button
-                className="portal-button portal-button--primary"
-                disabled={busy || !interviewRecordReady}
-                onClick={() => void save({ action: "interview", interviewStatus: interview.status, interviewerProfileId: interview.interviewer, scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "", notes: interview.notes, result: interview.result })}
-              >
-                Save interview record
-              </button>
-              <span className={interviewPassed ? "is-ready" : ""}>
-                {interviewNeedsSchedule
-                  ? "Enter the interview date and time before saving Scheduled."
-                  : interviewNeedsFinalDetails
-                    ? "Pass / Fail requires an interviewer and result summary."
-                    : interviewPassed
-                      ? "✓ Passed interview saved — use Final Recruit appointment below."
-                      : "Final Recruit appointment remains locked until a Passed result is saved."}
-              </span>
+        <>
+          <section className="portal-panel recruitment-interview-panel">
+            <div className="portal-panel-heading">
+              <div><p>Required interview</p><h2>{isHired ? "Interview completed" : "Interview scheduling & result"}</h2></div>
+              <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
             </div>
-          ) : null}
-        </section>
+            {!isHired ? <div className="recruitment-interview-callout"><strong>Application accepted — interview is now required.</strong><span>Contact <b>{application.discord_username}</b> on Discord, schedule the interview, and record the result here. The final Recruit appointment stays locked until a Passed result is saved.</span></div> : null}
+            <div className="recruitment-control-grid">
+              <label>
+                Interview status
+                <select value={interview.status} onChange={(event) => setInterview({ ...interview, status: event.target.value })} disabled={isHired}>
+                  {INTERVIEW_STATUSES.map((item) => <option key={item}>{item}</option>)}
+                </select>
+              </label>
+              <label>
+                Interviewer
+                <select value={interview.interviewer} onChange={(event) => setInterview({ ...interview, interviewer: event.target.value })} disabled={isHired}>
+                  <option value="">Not assigned</option>
+                  {reviewers.map((person: any) => <option key={person.id} value={person.id}>{person.name}</option>)}
+                </select>
+              </label>
+              <label>
+                Scheduled date & time
+                <input type="datetime-local" value={interview.scheduled} onChange={(event) => setInterview({ ...interview, scheduled: event.target.value })} disabled={isHired} />
+              </label>
+              <label>
+                Result summary
+                <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail" disabled={isHired} />
+              </label>
+            </div>
+            <label className="recruitment-wide-label">Interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired} placeholder="Document interview observations, strengths, concerns, and follow-up items." /></label>
+            {!isHired ? (
+              <div className="recruitment-interview-actions">
+                <button
+                  className="portal-button portal-button--primary"
+                  disabled={busy || !interviewRecordReady}
+                  onClick={() => void save({ action: "interview", interviewStatus: interview.status, interviewerProfileId: interview.interviewer, scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "", notes: interview.notes, result: interview.result })}
+                >
+                  Save interview record
+                </button>
+                <span className={interviewPassed ? "is-ready" : ""}>
+                  {interviewNeedsSchedule
+                    ? "Enter the interview date and time before saving Scheduled."
+                    : interviewNeedsFinalDetails
+                      ? "Pass / Fail requires an interviewer and result summary."
+                      : interviewPassed
+                        ? "✓ Passed interview saved — Recruit appointment is ready directly below."
+                        : "Final Recruit appointment remains locked until a Passed result is saved."}
+                </span>
+              </div>
+            ) : null}
+          </section>
+
+          <RecruitHireHandoff
+            applicationId={application.id}
+            applicantName={application.full_name}
+            eligible={hireEligible}
+            hired={isHired}
+          />
+        </>
       ) : (
         !isDenied ? <section className="portal-panel recruitment-interview-locked"><div><p>Interview stage</p><h2>Locked until the application is accepted.</h2><span>The applicant must first pass the written Command screening. An application denial ends the process without an interview.</span></div></section> : null
       )}
 
-      <section className="portal-panel">
-        <div className="portal-panel-heading"><div><p>Applicant certification</p><h2>Electronic signature</h2></div><b className={`recruitment-status ${signed ? "recruitment-status--accepted" : "recruitment-status--denied"}`}>{signed ? "Signed" : "Signature unavailable"}</b></div>
-        <div className="recruitment-signature-record"><p>{certificationText}</p><dl><div><dt>Signed by</dt><dd>{application.applicant_signature_name || "Not recorded"}</dd></div><div><dt>Signed at</dt><dd>{application.applicant_signed_at ? new Date(application.applicant_signed_at).toLocaleString() : "Not recorded"}</dd></div><div><dt>Method</dt><dd>{application.applicant_signature_method || "Not recorded"}</dd></div></dl></div>
-      </section>
+      <ApplicantStatusMessage
+        applicationId={application.id}
+        messages={applicantMessages ?? []}
+        names={names}
+      />
 
       <section className="portal-panel">
         <div className="portal-panel-heading"><div><p>Internal notes</p><h2>Chronological notes</h2></div></div>
