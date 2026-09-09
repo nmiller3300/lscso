@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
+import { getRecruitmentApplicationQuestions } from "@/lib/recruitment/questions.server";
 import { ApplicationForm } from "./ApplicationForm";
 import "./application.css";
 import "./application-closed.css";
@@ -13,7 +14,10 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 
 export default async function ApplicationPage() {
-  const recruitment = await getRecruitmentStatus();
+  const [recruitment, questions] = await Promise.all([
+    getRecruitmentStatus(),
+    getRecruitmentApplicationQuestions(false),
+  ]);
 
   if (!recruitment.isOpen) {
     return (
@@ -35,6 +39,8 @@ export default async function ApplicationPage() {
     );
   }
 
+  const sectionCount = new Set(questions.map((question) => question.sectionTitle)).size + 1;
+
   return (
     <main className="application-page">
       <section className="application-page__hero">
@@ -46,8 +52,8 @@ export default async function ApplicationPage() {
               <h1>Earn your place in the Sheriff&apos;s Office.</h1>
               <p className="intro-serif">This is your formal candidate packet for the Los Santos County Sheriff&apos;s Office. Take your time, answer in your own words, and give Command a clear picture of your judgment, integrity, and roleplay standards.</p>
               <div className="application-page__metrics" aria-label="Application overview">
-                <article><strong>17</strong><span>Application Questions</span></article>
-                <article><strong>07</strong><span>Guided Sections</span></article>
+                <article><strong>{String(questions.length).padStart(2, "0")}</strong><span>Application Questions</span></article>
+                <article><strong>{String(sectionCount).padStart(2, "0")}</strong><span>Guided Sections</span></article>
                 <article><strong>01</strong><span>Required Interview</span></article>
               </div>
             </div>
@@ -64,7 +70,9 @@ export default async function ApplicationPage() {
             <article><span>Step 04</span><strong>Recruit Onboarding</strong><small>A passed interview clears the applicant for the hiring handoff.</small></article>
           </div>
 
-          <ApplicationForm />
+          {questions.length ? <ApplicationForm questions={questions} /> : (
+            <section className="application-success"><p className="application-success__eyebrow">Recruitment configuration</p><h2>The application is temporarily unavailable.</h2><p className="application-success__lead">Command has not published an active application form. Please check back later.</p></section>
+          )}
         </div>
       </section>
     </main>
