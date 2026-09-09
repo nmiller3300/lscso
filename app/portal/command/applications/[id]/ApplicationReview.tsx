@@ -8,7 +8,6 @@ import {
   INTERVIEW_STATUSES,
   applicationLabel,
   applicationNextAction,
-  applicationQuestions,
   applicationStatusLabel,
 } from "@/lib/recruitment/application";
 import { PortalDialog } from "../../../_components/PortalDialog";
@@ -77,10 +76,6 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
     }
   }
 
-  const grouped = applicationQuestions.reduce((acc: any, [section, key, label]) => {
-    (acc[section] ??= []).push([key, label]);
-    return acc;
-  }, {});
   const certificationText = application.applicant_certification_text || APPLICATION_CERTIFICATION_TEXT;
   const signed = Boolean(application.applicant_signature_name && application.applicant_signed_at);
   const isReviewing = APPLICATION_REVIEW_STATUSES.includes(application.status);
@@ -88,6 +83,10 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const isDenied = application.status === "Denied";
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const interviewPassed = application.interview_status === "Passed";
+  const interviewNeedsSchedule = interview.status === "Scheduled" && !interview.scheduled;
+  const interviewNeedsFinalDetails = ["Passed", "Failed"].includes(interview.status)
+    && (!interview.interviewer || interview.result.trim().length < 3);
+  const interviewRecordReady = !interviewNeedsSchedule && !interviewNeedsFinalDetails;
   const nextAction = applicationNextAction(application.status, application.interview_status, isHired);
 
   return (
@@ -117,7 +116,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
           <h2>{nextAction}</h2>
           {isAccepted && !isHired ? <span>Applicant Discord: <strong>{application.discord_username}</strong>. Application acceptance means the candidate passed the written screening only; it does <b>not</b> make them a deputy or Recruit.</span> : null}
           {isDenied ? <span>No interview is scheduled for a denied application. The reason remains in the permanent recruitment record and audit history.</span> : null}
-          {isHired ? <span>The application, passed interview, and Recruit hire handoff are complete.</span> : null}
+          {isHired ? <span>The application, passed interview, and Recruit appointment are complete.</span> : null}
         </div>
       </section>
 
@@ -169,7 +168,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
             <div><p>Required interview</p><h2>{isHired ? "Interview completed" : "Interview scheduling & result"}</h2></div>
             <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
           </div>
-          {!isHired ? <div className="recruitment-interview-callout"><strong>Application accepted — interview is now required.</strong><span>Contact <b>{application.discord_username}</b> on Discord, schedule the interview, and record the result here. The Recruit hire handoff stays locked until the interview is marked Passed.</span></div> : null}
+          {!isHired ? <div className="recruitment-interview-callout"><strong>Application accepted — interview is now required.</strong><span>Contact <b>{application.discord_username}</b> on Discord, schedule the interview, and record the result here. The final Recruit appointment stays locked until a Passed result is saved.</span></div> : null}
           <div className="recruitment-control-grid">
             <label>
               Interview status
@@ -194,7 +193,26 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
             </label>
           </div>
           <label className="recruitment-wide-label">Interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired} placeholder="Document interview observations, strengths, concerns, and follow-up items." /></label>
-          {!isHired ? <div className="recruitment-interview-actions"><button className="portal-button portal-button--primary" disabled={busy} onClick={() => void save({ action: "interview", interviewStatus: interview.status, interviewerProfileId: interview.interviewer, scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "", notes: interview.notes, result: interview.result })}>Save interview record</button><span className={interviewPassed ? "is-ready" : ""}>{interviewPassed ? "✓ Recruit hire handoff unlocked" : "Hire handoff remains locked until Passed"}</span></div> : null}
+          {!isHired ? (
+            <div className="recruitment-interview-actions">
+              <button
+                className="portal-button portal-button--primary"
+                disabled={busy || !interviewRecordReady}
+                onClick={() => void save({ action: "interview", interviewStatus: interview.status, interviewerProfileId: interview.interviewer, scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "", notes: interview.notes, result: interview.result })}
+              >
+                Save interview record
+              </button>
+              <span className={interviewPassed ? "is-ready" : ""}>
+                {interviewNeedsSchedule
+                  ? "Enter the interview date and time before saving Scheduled."
+                  : interviewNeedsFinalDetails
+                    ? "Pass / Fail requires an interviewer and result summary."
+                    : interviewPassed
+                      ? "✓ Passed interview saved — use Final Recruit appointment below."
+                      : "Final Recruit appointment remains locked until a Passed result is saved."}
+              </span>
+            </div>
+          ) : null}
         </section>
       ) : (
         !isDenied ? <section className="portal-panel recruitment-interview-locked"><div><p>Interview stage</p><h2>Locked until the application is accepted.</h2><span>The applicant must first pass the written Command screening. An application denial ends the process without an interview.</span></div></section> : null
@@ -209,11 +227,6 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
         <div className="portal-panel-heading"><div><p>Internal notes</p><h2>Chronological notes</h2></div></div>
         <form onSubmit={noteSubmit}><label className="recruitment-wide-label">Add an internal note<textarea required rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label><button className="portal-button" disabled={busy}>Add note</button></form>
         <div className="recruitment-notes">{notes.map((item: any) => <article key={item.id}><strong>{names[item.author_profile_id] ?? "Command"}</strong><span>{new Date(item.created_at).toLocaleString()}</span><p>{item.content}</p></article>)}{!notes.length ? <div className="portal-empty-state"><strong>No internal notes recorded.</strong></div> : null}</div>
-      </section>
-
-      <section className="portal-panel">
-        <div className="portal-panel-heading"><div><p>Submitted candidate packet</p><h2>Application answers</h2></div></div>
-        {Object.entries(grouped).map(([section, questions]: any) => <div className="recruitment-answer-section" key={section}><h3>{section}</h3>{questions.map(([key, label]: any) => <article key={key}><strong>{label}</strong><p>{String(application[key] ?? "Not provided")}</p></article>)}</div>)}
       </section>
 
       <section className="portal-panel">
