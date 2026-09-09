@@ -36,6 +36,8 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [applicationNumber, setApplicationNumber] = useState<string | null>(null);
+  const [trackingToken, setTrackingToken] = useState<string | null>(null);
+  const [trackingCopied, setTrackingCopied] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [signedAt, setSignedAt] = useState<string | null>(null);
 
@@ -124,6 +126,17 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
     setSignedAt(null);
   }
 
+  async function copyTrackingLink() {
+    if (!trackingToken) return;
+    const trackingUrl = `${window.location.origin}/join/application/status/${encodeURIComponent(trackingToken)}`;
+    try {
+      await navigator.clipboard.writeText(trackingUrl);
+      setTrackingCopied(true);
+    } catch {
+      setTrackingCopied(false);
+    }
+  }
+
   async function submit(event: FormEvent) {
     event.preventDefault();
     if (!validateCurrentStep()) return;
@@ -143,6 +156,7 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "The application could not be submitted.");
       setApplicationNumber(String(data.application_number));
+      setTrackingToken(typeof data.tracking_token === "string" ? data.tracking_token : null);
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "The application could not be submitted.");
@@ -152,6 +166,7 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
   }
 
   if (applicationNumber) {
+    const trackingHref = trackingToken ? `/join/application/status/${encodeURIComponent(trackingToken)}` : null;
     return (
       <section className="application-success">
         <div className="application-success__seal"><img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" /></div>
@@ -165,8 +180,15 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
           <article><span>03</span><div><strong>Interview</strong><small>Recruitment staff will contact you on Discord to schedule it.</small></div></article>
           <article><span>04</span><div><strong>Recruit Onboarding</strong><small>A passed interview clears you for the hiring handoff.</small></div></article>
         </div>
-        <div className="application-success__notice"><strong>What happens next?</strong><p>If Command accepts your application, LSCSO staff will contact you through Discord to arrange your interview. Application acceptance is not the same as being hired. If the application is denied, no interview is scheduled.</p></div>
-        <p className="application-success__keep">Keep <b>APP-{applicationNumber.padStart(4, "0")}</b> for your records.</p>
+        <div className="application-success__notice"><strong>Private applicant status page</strong><p>Your tracking link is the key to your application status. Save or bookmark it now. Anyone with the private link can view the candidate-facing status, so do not post it publicly.</p></div>
+        {trackingHref ? (
+          <div className="button-row">
+            <a className="button button--dark" href={trackingHref}>Track My Application</a>
+            <button className="button button--outline" type="button" onClick={() => void copyTrackingLink()}>{trackingCopied ? "Tracking Link Copied" : "Copy Private Tracking Link"}</button>
+          </div>
+        ) : null}
+        <div className="application-success__notice"><strong>What happens next?</strong><p>If Command accepts your application, LSCSO staff will contact you through Discord to arrange your interview. Application acceptance is not the same as being hired. Your private status page will show the current stage, last update, and any applicant-facing message from Recruitment.</p></div>
+        <p className="application-success__keep">Keep <b>APP-{applicationNumber.padStart(4, "0")}</b> and your private tracking link for your records.</p>
       </section>
     );
   }
