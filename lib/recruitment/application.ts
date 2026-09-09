@@ -1,4 +1,4 @@
-export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Interview", "Denied", "Hired", "Withdrawn"] as const;
+export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Denied", "Hired", "Withdrawn"] as const;
 export const APPLICATION_REVIEW_STATUSES = ["Submitted", "Under Review"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;
 
@@ -31,7 +31,7 @@ export function applicationLabel(applicationNumber: number | string) {
 export function applicationStatusLabel(status: string) {
   switch (status) {
     case "Accepted": return "Application Accepted";
-    case "Interview": return "Interview Stage";
+    case "Interview": return "Legacy Interview Stage";
     case "Hired": return "Hired · Recruit";
     default: return status;
   }
@@ -45,12 +45,12 @@ export function applicationNextAction(status: string, interviewStatus?: string |
   if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
   if (status === "Accepted") {
     if (interviewStatus === "Passed") return "Interview passed — applicant is cleared for the Recruit hire handoff.";
-    if (interviewStatus === "Failed") return "Interview failed — document the outcome and deny or otherwise close the application.";
+    if (interviewStatus === "Failed") return "Interview failed — document the outcome; the applicant is not eligible for the Recruit hire handoff.";
     if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
-    if (interviewStatus === "No Show") return "Applicant did not attend — reschedule or close the application.";
+    if (interviewStatus === "No Show") return "Applicant did not attend — reschedule the interview or document the no-show outcome.";
     if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail before hiring.";
     return "Contact the applicant on Discord and schedule the required interview.";
   }
-  if (status === "Interview") return "Complete the interview record before any Recruit hire handoff.";
+  if (status === "Interview") return "Legacy record — complete the interview record before any Recruit hire handoff.";
   return "Continue the documented recruitment workflow.";
 }
