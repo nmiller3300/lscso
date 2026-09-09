@@ -51,7 +51,7 @@ export default async function FullRosterPage() {
       .is("revoked_at", null),
     supabase
       .from("leave_requests")
-      .select("profile_id,leave_type,status,starts_on,expected_return_on")
+      .select("id,profile_id,leave_type,status,starts_on,expected_return_on")
       .eq("status", "Approved")
       .order("starts_on", { ascending: false }),
     supabase
@@ -83,10 +83,25 @@ export default async function FullRosterPage() {
   }
 
   const currentLeave = new Map<string, any>();
+  const managedLeave = new Map<string, any>();
   const today = new Date().toISOString().slice(0, 10);
   for (const row of leave ?? []) {
-    if (currentLeave.has(row.profile_id)) continue;
-    if (row.starts_on <= today && row.expected_return_on >= today) currentLeave.set(row.profile_id, row);
+    const rowIsCurrent = row.starts_on <= today && row.expected_return_on >= today;
+    if (rowIsCurrent && !currentLeave.has(row.profile_id)) currentLeave.set(row.profile_id, row);
+    if (row.expected_return_on < today) continue;
+
+    const existing = managedLeave.get(row.profile_id);
+    if (!existing) {
+      managedLeave.set(row.profile_id, row);
+      continue;
+    }
+
+    const existingIsCurrent = existing.starts_on <= today && existing.expected_return_on >= today;
+    if (rowIsCurrent && !existingIsCurrent) {
+      managedLeave.set(row.profile_id, row);
+    } else if (!rowIsCurrent && !existingIsCurrent && row.starts_on < existing.starts_on) {
+      managedLeave.set(row.profile_id, row);
+    }
   }
 
   const latestCareer = new Map<string, any>();
@@ -117,13 +132,22 @@ export default async function FullRosterPage() {
 
   const changeablePersonnel = (profiles ?? [])
     .filter((member:any) => member.id !== profile.id)
-    .map((member:any) => ({
-      profileId: member.id,
-      personnelId: member.personnel_id,
-      displayName: member.display_name,
-      rank: member.rank,
-      status: member.status,
-    }));
+    .map((member:any) => {
+      const leaveRow = managedLeave.get(member.id);
+      return {
+        profileId: member.id,
+        personnelId: member.personnel_id,
+        displayName: member.display_name,
+        rank: member.rank,
+        status: member.status,
+        activeLeave: leaveRow ? {
+          id: leaveRow.id,
+          leaveType: leaveRow.leave_type,
+          startsOn: leaveRow.starts_on,
+          expectedReturnOn: leaveRow.expected_return_on,
+        } : null,
+      };
+    });
 
   const deactivatedPersonnel = (profiles ?? [])
     .filter((member:any) => member.status === "Deactivated" && !member.is_test_account)
