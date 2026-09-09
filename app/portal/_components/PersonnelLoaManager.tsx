@@ -19,6 +19,17 @@ type Props = {
 };
 
 const leaveTypes = ["Personal", "Medical", "Military", "Family", "Administrative", "Other"];
+const OPEN_ENDED_RETURN = "9999-12-31";
+
+function formatDate(value: string) {
+  return new Date(`${value}T12:00:00`).toLocaleDateString();
+}
+
+function leaveWindow(activeLeave: NonNullable<ActiveLeave>) {
+  return activeLeave.expectedReturnOn === OPEN_ENDED_RETURN
+    ? `${formatDate(activeLeave.startsOn)} · open-ended until manually ended`
+    : `${formatDate(activeLeave.startsOn)} through ${formatDate(activeLeave.expectedReturnOn)}`;
+}
 
 export function PersonnelLoaManager({ profileId, personnelId, displayName, activeLeave }: Props) {
   const router = useRouter();
@@ -35,11 +46,11 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
     if (pending) return;
     setError("");
     setNotice("");
-    if (!startsOn || !expectedReturnOn) {
-      setError("Enter both the LOA start date and expected return date.");
+    if (!startsOn) {
+      setError("Enter the LOA start date.");
       return;
     }
-    if (expectedReturnOn < startsOn) {
+    if (expectedReturnOn && expectedReturnOn < startsOn) {
       setError("Expected return date must be on or after the LOA start date.");
       return;
     }
@@ -49,7 +60,7 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       p_profile_id: profileId,
       p_leave_type: leaveType,
       p_starts_on: startsOn,
-      p_expected_return_on: expectedReturnOn,
+      p_expected_return_on: expectedReturnOn || null,
       p_notes: notes.trim() || null,
     });
     setPending(false);
@@ -59,8 +70,11 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       return;
     }
 
-    setNotice(`${displayName} now has an approved LOA record. The roster will show LOA automatically while the approved dates are active.`);
+    setNotice(expectedReturnOn
+      ? `${displayName} now has an approved LOA record through ${formatDate(expectedReturnOn)}.`
+      : `${displayName} now has an open-ended approved LOA and will remain LOA until you manually end it.`);
     setNotes("");
+    setExpectedReturnOn("");
     router.refresh();
   }
 
@@ -92,19 +106,19 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
         <div><p>Personnel administration</p><h2>Leave of Absence</h2></div>
         <span>{personnelId}</span>
       </div>
-      <p className="personnel-admin-control__intro">Record an approved LOA directly for this member. During the approved dates, the website and roster automatically display the member as LOA without changing their underlying service status.</p>
+      <p className="personnel-admin-control__intro">Record an approved LOA directly for this member. The expected return date is optional; leave it blank for an open-ended LOA that stays active until Command manually ends it.</p>
 
       {activeLeave ? (
         <div className="portal-form-success" role="status">
           <strong>Approved LOA on file</strong>
-          <span>{activeLeave.leaveType} · {new Date(`${activeLeave.startsOn}T12:00:00`).toLocaleDateString()} through {new Date(`${activeLeave.expectedReturnOn}T12:00:00`).toLocaleDateString()}</span>
+          <span>{activeLeave.leaveType} · {leaveWindow(activeLeave)}</span>
         </div>
       ) : null}
 
       <div className="personnel-admin-fields personnel-admin-fields--identity">
         <label><span>Leave type</span><select value={leaveType} onChange={(event) => setLeaveType(event.target.value)} disabled={pending}>{leaveTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label><span>Starts on</span><input type="date" value={startsOn} onChange={(event) => setStartsOn(event.target.value)} disabled={pending} /></label>
-        <label><span>Expected return</span><input type="date" value={expectedReturnOn} min={startsOn || undefined} onChange={(event) => setExpectedReturnOn(event.target.value)} disabled={pending} /></label>
+        <label><span>Expected return <small style={{ opacity: .65 }}>(optional)</small></span><input type="date" value={expectedReturnOn} min={startsOn || undefined} onChange={(event) => setExpectedReturnOn(event.target.value)} disabled={pending} /></label>
       </div>
 
       <label className="portal-call-sign-field">
@@ -113,10 +127,10 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       </label>
 
       <div className="personnel-admin-actions">
-        <span>{activeLeave ? "Current / upcoming approved LOA detected" : "No current or upcoming approved LOA"}</span>
+        <span>{activeLeave ? "Current / upcoming approved LOA detected" : expectedReturnOn ? "LOA will use the selected expected return date" : "No return date set · LOA will stay active until ended"}</span>
         <div className="portal-control-actions">
           {activeLeave ? <button className="portal-button portal-button--danger" disabled={pending} onClick={() => void endLeave()} type="button">{pending ? "Saving…" : "End / Cancel LOA"}</button> : null}
-          <button className="portal-button portal-button--primary" disabled={pending || !expectedReturnOn} onClick={() => void recordLeave()} type="button">{pending ? "Saving…" : "Record LOA"}</button>
+          <button className="portal-button portal-button--primary" disabled={pending || !startsOn} onClick={() => void recordLeave()} type="button">{pending ? "Saving…" : "Record LOA"}</button>
         </div>
       </div>
 
