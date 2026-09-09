@@ -14,11 +14,12 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
   const { id } = await params;
   const supabase = await createClient() as any;
-  const [{ data: application }, { data: people }, { data: notes }, { data: history }] = await Promise.all([
+  const [{ data: application }, { data: people }, { data: notes }, { data: history }, { data: applicantMessages }] = await Promise.all([
     supabase.from("recruitment_applications").select("*").eq("id", id).maybeSingle(),
     supabase.from("personnel_profiles").select("id,display_name,access_tier,status").in("access_tier", ["Executive", "Command"]).in("status", ["Active", "Acting"]).order("display_name"),
     supabase.from("recruitment_application_notes").select("*").eq("application_id", id).order("created_at", { ascending: false }),
     supabase.from("recruitment_application_history").select("*").eq("application_id", id).order("created_at", { ascending: false }),
+    supabase.from("recruitment_applicant_messages").select("id,application_id,author_profile_id,content,created_at").eq("application_id", id).order("created_at", { ascending: true }),
   ]);
   if (!application) notFound();
   const reviewerList = (people ?? []).map((person: any) => ({ id: person.id, name: person.display_name }));
@@ -37,9 +38,8 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
       <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
       <ApplicantStatusMessage
         applicationId={application.id}
-        initialMessage={application.applicant_status_message}
-        updatedAt={application.applicant_status_message_updated_at}
-        updatedBy={names[application.applicant_status_message_updated_by_profile_id] ?? null}
+        messages={applicantMessages ?? []}
+        names={names}
       />
       <ApplicationDynamicAnswers application={application} />
     </PortalShell>
