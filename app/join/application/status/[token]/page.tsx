@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { LocalDateTime } from "./LocalDateTime";
@@ -181,7 +182,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
       <main className="application-status-page">
         <section className="application-status-hero">
           <div className="site-shell application-status-invalid">
-            <img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" />
+            <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={140} height={140} priority />
             <p>LSCSO Recruitment</p>
             <h1>Private status link unavailable.</h1>
             <span>This tracking link is invalid, incomplete, or no longer associated with an active candidate record. For privacy, application details are not available without the original private tracking link.</span>
@@ -207,7 +208,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
               <p className="application-status-intro">{message}</p>
             </div>
             <aside className="application-status-seal">
-              <img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" />
+              <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={145} height={145} priority />
               <span>Private Candidate Record</span>
               <strong>{applicationLabel(record.application_number)}</strong>
               <small>{record.applicant_name || "LSCSO Applicant"}</small>
