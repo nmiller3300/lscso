@@ -25,7 +25,7 @@ export function DeleteApplicationButton({
     setBusy(true);
     setError("");
     try {
-      const response = await fetch(`/api/portal/applications/${applicationId}`, {
+      const response = await fetch(`/api/portal/applications/${applicationId}/delete`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ confirm: confirmation.trim() }),
