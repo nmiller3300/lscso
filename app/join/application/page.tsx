@@ -46,7 +46,7 @@ export default async function ApplicationPage() {
               <h1>Earn your place in the Sheriff&apos;s Office.</h1>
               <p className="intro-serif">This is your formal candidate packet for the Los Santos County Sheriff&apos;s Office. Take your time, answer in your own words, and give Command a clear picture of your judgment, integrity, and roleplay standards.</p>
               <div className="application-page__metrics" aria-label="Application overview">
-                <article><strong>18</strong><span>Application Questions</span></article>
+                <article><strong>17</strong><span>Application Questions</span></article>
                 <article><strong>07</strong><span>Guided Sections</span></article>
                 <article><strong>01</strong><span>Required Interview</span></article>
               </div>
