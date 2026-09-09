@@ -6,6 +6,7 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
 import { ApplicationReview } from "./ApplicationReview";
 import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
+import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
@@ -26,6 +27,12 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
     <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={applicationLabel(application.application_number)} description="Review the submitted application and record each Command action.">
       <div className="portal-page-actions"><Link href="/portal/command/applications" className="portal-button">Back to applications</Link></div>
       <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
+      <ApplicantStatusMessage
+        applicationId={application.id}
+        initialMessage={application.applicant_status_message}
+        updatedAt={application.applicant_status_message_updated_at}
+        updatedBy={names[application.applicant_status_message_updated_by_profile_id] ?? null}
+      />
       <ApplicationDynamicAnswers application={application} />
     </PortalShell>
   );
