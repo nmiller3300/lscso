@@ -105,7 +105,19 @@ function candidateView(record: ApplicantStatusRecord): CandidateView {
       };
     }
 
-    if (["Completed", "Passed", "Failed"].includes(record.interview_status)) {
+    if (record.interview_status === "Failed") {
+      return {
+        title: "Interview Not Passed",
+        eyebrow: "Interview result recorded",
+        message: "Your required interview has been completed and was not passed. Your application will not advance to Recruit onboarding.",
+        nextAction: "No further action is required unless LSCSO Recruitment contacts you with additional information.",
+        currentStep: 3,
+        terminal: true,
+        tone: "closed",
+      };
+    }
+
+    if (["Completed", "Passed"].includes(record.interview_status)) {
       return {
         title: "Interview Completed — Final Review",
         eyebrow: "Recruitment review in progress",
