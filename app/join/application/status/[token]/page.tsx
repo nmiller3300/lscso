@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LocalDateTime } from "./LocalDateTime";
 import "../../application.css";
 import "./status.css";
+import "./communications.css";
 
 export const metadata: Metadata = {
   title: "Application Status",
@@ -26,6 +27,12 @@ type ApplicantStatusRecord = {
   interview_scheduled_at: string | null;
   applicant_status_message: string | null;
   hired: boolean;
+};
+
+type ApplicantMessage = {
+  id: string;
+  content: string;
+  sent_at: string;
 };
 
 type CandidateView = {
@@ -193,8 +200,11 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
     );
   }
 
+  const { data: messageData } = await supabase.rpc("get_recruitment_application_messages", {
+    p_tracking_token_hash: tokenHash,
+  });
+  const applicantMessages = (Array.isArray(messageData) ? messageData : []) as ApplicantMessage[];
   const view = candidateView(record);
-  const message = record.applicant_status_message?.trim() || view.message;
 
   return (
     <main className="application-status-page">
@@ -205,7 +215,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
               <p className="section-kicker">Careers & Recruitment · Candidate Status</p>
               <span className={`application-status-badge application-status-badge--${view.tone}`}>{view.eyebrow}</span>
               <h1>{view.title}</h1>
-              <p className="application-status-intro">{message}</p>
+              <p className="application-status-intro">{view.message}</p>
             </div>
             <aside className="application-status-seal">
               <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={145} height={145} priority />
@@ -220,6 +230,29 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
             <article><span>Last updated</span><strong><LocalDateTime value={record.updated_at} /></strong></article>
             <article><span>Application submitted</span><strong><LocalDateTime value={record.submitted_at} /></strong></article>
           </section>
+
+          {applicantMessages.length ? (
+            <section className="application-status-communications" aria-label="Recruitment communications">
+              <div className="application-status-communications__heading">
+                <div>
+                  <span>Recruitment communications</span>
+                  <h2>Messages from LSCSO Recruitment</h2>
+                </div>
+                <strong>{applicantMessages.length} {applicantMessages.length === 1 ? "message" : "messages"}</strong>
+              </div>
+              <div className="application-status-communications__history">
+                {applicantMessages.map((item) => (
+                  <article key={item.id}>
+                    <div>
+                      <strong>LSCSO Recruitment</strong>
+                      <span><LocalDateTime value={item.sent_at} /></span>
+                    </div>
+                    <p>{item.content}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <section className="application-status-next-action">
             <span>Your next action</span>
