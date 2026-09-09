@@ -128,13 +128,26 @@ export function ApplicationEditor({ initialQuestions }: { initialQuestions: Recr
   async function move(index: number, direction: -1 | 1) {
     const target = index + direction;
     if (target < 0 || target >= questions.length) return;
+    const previous = [...questions];
     const next = [...questions];
     [next[index], next[target]] = [next[target], next[index]];
     const optimistic = next.map((question, questionIndex) => ({ ...question, sortOrder: (questionIndex + 1) * 10 }));
     setQuestions(optimistic); setBusy(true); setError("");
     try { await api({ action: "reorder", ids: optimistic.map((question) => question.id) }); }
-    catch (caught) { setQuestions(questions); setError(caught instanceof Error ? caught.message : "The question order could not be saved."); }
+    catch (caught) { setQuestions(previous); setError(caught instanceof Error ? caught.message : "The question order could not be saved."); }
     finally { setBusy(false); }
+  }
+
+  function updateSectionTitle(value: string) {
+    if (!draft) return;
+    const existing = questions.find((question) => question.sectionTitle === value);
+    setDraft({
+      ...draft,
+      sectionTitle: value,
+      sectionShortTitle: existing?.sectionShortTitle ?? draft.sectionShortTitle,
+      sectionEyebrow: existing?.sectionEyebrow ?? draft.sectionEyebrow,
+      sectionDescription: existing?.sectionDescription ?? draft.sectionDescription,
+    });
   }
 
   return (
@@ -167,8 +180,7 @@ export function ApplicationEditor({ initialQuestions }: { initialQuestions: Recr
 
       <PortalDialog open={Boolean(draft)} onClose={() => { if (!busy) setDraft(null); }} eyebrow={draft?.id ? "Edit application question" : "Add application question"} title={draft?.id ? "Update question" : "Create a new question"} description="Changes publish to future applicant packets. Submitted applications are not rewritten." dismissOnBackdrop={!busy} footer={<><button className="portal-button portal-button--secondary" type="button" disabled={busy} onClick={() => setDraft(null)}>Cancel</button><button className="portal-button portal-button--primary" type="button" disabled={busy || !draft?.prompt.trim() || !draft?.sectionTitle.trim()} onClick={() => void saveDraft()}>{busy ? "Saving…" : draft?.id ? "Save changes" : "Add question"}</button></>}>
         {draft ? <div className={styles.form}>
-          <label>Section<select value={draft.sectionTitle} onChange={(event) => { const section = questions.find((question) => question.sectionTitle === event.target.value); setDraft({ ...draft, sectionTitle: event.target.value, sectionShortTitle: section?.sectionShortTitle ?? draft.sectionShortTitle, sectionEyebrow: section?.sectionEyebrow ?? draft.sectionEyebrow, sectionDescription: section?.sectionDescription ?? draft.sectionDescription }); }}><option value={draft.sectionTitle}>{draft.sectionTitle}</option>{existingSections.filter((section) => section !== draft.sectionTitle).map((section) => <option key={section}>{section}</option>)}<option value="__new__">+ New section</option></select></label>
-          {draft.sectionTitle === "__new__" ? <label>New section name<input value="" autoFocus onChange={(event) => setDraft({ ...draft, sectionTitle: event.target.value })} placeholder="Example: Community Conduct" /></label> : null}
+          <label>Section<input list="recruitment-application-sections" value={draft.sectionTitle} onChange={(event) => updateSectionTitle(event.target.value)} placeholder="Type or choose a section" /><datalist id="recruitment-application-sections">{existingSections.map((section) => <option value={section} key={section} />)}</datalist></label>
           <div className={styles.two}><label>Sidebar title<input value={draft.sectionShortTitle} onChange={(event) => setDraft({ ...draft, sectionShortTitle: event.target.value })} placeholder="Short section name" /></label><label>Section eyebrow<input value={draft.sectionEyebrow} onChange={(event) => setDraft({ ...draft, sectionEyebrow: event.target.value })} placeholder="Example: Candidate Judgment" /></label></div>
           <label>Section description<textarea rows={2} value={draft.sectionDescription} onChange={(event) => setDraft({ ...draft, sectionDescription: event.target.value })} /></label>
           <label>Question<textarea rows={3} value={draft.prompt} onChange={(event) => setDraft({ ...draft, prompt: event.target.value })} placeholder="Enter the question applicants will see…" /></label>
