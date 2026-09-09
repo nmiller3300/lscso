@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
@@ -11,7 +12,7 @@ export default async function CommandApplicationsPage() {
 
   const supabase = await createClient() as any;
   const [applicationsResult, peopleResult, settingsResult] = await Promise.all([
-    supabase.from("recruitment_applications").select("id,application_number,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id").order("submitted_at", { ascending: false }).limit(250),
+    supabase.from("recruitment_applications").select("id,application_number,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id,interview_status").order("submitted_at", { ascending: false }).limit(250),
     supabase.from("personnel_profiles").select("id,display_name,rank,access_tier,status").in("access_tier", ["Executive", "Command"]).in("status", ["Active", "Acting"]).order("display_name"),
     supabase.from("recruitment_settings").select("applications_open,updated_at,updated_by_profile_id").eq("id", "applications").maybeSingle(),
   ]);
@@ -22,9 +23,13 @@ export default async function CommandApplicationsPage() {
   const fullNames = new Map<string, string>(people.map((person: any): [string, string] => [person.id, `${person.rank} ${person.display_name}`]));
   const settings = settingsResult.data;
   const counts = (status: string) => applications.filter((item: any) => item.status === status).length;
+  const activeInterviews = applications.filter((item: any) => item.status === "Accepted" && !["Passed", "Failed"].includes(item.interview_status)).length;
+  const canEditApplication = ["Sheriff", "Undersheriff"].includes(profile.rank);
 
   return (
     <PortalShell active="applications" eyebrow="Personnel · Recruitment" title="Recruitment Applications" description="Control public application availability, review applicants, manage recruitment workflow, and make documented hiring decisions.">
+      {canEditApplication ? <div className="portal-page-actions"><Link className="portal-button portal-button--primary" href="/portal/command/applications/editor">Edit application form</Link></div> : null}
+
       <ApplicationAvailabilityControl
         initialIsOpen={settings?.applications_open === true}
         initialUpdatedAt={settings?.updated_at ?? null}
@@ -34,9 +39,9 @@ export default async function CommandApplicationsPage() {
       <div className="deputy-summary-grid recruitment-metrics">
         <article><span>New applications</span><strong>{String(counts("Submitted")).padStart(2, "0")}</strong><small>Awaiting initial review</small></article>
         <article><span>Under review</span><strong>{String(counts("Under Review")).padStart(2, "0")}</strong><small>Active review queue</small></article>
-        <article><span>Interviews</span><strong>{String(counts("Interview")).padStart(2, "0")}</strong><small>Interview-stage applicants</small></article>
-        <article><span>Accepted</span><strong>{String(counts("Accepted")).padStart(2, "0")}</strong><small>Recorded decisions</small></article>
-        <article><span>Denied</span><strong>{String(counts("Denied")).padStart(2, "0")}</strong><small>Recorded decisions</small></article>
+        <article><span>Interviews</span><strong>{String(activeInterviews).padStart(2, "0")}</strong><small>Accepted applicants in interview workflow</small></article>
+        <article><span>Accepted</span><strong>{String(counts("Accepted")).padStart(2, "0")}</strong><small>Applications accepted for interview</small></article>
+        <article><span>Denied</span><strong>{String(counts("Denied")).padStart(2, "0")}</strong><small>Denied with documented reason</small></article>
       </div>
 
       <ApplicationsDirectory
