@@ -1,0 +1,9 @@
+revoke update on table public.recruitment_applications from authenticated;
+revoke insert on table public.recruitment_application_notes from authenticated;
+revoke insert on table public.recruitment_application_history from authenticated;
+revoke insert on table public.recruitment_applicant_messages from authenticated;
+
+drop policy if exists recruitment_applications_command_update on public.recruitment_applications;
+drop policy if exists recruitment_application_notes_command_insert on public.recruitment_application_notes;
+drop policy if exists recruitment_application_history_command_insert on public.recruitment_application_history;
+drop policy if exists recruitment_applicant_messages_command_insert on public.recruitment_applicant_messages;
