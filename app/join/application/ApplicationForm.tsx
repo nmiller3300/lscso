@@ -1,7 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { FormEvent, useMemo, useState } from "react";
-import { APPLICATION_CERTIFICATION_TEXT, type RecruitmentApplicationQuestion } from "@/lib/recruitment/application";
+import {
+  APPLICATION_AI_ACKNOWLEDGEMENT_TEXT,
+  APPLICATION_AI_POLICY_TEXT,
+  APPLICATION_CERTIFICATION_TEXT,
+  type RecruitmentApplicationQuestion,
+} from "@/lib/recruitment/application";
 
 type ApplicationSection = {
   title: string;
@@ -40,6 +46,8 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
   const [trackingCopied, setTrackingCopied] = useState(false);
   const [signatureName, setSignatureName] = useState("");
   const [signedAt, setSignedAt] = useState<string | null>(null);
+  const [aiPolicyAccepted, setAiPolicyAccepted] = useState(false);
+  const [aiGatePassed, setAiGatePassed] = useState(false);
 
   const totalSteps = sections.length + 1;
   const signed = Boolean(signatureName && signedAt);
@@ -139,6 +147,10 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!aiGatePassed || !aiPolicyAccepted) {
+      setError("You must acknowledge the LSCSO AI Use Policy before submitting the application.");
+      return;
+    }
     if (!validateCurrentStep()) return;
     setSubmitting(true);
     setError("");
@@ -151,6 +163,7 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
           applicant_certification: true,
           signature_confirmed: true,
           applicant_signature_name: signatureName,
+          ai_policy_acknowledged: true,
         }),
       });
       const data = await response.json();
@@ -169,7 +182,9 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
     const trackingHref = trackingToken ? `/join/application/status/${encodeURIComponent(trackingToken)}` : null;
     return (
       <section className="application-success">
-        <div className="application-success__seal"><img src="/images/lscso-portal-patch.webp" alt="Los Santos County Sheriff's Office patch" /></div>
+        <div className="application-success__seal">
+          <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={160} height={160} />
+        </div>
         <p className="application-success__eyebrow">Application transmitted</p>
         <h2>Your candidate packet is in Command&apos;s queue.</h2>
         <p className="application-success__lead">Your signed application was received successfully and assigned a permanent application number.</p>
@@ -193,11 +208,49 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
     );
   }
 
+  if (!aiGatePassed) {
+    return (
+      <section className="application-ai-gate" aria-labelledby="application-ai-policy-title">
+        <header className="application-ai-gate__header">
+          <div className="application-ai-gate__seal">
+            <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={132} height={132} priority />
+          </div>
+          <div>
+            <p>Mandatory Applicant Integrity Notice</p>
+            <h2 id="application-ai-policy-title">AI assistance is prohibited.</h2>
+            <span>You must read and accept this policy before the Deputy Candidate Application will open.</span>
+          </div>
+        </header>
+
+        <div className="application-ai-gate__warning">
+          <strong>Any detected use of AI will result in immediate denial.</strong>
+          <p>{APPLICATION_AI_POLICY_TEXT}</p>
+        </div>
+
+        <div className="application-ai-gate__rules" aria-label="AI use policy summary">
+          <article><span>01</span><div><strong>Write your own answers</strong><p>Every substantive response must reflect your own judgment, experience, and writing.</p></div></article>
+          <article><span>02</span><div><strong>No AI drafting or rewriting</strong><p>Do not use AI to generate, rewrite, expand, polish, paraphrase, or improve application responses.</p></div></article>
+          <article><span>03</span><div><strong>Immediate denial</strong><p>If LSCSO determines prohibited AI assistance was used, the application will be denied immediately.</p></div></article>
+        </div>
+
+        <label className={`application-ai-gate__acknowledgement ${aiPolicyAccepted ? "is-accepted" : ""}`}>
+          <input type="checkbox" checked={aiPolicyAccepted} onChange={(event) => setAiPolicyAccepted(event.target.checked)} />
+          <span><strong>I understand and agree.</strong><small>{APPLICATION_AI_ACKNOWLEDGEMENT_TEXT}</small></span>
+        </label>
+
+        <div className="application-ai-gate__footer">
+          <span>Your acknowledgement will be retained with your submitted candidate record.</span>
+          <button className="button button--dark" type="button" disabled={!aiPolicyAccepted} onClick={() => { setAiGatePassed(true); setError(""); setTimeout(scrollToWorkspace, 0); }}>I Understand — Begin Application</button>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div className="application-workspace">
       <aside className="application-briefing" aria-label="Application briefing">
         <div className="application-briefing__identity">
-          <img src="/images/lscso-portal-patch.webp" alt="" aria-hidden="true" />
+          <Image src="/images/lscso-patch-color.png" alt="" aria-hidden="true" width={56} height={56} />
           <div><span>LSCSO Recruitment</span><strong>Deputy Candidate Packet</strong></div>
         </div>
         <div className="application-briefing__current">
@@ -280,6 +333,12 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
               <div><p>Final Candidate Certification</p><h2 id="application-certification-title">Review, certify, and sign.</h2><span>Your electronic signature is retained with the submitted application as part of the permanent recruitment record.</span></div>
             </header>
 
+            <div className="application-ai-reminder" role="note">
+              <span>AI Use Policy</span>
+              <strong>Policy acknowledged · AI assistance prohibited</strong>
+              <p>By submitting this packet, you reaffirm that all substantive application responses were completed without prohibited AI assistance. Detected use will result in immediate denial.</p>
+            </div>
+
             <div className="application-screening-notice application-screening-notice--final" role="note">
               <div className="application-screening-notice__icon" aria-hidden="true">✓</div>
               <div><span>Applicant Screening Notice</span><strong>Fingerprinting and testing requirements</strong><p>LSCSO candidates are subject to fingerprinting, blood testing, drug testing, and breathalyzer testing as part of the department&apos;s background and suitability screening process.</p></div>
@@ -292,7 +351,7 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
               {signed ? <button className="application-signature__clear" type="button" onClick={clearSignature}>Clear signature</button> : <button className="application-signature__button" type="button" onClick={signApplication}>Apply Electronic Signature</button>}
             </div>
 
-            <p className="application-certification__notice">By applying your signature, you acknowledge the certification and applicant-screening notice above and authorize LSCSO to retain the signature with your application.</p>
+            <p className="application-certification__notice">By applying your signature, you acknowledge the certification, AI Use Policy, and applicant-screening notice above and authorize LSCSO to retain the signature and acknowledgements with your application.</p>
             {error ? <p className="application-error" role="alert">{error}</p> : null}
             <div className="application-navigation">
               <button className="button application-navigation__back" type="button" onClick={previousStep}>← Previous Section</button>
