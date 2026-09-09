@@ -51,7 +51,7 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
       setError(rpcError.message);
       return;
     }
-    setNotice(`${displayName} updated. FiveM/QBox synchronization is queued automatically when a linked character exists.`);
+    setNotice(`${displayName} updated in the LSCSO personnel system.`);
     router.refresh();
   }
 
@@ -61,7 +61,7 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
         <div><p>Personnel management</p><h2>Rank & status</h2></div>
         <span>{personnelId}</span>
       </div>
-      <p className="personnel-admin-control__intro">Change the member&apos;s official rank or service status. Portal access and the linked LSCSO QBox job are synchronized from this roster record.</p>
+      <p className="personnel-admin-control__intro">Change the member&apos;s official website rank or service status. Portal access is derived from the roster rank. Game/computer synchronization is currently disabled.</p>
 
       <div className="personnel-admin-fields personnel-admin-fields--identity">
         <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
