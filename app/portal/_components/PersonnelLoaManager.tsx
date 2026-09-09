@@ -18,7 +18,7 @@ type Props = {
   activeLeave: ActiveLeave;
 };
 
-const leaveTypes = ["Personal", "Medical", "Military", "Family", "Paternity", "Administrative", "Other"];
+const leaveTypes = ["Personal", "Medical", "Military", "Family", "Paternity", "Maternity", "Administrative", "Other"];
 const OPEN_ENDED_RETURN = "9999-12-31";
 
 function formatDate(value: string) {
