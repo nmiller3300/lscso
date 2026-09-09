@@ -12,6 +12,17 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 type PageProps = { params: Promise<{ personnelId: string }> };
 const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
 const DELEGATION_MANAGERS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const OPEN_ENDED_RETURN = "9999-12-31";
+
+function formatDate(value: string) {
+  return new Date(`${value}T12:00:00`).toLocaleDateString();
+}
+
+function formatLeaveWindow(item: { starts_on: string; expected_return_on: string }) {
+  return item.expected_return_on === OPEN_ENDED_RETURN
+    ? `${formatDate(item.starts_on)} to Open-ended`
+    : `${formatDate(item.starts_on)} to ${formatDate(item.expected_return_on)}`;
+}
 
 export default async function PersonnelAdministrationPage({ params }: PageProps) {
   const profile = await getCurrentPortalProfile();
@@ -56,6 +67,11 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   const canManageDelegations = DELEGATION_MANAGERS.has(profile.rank) && profile.id !== member.id;
   const canGrantTemporaryCommand = ["Sheriff", "Undersheriff"].includes(profile.rank);
   const canManageAssignments = ["Executive", "Command"].includes(profile.access_tier);
+  const administrationDisplayStatus = member.status === "Suspended"
+    ? "Suspended"
+    : activeOrUpcomingLeave && activeOrUpcomingLeave.starts_on <= today
+      ? "LOA"
+      : member.status;
   const assignmentRows = (assignments.data ?? []).map((item: any) => {
     const unit = Array.isArray(item.organizational_units) ? item.organizational_units[0] : item.organizational_units;
     return { id: item.id, unitId: item.organizational_unit_id, unitName: unit?.name ?? "Unknown unit", unitType: unit?.unit_type ?? "Unit", assignmentType: item.assignment_type, startsAt: item.starts_at, notes: item.notes };
@@ -68,7 +84,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
       title={`${member.display_name} · Administration`}
       description="Administrative flags, leave, personnel requests, delegated authority, and controlled personnel changes."
     >
-      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={member.status} active="administration" />
+      <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={administrationDisplayStatus} active="administration" />
 
       <PersonnelAssignmentManager
         profileId={member.id}
@@ -143,7 +159,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>Leave</p><h2>Leave history</h2></div><span>{leave.data?.length ?? 0}</span></div>
           <div className="command-v2-mini-list">
-            {(leave.data ?? []).length ? (leave.data ?? []).map((item:any) => <div key={item.id}><strong>{item.leave_type} · RQ-{String(item.request_number).padStart(4, "0")}</strong><span>{item.status} · {new Date(`${item.starts_on}T12:00:00`).toLocaleDateString()} to {new Date(`${item.expected_return_on}T12:00:00`).toLocaleDateString()}</span></div>) : <p className="command-v2-compact-copy">No leave history.</p>}
+            {(leave.data ?? []).length ? (leave.data ?? []).map((item:any) => <div key={item.id}><strong>{item.leave_type} · RQ-{String(item.request_number).padStart(4, "0")}</strong><span>{item.status} · {formatLeaveWindow(item)}</span></div>) : <p className="command-v2-compact-copy">No leave history.</p>}
           </div>
         </section>
 
