@@ -32,10 +32,25 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
     <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Review the submitted application and record each Command action.">
       <div className="portal-page-actions">
         <Link href="/portal/command/applications" className="portal-button">Back to applications</Link>
-        {canDeleteApplication ? (
-          <DeleteApplicationButton applicationId={application.id} applicationNumber={label} applicantName={application.full_name} />
-        ) : null}
       </div>
+
+      {canDeleteApplication ? (
+        <section className="portal-panel recruitment-admin-cleanup">
+          <div className="portal-panel-heading">
+            <div>
+              <p>Administrative cleanup</p>
+              <h2>Test / invalid application cleanup</h2>
+            </div>
+            <span>Sheriff / Undersheriff</span>
+          </div>
+          <p>
+            You can safely test this application through Accepted and the interview stages, then permanently delete it afterward.
+            Deletion remains available until a Recruit/personnel record is actually created.
+          </p>
+          <DeleteApplicationButton applicationId={application.id} applicationNumber={label} applicantName={application.full_name} />
+        </section>
+      ) : null}
+
       <ApplicationReview application={application} reviewers={reviewerList} names={names} notes={notes ?? []} history={history ?? []} />
       <ApplicantStatusMessage
         applicationId={application.id}
