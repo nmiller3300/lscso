@@ -13,6 +13,7 @@ type PersonnelRecordPageProps = {
 };
 
 const ACTIVE_TRAINING_STATUSES = ["Not Started", "In Progress", "Needs Improvement"];
+const OPEN_ENDED_RETURN = "9999-12-31";
 
 function shortDate(value: string | null | undefined) {
   if (!value) return null;
@@ -102,6 +103,11 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
   const latestCareerRow = latestCareer.data?.[0];
   const probationLabel = probation.active ? `PROBATION · ${probation.daysRemaining}D` : null;
+  const leaveSummary = leaveRow
+    ? leaveRow.expected_return_on === OPEN_ENDED_RETURN
+      ? `${leaveRow.leave_type} · open-ended until manually ended`
+      : `${leaveRow.leave_type} through ${shortDate(leaveRow.expected_return_on)}`
+    : null;
 
   return (
     <PortalShell
@@ -134,7 +140,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
           </div>
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Operational status</p><h2>{displayStatus}{probation.active ? " · Probation" : ""}</h2></div></div>
-            <p className="command-v2-compact-copy">{leaveRow ? `${leaveRow.leave_type} through ${shortDate(leaveRow.expected_return_on)}${probation.active ? ` · Probation continues through ${shortDate(probation.endsAt)} (${probation.daysRemaining} days remaining)` : ""}` : probation.active ? `15-day probationary period ends ${shortDate(probation.endsAt)} · ${probation.daysRemaining} days remaining.` : "No current approved leave or probation marker changes this member's displayed operational status."}</p>
+            <p className="command-v2-compact-copy">{leaveSummary ? `${leaveSummary}${probation.active ? ` · Probation continues through ${shortDate(probation.endsAt)} (${probation.daysRemaining} days remaining)` : ""}` : probation.active ? `15-day probationary period ends ${shortDate(probation.endsAt)} · ${probation.daysRemaining} days remaining.` : "No current approved leave or probation marker changes this member's displayed operational status."}</p>
           </div>
         </div>
 
