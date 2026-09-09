@@ -24,6 +24,10 @@ export type RecruitmentApplicationQuestion = {
   locked: boolean;
 };
 
+export const APPLICATION_AI_POLICY_TEXT = "The use of generative artificial intelligence on this application is prohibited. Every substantive response must be written by the applicant without assistance from ChatGPT, Claude, Gemini, Copilot, AI writing, rewriting, paraphrasing, answer-generation, or similar tools. Using AI to draft, rewrite, expand, improve, or generate any application response is forbidden. Any detected use of AI will result in immediate denial of the application.";
+
+export const APPLICATION_AI_ACKNOWLEDGEMENT_TEXT = "I have read and understand the LSCSO AI Use Policy. I certify that I will complete this application without prohibited AI assistance and understand that any detected use of AI will result in immediate denial of my application.";
+
 export const APPLICATION_CERTIFICATION_TEXT = "Under penalty of perjury under the laws of the State of San Andreas, I certify that all information provided in this application is true, accurate, and complete to the best of my knowledge. I understand that any false, misleading, or intentionally omitted information may result in the denial or disqualification of my application.";
 
 // Legacy question map retained for older integrations and applications submitted before the form builder.
