@@ -51,10 +51,9 @@ export default async function TrainingWorkspacePage() {
       .order("expires_on", { ascending: true }),
     supabase
       .from("certifications")
-      .select("id,name,status,created_at,profile_id,personnel_profiles!certifications_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
+      .select("id,name,status,created_at,profile_id")
       .in("status", ["Requested", "Pending"])
-      .order("created_at", { ascending: false })
-      .limit(8),
+      .order("created_at", { ascending: false }),
   ]);
 
   const trainingRows = trainingResult.data ?? [];
@@ -84,15 +83,16 @@ export default async function TrainingWorkspacePage() {
   return (
     <PortalShell
       active="training"
-      eyebrow="Training"
-      title="Training"
-      description={canManageTraining ? "Department training, FTO assignment, progression, and qualification oversight." : "Your authorized FTO and training workspace."}
+      eyebrow="Training & FTO"
+      title="Training & FTO"
+      description={canManageTraining ? "Active trainees, FTO staffing, progress, and qualification readiness in one operational workspace." : "Your assigned trainees and current FTO responsibilities."}
+      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/certifications">Certification Center</Link>}
     >
       <div className="portal-metric-grid portal-training-metrics">
         <article className="portal-metric portal-metric--gold"><span>{canManageTraining ? "Active trainees" : "My active trainees"}</span><strong>{trainingRows.length}</strong><small>Current training records</small></article>
         <article className="portal-metric"><span>FTO authorized</span><strong>{trainers.length}</strong><small>Current Field Training Officer certifications</small></article>
         <article className={`portal-metric ${needsAttention ? "portal-metric--warning" : ""}`}><span>Needs attention</span><strong>{needsAttention}</strong><small>Training records requiring review</small></article>
-        <article className="portal-metric"><span>{canManageTraining ? "Unassigned trainees" : "Certification queue"}</span><strong>{canManageTraining ? unassignedTraining : pendingRows.length}</strong><small>{canManageTraining ? "No trainer assigned" : "Pending certification requests"}</small></article>
+        <article className="portal-metric"><span>{canManageTraining ? "Unassigned trainees" : "Expiring certs"}</span><strong>{canManageTraining ? unassignedTraining : expiringRows.length}</strong><small>{canManageTraining ? "No trainer assigned" : "Within 90 days"}</small></article>
       </div>
 
       <section className="portal-panel portal-training-board">
@@ -100,7 +100,7 @@ export default async function TrainingWorkspacePage() {
           <div><p>Training progression</p><h2>{canManageTraining ? "Active training board" : "My assigned trainees"}</h2></div>
           <span>{trainingRows.length}</span>
         </div>
-        <p className="command-v2-compact-copy">Current trainee assignments, trainers, phases, status, and progress from the shared personnel record.</p>
+        <p className="command-v2-compact-copy">Work the active training records here. Certification approvals stay in Approvals & Requests / Certification Center instead of being duplicated on this page.</p>
 
         <div className="command-v2-personnel-results portal-training-trainee-list">
           {trainingRows.length ? trainingRows.map((row: any) => {
@@ -124,7 +124,7 @@ export default async function TrainingWorkspacePage() {
 
       <div className="portal-training-grid">
         <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>FTO program</p><h2>Authorized FTOs</h2></div><span>{trainers.length}</span></div>
+          <div className="portal-panel-heading"><div><p>FTO staffing</p><h2>Authorized FTOs</h2></div><span>{trainers.length}</span></div>
           <p className="command-v2-compact-copy">FTO permissions exist only while the member holds a current Field Training Officer certification.</p>
           <div className="command-v2-mini-list portal-training-list">
             {trainers.length ? trainers.map((trainer: any) => (
@@ -141,9 +141,10 @@ export default async function TrainingWorkspacePage() {
 
         <section className="portal-panel portal-training-certification-launcher">
           <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification Center</h2></div><span>{pendingRows.length} pending</span></div>
-          <p className="command-v2-compact-copy">Issue, review, revoke, and monitor department certifications. Field Training Officer status controls FTO permissions automatically.</p>
+          <p className="command-v2-compact-copy">Issue, review, revoke, and monitor certifications in the dedicated Certification Center. Pending decisions are also surfaced in Approvals & Requests.</p>
           <div className="command-v2-action-row">
             <Link className="portal-button portal-button--primary" href="/portal/command/certifications">Open Certification Center</Link>
+            <Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Open pending requests</Link>
           </div>
         </section>
 
@@ -162,23 +163,6 @@ export default async function TrainingWorkspacePage() {
           </div>
         </section>
       </div>
-
-      {pendingRows.length ? (
-        <section className="portal-panel portal-training-pending">
-          <div className="portal-panel-heading"><div><p>Certification review</p><h2>Pending requests</h2></div><span>{pendingRows.length}</span></div>
-          <div className="command-v2-mini-list portal-training-list">
-            {pendingRows.map((row: any) => {
-              const member = relationOne(row.personnel_profiles);
-              return (
-                <Link key={row.id} href="/portal/command/certifications">
-                  <div><strong>{row.name}</strong><span>{member?.display_name ?? "Personnel"} · {row.status}</span></div>
-                  <div><span>{new Date(row.created_at).toLocaleDateString()}</span></div>
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-      ) : null}
     </PortalShell>
   );
 }
