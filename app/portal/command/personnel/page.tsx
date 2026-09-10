@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PersonnelDirectory } from "../../_components/PersonnelDirectory";
 import { PortalShell } from "../../_components/PortalShell";
@@ -39,8 +40,14 @@ export default async function CommandPersonnelPage() {
     <PortalShell
       active="personnel"
       eyebrow="Personnel"
-      title="Personnel"
-      description="Find, review, and manage authorized personnel records."
+      title="Personnel Directory"
+      description="Find a member first, then work inside their personnel record. Department-wide roster actions remain one click away."
+      actions={
+        <>
+          <Link className="portal-button portal-button--primary" href="/portal/command/personnel/roster">Roster & Personnel Actions</Link>
+          <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link>
+        </>
+      }
     >
       <PersonnelDirectory personnel={(personnel ?? []).map((member:any) => {
         const probation = getPersonnelProbationState(member.probation_ends_at, now);
