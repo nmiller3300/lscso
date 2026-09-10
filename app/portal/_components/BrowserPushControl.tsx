@@ -69,26 +69,19 @@ export function BrowserPushControl() {
     setBusy(true);
     setNotice("");
     try {
-      const permission = Notification.permission === "granted"
-        ? "granted"
-        : await Notification.requestPermission();
-
+      const permission = Notification.permission === "granted" ? "granted" : await Notification.requestPermission();
       if (permission !== "granted") {
         setState(permission === "denied" ? "blocked" : "disabled");
-        setNotice("Notification permission was not granted.");
+        setNotice("Permission not granted.");
         return;
       }
 
       const registration = await getRegistration();
-      const subscription = await registration.pushManager.getSubscription() ?? await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: applicationServerKey(),
-      });
-
+      const subscription = await registration.pushManager.getSubscription() ?? await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: applicationServerKey() });
       const serialized = subscription.toJSON();
       const p256dh = serialized.keys?.p256dh;
       const auth = serialized.keys?.auth;
-      if (!p256dh || !auth) throw new Error("Browser push keys are unavailable.");
+      if (!p256dh || !auth) throw new Error("Push keys unavailable.");
 
       const supabase = createClient() as any;
       const { error } = await supabase.rpc("register_browser_push_subscription", {
@@ -100,9 +93,9 @@ export function BrowserPushControl() {
       if (error) throw error;
 
       setState("enabled");
-      setNotice("Browser notifications are enabled on this device.");
+      setNotice("Alerts enabled.");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Browser notifications could not be enabled.");
+      setNotice(error instanceof Error ? error.message : "Could not enable alerts.");
     } finally {
       setBusy(false);
     }
@@ -114,20 +107,16 @@ export function BrowserPushControl() {
     try {
       const registration = await navigator.serviceWorker.getRegistration("/");
       const subscription = await registration?.pushManager.getSubscription();
-
       if (subscription) {
         const supabase = createClient() as any;
-        const { error } = await supabase.rpc("unregister_browser_push_subscription", {
-          push_endpoint: subscription.endpoint,
-        });
+        const { error } = await supabase.rpc("unregister_browser_push_subscription", { push_endpoint: subscription.endpoint });
         if (error) throw error;
         await subscription.unsubscribe();
       }
-
       setState("disabled");
-      setNotice("Browser notifications are disabled on this device.");
+      setNotice("Alerts disabled.");
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "Browser notifications could not be disabled.");
+      setNotice(error instanceof Error ? error.message : "Could not disable alerts.");
     } finally {
       setBusy(false);
     }
@@ -138,31 +127,20 @@ export function BrowserPushControl() {
   return (
     <section className={styles.panel} aria-label="Browser notification settings">
       <div className={styles.copy}>
-        <small>Device Alerts</small>
-        <strong>Browser Push Notifications</strong>
-        <span>Receive LSCSO portal notifications on this device even when the Personnel Portal is not open. Permission is saved per browser/device.</span>
+        <small>Device alerts</small>
+        <strong>Browser notifications</strong>
       </div>
-
-      {state === "unsupported" ? (
-        <span className={styles.unsupported}>This browser does not support Web Push.</span>
-      ) : (
+      {state === "unsupported" ? <span className={styles.unsupported}>Not supported on this browser</span> : (
         <div className={styles.actions}>
-          <span className={`${styles.status} ${isEnabled ? styles.statusOn : ""}`}>
-            {state === "checking" ? "Checking" : state === "blocked" ? "Blocked" : isEnabled ? "Enabled" : "Off"}
-          </span>
+          <span className={`${styles.status} ${isEnabled ? styles.statusOn : ""}`}>{state === "checking" ? "Checking" : state === "blocked" ? "Blocked" : isEnabled ? "Enabled" : "Off"}</span>
           {isEnabled ? (
-            <button className={`${styles.button} ${styles.buttonOff}`} disabled={busy} onClick={() => void disable()} type="button">
-              {busy ? "Updating…" : "Turn Off"}
-            </button>
+            <button className={`${styles.button} ${styles.buttonOff}`} disabled={busy} onClick={() => void disable()} type="button">{busy ? "Updating…" : "Turn Off"}</button>
           ) : (
-            <button className={styles.button} disabled={busy || state === "checking" || state === "blocked"} onClick={() => void enable()} type="button">
-              {busy ? "Enabling…" : state === "blocked" ? "Blocked" : "Enable Alerts"}
-            </button>
+            <button className={styles.button} disabled={busy || state === "checking" || state === "blocked"} onClick={() => void enable()} type="button">{busy ? "Enabling…" : state === "blocked" ? "Blocked" : "Enable"}</button>
           )}
         </div>
       )}
-
-      {state === "blocked" ? <p className={styles.notice}>Notifications are blocked in this browser’s site settings. Allow notifications for LSCSO, then reload this page.</p> : null}
+      {state === "blocked" ? <p className={styles.notice}>Allow notifications in browser settings.</p> : null}
       {notice ? <p className={styles.notice} role="status">{notice}</p> : null}
     </section>
   );
