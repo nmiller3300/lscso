@@ -66,7 +66,7 @@ export default async function CommandHomePage() {
   const metric = (value: number, unavailable: boolean) => unavailable ? "—" : String(value).padStart(2, "0");
 
   return (
-    <PortalShell active="overview" eyebrow="Command" title="Home" description="Actionable work, department standing, and the fastest path to Command operations." actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}>
+    <PortalShell active="overview" eyebrow="Command" title="Home" description="Actionable work first, then the fastest paths into personnel, recruitment, supervision, and training." actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}>
       {dataIssues.length ? <div className="portal-data-warning" role="status"><strong>Some Command data is temporarily unavailable.</strong><span>{dataIssues.join(", ")} could not be loaded. A missing dataset is shown as — rather than being reported as zero.</span></div> : null}
       {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Your assigned command scope is not active yet.</strong><span>Executive Command must assign your personnel or organizational responsibility before personnel decisions can be made.</span></div> : null}
 
@@ -80,7 +80,7 @@ export default async function CommandHomePage() {
 
       <div className="command-home-primary-grid">
         <section className="portal-panel command-v2-home-attention">
-          <div className="portal-panel-heading"><div><p>Priority workspace</p><h2>Action required</h2></div><Link href="/portal/notifications#action-required">Open full queue</Link></div>
+          <div className="portal-panel-heading"><div><p>Priority workspace</p><h2>Action required</h2></div><Link href="/portal/command/approvals">Open Approvals & Requests</Link></div>
           <div className="command-v2-attention-summary" aria-label="Pending Command work by category">
             <Link href="/portal/command/applications"><strong>{metric(pendingApplications.length, Boolean(applicationsResult.error))}</strong><span>Applications</span></Link>
             <Link href="/portal/command/approvals#guardian-requests"><strong>{metric(pendingGuardians.length, Boolean(guardiansResult.error))}</strong><span>Guardians</span></Link>
@@ -93,19 +93,19 @@ export default async function CommandHomePage() {
             {pendingGuardians.slice(0, 3).map((item: any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`g-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · {item.title}</strong><span>Pending approval</span></Link>)}
             {pendingRequests.slice(0, 3).map((item: any) => <Link href="/portal/command/approvals#personnel-requests" key={`r-${item.id}`}><strong>RQ-{String(item.request_number).padStart(4, "0")} · {item.subject}</strong><span>{item.request_type} · {item.routing_label ?? item.routing_stage ?? item.current_reviewer_label ?? "Assigned review"}</span></Link>)}
             {followUps.slice(0, 2).map((item: any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`f-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · Follow-up due</strong><span>{item.title}</span></Link>)}
-            {!attentionTotal && !dataIssues.length ? <div className="portal-empty-state"><strong>Nothing requires your action right now.</strong><span>New routed work will appear here and in the Action Center.</span></div> : null}
+            {!attentionTotal && !dataIssues.length ? <div className="portal-empty-state"><strong>Nothing requires your action right now.</strong><span>New routed work will appear here and in Approvals & Requests.</span></div> : null}
             {!attentionTotal && dataIssues.length ? <div className="portal-empty-state is-unavailable"><strong>Action queue cannot be confirmed yet.</strong><span>At least one supporting dataset failed to load. Refresh before relying on this queue.</span></div> : null}
           </div>
         </section>
 
         <aside className="portal-panel command-home-quick-actions">
-          <div className="portal-panel-heading"><div><p>Quick actions</p><h2>Start work</h2></div><span>Direct</span></div>
+          <div className="portal-panel-heading"><div><p>Quick actions</p><h2>Start work</h2></div><span>Daily work</span></div>
           <nav aria-label="Command quick actions">
-            <Link href="/portal/command/personnel"><span>Personnel</span><strong>Find a member</strong><b>→</b></Link>
-            <Link href="/portal/command/guardians"><span>Supervision</span><strong>Create a Guardian</strong><b>→</b></Link>
-            <Link href="/portal/command/applications"><span>Recruitment</span><strong>Review applications</strong><b>→</b></Link>
+            <Link href="/portal/command/approvals"><span>Decisions</span><strong>Approvals & Requests</strong><b>→</b></Link>
+            <Link href="/portal/command/personnel/roster"><span>Personnel</span><strong>Roster & Personnel Actions</strong><b>→</b></Link>
+            <Link href="/portal/command/applications"><span>Recruitment</span><strong>Applications & Interviews</strong><b>→</b></Link>
+            <Link href="/portal/command/guardians"><span>Supervision</span><strong>Create / Review Guardians</strong><b>→</b></Link>
             <Link href="/portal/command/training"><span>Training</span><strong>Training & FTO</strong><b>→</b></Link>
-            <Link href="/portal/command/administration"><span>Administration</span><strong>Department tools</strong><b>→</b></Link>
             <Link href="/portal/my-office"><span>Personal</span><strong>Open My Info</strong><b>→</b></Link>
           </nav>
         </aside>
