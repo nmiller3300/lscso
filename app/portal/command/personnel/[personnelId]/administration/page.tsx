@@ -76,23 +76,25 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
     const unit = Array.isArray(item.organizational_units) ? item.organizational_units[0] : item.organizational_units;
     return { id: item.id, unitId: item.organizational_unit_id, unitName: unit?.name ?? "Unknown unit", unitType: unit?.unit_type ?? "Unit", assignmentType: item.assignment_type, startsAt: item.starts_at, notes: item.notes };
   });
+  const activeFlags = (flags.data ?? []).filter((item: any) => item.active);
 
   return (
     <PortalShell
       active="personnel"
       eyebrow={`${member.personnel_id} · Administration`}
       title={`${member.display_name} · Administration`}
-      description="Administrative flags, leave, personnel requests, delegated authority, and controlled personnel changes."
+      description="Current standing first: rank and status, LOA, assignments, delegated authority, then administrative history."
     >
       <PersonnelRecordHeader personnelId={member.personnel_id} displayName={member.display_name} rank={member.rank} callSign={member.call_sign} assignment={member.division} status={administrationDisplayStatus} active="administration" />
 
-      <PersonnelAssignmentManager
-        profileId={member.id}
-        displayName={member.display_name}
-        canManage={canManageAssignments}
-        units={unitRows.map((item: any) => ({ id: item.id, name: item.name, unitType: item.unit_type }))}
-        assignments={assignmentRows}
-      />
+      {activeFlags.length ? (
+        <section className="portal-panel">
+          <div className="portal-panel-heading"><div><p>Attention</p><h2>Active administrative flags</h2></div><span>{activeFlags.length} active</span></div>
+          <div className="command-v2-mini-list">
+            {activeFlags.map((item:any) => <div key={item.id}><strong>{item.flag_type}</strong><span>Active</span>{item.notes ? <small>{item.notes}</small> : null}</div>)}
+          </div>
+        </section>
+      ) : null}
 
       {canApprovePersonnelChanges ? (
         <PersonnelIdentityManager
@@ -117,6 +119,14 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
           } : null}
         />
       ) : null}
+
+      <PersonnelAssignmentManager
+        profileId={member.id}
+        displayName={member.display_name}
+        canManage={canManageAssignments}
+        units={unitRows.map((item: any) => ({ id: item.id, name: item.name, unitType: item.unit_type }))}
+        assignments={assignmentRows}
+      />
 
       {canManageDelegations ? (
         <PersonnelDelegationManager
@@ -148,28 +158,33 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
         </section>
       )}
 
-      <div className="personnel-record-two-column">
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Personnel status</p><h2>Administrative flags</h2></div><span>{flags.data?.length ?? 0}</span></div>
-          <div className="command-v2-mini-list">
-            {(flags.data ?? []).length ? (flags.data ?? []).map((item:any) => <div key={item.id}><strong>{item.flag_type}</strong><span>{item.active ? "Active" : "Resolved"}</span>{item.notes ? <small>{item.notes}</small> : null}</div>) : <p className="command-v2-compact-copy">No administrative flags.</p>}
-          </div>
-        </section>
+      <section className="portal-panel">
+        <div className="portal-panel-heading"><div><p>Administrative record</p><h2>History & requests</h2></div><span>Reference</span></div>
+        <div className="personnel-record-two-column">
+          <section className="portal-panel">
+            <div className="portal-panel-heading"><div><p>Leave</p><h2>Leave history</h2></div><span>{leave.data?.length ?? 0}</span></div>
+            <div className="command-v2-mini-list">
+              {(leave.data ?? []).length ? (leave.data ?? []).map((item:any) => <div key={item.id}><strong>{item.leave_type} · LOA-{String(item.request_number).padStart(4, "0")}</strong><span>{item.status} · {formatLeaveWindow(item)}</span></div>) : <p className="command-v2-compact-copy">No leave history.</p>}
+            </div>
+          </section>
 
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Leave</p><h2>Leave history</h2></div><span>{leave.data?.length ?? 0}</span></div>
-          <div className="command-v2-mini-list">
-            {(leave.data ?? []).length ? (leave.data ?? []).map((item:any) => <div key={item.id}><strong>{item.leave_type} · RQ-{String(item.request_number).padStart(4, "0")}</strong><span>{item.status} · {formatLeaveWindow(item)}</span></div>) : <p className="command-v2-compact-copy">No leave history.</p>}
-          </div>
-        </section>
+          <section className="portal-panel">
+            <div className="portal-panel-heading"><div><p>Requests</p><h2>Personnel requests</h2></div><span>{requests.data?.length ?? 0}</span></div>
+            <div className="command-v2-mini-list">
+              {(requests.data ?? []).length ? (requests.data ?? []).map((item:any) => <div key={item.id}><strong>{item.request_type} · {item.subject}</strong><span>RQ-{String(item.request_number).padStart(4, "0")} · {item.status}</span></div>) : <p className="command-v2-compact-copy">No personnel requests.</p>}
+            </div>
+          </section>
 
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Requests</p><h2>Personnel requests</h2></div><span>{requests.data?.length ?? 0}</span></div>
-          <div className="command-v2-mini-list">
-            {(requests.data ?? []).length ? (requests.data ?? []).map((item:any) => <div key={item.id}><strong>{item.request_type} · {item.subject}</strong><span>RQ-{String(item.request_number).padStart(4, "0")} · {item.status}</span></div>) : <p className="command-v2-compact-copy">No personnel requests.</p>}
-          </div>
-        </section>
-      </div>
+          {!activeFlags.length && (flags.data ?? []).length ? (
+            <section className="portal-panel">
+              <div className="portal-panel-heading"><div><p>Personnel status</p><h2>Resolved flags</h2></div><span>{flags.data?.length ?? 0}</span></div>
+              <div className="command-v2-mini-list">
+                {(flags.data ?? []).map((item:any) => <div key={item.id}><strong>{item.flag_type}</strong><span>{item.active ? "Active" : "Resolved"}</span>{item.notes ? <small>{item.notes}</small> : null}</div>)}
+              </div>
+            </section>
+          ) : null}
+        </div>
+      </section>
     </PortalShell>
   );
 }
