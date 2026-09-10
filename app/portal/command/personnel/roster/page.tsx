@@ -166,15 +166,24 @@ export default async function FullRosterPage() {
     <PortalShell
       active="personnel"
       eyebrow="Personnel"
-      title="Full roster"
-      description="Department-wide roster, personnel facts, and credential management. Shared organizational and training information is synchronized with Personnel Operations."
+      title="Roster & Personnel Actions"
+      description="Make department-wide personnel changes first, then review the roster below. Individual records remain the home for member-specific work."
+      actions={
+        <>
+          <Link className="portal-button portal-button--primary" href="/portal/command/personnel">Personnel Directory</Link>
+          <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link>
+        </>
+      }
     >
+      {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
+      {EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
+
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
-          <div><p>Shared personnel core</p><h2>Department personnel overview</h2></div>
+          <div><p>Department roster</p><h2>Personnel overview</h2></div>
           <span>{operationalPersonnel.length} active records</span>
         </div>
-        <p className="command-v2-compact-copy">This view is informational. Personnel Operations remains the central roster editor while existing Command Portal account and credential controls stay here.</p>
+        <p className="command-v2-compact-copy">Select a member to open the full personnel record. Rank, status, LOA, assignments, training, certifications, delegated authority, and career history all resolve from the shared personnel system.</p>
         <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
           {operationalPersonnel.map((member:any) => {
             const memberCerts = (certifications ?? []).filter((item:any) => item.profile_id === member.id && item.status === "Current");
@@ -201,8 +210,6 @@ export default async function FullRosterPage() {
         </div>
       </section>
 
-      {EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
-      {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
       <RosterRowInteraction />
       <div className="command-roster-account-create-hidden">
         <RosterWorkspace personnel={personnel} />
