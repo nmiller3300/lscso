@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
 import { ApplicationReview } from "./ApplicationReview";
+import { ApplicantTrackingLinkManager } from "./ApplicantTrackingLinkManager";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
 import "./communications.css";
 
@@ -28,24 +29,19 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   const label = applicationLabel(application.application_number);
 
   return (
-    <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Review the submitted application and record each Command action.">
+    <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Application review and recruitment workflow.">
       <div className="portal-page-actions">
         <Link href="/portal/command/applications" className="portal-button">Back to applications</Link>
       </div>
 
+      <ApplicantTrackingLinkManager applicationId={application.id} applicantName={application.full_name} />
+
       {canDeleteApplication ? (
         <section className="portal-panel recruitment-admin-cleanup">
           <div className="portal-panel-heading">
-            <div>
-              <p>Administrative cleanup</p>
-              <h2>Test / invalid application cleanup</h2>
-            </div>
+            <div><p>Administrative cleanup</p><h2>Test / invalid application cleanup</h2></div>
             <span>Sheriff / Undersheriff</span>
           </div>
-          <p>
-            You can safely test this application through Accepted and the interview stages, then permanently delete it afterward.
-            Deletion remains available until a Recruit/personnel record is actually created.
-          </p>
           <DeleteApplicationButton applicationId={application.id} applicationNumber={label} applicantName={application.full_name} />
         </section>
       ) : null}
