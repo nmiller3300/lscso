@@ -1,0 +1,23 @@
+/* Keep operational screens concise. Long-form guidance belongs in dialogs, policies, or dedicated detail views. */
+.portal-content .command-v2-compact-copy,
+.portal-content .personnel-section-intro {
+  display: none;
+}
+
+.portal-content .portal-panel-heading > div > p {
+  margin-bottom: 2px;
+}
+
+.portal-content .portal-empty-state {
+  min-height: 0;
+}
+
+@media (max-width: 720px) {
+  .portal-content .portal-page-heading {
+    margin-bottom: 14px;
+  }
+
+  .portal-content .portal-panel {
+    margin-bottom: 14px;
+  }
+}
