@@ -39,6 +39,20 @@ export function ApplicantTrackingLinkManager({ applicationId, applicantName }: {
     window.setTimeout(() => setNotice(""), 2200);
   }
 
+  async function share() {
+    if (!trackingUrl) return;
+    const text = `Hi ${applicantName}, here is your private LSCSO application tracking link:`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "LSCSO Application Tracking", text, url: trackingUrl });
+        return;
+      } catch (caught) {
+        if (caught instanceof DOMException && caught.name === "AbortError") return;
+      }
+    }
+    await copy(`${text} ${trackingUrl}`, "Applicant message copied.");
+  }
+
   async function reissue() {
     const confirmed = window.confirm("Reissue this tracking link? The applicant's old private link will stop working.");
     if (!confirmed || busy) return;
@@ -70,8 +84,8 @@ export function ApplicantTrackingLinkManager({ applicationId, applicantName }: {
           <input aria-label="Applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
           <div className="portal-page-actions" style={{ marginTop: 12 }}>
             <a className="portal-button" href={trackingUrl} target="_blank" rel="noreferrer">Open link</a>
-            <button className="portal-button portal-button--primary" type="button" onClick={() => void copy(trackingUrl, "Tracking link copied.")}>Copy link</button>
-            <button className="portal-button" type="button" onClick={() => void copy(`Hi ${applicantName}, here is your private LSCSO application tracking link: ${trackingUrl}`, "Applicant message copied.")}>Copy message</button>
+            <button className="portal-button portal-button--primary" type="button" onClick={() => void share()}>Share to applicant</button>
+            <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Tracking link copied.")}>Copy link</button>
             <button className="portal-button portal-button--danger" disabled={busy} type="button" onClick={() => void reissue()}>{busy ? "Reissuing…" : "Reissue link"}</button>
           </div>
         </>
