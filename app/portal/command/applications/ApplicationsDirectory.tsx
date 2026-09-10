@@ -23,6 +23,15 @@ type Item = {
   hired: boolean;
 };
 
+function actionLabel(item: Item) {
+  if (item.hired) return "Open Record";
+  if (item.status === "Submitted" || item.status === "Under Review") return "Review Application";
+  if (item.status === "Accepted" && item.interviewStatus === "Passed") return "Appoint Recruit";
+  if (item.status === "Accepted" && item.interviewStatus === "Failed") return "Review Outcome";
+  if (item.status === "Accepted") return "Open Interview";
+  return "Open Record";
+}
+
 export function ApplicationsDirectory({ items, reviewers }: { items: Item[]; reviewers: Array<{ id: string; name: string }> }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("");
@@ -40,6 +49,7 @@ export function ApplicationsDirectory({ items, reviewers }: { items: Item[]; rev
 
   return (
     <section className="portal-panel recruitment-directory recruitment-directory--workflow">
+      <div className="portal-panel-heading"><div><p>Candidate workflow</p><h2>Applications & interviews</h2></div><span>{rows.length} shown</span></div>
       <div className="recruitment-filters">
         <label>Search<input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Applicant, Discord, or APP number" /></label>
         <label>Status<select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{APPLICATION_STATUSES.map((value) => <option key={value}>{applicationStatusLabel(value)}</option>)}</select></label>
@@ -50,9 +60,9 @@ export function ApplicationsDirectory({ items, reviewers }: { items: Item[]; rev
       <div className="recruitment-list recruitment-list--workflow" role="list">
         {rows.map((item) => {
           const nextAction = applicationNextAction(item.status, item.interviewStatus, item.hired);
-          const needsInterview = item.status === "Accepted" && !item.hired;
+          const inInterviewWorkflow = item.status === "Accepted" && !item.hired;
           return (
-            <article key={item.id} role="listitem" className={needsInterview ? "is-interview" : item.status === "Submitted" ? "is-new" : item.status === "Denied" ? "is-denied" : item.hired ? "is-hired" : ""}>
+            <article key={item.id} role="listitem" className={inInterviewWorkflow ? "is-interview" : item.status === "Submitted" ? "is-new" : item.status === "Denied" ? "is-denied" : item.hired ? "is-hired" : ""}>
               <div className="recruitment-list__identity">
                 <strong>{applicationLabel(item.applicationNumber)}</strong>
                 <span>{item.fullName}</span>
@@ -60,11 +70,11 @@ export function ApplicationsDirectory({ items, reviewers }: { items: Item[]; rev
               </div>
               <div className="recruitment-list__stage">
                 <b className={`recruitment-status recruitment-status--${item.status.toLowerCase().replaceAll(" ", "-")}`}>{applicationStatusLabel(item.status)}</b>
-                {needsInterview ? <span>Interview: <strong>{item.interviewStatus ?? "Not Scheduled"}</strong></span> : <span>Submitted {new Date(item.submittedAt).toLocaleDateString()}</span>}
+                {inInterviewWorkflow ? <span>Interview: <strong>{item.interviewStatus ?? "Not Scheduled"}</strong></span> : <span>Submitted {new Date(item.submittedAt).toLocaleDateString()}</span>}
               </div>
               <div className="recruitment-list__reviewer"><span>Reviewer</span><strong>{item.reviewer ?? "Unassigned"}</strong></div>
               <div className="recruitment-list__next"><span>Next action</span><strong>{nextAction}</strong></div>
-              <Link className="portal-button" href={`/portal/command/applications/${item.id}`} aria-label={`Review ${applicationLabel(item.applicationNumber)} for ${item.fullName}`}>{needsInterview ? "Open Interview" : "Review"}</Link>
+              <Link className="portal-button" href={`/portal/command/applications/${item.id}`} aria-label={`Open ${applicationLabel(item.applicationNumber)} for ${item.fullName}`}>{actionLabel(item)}</Link>
             </article>
           );
         })}
