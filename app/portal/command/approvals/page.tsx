@@ -75,37 +75,54 @@ export default async function ApprovalsPage() {
 
   const leaveItems = leave.map((item: any) => ({ id: item.id, request_number: Number(item.request_number), display_name: names.get(item.profile_id) ?? "Personnel", leave_type: item.leave_type, starts_on: item.starts_on, expected_return_on: item.expected_return_on, notes: item.notes, status: item.status }));
   const scopeUnavailable = fullCommandAccess && !departmentAuthority && !purview?.structuredAuthorityAvailable;
+  const totalPending = requestItems.length + guardianItems.length + leaveItems.length + certificationRequests.length;
 
   return (
-    <PortalShell active="approvals" eyebrow="Decision center" title="Approvals" description="Only matters currently routed to your authority appear here." actions={<Link className="portal-button portal-button--secondary" href="/portal/notifications#action-required">Action Center</Link>}>
+    <PortalShell
+      active="approvals"
+      eyebrow="Command Work"
+      title="Approvals & Requests"
+      description="Your decision queue. Only matters currently routed to your authority appear here."
+      actions={<Link className="portal-button portal-button--secondary" href="/portal/notifications#action-required">Action Center</Link>}
+    >
       {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Structured purview is not active yet.</strong><span>No department-wide approvals are inferred from legacy supervisor labels.</span></div> : null}
+
+      <section className="portal-panel" style={{ marginBottom: 16 }}>
+        <div className="portal-panel-heading"><div><p>Decision queue</p><h2>{totalPending ? `${totalPending} item${totalPending === 1 ? "" : "s"} awaiting action` : "Nothing is waiting on you"}</h2></div><span>Live routing</span></div>
+        <div className="portal-page-actions">
+          <Link className="portal-button portal-button--secondary" href="#personnel-requests">Personnel Requests · {requestItems.length}</Link>
+          {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#leave-requests">LOA · {leaveItems.length}</Link> : null}
+          {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#guardian-requests">Guardians · {guardianItems.length}</Link> : null}
+          {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#certification-requests">Certifications · {certificationRequests.length}</Link> : null}
+        </div>
+      </section>
 
       <section className="portal-metric-grid">
         <article className="portal-metric portal-metric--neutral"><span>Personnel requests</span><strong>{String(requestItems.length).padStart(2, "0")}</strong><small>Routed directly to you</small></article>
-        {fullCommandAccess ? <article className="portal-metric portal-metric--gold"><span>Guardian approvals</span><strong>{String(guardianItems.length).padStart(2, "0")}</strong><small>Awaiting review</small></article> : null}
         {fullCommandAccess ? <article className="portal-metric portal-metric--warning"><span>Leave requests</span><strong>{String(leaveItems.length).padStart(2, "0")}</strong><small>LOA decisions pending</small></article> : null}
+        {fullCommandAccess ? <article className="portal-metric portal-metric--gold"><span>Guardian approvals</span><strong>{String(guardianItems.length).padStart(2, "0")}</strong><small>Awaiting review</small></article> : null}
         {fullCommandAccess ? <article className="portal-metric portal-metric--neutral"><span>Certification requests</span><strong>{String(certificationRequests.length).padStart(2, "0")}</strong><small>Issue or deny</small></article> : null}
       </section>
 
       <section className="portal-panel" id="personnel-requests">
-        <div className="portal-panel-heading"><div><p>Personnel routing</p><h2>Requests assigned to you</h2></div><span>{requestItems.length} pending</span></div>
+        <div className="portal-panel-heading"><div><p>Personnel routing</p><h2>Personnel requests assigned to you</h2></div><span>{requestItems.length} pending</span></div>
         <CommandApprovalQueue initialItems={requestItems} />
       </section>
 
       {fullCommandAccess ? (
         <>
-          <section className="portal-panel" id="guardian-requests">
-            <div className="portal-panel-heading"><div><p>Guardians</p><h2>Guardian approvals</h2></div><span>{guardianItems.length} pending</span></div>
-            <CommandApprovalQueue initialItems={guardianItems} />
-          </section>
-
           <section className="portal-panel" id="leave-requests">
             <div className="portal-panel-heading"><div><p>Leave administration</p><h2>LOA requests</h2></div><span>{leaveItems.length} pending</span></div>
             <LeaveApprovalQueue items={leaveItems} />
           </section>
 
+          <section className="portal-panel" id="guardian-requests">
+            <div className="portal-panel-heading"><div><p>Accountability</p><h2>Guardian approvals</h2></div><span>{guardianItems.length} pending</span></div>
+            <CommandApprovalQueue initialItems={guardianItems} />
+          </section>
+
           <section className="portal-panel" id="certification-requests">
-            <div className="portal-panel-heading"><div><p>Professional standards</p><h2>Certification requests</h2></div><Link href="/portal/command/certifications">Review & issue certifications →</Link></div>
+            <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification requests</h2></div><Link href="/portal/command/certifications">Open Certification Center →</Link></div>
             <div className="deputy-request-history">
               {certificationRequests.map((item: any) => <article key={item.id}><span>CE</span><div><strong>{item.name}</strong><small>{names.get(item.profile_id) ?? "Personnel"} · {item.notes ?? "No request note"}</small></div><b>{item.status}</b></article>)}
               {!certificationRequests.length ? <div className="portal-empty-state"><strong>No certification requests are awaiting review.</strong></div> : null}
