@@ -62,6 +62,7 @@ export async function POST(request: Request) {
         p_certification_text: APPLICATION_CERTIFICATION_TEXT,
         p_tracking_token_hash: trackingTokenHash,
         p_ai_policy_acknowledged: true,
+        p_tracking_token: trackingToken,
       })
       .single();
 
