@@ -6,13 +6,13 @@ export function ApplicantTrackingLinkManager({ applicationId, applicantName }: {
   const [origin, setOrigin] = useState("");
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   const trackingUrl = useMemo(() => token && origin
     ? `${origin}/join/application/status/${encodeURIComponent(token)}`
     : "", [origin, token]);
+  const previewUrl = `/portal/command/applications/${applicationId}/applicant-view`;
 
   useEffect(() => {
     setOrigin(window.location.origin);
@@ -53,45 +53,29 @@ export function ApplicantTrackingLinkManager({ applicationId, applicantName }: {
     await copy(`${text} ${trackingUrl}`, "Applicant message copied.");
   }
 
-  async function reissue() {
-    const confirmed = window.confirm("Reissue this tracking link? The applicant's old private link will stop working.");
-    if (!confirmed || busy) return;
-    setBusy(true);
-    setError("");
-    setNotice("");
-    try {
-      const response = await fetch(`/api/portal/applications/${applicationId}/tracking-link`, { method: "POST" });
-      const data = await response.json();
-      if (!response.ok || !data.tracking_token) throw new Error(data.error || "Tracking link could not be reissued.");
-      setToken(data.tracking_token);
-      setNotice("New tracking link issued.");
-    } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Tracking link could not be reissued.");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   return (
     <section className="portal-panel" id="tracking-link">
       <div className="portal-panel-heading">
         <div><p>Applicant access</p><h2>Private tracking link</h2></div>
-        <span>{loading ? "Loading" : token ? "Available" : "Recovery needed"}</span>
+        <span>{loading ? "Loading" : token ? "Original link" : "Legacy application"}</span>
       </div>
 
       {trackingUrl ? (
         <>
           <input aria-label="Applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
           <div className="portal-page-actions" style={{ marginTop: 12 }}>
-            <a className="portal-button" href={trackingUrl} target="_blank" rel="noreferrer">Open link</a>
-            <button className="portal-button portal-button--primary" type="button" onClick={() => void share()}>Share to applicant</button>
+            <a className="portal-button portal-button--primary" href={trackingUrl} target="_blank" rel="noreferrer">Open applicant link</a>
+            <button className="portal-button" type="button" onClick={() => void share()}>Share to applicant</button>
             <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Tracking link copied.")}>Copy link</button>
-            <button className="portal-button portal-button--danger" disabled={busy} type="button" onClick={() => void reissue()}>{busy ? "Reissuing…" : "Reissue link"}</button>
           </div>
         </>
       ) : !loading ? (
-        <button className="portal-button portal-button--primary" disabled={busy} type="button" onClick={() => void reissue()}>{busy ? "Generating…" : "Generate replacement link"}</button>
+        <p className="command-v2-compact-copy">This application was submitted before original tracking-link recovery was enabled.</p>
       ) : null}
+
+      <div className="portal-page-actions" style={{ marginTop: 12 }}>
+        <a className="portal-button" href={previewUrl} target="_blank" rel="noreferrer">Preview applicant tracking page</a>
+      </div>
 
       {error ? <p className="application-error" role="alert">{error}</p> : null}
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
