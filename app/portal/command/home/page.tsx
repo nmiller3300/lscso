@@ -16,13 +16,14 @@ export default async function CommandHomePage() {
   const supabase = await createClient() as any;
   const now = new Date();
   const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  const [profilesResult, guardiansResult, certificationsResult, requestsResult, leaveResult, applicationsResult] = await Promise.all([
+  const [profilesResult, guardiansResult, certificationsResult, requestsResult, leaveResult, applicationsResult, promotionsResult] = await Promise.all([
     supabase.from("personnel_profiles").select("id,status,is_test_account"),
     supabase.from("guardian_records").select("id,status,subject_profile_id,follow_up_due_at,created_at,guardian_number,title").order("created_at", { ascending: false }),
     supabase.from("certifications").select("id,profile_id,status,expires_on"),
     supabase.from("personnel_requests").select("id,request_number,requester_profile_id,status,request_type,subject,current_reviewer_profile_id,current_reviewer_label,routing_fallback,routing_stage,routing_label,created_at").order("created_at", { ascending: false }),
     supabase.from("leave_requests").select("id,status,profile_id,starts_on,expected_return_on,created_at").order("created_at", { ascending: false }),
     supabase.from("recruitment_applications").select("id,application_number,full_name,discord_username,status,submitted_at").order("submitted_at", { ascending: false }).limit(100),
+    supabase.from("promotion_cases").select("id,case_number,subject_profile_id,current_rank,requested_rank,source_type,status,created_at").in("status", ["Submitted","Under Review"]).order("created_at", { ascending: false }),
   ]);
 
   const dataIssues = [
@@ -32,6 +33,7 @@ export default async function CommandHomePage() {
     requestsResult.error ? "personnel requests" : null,
     leaveResult.error ? "leave requests" : null,
     applicationsResult.error ? "applications" : null,
+    promotionsResult.error ? "promotion reviews" : null,
   ].filter(Boolean) as string[];
 
   const departmentAuthority = DEPARTMENT_COMMAND_RANKS.has(profile.rank);
@@ -47,6 +49,7 @@ export default async function CommandHomePage() {
   const requests = requestsResult.data ?? [];
   const leave = leaveResult.data ?? [];
   const applications = applicationsResult.data ?? [];
+  const promotions = (promotionsResult.data ?? []).filter((item:any) => allowedDecision(item.subject_profile_id));
 
   const requestNeedsMyReview = (item: any) => {
     if (!["Submitted", "In Review"].includes(item.status) || item.requester_profile_id === profile.id) return false;
@@ -62,11 +65,11 @@ export default async function CommandHomePage() {
   const pendingApplications = applications.filter((item: any) => item.status === "Submitted");
   const followUps = guardians.filter((item: any) => allowedDecision(item.subject_profile_id) && item.follow_up_due_at && new Date(item.follow_up_due_at) <= now && !["Acknowledged", "Closed"].includes(item.status));
   const expiring = certifications.filter((item: any) => allowedDecision(item.profile_id) && item.status === "Current" && item.expires_on && new Date(item.expires_on) <= thirtyDays);
-  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingCertifications.length + pendingApplications.length + followUps.length;
+  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingCertifications.length + pendingApplications.length + promotions.length + followUps.length;
   const metric = (value: number, unavailable: boolean) => unavailable ? "—" : String(value).padStart(2, "0");
 
   return (
-    <PortalShell active="overview" eyebrow="Command" title="Home" description="Actionable work first, then the fastest paths into personnel, recruitment, supervision, and training." actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}>
+    <PortalShell active="overview" eyebrow="Command" title="Home" actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}>
       {dataIssues.length ? <div className="portal-data-warning" role="status"><strong>Some Command data is temporarily unavailable.</strong><span>{dataIssues.join(", ")} could not be loaded. A missing dataset is shown as — rather than being reported as zero.</span></div> : null}
       {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Your assigned command scope is not active yet.</strong><span>Executive Command must assign your personnel or organizational responsibility before personnel decisions can be made.</span></div> : null}
 
@@ -74,7 +77,7 @@ export default async function CommandHomePage() {
         <article><span>Active personnel</span><strong>{metric(activePersonnel, Boolean(profilesResult.error))}</strong><small>Members under your command · your own profile is excluded</small></article>
         <article><span>Needs your attention</span><strong>{metric(attentionTotal, dataIssues.length > 0)}</strong><small>Only work currently routed to you</small></article>
         <article><span>New applications</span><strong>{metric(pendingApplications.length, Boolean(applicationsResult.error))}</strong><small>Awaiting initial review</small></article>
-        <article><span>Expiring certs</span><strong>{metric(expiring.length, Boolean(certificationsResult.error))}</strong><small>Within 30 days</small></article>
+        <article><span>Promotion reviews</span><strong>{metric(promotions.length, Boolean(promotionsResult.error))}</strong><small>Open career progression cases</small></article>
         <article><span>Open requests</span><strong>{metric(pendingRequests.length + pendingLeave.length + pendingCertifications.length, Boolean(requestsResult.error || leaveResult.error || certificationsResult.error))}</strong><small>Personnel, LOA and certification decisions</small></article>
       </div>
 
@@ -83,24 +86,27 @@ export default async function CommandHomePage() {
           <div className="portal-panel-heading"><div><p>Priority workspace</p><h2>Action required</h2></div><Link href="/portal/command/approvals">Open Approvals & Requests</Link></div>
           <div className="command-v2-attention-summary" aria-label="Pending Command work by category">
             <Link href="/portal/command/applications"><strong>{metric(pendingApplications.length, Boolean(applicationsResult.error))}</strong><span>Applications</span></Link>
+            <Link href="/portal/command/promotions"><strong>{metric(promotions.length, Boolean(promotionsResult.error))}</strong><span>Promotions</span></Link>
             <Link href="/portal/command/approvals#guardian-requests"><strong>{metric(pendingGuardians.length, Boolean(guardiansResult.error))}</strong><span>Guardians</span></Link>
             <Link href="/portal/command/approvals#personnel-requests"><strong>{metric(pendingRequests.length, Boolean(requestsResult.error))}</strong><span>Requests</span></Link>
             <Link href="/portal/command/approvals#leave-requests"><strong>{metric(pendingLeave.length, Boolean(leaveResult.error))}</strong><span>LOA</span></Link>
             <Link href="/portal/command/approvals#certification-requests"><strong>{metric(pendingCertifications.length, Boolean(certificationsResult.error))}</strong><span>Certifications</span></Link>
           </div>
           <div className="command-v2-mini-list command-home-action-list">
+            {promotions.slice(0, 3).map((item:any) => <Link href="/portal/command/promotions" key={`p-${item.id}`}><strong>PR-{String(item.case_number).padStart(4,"0")} · {item.current_rank} → {item.requested_rank}</strong><span>{item.source_type} · {item.status}</span></Link>)}
             {pendingApplications.slice(0, 3).map((item: any) => <Link href={`/portal/command/applications/${item.id}`} key={`a-${item.id}`}><strong>{applicationLabel(item.application_number)} · {item.full_name}</strong><span>{item.discord_username} · New application</span></Link>)}
             {pendingGuardians.slice(0, 3).map((item: any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`g-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · {item.title}</strong><span>Pending approval</span></Link>)}
             {pendingRequests.slice(0, 3).map((item: any) => <Link href="/portal/command/approvals#personnel-requests" key={`r-${item.id}`}><strong>RQ-{String(item.request_number).padStart(4, "0")} · {item.subject}</strong><span>{item.request_type} · {item.routing_label ?? item.routing_stage ?? item.current_reviewer_label ?? "Assigned review"}</span></Link>)}
             {followUps.slice(0, 2).map((item: any) => <Link href={`/portal/command/guardians/${item.guardian_number}`} key={`f-${item.id}`}><strong>G-{String(item.guardian_number).padStart(4, "0")} · Follow-up due</strong><span>{item.title}</span></Link>)}
-            {!attentionTotal && !dataIssues.length ? <div className="portal-empty-state"><strong>Nothing requires your action right now.</strong><span>New routed work will appear here and in Approvals & Requests.</span></div> : null}
-            {!attentionTotal && dataIssues.length ? <div className="portal-empty-state is-unavailable"><strong>Action queue cannot be confirmed yet.</strong><span>At least one supporting dataset failed to load. Refresh before relying on this queue.</span></div> : null}
+            {!attentionTotal && !dataIssues.length ? <div className="portal-empty-state"><strong>Nothing requires your action right now.</strong></div> : null}
+            {!attentionTotal && dataIssues.length ? <div className="portal-empty-state is-unavailable"><strong>Action queue cannot be confirmed yet.</strong></div> : null}
           </div>
         </section>
 
         <aside className="portal-panel command-home-quick-actions">
           <div className="portal-panel-heading"><div><p>Quick actions</p><h2>Start work</h2></div><span>Daily work</span></div>
           <nav aria-label="Command quick actions">
+            <Link href="/portal/command/promotions"><span>Career</span><strong>Promotion Review</strong><b>→</b></Link>
             <Link href="/portal/command/approvals"><span>Decisions</span><strong>Approvals & Requests</strong><b>→</b></Link>
             <Link href="/portal/command/personnel/roster"><span>Personnel</span><strong>Roster & Personnel Actions</strong><b>→</b></Link>
             <Link href="/portal/command/applications"><span>Recruitment</span><strong>Applications & Interviews</strong><b>→</b></Link>
