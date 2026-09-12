@@ -68,15 +68,15 @@ export function applicationNextAction(status: string, interviewStatus?: string |
   if (hired || status === "Hired") return "Recruit personnel record created — continue onboarding and training.";
   if (status === "Denied") return "Application closed — no interview will be scheduled.";
   if (status === "Withdrawn") return "Application withdrawn — no further action required.";
-  if (status === "Archived") return "Application archived — no further recruitment action is pending.";
+  if (status === "Archived") return "Selection process closed — no further recruitment action is pending.";
   if (status === "Submitted") return "Assign a Captain+ reviewer and begin Command screening.";
   if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
   if (status === "Accepted") {
-    if (interviewStatus === "Passed") return "Interview passed — applicant is cleared for the final Recruit appointment.";
-    if (interviewStatus === "Failed") return "Interview failed — document the outcome; the applicant is not eligible for a Recruit appointment.";
+    if (interviewStatus === "Passed") return "Interview passed — complete the employment-offer stage before Recruit appointment.";
+    if (interviewStatus === "Failed") return "Interview failed — applicant is not eligible for a Recruit appointment.";
     if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
-    if (interviewStatus === "No Show") return "Applicant did not attend — reschedule the interview or document the no-show outcome.";
-    if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail before a Recruit appointment.";
+    if (interviewStatus === "No Show") return "Interview no-show — close the selection process.";
+    if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail.";
     return "Contact the applicant on Discord and schedule the required interview.";
   }
   if (status === "Interview") return "Legacy record — complete the interview record before any Recruit appointment.";
