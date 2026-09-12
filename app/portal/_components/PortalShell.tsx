@@ -12,7 +12,7 @@ import { PortalPolicyDirectory } from "./PortalPolicyDirectory";
 import { PromotionSelfReviewCenter } from "./PromotionSelfReviewCenter";
 
 type PortalShellProps = {
-  active: "overview" | "personnel" | "supervision" | "training" | "promotions" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
+  active: "overview" | "personnel" | "supervision" | "training" | "promotions" | "orders" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
