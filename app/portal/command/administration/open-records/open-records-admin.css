@@ -1,28 +1,30 @@
-.open-records-admin-metrics { grid-template-columns:repeat(4,minmax(0,1fr)); }
-.open-records-admin-law { margin-bottom:16px; }
-.open-records-admin-law-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
-.open-records-admin-law-grid article { padding:14px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
-.open-records-admin-law-grid strong,.open-records-admin-law-grid span { display:block; }
-.open-records-admin-law-grid strong { color:var(--portal-gold,#a48b45); font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; }
-.open-records-admin-law-grid span { margin-top:5px; font-size:.8rem; font-weight:700; }
-.open-records-admin-law-grid p { margin:7px 0 0; color:var(--portal-muted); font-size:.76rem; line-height:1.5; }
-.open-records-admin-list { display:grid; gap:14px; }
-.open-records-admin-request { border:1px solid var(--portal-line); background:var(--portal-surface,#fff); }
-.open-records-admin-request>header { display:flex; justify-content:space-between; gap:18px; padding:16px; border-bottom:1px solid var(--portal-line); background:var(--portal-subtle); }
-.open-records-admin-request>header>div:first-child { min-width:0; }
-.open-records-admin-request>header span { color:var(--portal-gold,#a48b45); font-size:.7rem; font-weight:800; letter-spacing:.07em; }
-.open-records-admin-request>header h3 { margin:4px 0; }
-.open-records-admin-request>header p { margin:0; color:var(--portal-muted); font-size:.78rem; overflow-wrap:anywhere; }
-.open-records-admin-request>header>div:last-child { display:grid; gap:4px; justify-items:end; flex:0 0 auto; text-align:right; }
-.open-records-admin-request>header b { padding:4px 8px; border:1px solid rgba(164,139,69,.35); border-radius:999px; color:var(--portal-gold,#a48b45); font-size:.67rem; text-transform:uppercase; }
-.open-records-admin-request>header small { color:var(--portal-muted); font-size:.68rem; }
-.open-records-admin-request>header small.is-overdue { color:#a33f35; font-weight:800; }
-.open-records-admin-request-body { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(250px,.6fr); gap:16px; padding:16px; }
-.open-records-admin-request-body strong { display:block; margin-bottom:6px; font-size:.72rem; text-transform:uppercase; }
-.open-records-admin-request-body p { margin:0; color:var(--portal-muted); line-height:1.55; white-space:pre-wrap; }
-.open-records-admin-request-meta { display:grid; gap:10px; }
-.open-records-admin-request-meta span { display:grid; gap:3px; padding:10px; border:1px solid var(--portal-line); background:var(--portal-subtle); font-size:.76rem; }
-.open-records-admin-request-meta b { color:var(--portal-muted); font-size:.65rem; text-transform:uppercase; }
+.open-records-admin-metrics,.open-records-detail-metrics { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.open-records-admin-list { display:grid; gap:10px; }
+.open-records-queue-card { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(190px,.55fr) auto; gap:18px; align-items:center; padding:16px 18px; border:1px solid var(--portal-line); background:var(--portal-surface,#fff); color:inherit; text-decoration:none; transition:border-color .16s ease,background .16s ease,transform .16s ease; }
+.open-records-queue-card:hover { border-color:rgba(164,139,69,.5); background:var(--portal-subtle); transform:translateY(-1px); }
+.open-records-queue-primary { min-width:0; }
+.open-records-queue-primary>span { color:var(--portal-gold,#a48b45); font-size:.7rem; font-weight:850; letter-spacing:.08em; }
+.open-records-queue-primary h3 { margin:4px 0 5px; font-size:1rem; }
+.open-records-queue-primary p { margin:0; color:var(--portal-muted); font-size:.76rem; line-height:1.45; overflow-wrap:anywhere; }
+.open-records-queue-primary small { display:block; margin-top:7px; color:var(--portal-muted); font-size:.69rem; }
+.open-records-queue-status { display:grid; gap:5px; justify-items:start; }
+.open-records-queue-status b { padding:4px 8px; border:1px solid rgba(164,139,69,.35); border-radius:999px; color:var(--portal-gold,#a48b45); font-size:.64rem; letter-spacing:.04em; text-transform:uppercase; }
+.open-records-queue-status span,.open-records-queue-status small { color:var(--portal-muted); font-size:.68rem; }
+.open-records-queue-status small.is-overdue,.open-records-metric-date.is-overdue { color:#b8594d; font-weight:800; }
+.open-records-queue-open { display:flex; align-items:center; gap:8px; color:var(--portal-gold,#a48b45); font-size:.72rem; font-weight:850; letter-spacing:.04em; text-transform:uppercase; white-space:nowrap; }
+.open-records-request-detail,.open-records-custodian-workspace { margin-top:16px; }
+.open-records-detail-grid { display:grid; grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr); gap:16px; }
+.open-records-detail-request { padding:16px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.open-records-detail-request>strong { display:block; margin-bottom:8px; color:var(--portal-gold,#a48b45); font-size:.7rem; letter-spacing:.06em; text-transform:uppercase; }
+.open-records-detail-request p { margin:0; color:var(--portal-text); line-height:1.65; white-space:pre-wrap; overflow-wrap:anywhere; }
+.open-records-detail-meta { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+.open-records-detail-meta article { display:grid; gap:4px; padding:12px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.open-records-detail-meta span { color:var(--portal-muted); font-size:.64rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+.open-records-detail-meta strong { font-size:.78rem; overflow-wrap:anywhere; }
+.open-records-detail-meta small { color:var(--portal-muted); font-size:.68rem; overflow-wrap:anywhere; }
+.open-records-metric-text { font-size:1rem !important; line-height:1.2; }
+.open-records-metric-date { font-size:.83rem !important; line-height:1.35; }
+.open-records-custodian-workspace>.portal-panel-heading { margin-bottom:0; }
 .open-records-custodian-controls { display:grid; gap:0; border-top:1px solid var(--portal-line); }
 .open-records-custodian-section { display:grid; gap:12px; padding:16px; border-bottom:1px solid var(--portal-line); }
 .open-records-custodian-section>div:first-child { display:flex; gap:8px; align-items:center; }
@@ -44,17 +46,21 @@
 .open-records-staged-files article>span { display:grid; gap:3px; min-width:0; }
 .open-records-staged-files strong { overflow-wrap:anywhere; }
 .open-records-staged-files small { color:var(--portal-muted); font-size:.68rem; }
-.open-records-staged-files button { border:0; background:transparent; color:#a33f35; font:inherit; font-size:.7rem; font-weight:800; cursor:pointer; }
+.open-records-staged-files button { border:0; background:transparent; color:#b8594d; font:inherit; font-size:.7rem; font-weight:800; cursor:pointer; }
 .open-records-release-section { background:rgba(164,139,69,.035); }
-.open-records-custodian-message { margin:0; padding:10px 16px; color:#9a3f35; font-size:.76rem; font-weight:700; }
-.open-records-custodian-message.is-success { color:#55713a; }
+.open-records-custodian-message { margin:0; padding:10px 16px; color:#b8594d; font-size:.76rem; font-weight:700; }
+.open-records-custodian-message.is-success { color:#6f9449; }
 @media (max-width:900px) {
-  .open-records-admin-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .open-records-admin-metrics,.open-records-detail-metrics { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .open-records-queue-card { grid-template-columns:minmax(0,1fr) minmax(170px,.6fr); }
+  .open-records-queue-open { grid-column:1/-1; padding-top:8px; border-top:1px solid var(--portal-line); }
+  .open-records-detail-grid { grid-template-columns:1fr; }
 }
 @media (max-width:760px) {
-  .open-records-admin-metrics,.open-records-admin-law-grid,.open-records-admin-request-body,.open-records-custodian-grid { grid-template-columns:1fr; }
-  .open-records-admin-request>header { align-items:flex-start; flex-direction:column; }
-  .open-records-admin-request>header>div:last-child { justify-items:start; text-align:left; }
+  .open-records-admin-metrics,.open-records-detail-metrics,.open-records-custodian-grid,.open-records-detail-meta { grid-template-columns:1fr; }
+  .open-records-queue-card { grid-template-columns:1fr; gap:12px; padding:15px; }
+  .open-records-queue-status { padding-top:10px; border-top:1px solid var(--portal-line); }
+  .open-records-queue-open { grid-column:auto; padding-top:10px; }
   .open-records-custodian-grid label.is-wide { grid-column:auto; }
   .open-records-custodian-action-row { align-items:stretch; flex-direction:column; }
   .open-records-custodian-action-row .portal-button,.open-records-upload-button { width:100%; justify-content:center; }

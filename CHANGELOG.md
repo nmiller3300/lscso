@@ -21,6 +21,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Open Records — Protected Electronic Release**: Added private release-file storage, First Lieutenant+ file staging, full/partial/denied dispositions, legal withholding citations, secure download links, and a 48-hour requester download window.
 - **Open Records — Automatic Release Purge**: Added a scheduled Supabase purge worker that removes expired temporary release files from private Storage after the 48-hour window while retaining the permanent request and audit history.
 - **Administration — Open Records Records-Custodian Workspace**: Added a First Lieutenant+ Administration workspace for acknowledgment, fee assessment, payment confirmation, collection, redaction/legal review, file upload, release, denial, and permanent request history.
+- **Administration — Open Records Dedicated Request Screens**: Added dedicated Records Custodian request pages so the Administration queue stays compact and each ORR opens into its own full workflow screen.
 - **Records Law — San Andreas Open Records Act**: Added OCSA § 50-18-70 et seq. to the Code of San Andreas as a Government Transparency Act outside the felony, misdemeanor, and infraction classifications. Georgia material remains development/reference context rather than public ORR-page content.
 - **Recruitment — Employment Offers and Closure**: Added employment-offer handling, recruitment closure behavior, and tracking-expiration support so completed candidate cases can close cleanly without losing their history.
 - **Personnel — Promotion Review Workflow**: Added structured promotion review and required approved promotion review before rank increases are finalized.
@@ -34,12 +35,14 @@ This file is the authoritative development history for the Los Santos County She
 - **Personnel Records — Document Classification Headers**: Added distinct running PDF labels for INTERNAL PERSONNEL RECORD, INTER-AGENCY PERSONNEL PACKET, and OPEN RECORDS RELEASE COPY so separated pages retain their release classification.
 - **Open Records — OCSA Public Response Model**: Public requester pages now present only the operational San Andreas requirements: a 72-hour initial determination, any assessed in-city fee, release status, lawful withholding/redaction, and the 48-hour download window. Detailed statutory information is linked to the published Open Records Act instead of reproduced across the page.
 - **Open Records — Records Custodian Authority**: Restricted LSCSO completion authority to Sheriff, Undersheriff, Major, Captain, and 1st Lieutenant. Lower ranks may assist but cannot assess fees, confirm payment, approve withholding, deny, or publish a release.
+- **Open Records — Custodian Legal Citation Prompt**: Kept the operational custodian workflow focused on OCSA and other controlling San Andreas authority rather than showing Georgia-development reference language in the request UI.
 - **Recruitment — Applicant Dispositions**: Clarified applicant disposition reasons and status semantics so closures and adverse outcomes preserve a clearer historical explanation.
 - **Personnel History — Record Continuity**: Extended promotion, rehire/reinstatement, training, and Guardian workflows around the existing permanent personnel record instead of creating duplicate records.
 
 ### Fixed
 - **Public Site — Open Records Navigation**: Integrated Open Records directly into the primary desktop and mobile navigation and removed the separate public-services strip that caused clipping and overlap on mobile.
 - **Public Site — Open Records Readability**: Removed the dense dual-law cards and corrected heading/text contrast on light Open Records surfaces so public headings no longer render as low-contrast white text.
+- **Public Site — Open Records Act Button Contrast**: Reworked the Open Records Act links on the public intake and private request-status pages into high-contrast dark/gold buttons so they remain clearly visible on the light background.
 - **Personnel Records — Mobile Section Navigation**: Made the personnel-record section tabs horizontally swipeable on mobile so Overview, Administration, Training & Certifications, Accountability, Recognition, Documents, and Service History remain reachable instead of being clipped off-screen.
 - **Open Records — Tracking Token Crypto**: Corrected the secured public-submission RPC to resolve pgcrypto from the Supabase extensions schema so private request keys generate reliably while only their SHA-256 hashes are retained.
 

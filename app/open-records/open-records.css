@@ -11,6 +11,10 @@
 .open-records-intro__copy h2 { margin:6px 0 12px; }
 .open-records-intro__copy>p:not(.section-kicker) { margin:0; color:#5f5a51; line-height:1.65; }
 .open-records-law-link { margin-top:20px; }
+.open-records-law-link.button,
+.open-records-status-actions .button { display:inline-flex; align-items:center; justify-content:center; width:max-content; min-height:48px; padding:0 20px; border:1px solid #8f7636 !important; background:#171914 !important; color:#f5d978 !important; box-shadow:0 6px 16px rgba(31,33,30,.16); font-weight:800; letter-spacing:.045em; text-decoration:none; }
+.open-records-law-link.button:hover,
+.open-records-status-actions .button:hover { border-color:#b99d50 !important; background:#24271f !important; color:#ffe58b !important; }
 .open-records-summary { display:grid; gap:10px; }
 .open-records-summary article { display:grid; gap:4px; padding:16px 18px; border:1px solid rgba(77,62,43,.14); background:#fff; }
 .open-records-summary strong { color:#6c5925; font-size:.84rem; letter-spacing:.035em; text-transform:uppercase; }
@@ -88,5 +92,5 @@
   .open-records-status-hero { align-items:stretch; flex-direction:column; padding:20px; }
   .open-records-status-badge { min-width:0; text-align:left; }
   .open-records-status-page { padding-top:24px; }
-  .open-records-status-actions .button { width:100%; justify-content:center; }
+  .open-records-law-link.button,.open-records-status-actions .button { width:100%; box-sizing:border-box; }
 }
