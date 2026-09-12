@@ -81,7 +81,7 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
     <div className="open-records-status-workspace">
       <section className="open-records-status-hero">
         <div>
-          <p className="section-kicker section-kicker--dark">Private Request Status</p>
+          <p className="section-kicker">Private Request Status</p>
           <h1>ORR-{String(request.request_number).padStart(5, "0")}</h1>
           <p>{request.requester_name} · Discord: {request.requester_discord}</p>
         </div>
@@ -98,25 +98,25 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
       {paymentRequired ? <section className="open-records-status-notice is-payment"><strong>In-city payment required</strong><p>LSCSO has assessed a fee of {formatMoney(request.fee_amount)}. Processing will remain paused until payment is made in city and confirmed by an authorized Records Custodian.</p></section> : null}
 
       <section className="open-records-status-card">
-        <div className="open-records-form-heading"><p className="section-kicker section-kicker--dark">Original Request</p><h2>Records requested</h2></div>
+        <div className="open-records-form-heading"><p className="section-kicker">Original Request</p><h2>Records requested</h2></div>
         {(request.subject_name || request.subject_personnel_id) ? <p className="open-records-status-subject"><strong>Subject:</strong> {request.subject_name || "Not specified"}{request.subject_personnel_id ? ` · ${request.subject_personnel_id}` : ""}</p> : null}
         <p className="open-records-status-description">{request.records_description}</p>
       </section>
 
       {(request.response_summary || request.withholding_authority) ? <section className="open-records-status-card">
-        <div className="open-records-form-heading"><p className="section-kicker section-kicker--dark">Custodian Determination</p><h2>Release decision</h2></div>
+        <div className="open-records-form-heading"><p className="section-kicker">Custodian Determination</p><h2>Release decision</h2></div>
         {request.response_summary ? <p>{request.response_summary}</p> : null}
         {request.withholding_authority ? <div className="open-records-status-legal"><strong>Withholding / redaction authority</strong><p>{request.withholding_authority}</p></div> : null}
       </section> : null}
 
       {request.release_available_at ? <section className="open-records-status-card open-records-status-release">
-        <div className="open-records-form-heading"><p className="section-kicker section-kicker--dark">Electronic Release</p><h2>{releaseCountdown === "Expired" ? "Release window expired" : "Your released records"}</h2></div>
+        <div className="open-records-form-heading"><p className="section-kicker">Electronic Release</p><h2>{releaseCountdown === "Expired" ? "Release window expired" : "Your released records"}</h2></div>
         <p>Released {formatDate(request.release_available_at)}. Temporary release copies remain available for 48 hours and are then removed from active release storage.</p>
         {activeFiles.length ? <div className="open-records-download-list">{activeFiles.map((file) => <a href={file.download_url!} key={file.id} target="_blank" rel="noreferrer"><span><strong>{file.file_name}</strong><small>{[file.mime_type, formatBytes(file.size_bytes)].filter(Boolean).join(" · ")}</small></span><b>Download</b></a>)}</div> : <div className="open-records-status-notice"><strong>{releaseCountdown === "Expired" ? "Files are no longer available." : "No downloadable release files are currently available."}</strong><p>{releaseCountdown === "Expired" ? "The 48-hour release window has ended. The permanent request history remains on file, but temporary release copies are removed from active storage." : "If LSCSO has marked this request released, refresh this page after the files finish publishing."}</p></div>}
       </section> : null}
 
       <div className="open-records-status-actions">
-        <a className="button button--outline" href={OPEN_RECORDS_ACT_URL} target="_blank" rel="noreferrer">View Open Records Act</a>
+        <a className="route-link route-link--gold" href={OPEN_RECORDS_ACT_URL} target="_blank" rel="noreferrer"><span>View Open Records Act</span><span aria-hidden="true">↗</span></a>
       </div>
     </div>
   );

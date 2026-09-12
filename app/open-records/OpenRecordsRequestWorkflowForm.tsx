@@ -74,13 +74,13 @@ export function OpenRecordsRequestWorkflowForm() {
     const trackingHref = `/open-records/status/${encodeURIComponent(result.tracking_token)}`;
     return (
       <section className="open-records-success" aria-live="polite">
-        <p className="section-kicker section-kicker--dark">Request Received</p>
-        <h2>Your Open Records Request is active.</h2>
+        <p className="section-kicker">Request Received</p>
+        <h2>Your request is active.</h2>
         <strong>ORR-{String(result.request_number).padStart(5, "0")}</strong>
         <p>Your private tracking page shows the response deadline, assessed fee, payment status, release decision, and any files LSCSO makes available.</p>
         <div className="page-actions">
-          <a className="button button--dark" href={trackingHref}>Open My Request</a>
-          <button className="button button--outline" type="button" onClick={() => void copyTrackingLink()}>{trackingCopied ? "Tracking Link Copied" : "Copy Private Tracking Link"}</button>
+          <a className="route-link route-link--gold" href={trackingHref}><span>Open My Request</span><span aria-hidden="true">↗</span></a>
+          <button className="route-link route-link--outline open-records-action" type="button" onClick={() => void copyTrackingLink()}><span>{trackingCopied ? "Tracking Link Copied" : "Copy Private Tracking Link"}</span><span aria-hidden="true">↗</span></button>
         </div>
         <div className="open-records-success__notice">
           <strong>Save this private link.</strong>
@@ -94,8 +94,11 @@ export function OpenRecordsRequestWorkflowForm() {
     <form className="open-records-form" onSubmit={submit}>
       <section className="open-records-form-card">
         <div className="open-records-form-heading">
-          <p className="section-kicker section-kicker--dark">Requester Information</p>
-          <h2>Who is requesting the records?</h2>
+          <span className="open-records-form-number">01</span>
+          <div>
+            <p className="section-kicker">Requester Information</p>
+            <h2>Who is requesting the records?</h2>
+          </div>
         </div>
         <div className="open-records-fields open-records-fields--two">
           <label>First name<input name="first_name" required maxLength={100} /></label>
@@ -109,9 +112,12 @@ export function OpenRecordsRequestWorkflowForm() {
 
       <section className="open-records-form-card">
         <div className="open-records-form-heading">
-          <p className="section-kicker section-kicker--dark">Records Requested</p>
-          <h2>What records are you looking for?</h2>
-          <p>Be specific enough for LSCSO to locate the records. Include names, approximate dates, incident numbers, or other identifying details when available.</p>
+          <span className="open-records-form-number">02</span>
+          <div>
+            <p className="section-kicker">Records Requested</p>
+            <h2>What records are you looking for?</h2>
+            <p>Be specific enough for LSCSO to locate the records. Include names, approximate dates, incident numbers, or other identifying details when available.</p>
+          </div>
         </div>
         <div className="open-records-fields open-records-fields--two">
           <label>Personnel member / subject <span>(optional)</span><input name="subject_name" maxLength={160} placeholder="Name of deputy or other subject" /></label>
@@ -132,7 +138,7 @@ export function OpenRecordsRequestWorkflowForm() {
 
       {error ? <p className="open-records-error" role="alert">{error}</p> : null}
       <div className="open-records-submit-row">
-        <button className="button button--dark" type="submit" disabled={submitting || !acknowledged}>{submitting ? "Submitting…" : "Submit Open Records Request"}</button>
+        <button className="route-link route-link--gold open-records-action" type="submit" disabled={submitting || !acknowledged}><span>{submitting ? "Submitting…" : "Submit Open Records Request"}</span><span aria-hidden="true">↗</span></button>
         <span>A private tracking link is created immediately after successful submission.</span>
       </div>
     </form>
