@@ -15,6 +15,7 @@ const mobilePrimaryNavigation = [
   { href: "/", label: "Home", detail: "LSCSO overview" },
   { href: "/about", label: "About", detail: "Mission, values & service" },
   { href: "/office-of-the-sheriff", label: "Office of the Sheriff", detail: "Executive leadership" },
+  { href: "/open-records", label: "Open Records", detail: "Request public records & track releases" },
 ];
 
 export function SiteHeader() {
@@ -92,6 +93,7 @@ export function SiteHeader() {
             </div>
           </details>
 
+          <Link href="/open-records">Open Records</Link>
           <Link href="/join">Join LSCSO</Link>
           <Link href="/portal">Personnel Portal</Link>
         </nav>
