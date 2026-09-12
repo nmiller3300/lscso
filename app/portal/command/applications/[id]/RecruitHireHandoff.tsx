@@ -52,9 +52,6 @@ export function RecruitHireHandoff({
           <div><p>Recruit appointment</p><h2>Recruit personnel record created</h2></div>
           <span>Complete</span>
         </div>
-        <p>
-          The applicant has been added to LSCSO personnel as a Recruit. No FiveM, QBox, or computer-system link was created.
-        </p>
         {createdPersonnelId ? <p><strong>Personnel ID:</strong> {createdPersonnelId}</p> : null}
       </section>
     );
@@ -64,31 +61,13 @@ export function RecruitHireHandoff({
     <>
       <section className="portal-panel recruitment-hire-handoff recruitment-hire-handoff--ready">
         <div className="portal-panel-heading">
-          <div>
-            <p>Final Recruit appointment</p>
-            <h2>Interview passed — Recruit personnel record ready</h2>
-          </div>
+          <div><p>Final Recruit appointment</p><h2>Employment offer accepted</h2></div>
           <span>Ready to appoint</span>
         </div>
-        <p>
-          This is the actual website hiring action. It creates an LSCSO personnel record for {applicantName} at the rank of Recruit.
-          Computer/FiveM integration is currently disabled and is not part of this action.
-        </p>
         {error ? <p className="application-error" role="alert">{error}</p> : null}
-        <div className="recruitment-interview-actions">
-          <button
-            className="portal-button portal-button--primary"
-            type="button"
-            disabled={busy}
-            onClick={() => {
-              setError("");
-              setConfirmOpen(true);
-            }}
-          >
-            Create Recruit Personnel Record
-          </button>
-          <span className="is-ready">Passed interview requirement satisfied</span>
-        </div>
+        <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => { setError(""); setConfirmOpen(true); }}>
+          Create Recruit Personnel Record
+        </button>
       </section>
 
       <PortalDialog
@@ -96,13 +75,13 @@ export function RecruitHireHandoff({
         onClose={() => { if (!busy) setConfirmOpen(false); }}
         eyebrow="Final hiring action"
         title={`Appoint ${applicantName} as an LSCSO Recruit?`}
-        description="This creates the permanent website personnel record. It does not connect to FiveM or the computer script. After it succeeds, this application can no longer be deleted as a disposable test submission."
+        description="Creates the LSCSO personnel record. FiveM/computer integration remains disabled."
         dismissOnBackdrop={!busy}
         footer={
           <>
             <button className="portal-button portal-button--secondary" type="button" disabled={busy} onClick={() => setConfirmOpen(false)}>Cancel</button>
             <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => void createRecruit()}>
-              {busy ? "Creating Recruit…" : "Confirm Recruit Appointment"}
+              {busy ? "Creating…" : "Confirm Recruit Appointment"}
             </button>
           </>
         }
@@ -110,8 +89,8 @@ export function RecruitHireHandoff({
         <div className="recruitment-decision-review">
           <div><span>Applicant</span><strong>{applicantName}</strong></div>
           <div><span>Portal rank</span><strong>Recruit</strong></div>
-          <div><span>Computer / FiveM action</span><strong>None</strong></div>
-          <p><strong>Testing?</strong> If you only want to inspect the Passed applicant view, stop here and use the Sheriff/Undersheriff delete control instead of creating a personnel record.</p>
+          <div><span>Employment offer</span><strong>Signed & accepted</strong></div>
+          <div><span>FiveM / computer action</span><strong>None</strong></div>
           {error ? <p className="application-error" role="alert">{error}</p> : null}
         </div>
       </PortalDialog>
