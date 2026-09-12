@@ -7,6 +7,7 @@ import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord 
 import "../../application.css";
 import "./status.css";
 import "./communications.css";
+import "./offer.css";
 
 export const metadata: Metadata = {
   title: "Application Status",
@@ -38,7 +39,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
             <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={140} height={140} priority />
             <p>LSCSO Recruitment</p>
             <h1>Private status link unavailable.</h1>
-            <span>This tracking link is invalid, incomplete, or no longer associated with an active candidate record.</span>
+            <span>This tracking link is invalid, expired, incomplete, or no longer associated with an active candidate record.</span>
             <Link className="button" href="/join">Return to Join LSCSO</Link>
           </div>
         </section>
@@ -50,5 +51,5 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
     p_tracking_token_hash: tokenHash,
   });
   const applicantMessages = (Array.isArray(messageData) ? messageData : []) as ApplicantMessage[];
-  return <ApplicantStatusView record={record} applicantMessages={applicantMessages} />;
+  return <ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} />;
 }
