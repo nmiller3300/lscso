@@ -3,7 +3,6 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { MaintenanceNotice } from "./MaintenanceNotice";
-import { PublicServicesNav } from "./PublicServicesNav";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { StatewideJurisdictionAlert } from "./StatewideJurisdictionAlert";
@@ -19,7 +18,6 @@ export function PublicSiteFrame({ children }: { children: ReactNode }) {
     <>
       <MaintenanceNotice scope="public_site" variant="public" />
       <SiteHeader />
-      <PublicServicesNav />
       <StatewideJurisdictionAlert />
       <main>{children}</main>
       <SiteFooter />
