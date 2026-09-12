@@ -88,6 +88,8 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const isClosed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
   const offer = application.latest_offer ?? null;
+  const offerExpired = Boolean(offer?.status === "Pending" && offer?.expires_at && new Date(offer.expires_at).getTime() <= Date.now());
+  const offerStatus = offerExpired ? "Expired" : offer?.status ?? null;
   const offerAccepted = offer?.status === "Accepted";
   const interviewPassed = application.interview_status === "Passed";
   const hireEligible = isAccepted && interviewPassed && offerAccepted && !isHired;
@@ -99,11 +101,13 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
     ? "Selection process closed."
     : isAccepted && interviewPassed && offerAccepted && !isHired
       ? "Complete Recruit appointment."
-      : isAccepted && interviewPassed && offer?.status === "Pending"
-        ? "Await applicant employment-offer signature."
-        : isAccepted && interviewPassed && !offer
-          ? "Issue employment offer."
-          : applicationNextAction(application.status, application.interview_status, isHired);
+      : isAccepted && interviewPassed && offerExpired
+        ? "Employment offer expired — terminate the offer or close the process."
+        : isAccepted && interviewPassed && offer?.status === "Pending"
+          ? "Await applicant employment-offer signature."
+          : isAccepted && interviewPassed && !offer
+            ? "Issue employment offer."
+            : applicationNextAction(application.status, application.interview_status, isHired);
 
   return (
     <div className="recruitment-review recruitment-review--workflow">
@@ -121,7 +125,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
           <div><dt>Application</dt><dd><b className={`recruitment-status recruitment-status--${application.status.toLowerCase().replaceAll(" ", "-")}`}>{isClosed ? "Closed" : applicationStatusLabel(application.status)}</b></dd></div>
           <div><dt>Assigned reviewer</dt><dd>{names[application.reviewer_profile_id] ?? "Unassigned"}</dd></div>
           <div><dt>Interview</dt><dd>{application.interview_status ?? "Not Scheduled"}</dd></div>
-          <div><dt>Employment offer</dt><dd>{offer?.status ?? "Not issued"}</dd></div>
+          <div><dt>Employment offer</dt><dd>{offerStatus ?? "Not issued"}</dd></div>
           <div><dt>Recruit record</dt><dd>{isHired ? "Created" : "Not created"}</dd></div>
         </dl>
       </section>
