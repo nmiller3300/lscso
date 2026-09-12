@@ -25,6 +25,7 @@ import "./portal-ux-integrations.css";
 import "./portal-legacy-dialog-bridge.css";
 import "./fivem-pairing.css";
 import "./portal-copy-compact.css";
+import "./training-operations.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
