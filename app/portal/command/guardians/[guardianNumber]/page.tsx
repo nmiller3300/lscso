@@ -7,6 +7,23 @@ type GuardianRecordPageProps = {
   params: Promise<{ guardianNumber: string }>;
 };
 
+const evaluationRatingLabels: Record<string, string> = {
+  professional_conduct: "Professional Conduct",
+  policy_knowledge: "Policy Knowledge",
+  communication: "Communication",
+  judgment_decision_making: "Judgment & Decision-Making",
+  report_documentation: "Reports & Documentation",
+  officer_safety_tactics: "Officer Safety & Tactics",
+  initiative_reliability: "Initiative & Reliability",
+  teamwork_leadership: "Teamwork & Leadership",
+};
+
+function dateLabel(value: unknown) {
+  const text = String(value ?? "");
+  if (!text) return "Not recorded";
+  return new Date(text.length === 10 ? `${text}T12:00:00` : text).toLocaleDateString();
+}
+
 export default async function GuardianRecordPage({ params }: GuardianRecordPageProps) {
   const { guardianNumber } = await params;
   const numeric = Number(guardianNumber);
@@ -21,13 +38,18 @@ export default async function GuardianRecordPage({ params }: GuardianRecordPageP
     supabase.from("personnel_profiles").select("display_name,rank,call_sign").eq("id", record.author_profile_id).maybeSingle(),
   ]);
 
+  const isEvaluation = record.record_type === "Performance Evaluation";
+  const fields = record.structured_fields && typeof record.structured_fields === "object" ? record.structured_fields as Record<string, any> : {};
+  const ratings = fields.ratings && typeof fields.ratings === "object" ? fields.ratings as Record<string, number> : {};
+  const ratingEntries = Object.entries(evaluationRatingLabels).map(([key, label]) => ({ key, label, value: Number(ratings[key] ?? 0) }));
+
   return (
     <PortalShell
       active="guardians"
       eyebrow={`Guardian G-${String(record.guardian_number).padStart(4, "0")}`}
       title={record.title}
       description={`${record.record_type} · ${record.status}`}
-      actions={<><Link className="portal-button portal-button--secondary" href="/portal/command/guardians">Back to Guardians</Link><Link className="portal-button portal-button--primary" href="/portal/command/guardians/manage">Open management</Link></>}
+      actions={<><Link className="portal-button portal-button--secondary" href="/portal/command/guardians">Back to Guardians</Link><Link className="portal-button portal-button--primary" href={isEvaluation ? "/portal/command/guardians/evaluations" : "/portal/command/guardians/manage"}>{isEvaluation ? "Open evaluations" : "Open management"}</Link></>}
     >
       <div className="command-v2-workspace-grid">
         <section className="portal-panel command-v2-launcher">
@@ -35,27 +57,58 @@ export default async function GuardianRecordPage({ params }: GuardianRecordPageP
           <p className="command-v2-compact-copy">{subject?.rank ?? ""}{subject?.call_sign ? ` · ${subject.call_sign}` : ""}</p>
         </section>
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Issued by</p><h2>{author?.display_name ?? "Department personnel"}</h2></div></div>
+          <div className="portal-panel-heading"><div><p>{isEvaluation ? "Evaluated by" : "Issued by"}</p><h2>{author?.display_name ?? "Department personnel"}</h2></div></div>
           <p className="command-v2-compact-copy">{author?.rank ?? ""}{author?.call_sign ? ` · ${author.call_sign}` : ""}</p>
         </section>
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Status</p><h2>{record.status}</h2></div></div>
-          <p className="command-v2-compact-copy">Incident {new Date(record.incident_at).toLocaleString()}</p>
+          <p className="command-v2-compact-copy">{isEvaluation ? `Issued ${new Date(record.issued_at ?? record.created_at).toLocaleString()}` : `Incident ${new Date(record.incident_at).toLocaleString()}`}</p>
         </section>
       </div>
 
-      <section className="portal-panel command-v2-record-body">
-        <div className="portal-panel-heading"><div><p>Guardian record</p><h2>Record details</h2></div></div>
-        <dl className="command-v2-record-detail-list">
-          {record.location ? <><dt>Location</dt><dd>{record.location}</dd></> : null}
-          {record.policy_reference ? <><dt>Policy reference</dt><dd>{record.policy_reference}</dd></> : null}
-          {record.observed_behavior ? <><dt>Observed behavior</dt><dd>{record.observed_behavior}</dd></> : null}
-          {record.expected_standard ? <><dt>Expected standard</dt><dd>{record.expected_standard}</dd></> : null}
-          {record.action_taken ? <><dt>Action taken</dt><dd>{record.action_taken}</dd></> : null}
-          {record.follow_up_plan ? <><dt>Follow-up</dt><dd>{record.follow_up_plan}</dd></> : null}
-          {record.employee_response ? <><dt>Employee response</dt><dd>{record.employee_response}</dd></> : null}
-        </dl>
-      </section>
+      {isEvaluation ? (
+        <>
+          <section className="deputy-summary-grid command-v2-record-metrics" style={{ marginTop: 16 }}>
+            <article><span>Evaluation type</span><strong>{String(fields.evaluation_kind ?? "Performance")}</strong><small>Guardian performance record</small></article>
+            <article><span>Review period</span><strong>{dateLabel(fields.period_start)}</strong><small>through {dateLabel(fields.period_end)}</small></article>
+            <article><span>Overall rating</span><strong>{Number(fields.overall_average ?? 0).toFixed(2)}</strong><small>{String(fields.overall_rating ?? "Not rated")}</small></article>
+            <article><span>Disciplinary points</span><strong>00</strong><small>Non-disciplinary evaluation</small></article>
+          </section>
+
+          <section className="portal-panel" style={{ marginTop: 16 }}>
+            <div className="portal-panel-heading"><div><p>1–5 scale</p><h2>Performance ratings</h2></div><span>{String(fields.overall_rating ?? "")}</span></div>
+            <div className="portal-form-grid" style={{ marginTop: 14 }}>
+              {ratingEntries.map((rating) => <div className="command-v2-inline-state" key={rating.key}><strong>{rating.label}</strong><span>{rating.value || "—"} / 5{rating.value ? ` · ${rating.value === 1 ? "Unsatisfactory" : rating.value === 2 ? "Needs Improvement" : rating.value === 3 ? "Meets Expectations" : rating.value === 4 ? "Exceeds Expectations" : "Exceptional"}` : ""}</span></div>)}
+            </div>
+          </section>
+
+          <section className="portal-panel command-v2-record-body" style={{ marginTop: 16 }}>
+            <div className="portal-panel-heading"><div><p>Supervisor assessment</p><h2>Evaluation narrative</h2></div></div>
+            <dl className="command-v2-record-detail-list">
+              <dt>Overall assessment</dt><dd>{String(fields.supervisor_summary ?? record.observed_behavior ?? "Not recorded")}</dd>
+              <dt>Strengths</dt><dd>{String(fields.strengths ?? record.action_taken ?? "Not recorded")}</dd>
+              <dt>Improvement areas</dt><dd>{String(fields.improvement_areas ?? record.expected_standard ?? "Not recorded")}</dd>
+              <dt>Goals / next-period expectations</dt><dd>{String(fields.goals ?? record.follow_up_plan ?? "Not recorded")}</dd>
+              {record.follow_up_due_at ? <><dt>Follow-up date</dt><dd>{new Date(record.follow_up_due_at).toLocaleString()}</dd></> : null}
+              {record.employee_response ? <><dt>Member response</dt><dd>{record.employee_response}</dd></> : null}
+              {record.acknowledged_at ? <><dt>Acknowledged</dt><dd>{new Date(record.acknowledged_at).toLocaleString()} · Receipt only, not agreement</dd></> : null}
+            </dl>
+          </section>
+        </>
+      ) : (
+        <section className="portal-panel command-v2-record-body">
+          <div className="portal-panel-heading"><div><p>Guardian record</p><h2>Record details</h2></div></div>
+          <dl className="command-v2-record-detail-list">
+            {record.location ? <><dt>Location</dt><dd>{record.location}</dd></> : null}
+            {record.policy_reference ? <><dt>Policy reference</dt><dd>{record.policy_reference}</dd></> : null}
+            {record.observed_behavior ? <><dt>Observed behavior</dt><dd>{record.observed_behavior}</dd></> : null}
+            {record.expected_standard ? <><dt>Expected standard</dt><dd>{record.expected_standard}</dd></> : null}
+            {record.action_taken ? <><dt>Action taken</dt><dd>{record.action_taken}</dd></> : null}
+            {record.follow_up_plan ? <><dt>Follow-up</dt><dd>{record.follow_up_plan}</dd></> : null}
+            {record.employee_response ? <><dt>Employee response</dt><dd>{record.employee_response}</dd></> : null}
+          </dl>
+        </section>
+      )}
     </PortalShell>
   );
 }
