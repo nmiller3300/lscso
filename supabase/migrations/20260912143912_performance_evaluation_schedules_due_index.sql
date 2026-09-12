@@ -1,0 +1,1 @@
+create index performance_evaluation_schedules_due_idx on public.performance_evaluation_schedules(active,next_due_on);

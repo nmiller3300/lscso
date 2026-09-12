@@ -1,0 +1,1 @@
+create unique index performance_evaluation_schedules_one_active_kind on public.performance_evaluation_schedules(subject_profile_id,evaluation_kind) where active;

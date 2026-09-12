@@ -1,0 +1,21 @@
+create table public.performance_evaluation_schedules (
+  id uuid primary key default gen_random_uuid(),
+  subject_profile_id uuid not null references public.personnel_profiles(id),
+  evaluation_kind text not null,
+  assigned_reviewer_profile_id uuid not null references public.personnel_profiles(id),
+  next_due_on date not null,
+  cadence_months smallint null,
+  command_review_required boolean not null default false,
+  notes text null,
+  active boolean not null default true,
+  completion_count integer not null default 0,
+  last_completed_guardian_id uuid null references public.guardian_records(id),
+  last_completed_at timestamptz null,
+  last_reminded_on date null,
+  cancelled_at timestamptz null,
+  cancelled_by_profile_id uuid null references public.personnel_profiles(id),
+  cancellation_reason text null,
+  created_by_profile_id uuid not null references public.personnel_profiles(id),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);

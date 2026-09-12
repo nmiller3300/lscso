@@ -1,0 +1,1 @@
+alter table public.performance_evaluation_schedules add constraint performance_evaluation_schedule_kind_check check (evaluation_kind in ('Routine','Probationary','Annual','Promotion Readiness','Special'));
