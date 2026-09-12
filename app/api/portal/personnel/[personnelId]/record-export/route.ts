@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { buildPersonnelRecordPdf } from "@/lib/pdf/simple-personnel-pdf";
+import {
+  GEORGIA_EXEMPTION_RULE,
+  GEORGIA_OPEN_RECORDS_CITATION,
+  GEORGIA_OPEN_RECORDS_QUOTE,
+  GEORGIA_RESPONSE_RULE,
+  SAN_ANDREAS_EXEMPTION_RULE,
+  SAN_ANDREAS_OPEN_RECORDS_CITATION,
+  SAN_ANDREAS_OPEN_RECORDS_QUOTE,
+  SAN_ANDREAS_RESPONSE_RULE,
+} from "@/lib/open-records/legal";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 
 const allowedTiers = new Set(["Executive", "Command"]);
 const validSections = new Set(["career", "assignments", "certifications", "training", "awards", "guardians", "administrative"]);
-const openRecordsSections = new Set(["career", "assignments", "certifications", "training", "awards"]);
 const evaluationLabels: Record<string, string> = {
   professional_conduct: "Professional Conduct",
   policy_knowledge: "Policy Knowledge",
@@ -19,20 +28,26 @@ const evaluationLabels: Record<string, string> = {
 };
 
 const exportProfiles = {
-  lateral: {
-    label: "Lateral Transfer Personnel File",
-    filename: "Lateral-Transfer-Personnel-File",
-    publicRelease: false,
-  },
   normal: {
     label: "Normal Personnel File",
     filename: "Personnel-File",
     publicRelease: false,
+    internalMetadata: true,
+    allowedSections: ["career", "assignments", "certifications", "training", "awards", "guardians", "administrative"],
+  },
+  lateral: {
+    label: "Lateral Transfer Personnel File",
+    filename: "Lateral-Transfer-Personnel-File",
+    publicRelease: false,
+    internalMetadata: false,
+    allowedSections: ["career", "assignments", "certifications", "training", "awards", "guardians"],
   },
   "open-records": {
     label: "Open Records Request Personnel File",
     filename: "Open-Records-Release-Copy",
     publicRelease: true,
+    internalMetadata: false,
+    allowedSections: ["career", "assignments", "certifications", "training", "awards"],
   },
 } as const;
 
@@ -70,12 +85,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
     .split(",")
     .map((value) => value.trim())
     .filter((value) => validSections.has(value));
-
-  let sections = requested.length ? requested : Array.from(validSections);
-  if (profile.publicRelease) {
-    sections = sections.filter((value) => openRecordsSections.has(value));
-    if (!sections.length) sections = Array.from(openRecordsSections);
-  }
+  const allowedForProfile = new Set<string>(profile.allowedSections);
+  let sections = requested.filter((value) => allowedForProfile.has(value));
+  if (!sections.length) sections = [...profile.allowedSections];
 
   const supabase = await createClient() as any;
   const { data: member, error: memberError } = await supabase
@@ -110,41 +122,61 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
         { text: "OPEN RECORDS RELEASE COPY", bold: true, size: 11, spaceAfter: 4 },
         { text: `ATTENTION: ${recipient}`, bold: true, size: 10, spaceAfter: 2 },
         { text: `This personnel record concerns the following individual: ${member.display_name} (${member.personnel_id}).`, spaceAfter: 4 },
-        { text: "This copy was prepared for open-records/public-records release review. Internal Guardian records and administrative flags are excluded from this release profile, and narrative notes are omitted from the included personnel-history sections.", spaceAfter: 4 },
-        { text: "Information may still require redaction or withholding where authorized or required by applicable law. The releasing official must complete a final releasability and redaction review before external disclosure. This export does not independently determine that every included field is legally releasable.", spaceAfter: 4 },
+        { text: "This copy is a public-release review profile. Guardian/accountability records, administrative flags, internal Portal/access information, and internal narrative notes are excluded from this generated copy.", spaceAfter: 4 },
+        { text: "A records custodian must still conduct a final releasability and redaction review before disclosure. This export is a review aid and does not independently determine that every included field is legally releasable.", spaceAfter: 4 },
       ]
-    : [
-        { text: `ATTENTION: ${recipient}`, bold: true, size: 11, spaceAfter: 4 },
-        { text: `This personnel file concerns the following individual: ${member.display_name} (${member.personnel_id}).`, spaceAfter: 4 },
-        { text: "OFFICIAL USE / CONTROLLED PERSONNEL INFORMATION", bold: true, size: 9.5, spaceAfter: 3 },
-        { text: "This file may contain confidential, sensitive, or legally protected information. It is provided for official departmental purposes and should not be redistributed or disclosed outside authorized departmental communications except as required or permitted by law and departmental policy.", spaceAfter: 4 },
-        { text: "Requests from members of the public for access to this personnel file must be processed through the applicable open-records/public-records request process. Do not use this departmental copy as a substitute for an official public-release review.", spaceAfter: 4 },
-      ];
+    : exportType === "lateral"
+      ? [
+          { text: `ATTENTION: ${recipient}`, bold: true, size: 11, spaceAfter: 4 },
+          { text: `This lateral-transfer personnel file concerns: ${member.display_name} (${member.personnel_id}).`, spaceAfter: 4 },
+          { text: "INTER-AGENCY EMPLOYMENT / BACKGROUND REVIEW", bold: true, size: 9.5, spaceAfter: 3 },
+          { text: "This packet contains department service, qualification, training, recognition, and non-draft accountability history selected for authorized inter-agency employment review. Internal administrative flags and Portal/access-control metadata are not part of this transfer profile.", spaceAfter: 4 },
+          { text: "This file may contain confidential, sensitive, or legally protected information. Do not redistribute it outside authorized departmental/background-investigation channels except as permitted or required by law and policy.", spaceAfter: 4 },
+        ]
+      : [
+          { text: `ATTENTION: ${recipient}`, bold: true, size: 11, spaceAfter: 4 },
+          { text: `This internal personnel file concerns: ${member.display_name} (${member.personnel_id}).`, spaceAfter: 4 },
+          { text: "OFFICIAL USE / FULL INTERNAL PERSONNEL RECORD", bold: true, size: 9.5, spaceAfter: 3 },
+          { text: "This is the department's fuller internal personnel export and may include administrative flags, Guardian/accountability material, probation data, supervisory information, and internal access classification. It is not a pre-cleared public-release copy.", spaceAfter: 4 },
+          { text: "Requests from members of the public must be processed through the applicable open-records/public-records process. Do not use this internal copy as a substitute for a statutory release and redaction review.", spaceAfter: 4 },
+        ];
 
-  const summaryRows: Array<[string, string]> = profile.publicRelease
-    ? [
-        ["Personnel ID", member.personnel_id],
-        ["Name", member.display_name],
-        ["Rank", member.rank],
-        ["Call Sign", member.call_sign ?? "Not assigned"],
-        ["Status", member.status],
-        ["Division", member.division ?? "Not recorded"],
-      ]
-    : [
-        ["Personnel ID", member.personnel_id],
-        ["Name", member.display_name],
-        ["Rank", member.rank],
-        ["Call Sign", member.call_sign ?? "Not assigned"],
-        ["Status", member.status],
-        ["Division", member.division ?? "Not recorded"],
-        ["Supervisor", member.supervisor_label ?? "Not recorded"],
-        ["Portal Classification", member.access_tier],
-        ["Probation Start", date(member.probation_started_at)],
-        ["Probation End", date(member.probation_ends_at)],
-      ];
+  const legalLines = [
+    { text: "UNITED STATES / STATE OF GEORGIA", bold: true, size: 9.5, spaceAfter: 2 },
+    { text: GEORGIA_OPEN_RECORDS_CITATION, bold: true, spaceAfter: 2 },
+    { text: `Quoted statutory language: “${GEORGIA_OPEN_RECORDS_QUOTE}”`, spaceAfter: 3 },
+    { text: GEORGIA_RESPONSE_RULE, spaceAfter: 3 },
+    { text: GEORGIA_EXEMPTION_RULE, spaceAfter: 5 },
+    { text: "STATE OF SAN ANDREAS / ROLEPLAY ANALOG", bold: true, size: 9.5, spaceAfter: 2 },
+    { text: SAN_ANDREAS_OPEN_RECORDS_CITATION, bold: true, spaceAfter: 2 },
+    { text: `Quoted RP statutory language: “${SAN_ANDREAS_OPEN_RECORDS_QUOTE}”`, spaceAfter: 3 },
+    { text: SAN_ANDREAS_RESPONSE_RULE, spaceAfter: 3 },
+    { text: SAN_ANDREAS_EXEMPTION_RULE, spaceAfter: 3 },
+  ];
+
+  const publicSummary: Array<[string, string]> = [
+    ["Personnel ID", member.personnel_id],
+    ["Name", member.display_name],
+    ["Rank", member.rank],
+    ["Call Sign", member.call_sign ?? "Not assigned"],
+    ["Status", member.status],
+    ["Division", member.division ?? "Not recorded"],
+  ];
+  const lateralSummary: Array<[string, string]> = [
+    ...publicSummary,
+    ["Supervisor", member.supervisor_label ?? "Not recorded"],
+  ];
+  const internalSummary: Array<[string, string]> = [
+    ...lateralSummary,
+    ["Portal Classification", member.access_tier],
+    ["Probation Start", date(member.probation_started_at)],
+    ["Probation End", date(member.probation_ends_at)],
+  ];
+  const summaryRows = profile.publicRelease ? publicSummary : profile.internalMetadata ? internalSummary : lateralSummary;
 
   const pdfSections: any[] = [
     { title: profile.publicRelease ? "Release Notice" : "Transmittal Notice", lines: releaseNotice },
+    { title: "Legal Framework", lines: legalLines },
     { title: "Service Summary", lines: pairs(summaryRows) },
   ];
 
@@ -197,7 +229,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
   if (data.has("guardians")) {
     const guardianRows = data.get("guardians")!.filter((row: any) => row.structured_fields?.lifecycle_state !== "Scheduled");
     pdfSections.push({
-      title: "Guardian Record",
+      title: exportType === "lateral" ? "Accountability / Evaluation History" : "Guardian Record",
       lines: guardianRows.flatMap((row: any) => {
         if (row.record_type === "Performance Evaluation") {
           const fields = row.structured_fields && typeof row.structured_fields === "object" ? row.structured_fields : {};
@@ -241,20 +273,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ pers
 
   const generatedAt = new Date().toLocaleString("en-US", { year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const generatedBy = `${actor.rank} ${actor.display_name}`;
+  const purpose = `${profile.label} | Destination: ${recipient}`;
   const pdf = buildPersonnelRecordPdf({
     departmentName: "LOS SANTOS COUNTY SHERIFF'S OFFICE",
     title: `${profile.label} - ${member.display_name}`,
     subtitle: `${member.rank} | ${member.personnel_id} | ${member.call_sign ?? "No call sign"}`,
     generatedAt,
     generatedBy,
-    purpose: `${profile.label} | Destination: ${recipient}`,
+    purpose,
     sections: pdfSections,
   });
 
-  const auditPurpose = `${profile.label} | Destination: ${recipient}`;
   const { error: auditError } = await supabase.rpc("record_personnel_record_export", {
     p_subject_profile_id: member.id,
-    p_purpose: auditPurpose,
+    p_purpose: purpose,
     p_sections: sections,
   });
   if (auditError) console.error("[Personnel Record Export Audit]", auditError);
