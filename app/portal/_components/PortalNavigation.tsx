@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { usePortalProfile } from "./PortalProfileProvider";
 
-type ActivePortalView = "overview" | "personnel" | "supervision" | "training" | "promotions" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
+type ActivePortalView = "overview" | "personnel" | "supervision" | "training" | "promotions" | "orders" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
 type PortalNavigationProps = { active: ActivePortalView; audience: "command" | "deputy" };
 type NavigationItem = { id: ActivePortalView | "requests"; href: string; label: string; mobileLabel: string; glyph: string; section: string; detail: string; personal?: boolean; matches?: ActivePortalView[] };
 
@@ -19,6 +19,7 @@ const commandNavigation: NavigationItem[] = [
   { id:"applications",href:"/portal/command/applications",label:"Recruitment",mobileLabel:"Recruitment",glyph:"AP",section:"Command Work",detail:"Applications and hiring" },
   { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Operations",detail:"Guardians and oversight",matches:["guardians"] },
   { id:"training",href:"/portal/command/training",label:"Training & FTO",mobileLabel:"Training",glyph:"TR",section:"Operations",detail:"Training and FTO",matches:["certifications"] },
+  { id:"orders",href:"/portal/command/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
   { id:"psa",href:"/portal/command/psa",label:"Public Information",mobileLabel:"Public Info",glyph:"PS",section:"Department",detail:"PSAs and notices" },
   { id:"administration",href:"/portal/command/administration",label:"Administration",mobileLabel:"Admin",glyph:"AD",section:"Administration",detail:"Accounts and system tools",matches:["activity"] },
   myInfo,
@@ -28,9 +29,18 @@ const supervisorNavigation: NavigationItem[] = [
   { id:"supervision",href:"/portal/command/supervision",label:"My Personnel & Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Work",detail:"Assigned personnel",matches:["guardians"] },
   { id:"promotions",href:"/portal/command/promotions",label:"Promotion Recommendations",mobileLabel:"Promotions",glyph:"UP",section:"Work",detail:"Recommend personnel" },
   { id:"approvals",href:"/portal/command/approvals",label:"Assigned Requests",mobileLabel:"Requests",glyph:"RQ",section:"Work",detail:"Pending requests" },
-  { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Work",detail:"Training and qualifications",matches:["certifications"] }, myInfo,
+  { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Work",detail:"Training and qualifications",matches:["certifications"] },
+  { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Department directives" },
+  myInfo,
 ];
-const deputyNavigation: NavigationItem[] = [myInfo,{ id:"certifications",href:"/portal/my-office#certifications",label:"Certifications",mobileLabel:"Certs",glyph:"CE",section:"Personnel",detail:"Qualifications" },{ id:"awards",href:"/portal/my-office#awards",label:"Medals & awards",mobileLabel:"Awards",glyph:"AW",section:"Personnel",detail:"Recognition" },{ id:"guardians",href:"/portal/my-office#documents",label:"My Documents",mobileLabel:"Documents",glyph:"MD",section:"Personnel",detail:"Personnel documents" },{ id:"requests",href:"/portal/my-office#requests",label:"Requests & LOA",mobileLabel:"Requests",glyph:"RQ",section:"Personnel",detail:"Requests and leave" }];
+const deputyNavigation: NavigationItem[] = [
+  myInfo,
+  { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Personnel",detail:"Department directives" },
+  { id:"certifications",href:"/portal/my-office#certifications",label:"Certifications",mobileLabel:"Certs",glyph:"CE",section:"Personnel",detail:"Qualifications" },
+  { id:"awards",href:"/portal/my-office#awards",label:"Medals & awards",mobileLabel:"Awards",glyph:"AW",section:"Personnel",detail:"Recognition" },
+  { id:"guardians",href:"/portal/my-office#documents",label:"My Documents",mobileLabel:"Documents",glyph:"MD",section:"Personnel",detail:"Personnel documents" },
+  { id:"requests",href:"/portal/my-office#requests",label:"Requests & LOA",mobileLabel:"Requests",glyph:"RQ",section:"Personnel",detail:"Requests and leave" },
+];
 function itemIsActive(item: NavigationItem, active: ActivePortalView){return item.id===active||item.matches?.includes(active)===true}
 
 function PortalNavIcon({ id }: { id: NavigationItem["id"] | "more" }) {
@@ -38,6 +48,7 @@ function PortalNavIcon({ id }: { id: NavigationItem["id"] | "more" }) {
   if(id==="overview")return <svg {...common}><path d="M3.5 10.8 12 3.8l8.5 7"/><path d="M5.8 9.7v10h12.4v-10"/><path d="M9.5 19.7v-6h5v6"/></svg>;
   if(id==="personnel"||id==="record")return <svg {...common}><circle cx="12" cy="8" r="3.3"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/></svg>;
   if(id==="promotions")return <svg {...common}><path d="M5 18 12 6l7 12"/><path d="M8.5 14h7"/><path d="M12 6V3"/></svg>;
+  if(id==="orders")return <svg {...common}><path d="M6 3.5h9l3 3V20.5H6z"/><path d="M15 3.5v3h3"/><path d="M9 10h6M9 13.5h6M9 17h4"/></svg>;
   if(id==="supervision"||id==="guardians")return <svg {...common}><path d="M12 3.2 19 6v5.2c0 4.6-2.8 7.7-7 9.6-4.2-1.9-7-5-7-9.6V6l7-2.8Z"/><path d="m9 12 2 2 4-4"/></svg>;
   if(id==="training"||id==="certifications")return <svg {...common}><path d="m3.5 8.5 8.5-4 8.5 4-8.5 4-8.5-4Z"/><path d="M7 10.2v4.3c2.8 2.1 7.2 2.1 10 0v-4.3"/><path d="M20.5 8.5v5"/></svg>;
   if(id==="applications")return <svg {...common}><path d="M7 3.8h7l4 4V20H7z"/><path d="M14 3.8V8h4"/><path d="M10 12h5M10 15.5h5"/></svg>;
