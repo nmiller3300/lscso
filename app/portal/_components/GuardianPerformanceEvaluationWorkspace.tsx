@@ -5,359 +5,86 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
 
-type PersonnelOption = {
-  id: string;
-  personnelId: string;
-  displayName: string;
-  rank: string;
-  callSign: string | null;
-  division: string;
-  authorityLabel: string;
-};
+type PersonnelOption = { id:string; personnelId:string; displayName:string; rank:string; callSign:string|null; division:string; authorityLabel:string };
+type EvaluationRecord = { id:string; guardianNumber:number; subjectProfileId:string; subjectName:string; subjectPersonnelId:string; authorProfileId:string; authorName:string; status:string; title:string; issuedAt:string; followUpDueAt:string|null; acknowledgedAt:string|null; evaluationKind:string; periodStart:string; periodEnd:string; overallAverage:number; overallRating:string; commandReviewRequired:boolean; remediationRequired:boolean; remediationPlan:string; scheduleGuardianId:string|null };
+type ScheduleRecord = { id:string; guardianNumber:number; subjectProfileId:string; subjectName:string; subjectPersonnelId:string; authorProfileId:string; reviewerName:string; evaluationKind:string; nextDueOn:string; cadenceMonths:number|null; commandReviewRequired:boolean; notes:string; completionCount:number; active:boolean; lastCompletedAt:string|null };
+type RatingKey = "professionalConduct"|"policyKnowledge"|"communication"|"judgmentDecisionMaking"|"reportDocumentation"|"officerSafetyTactics"|"initiativeReliability"|"teamworkLeadership";
 
-type EvaluationRecord = {
-  id: string;
-  guardianNumber: number;
-  subjectProfileId: string;
-  subjectName: string;
-  subjectPersonnelId: string;
-  authorName: string;
-  status: string;
-  title: string;
-  issuedAt: string;
-  followUpDueAt: string | null;
-  acknowledgedAt: string | null;
-  evaluationKind: string;
-  periodStart: string;
-  periodEnd: string;
-  overallAverage: number;
-  overallRating: string;
-};
-
-type RatingKey =
-  | "professionalConduct"
-  | "policyKnowledge"
-  | "communication"
-  | "judgmentDecisionMaking"
-  | "reportDocumentation"
-  | "officerSafetyTactics"
-  | "initiativeReliability"
-  | "teamworkLeadership";
-
-const ratingFields: Array<{ key: RatingKey; label: string; detail: string }> = [
-  { key: "professionalConduct", label: "Professional Conduct", detail: "Integrity, demeanor, accountability" },
-  { key: "policyKnowledge", label: "Policy Knowledge", detail: "Department policy and procedure" },
-  { key: "communication", label: "Communication", detail: "Radio, interpersonal, chain of command" },
-  { key: "judgmentDecisionMaking", label: "Judgment & Decision-Making", detail: "Reasoning, discretion, sound decisions" },
-  { key: "reportDocumentation", label: "Reports & Documentation", detail: "Accuracy, completeness, timeliness" },
-  { key: "officerSafetyTactics", label: "Officer Safety & Tactics", detail: "Awareness, control, safe practices" },
-  { key: "initiativeReliability", label: "Initiative & Reliability", detail: "Readiness, ownership, follow-through" },
-  { key: "teamworkLeadership", label: "Teamwork & Leadership", detail: "Team contribution and leadership behavior" },
+const ratingFields:Array<{key:RatingKey;dbKey:string;label:string;detail:string}>=[
+ {key:"professionalConduct",dbKey:"professional_conduct",label:"Professional Conduct",detail:"Integrity, demeanor, accountability"},
+ {key:"policyKnowledge",dbKey:"policy_knowledge",label:"Policy Knowledge",detail:"Department policy and procedure"},
+ {key:"communication",dbKey:"communication",label:"Communication",detail:"Radio, interpersonal, chain of command"},
+ {key:"judgmentDecisionMaking",dbKey:"judgment_decision_making",label:"Judgment & Decision-Making",detail:"Reasoning, discretion, sound decisions"},
+ {key:"reportDocumentation",dbKey:"report_documentation",label:"Reports & Documentation",detail:"Accuracy, completeness, timeliness"},
+ {key:"officerSafetyTactics",dbKey:"officer_safety_tactics",label:"Officer Safety & Tactics",detail:"Awareness, control, safe practices"},
+ {key:"initiativeReliability",dbKey:"initiative_reliability",label:"Initiative & Reliability",detail:"Readiness, ownership, follow-through"},
+ {key:"teamworkLeadership",dbKey:"teamwork_leadership",label:"Teamwork & Leadership",detail:"Team contribution and leadership behavior"},
 ];
+const ratingLabels:Record<number,string>={1:"Unsatisfactory",2:"Needs Improvement",3:"Meets Expectations",4:"Exceeds Expectations",5:"Exceptional"};
+const evaluationKinds=["Routine","Probationary","Annual","Promotion Readiness","Special"];
+const cadenceOptions=[{value:"",label:"One-time"},{value:"1",label:"Monthly"},{value:"3",label:"Quarterly"},{value:"6",label:"Every 6 months"},{value:"12",label:"Annual"}];
 
-const ratingLabels: Record<number, string> = {
-  1: "Unsatisfactory",
-  2: "Needs Improvement",
-  3: "Meets Expectations",
-  4: "Exceeds Expectations",
-  5: "Exceptional",
-};
+function dateInput(date=new Date()){const adjusted=new Date(date.getTime()-date.getTimezoneOffset()*60_000);return adjusted.toISOString().slice(0,10)}
+function dateLabel(value:string|null|undefined){if(!value)return"Not recorded";return new Date(value.length===10?`${value}T12:00:00`:value).toLocaleDateString()}
+function overallLabel(average:number){if(average>=4.5)return"Exceptional";if(average>=3.75)return"Exceeds Expectations";if(average>=2.75)return"Meets Expectations";if(average>=1.75)return"Needs Improvement";return"Unsatisfactory"}
+function initialRatings():Record<RatingKey,number>{return{professionalConduct:3,policyKnowledge:3,communication:3,judgmentDecisionMaking:3,reportDocumentation:3,officerSafetyTactics:3,initiativeReliability:3,teamworkLeadership:3}}
+function daysUntil(value:string){const today=new Date(`${dateInput()}T12:00:00`).getTime();const target=new Date(`${value}T12:00:00`).getTime();return Math.ceil((target-today)/86_400_000)}
+function cadenceLabel(months:number|null){if(!months)return"One-time";return months===1?"Monthly":months===3?"Quarterly":months===6?"Every 6 months":months===12?"Annual":`Every ${months} months`}
+function addMonthsFromTodayOrDue(due:string,months:number){const today=new Date(`${dateInput()}T12:00:00`);const dueDate=new Date(`${due}T12:00:00`);const base=dueDate.getTime()>today.getTime()?dueDate:today;const next=new Date(base);next.setMonth(next.getMonth()+months);return dateInput(next)}
 
-const evaluationKinds = ["Routine", "Probationary", "Annual", "Promotion Readiness", "Special"];
+export function GuardianPerformanceEvaluationWorkspace(){
+ const currentProfile=usePortalProfile();
+ const commandUser=["Executive","Command"].includes(currentProfile.access_tier);
+ const today=new Date();const priorMonth=new Date(today);priorMonth.setDate(priorMonth.getDate()-30);
+ const [personnel,setPersonnel]=useState<PersonnelOption[]>([]);const [evaluations,setEvaluations]=useState<EvaluationRecord[]>([]);const [schedules,setSchedules]=useState<ScheduleRecord[]>([]);
+ const [selectedMemberId,setSelectedMemberId]=useState("");const [evaluationKind,setEvaluationKind]=useState("Routine");const [periodStart,setPeriodStart]=useState(dateInput(priorMonth));const [periodEnd,setPeriodEnd]=useState(dateInput(today));const [followUpDueAt,setFollowUpDueAt]=useState("");const [ratings,setRatings]=useState<Record<RatingKey,number>>(initialRatings);const [strengths,setStrengths]=useState("");const [improvementAreas,setImprovementAreas]=useState("");const [goals,setGoals]=useState("");const [supervisorSummary,setSupervisorSummary]=useState("");const [remediationRequired,setRemediationRequired]=useState(false);const [remediationPlan,setRemediationPlan]=useState("");const [manualCommandReview,setManualCommandReview]=useState(false);const [selectedScheduleId,setSelectedScheduleId]=useState<string|null>(null);
+ const [scheduleMemberId,setScheduleMemberId]=useState("");const [scheduleKind,setScheduleKind]=useState("Annual");const [scheduleDueOn,setScheduleDueOn]=useState(dateInput(today));const [scheduleCadence,setScheduleCadence]=useState("12");const [scheduleCommandReview,setScheduleCommandReview]=useState(false);const [scheduleNotes,setScheduleNotes]=useState("");
+ const [historyQuery,setHistoryQuery]=useState("");const [historyKind,setHistoryKind]=useState("All");const [historyStatus,setHistoryStatus]=useState("All");const [loading,setLoading]=useState(true);const [submitting,setSubmitting]=useState(false);const [processingId,setProcessingId]=useState<string|null>(null);const [error,setError]=useState("");const [notice,setNotice]=useState("");
+ const average=useMemo(()=>{const values=Object.values(ratings);return values.reduce((sum,value)=>sum+value,0)/values.length},[ratings]);const overall=overallLabel(average);const selectedMember=personnel.find(member=>member.id===selectedMemberId)??null;const selectedSchedule=schedules.find(schedule=>schedule.id===selectedScheduleId)??null;const requiresCommandReview=manualCommandReview||evaluationKind==="Promotion Readiness"||average<2.75||remediationRequired||Boolean(selectedSchedule?.commandReviewRequired);const activeSchedules=schedules.filter(schedule=>schedule.active);const overdueSchedules=activeSchedules.filter(schedule=>daysUntil(schedule.nextDueOn)<0);const dueSoonSchedules=activeSchedules.filter(schedule=>{const days=daysUntil(schedule.nextDueOn);return days>=0&&days<=14});const awaiting=evaluations.filter(evaluation=>evaluation.status==="Awaiting Acknowledgment").length;const pendingCommand=evaluations.filter(evaluation=>evaluation.status==="Pending Approval").length;const readyToIssue=evaluations.filter(evaluation=>evaluation.status==="Approved"&&evaluation.authorProfileId===currentProfile.id).length;
+ const filteredHistory=useMemo(()=>{const query=historyQuery.trim().toLowerCase();return evaluations.filter(evaluation=>{if(historyKind!=="All"&&evaluation.evaluationKind!==historyKind)return false;if(historyStatus!=="All"&&evaluation.status!==historyStatus)return false;if(!query)return true;return[evaluation.subjectName,evaluation.subjectPersonnelId,evaluation.authorName,evaluation.evaluationKind,evaluation.overallRating,`g-${String(evaluation.guardianNumber).padStart(4,"0")}`].join(" ").toLowerCase().includes(query)})},[evaluations,historyKind,historyQuery,historyStatus]);const historyAverage=filteredHistory.length?filteredHistory.reduce((sum,item)=>sum+item.overallAverage,0)/filteredHistory.length:0;
 
-function dateInput(date: Date) {
-  const adjusted = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
-  return adjusted.toISOString().slice(0, 10);
-}
+ async function load(){
+  setLoading(true);setError("");const supabase=createClient() as any;
+  const [{data:profileRows,error:profileError},{data:purviewRows,error:purviewError},{data:guardianRows,error:guardianError}]=await Promise.all([
+   supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,division,status").neq("status","Deactivated").order("personnel_id"),
+   supabase.rpc("get_personnel_in_my_purview"),
+   supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,status,title,issued_at,created_at,follow_up_due_at,acknowledged_at,structured_fields").eq("record_type","Performance Evaluation").order("created_at",{ascending:false}),
+  ]);
+  if(profileError||purviewError||guardianError){setError(profileError?.message??purviewError?.message??guardianError?.message??"Performance evaluations could not be loaded.");setLoading(false);return}
+  const profiles=new Map((profileRows??[]).map((profile:any)=>[profile.id,profile]));const purview=new Map<string,{row:any;labels:Set<string>}>();
+  for(const row of purviewRows??[]){if(!row.profile_id||row.profile_id===currentProfile.id)continue;const unit=row.organizational_unit_name||(row.scope==="department"?"Department-wide":"Direct assignment");const authority=row.authority_type||"Supervisory authority";const label=row.scope==="department"?"Department-wide command authority":`${unit} · ${authority}`;const existing=purview.get(row.profile_id);if(existing)existing.labels.add(label);else purview.set(row.profile_id,{row,labels:new Set([label])})}
+  const options:PersonnelOption[]=[...purview.values()].map(({row,labels})=>{const profile=profiles.get(row.profile_id) as any;return{id:row.profile_id,personnelId:profile?.personnel_id??row.personnel_id??"",displayName:profile?.display_name??row.display_name??"Personnel",rank:profile?.rank??row.rank??"Personnel",callSign:profile?.call_sign??row.call_sign??null,division:profile?.division??row.organizational_unit_name??"Unassigned",authorityLabel:[...labels].join(" / ")}}).sort((a,b)=>a.displayName.localeCompare(b.displayName));
+  const evaluationRows:EvaluationRecord[]=[];const scheduleRows:ScheduleRecord[]=[];
+  for(const record of guardianRows??[]){const subject=profiles.get(record.subject_profile_id) as any;const author=profiles.get(record.author_profile_id) as any;const fields=record.structured_fields&&typeof record.structured_fields==="object"?record.structured_fields:{};if(fields.lifecycle_state==="Scheduled"){scheduleRows.push({id:record.id,guardianNumber:Number(record.guardian_number),subjectProfileId:record.subject_profile_id,subjectName:subject?.display_name??"Restricted personnel",subjectPersonnelId:subject?.personnel_id??"",authorProfileId:record.author_profile_id,reviewerName:author?.display_name??"Supervisor",evaluationKind:String(fields.evaluation_kind??"Performance"),nextDueOn:String(fields.next_due_on??""),cadenceMonths:fields.cadence_months==null?null:Number(fields.cadence_months),commandReviewRequired:fields.command_review_required===true,notes:String(fields.schedule_notes??""),completionCount:Number(fields.completion_count??0),active:fields.schedule_active!==false,lastCompletedAt:fields.last_completed_at?String(fields.last_completed_at):null});continue}
+   evaluationRows.push({id:record.id,guardianNumber:Number(record.guardian_number),subjectProfileId:record.subject_profile_id,subjectName:subject?.display_name??"Restricted personnel",subjectPersonnelId:subject?.personnel_id??"",authorProfileId:record.author_profile_id,authorName:author?.display_name??"Command",status:record.status,title:record.title,issuedAt:record.issued_at??record.created_at,followUpDueAt:record.follow_up_due_at,acknowledgedAt:record.acknowledged_at,evaluationKind:String(fields.evaluation_kind??"Performance"),periodStart:String(fields.period_start??""),periodEnd:String(fields.period_end??""),overallAverage:Number(fields.overall_average??0),overallRating:String(fields.overall_rating??"Not rated"),commandReviewRequired:fields.command_review_required===true,remediationRequired:fields.remediation_required===true,remediationPlan:String(fields.remediation_plan??""),scheduleGuardianId:fields.schedule_guardian_id?String(fields.schedule_guardian_id):null})}
+  setPersonnel(options);setEvaluations(evaluationRows);setSchedules(scheduleRows);if(!selectedMemberId&&options.length===1)setSelectedMemberId(options[0].id);setLoading(false)
+ }
+ useEffect(()=>{void load()},[]);
 
-function dateLabel(value: string | null | undefined) {
-  if (!value) return "Not recorded";
-  return new Date(value.length === 10 ? `${value}T12:00:00` : value).toLocaleDateString();
-}
+ async function createSchedule(event:FormEvent<HTMLFormElement>){event.preventDefault();if(submitting)return;setError("");setNotice("");const member=personnel.find(item=>item.id===scheduleMemberId);if(!member)return setError("Select the personnel member for this evaluation schedule.");if(!scheduleDueOn)return setError("Select the first evaluation due date.");if(new Date(`${scheduleDueOn}T12:00:00`)<new Date(`${dateInput()}T12:00:00`))return setError("The first due date cannot be in the past.");if(activeSchedules.some(item=>item.subjectProfileId===scheduleMemberId&&item.evaluationKind===scheduleKind))return setError(`An active ${scheduleKind} schedule is already visible for this member.`);setSubmitting(true);const cadence=scheduleCadence?Number(scheduleCadence):null;const {error:insertError}=await(createClient() as any).from("guardian_records").insert({subject_profile_id:scheduleMemberId,record_type:"Performance Evaluation",status:"Draft",title:`${scheduleKind} Performance Evaluation Schedule`,incident_at:new Date(`${scheduleDueOn}T12:00:00`).toISOString(),location:member.division||null,policy_reference:"Performance Evaluation Schedule",observed_behavior:scheduleNotes.trim()||"Scheduled performance evaluation.",expected_standard:`Complete the ${scheduleKind.toLowerCase()} evaluation by ${dateLabel(scheduleDueOn)}.`,action_taken:null,follow_up_plan:cadenceLabel(cadence),follow_up_due_at:new Date(`${scheduleDueOn}T17:00:00`).toISOString(),structured_fields:{lifecycle_state:"Scheduled",schedule_active:true,evaluation_kind:scheduleKind,next_due_on:scheduleDueOn,cadence_months:cadence,command_review_required:scheduleCommandReview,schedule_notes:scheduleNotes.trim(),completion_count:0,last_completed_at:null},points_assessed:0,escalation_override:false,escalation_reason:null,submitted_at:null,issued_at:null});setSubmitting(false);if(insertError)return setError(insertError.message);setNotice(`${scheduleKind} evaluation scheduled for ${member.displayName} on ${dateLabel(scheduleDueOn)}.`);setScheduleNotes("");await load()}
+ function startScheduledEvaluation(schedule:ScheduleRecord){setSelectedScheduleId(schedule.id);setSelectedMemberId(schedule.subjectProfileId);setEvaluationKind(schedule.evaluationKind);setManualCommandReview(schedule.commandReviewRequired);setPeriodEnd(dateInput(today));const start=new Date(today);start.setDate(start.getDate()-(schedule.cadenceMonths?Math.min(schedule.cadenceMonths*30,365):30));setPeriodStart(dateInput(start));setError("");setNotice(`Loaded scheduled ${schedule.evaluationKind} evaluation for ${schedule.subjectName}.`);window.setTimeout(()=>document.getElementById("evaluation-form")?.scrollIntoView({behavior:"smooth",block:"start"}),50)}
+ async function updateScheduleAfterIssue(scheduleId:string,evaluationId:string){const schedule=schedules.find(item=>item.id===scheduleId);if(!schedule)return;const completedAt=new Date().toISOString();const nextDueOn=schedule.cadenceMonths?addMonthsFromTodayOrDue(schedule.nextDueOn,schedule.cadenceMonths):schedule.nextDueOn;const fields={lifecycle_state:"Scheduled",schedule_active:Boolean(schedule.cadenceMonths),evaluation_kind:schedule.evaluationKind,next_due_on:nextDueOn,cadence_months:schedule.cadenceMonths,command_review_required:schedule.commandReviewRequired,schedule_notes:schedule.notes,completion_count:schedule.completionCount+1,last_completed_at:completedAt,last_completed_guardian_id:evaluationId};await(createClient() as any).from("guardian_records").update({structured_fields:fields,observed_behavior:schedule.notes||"Scheduled performance evaluation.",expected_standard:schedule.cadenceMonths?`Next ${schedule.evaluationKind.toLowerCase()} evaluation due ${dateLabel(nextDueOn)}.`:"One-time evaluation schedule completed.",follow_up_plan:schedule.cadenceMonths?cadenceLabel(schedule.cadenceMonths):"Completed",follow_up_due_at:schedule.cadenceMonths?new Date(`${nextDueOn}T17:00:00`).toISOString():null,incident_at:schedule.cadenceMonths?new Date(`${nextDueOn}T12:00:00`).toISOString():new Date(`${schedule.nextDueOn}T12:00:00`).toISOString()}).eq("id",scheduleId)}
+ async function cancelSchedule(schedule:ScheduleRecord){const reason=window.prompt(`Cancel the ${schedule.evaluationKind} evaluation schedule for ${schedule.subjectName}? Enter the reason:`)?.trim()??"";if(reason.length<4)return;setProcessingId(schedule.id);const fields={lifecycle_state:"Scheduled",schedule_active:false,evaluation_kind:schedule.evaluationKind,next_due_on:schedule.nextDueOn,cadence_months:schedule.cadenceMonths,command_review_required:schedule.commandReviewRequired,schedule_notes:schedule.notes,completion_count:schedule.completionCount,last_completed_at:schedule.lastCompletedAt,cancellation_reason:reason,cancelled_at:new Date().toISOString()};const {error:updateError}=await(createClient() as any).from("guardian_records").update({structured_fields:fields,follow_up_due_at:null}).eq("id",schedule.id);setProcessingId(null);if(updateError)return setError(updateError.message);setNotice(`Evaluation schedule cancelled for ${schedule.subjectName}.`);await load()}
 
-function overallLabel(average: number) {
-  if (average >= 4.5) return "Exceptional";
-  if (average >= 3.75) return "Exceeds Expectations";
-  if (average >= 2.75) return "Meets Expectations";
-  if (average >= 1.75) return "Needs Improvement";
-  return "Unsatisfactory";
-}
+ async function submitEvaluation(event:FormEvent<HTMLFormElement>){event.preventDefault();if(submitting)return;setError("");setNotice("");if(!selectedMemberId)return setError("Select the personnel member being evaluated.");if(!periodStart||!periodEnd)return setError("Enter the evaluation period.");if(new Date(`${periodEnd}T12:00:00`)<new Date(`${periodStart}T12:00:00`))return setError("Evaluation period end must be on or after the start date.");if(new Date(`${periodEnd}T12:00:00`)>new Date(`${dateInput(today)}T12:00:00`))return setError("The evaluation period cannot end in the future.");if(strengths.trim().length<4)return setError("Document the member's strengths.");if(improvementAreas.trim().length<4)return setError("Document improvement areas or state that none were identified.");if(goals.trim().length<4)return setError("Document the next-period goals.");if(supervisorSummary.trim().length<10)return setError("Enter the supervisor's overall assessment.");if(remediationRequired&&remediationPlan.trim().length<10)return setError("Document the required remediation or training plan.");const member=personnel.find(item=>item.id===selectedMemberId);if(!member)return setError("The selected personnel member is not in your supervisory purview.");setSubmitting(true);const status=requiresCommandReview?"Pending Approval":"Awaiting Acknowledgment";const now=new Date().toISOString();const ratingsPayload=Object.fromEntries(ratingFields.map(field=>[field.dbKey,ratings[field.key]]));const {data,error:insertError}=await(createClient() as any).from("guardian_records").insert({subject_profile_id:selectedMemberId,record_type:"Performance Evaluation",status,title:`${evaluationKind} Performance Evaluation`,incident_at:now,location:member.division||null,policy_reference:"Performance Evaluation",observed_behavior:supervisorSummary.trim(),expected_standard:improvementAreas.trim(),action_taken:strengths.trim(),follow_up_plan:goals.trim(),follow_up_due_at:followUpDueAt?new Date(followUpDueAt).toISOString():null,structured_fields:{lifecycle_state:"Evaluation",evaluation_kind:evaluationKind,period_start:periodStart,period_end:periodEnd,ratings:ratingsPayload,overall_average:Number(average.toFixed(2)),overall_rating:overall,strengths:strengths.trim(),improvement_areas:improvementAreas.trim(),goals:goals.trim(),supervisor_summary:supervisorSummary.trim(),rating_scale:{"1":"Unsatisfactory","2":"Needs Improvement","3":"Meets Expectations","4":"Exceeds Expectations","5":"Exceptional"},allow_response:true,response_window:"5 days",command_review_required:requiresCommandReview,remediation_required:remediationRequired,remediation_plan:remediationRequired?remediationPlan.trim():null,schedule_guardian_id:selectedScheduleId},points_assessed:0,escalation_override:false,escalation_reason:null,submitted_at:now,issued_at:status==="Awaiting Acknowledgment"?now:null}).select("id,guardian_number").single();setSubmitting(false);if(insertError||!data)return setError(insertError?.message??"The performance evaluation could not be saved.");if(status==="Awaiting Acknowledgment"&&selectedScheduleId)await updateScheduleAfterIssue(selectedScheduleId,data.id);const guardianNumber=`G-${String(data.guardian_number).padStart(4,"0")}`;setNotice(status==="Pending Approval"?`${guardianNumber} submitted for Command review.`:`${guardianNumber} issued to ${member.displayName}. Member acknowledgment is pending.`);setStrengths("");setImprovementAreas("");setGoals("");setSupervisorSummary("");setFollowUpDueAt("");setRemediationRequired(false);setRemediationPlan("");setManualCommandReview(false);setSelectedScheduleId(null);setRatings(initialRatings());await load()}
+ async function reviewEvaluation(evaluation:EvaluationRecord,decision:"Approved"|"Denied"){if(!commandUser||processingId)return;const reviewNotes=window.prompt(`${decision} G-${String(evaluation.guardianNumber).padStart(4,"0")}? Enter Command review notes:`)?.trim()??"";if(reviewNotes.length<4)return;setProcessingId(evaluation.id);const {error:reviewError}=await(createClient() as any).rpc("review_guardian",{record_id:evaluation.id,decision,review_notes:reviewNotes});setProcessingId(null);if(reviewError)return setError(reviewError.message);setNotice(decision==="Approved"?`G-${String(evaluation.guardianNumber).padStart(4,"0")} approved. The evaluating supervisor must issue it to the member.`:`G-${String(evaluation.guardianNumber).padStart(4,"0")} denied by Command.`);await load()}
+ async function issueApprovedEvaluation(evaluation:EvaluationRecord){if(processingId||evaluation.authorProfileId!==currentProfile.id)return;setProcessingId(evaluation.id);const {error:issueError}=await(createClient() as any).rpc("issue_guardian",{record_id:evaluation.id});setProcessingId(null);if(issueError)return setError(issueError.message);if(evaluation.scheduleGuardianId)await updateScheduleAfterIssue(evaluation.scheduleGuardianId,evaluation.id);setNotice(`G-${String(evaluation.guardianNumber).padStart(4,"0")} issued. Member acknowledgment is pending.`);await load()}
+ if(loading)return <section className="portal-panel"><div className="portal-empty-state"><strong>Loading performance evaluations…</strong></div></section>;
+ const attentionSchedules=[...overdueSchedules,...dueSoonSchedules].sort((a,b)=>a.nextDueOn.localeCompare(b.nextDueOn));
 
-function initialRatings(): Record<RatingKey, number> {
-  return {
-    professionalConduct: 3,
-    policyKnowledge: 3,
-    communication: 3,
-    judgmentDecisionMaking: 3,
-    reportDocumentation: 3,
-    officerSafetyTactics: 3,
-    initiativeReliability: 3,
-    teamworkLeadership: 3,
-  };
-}
+ return <div className="command-v2-directory">
+  <section className="deputy-summary-grid command-v2-record-metrics"><article><span>Overdue evaluations</span><strong>{String(overdueSchedules.length).padStart(2,"0")}</strong><small>Supervisor action required</small></article><article><span>Due within 14 days</span><strong>{String(dueSoonSchedules.length).padStart(2,"0")}</strong><small>Scheduled reviews</small></article><article><span>Command review</span><strong>{String(pendingCommand).padStart(2,"0")}</strong><small>Evaluations pending approval</small></article><article><span>Member acknowledgment</span><strong>{String(awaiting).padStart(2,"0")}</strong><small>Issued evaluations awaiting receipt</small></article></section>
+  {(attentionSchedules.length||readyToIssue)?<section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>Evaluation lifecycle</p><h2>Needs Attention</h2></div><span>{attentionSchedules.length+readyToIssue} action items</span></div><div className="command-v2-mini-list" style={{marginTop:12}}>{evaluations.filter(evaluation=>evaluation.status==="Approved"&&evaluation.authorProfileId===currentProfile.id).map(evaluation=><button key={`issue-${evaluation.id}`} onClick={()=>issueApprovedEvaluation(evaluation)} type="button"><strong>G-{String(evaluation.guardianNumber).padStart(4,"0")} · Approved — issue to {evaluation.subjectName}</strong><span>{evaluation.evaluationKind} · Command review complete</span></button>)}{attentionSchedules.map(schedule=>{const days=daysUntil(schedule.nextDueOn);return <button key={schedule.id} onClick={()=>startScheduledEvaluation(schedule)} type="button"><strong>{schedule.subjectName} · {schedule.evaluationKind}</strong><span>{days<0?`${Math.abs(days)} day${Math.abs(days)===1?"":"s"} overdue`:days===0?"Due today":`Due in ${days} days`} · {dateLabel(schedule.nextDueOn)} · Start evaluation →</span></button>})}</div></section>:null}
 
-export function GuardianPerformanceEvaluationWorkspace() {
-  const currentProfile = usePortalProfile();
-  const today = new Date();
-  const priorMonth = new Date(today);
-  priorMonth.setDate(priorMonth.getDate() - 30);
+  <section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>Recurring oversight</p><h2>Evaluation Schedules</h2></div><span>{activeSchedules.length} active</span></div><form onSubmit={createSchedule}><div className="portal-form-grid" style={{marginTop:16}}><label>Personnel member<select value={scheduleMemberId} onChange={event=>setScheduleMemberId(event.target.value)} required><option value="">Select personnel</option>{personnel.map(member=><option key={member.id} value={member.id}>{member.rank} {member.displayName} · {member.callSign??member.personnelId}</option>)}</select></label><label>Evaluation type<select value={scheduleKind} onChange={event=>setScheduleKind(event.target.value)}>{evaluationKinds.map(kind=><option key={kind}>{kind}</option>)}</select></label><label>First due date<input min={dateInput(today)} onChange={event=>setScheduleDueOn(event.target.value)} required type="date" value={scheduleDueOn}/></label><label>Repeat<select value={scheduleCadence} onChange={event=>setScheduleCadence(event.target.value)}>{cadenceOptions.map(option=><option key={option.label} value={option.value}>{option.label}</option>)}</select></label><label className="portal-checkbox-field"><input checked={scheduleCommandReview} onChange={event=>setScheduleCommandReview(event.target.checked)} type="checkbox"/><span><strong>Require Command review</strong><small>Every evaluation completed from this schedule routes through Command before issue.</small></span></label></div><label className="portal-call-sign-field" style={{marginTop:12}}>Schedule note <span>Optional</span><textarea maxLength={2000} onChange={event=>setScheduleNotes(event.target.value)} placeholder="Purpose, probation milestone, annual cycle, or other scheduling note." rows={2} value={scheduleNotes}/></label><div className="portal-modal-actions"><button className="portal-button portal-button--primary" disabled={submitting} type="submit">{submitting?"Saving…":"Create Schedule"}</button></div></form><div className="deputy-request-history" style={{marginTop:16}}>{activeSchedules.slice().sort((a,b)=>a.nextDueOn.localeCompare(b.nextDueOn)).map(schedule=>{const days=daysUntil(schedule.nextDueOn);return <article key={schedule.id}><span>EV</span><div><strong>{schedule.subjectName} · {schedule.evaluationKind}</strong><small>{cadenceLabel(schedule.cadenceMonths)} · Reviewer: {schedule.reviewerName} · Due {dateLabel(schedule.nextDueOn)}</small><small>{days<0?`OVERDUE · ${Math.abs(days)} day${Math.abs(days)===1?"":"s"}`:days===0?"DUE TODAY":`${days} days remaining`}{schedule.commandReviewRequired?" · Command review required":""}{schedule.notes?` · ${schedule.notes}`:""}</small></div><b>{days<0?"Overdue":days<=14?"Due Soon":"Scheduled"}</b><button className="portal-text-button" onClick={()=>startScheduledEvaluation(schedule)} type="button">Start</button><button className="portal-text-button" disabled={processingId===schedule.id} onClick={()=>cancelSchedule(schedule)} type="button">Cancel</button></article>})}{!activeSchedules.length?<div className="portal-empty-state"><strong>No active evaluation schedules.</strong><span>Create one-time or recurring reviews here.</span></div>:null}</div></section>
 
-  const [personnel, setPersonnel] = useState<PersonnelOption[]>([]);
-  const [evaluations, setEvaluations] = useState<EvaluationRecord[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState("");
-  const [evaluationKind, setEvaluationKind] = useState("Routine");
-  const [periodStart, setPeriodStart] = useState(dateInput(priorMonth));
-  const [periodEnd, setPeriodEnd] = useState(dateInput(today));
-  const [followUpDueAt, setFollowUpDueAt] = useState("");
-  const [ratings, setRatings] = useState<Record<RatingKey, number>>(initialRatings);
-  const [strengths, setStrengths] = useState("");
-  const [improvementAreas, setImprovementAreas] = useState("");
-  const [goals, setGoals] = useState("");
-  const [supervisorSummary, setSupervisorSummary] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
+  <form id="evaluation-form" onSubmit={submitEvaluation}><section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>Guardian · Performance</p><h2>Issue Performance Evaluation</h2></div><span>{selectedSchedule?`Scheduled · due ${dateLabel(selectedSchedule.nextDueOn)}`:"Ad hoc evaluation"}</span></div><div className="portal-form-protection" style={{marginTop:14}}><strong>Non-disciplinary Guardian record</strong><span>Performance evaluations carry zero disciplinary points. Promotion Readiness, below-expectation ratings, remediation plans, and manually flagged evaluations require Command review before issue.</span></div>{selectedSchedule?<div className="command-v2-inline-state" style={{marginTop:12}}><strong>Scheduled review loaded</strong><span>{selectedSchedule.subjectName} · {selectedSchedule.evaluationKind} · {cadenceLabel(selectedSchedule.cadenceMonths)}</span><button className="portal-text-button" onClick={()=>{setSelectedScheduleId(null);setManualCommandReview(false)}} type="button">Clear schedule</button></div>:null}<div className="portal-form-grid" style={{marginTop:18}}><label>Personnel member<select value={selectedMemberId} onChange={event=>{setSelectedMemberId(event.target.value);setSelectedScheduleId(null)}} required><option value="">Select personnel</option>{personnel.map(member=><option key={member.id} value={member.id}>{member.rank} {member.displayName} · {member.callSign??member.personnelId}</option>)}</select><small>{selectedMember?.authorityLabel??"Only personnel within your supervisory authority are available."}</small></label><label>Evaluation type<select value={evaluationKind} onChange={event=>{setEvaluationKind(event.target.value);setSelectedScheduleId(null)}}>{evaluationKinds.map(kind=><option key={kind}>{kind}</option>)}</select></label><label>Review period start<input max={dateInput(today)} onChange={event=>setPeriodStart(event.target.value)} required type="date" value={periodStart}/></label><label>Review period end<input max={dateInput(today)} min={periodStart} onChange={event=>setPeriodEnd(event.target.value)} required type="date" value={periodEnd}/></label><label>Follow-up date <span>Optional</span><input onChange={event=>setFollowUpDueAt(event.target.value)} type="datetime-local" value={followUpDueAt}/></label><label className="portal-checkbox-field"><input checked={manualCommandReview} onChange={event=>setManualCommandReview(event.target.checked)} type="checkbox"/><span><strong>Route through Command</strong><small>Optional unless automatically required by the evaluation.</small></span></label></div></section>
+  <section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>1–5 rating scale</p><h2>Performance Categories</h2></div><span>{average.toFixed(2)} · {overall}</span></div><div className="portal-form-grid" style={{marginTop:16}}>{ratingFields.map(field=><label key={field.key}>{field.label}<select value={ratings[field.key]} onChange={event=>setRatings(current=>({...current,[field.key]:Number(event.target.value)}))}>{Object.entries(ratingLabels).map(([value,label])=><option key={value} value={value}>{value} · {label}</option>)}</select><small>{field.detail}</small></label>)}</div></section>
+  <section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>Supervisor narrative</p><h2>Assessment & Development</h2></div><span>{requiresCommandReview?"Command review required":"Direct issue"}</span></div><div className="portal-form-grid" style={{marginTop:16}}><label>Strengths<textarea maxLength={6000} onChange={event=>setStrengths(event.target.value)} rows={4} value={strengths}/></label><label>Improvement areas<textarea maxLength={6000} onChange={event=>setImprovementAreas(event.target.value)} placeholder="State none identified when appropriate." rows={4} value={improvementAreas}/></label><label>Goals / next-period expectations<textarea maxLength={6000} onChange={event=>setGoals(event.target.value)} rows={4} value={goals}/></label><label>Overall supervisor assessment<textarea maxLength={6000} onChange={event=>setSupervisorSummary(event.target.value)} rows={4} value={supervisorSummary}/></label></div><label className="portal-checkbox-field" style={{marginTop:14}}><input checked={remediationRequired} onChange={event=>setRemediationRequired(event.target.checked)} type="checkbox"/><span><strong>Remediation / training required</strong><small>Creates a documented development requirement and forces Command review before the evaluation is issued.</small></span></label>{remediationRequired?<><label className="portal-call-sign-field" style={{marginTop:12}}>Required remediation / training plan<textarea maxLength={6000} onChange={event=>setRemediationPlan(event.target.value)} placeholder="Required training, corrective development, deadline, or follow-up expectation." rows={4} value={remediationPlan}/></label><div className="portal-form-protection" style={{marginTop:10}}><strong>Training connection</strong><span>After issue, open Training & FTO to create any formal Remedial training progression required by this evaluation.</span><Link href="/portal/command/training">Open Training & FTO →</Link></div></>:null}</section>{error?<div className="portal-form-error" role="alert" style={{marginBottom:12}}>{error}</div>:null}<div className="portal-modal-actions" style={{marginBottom:20}}><button className="portal-button portal-button--primary" disabled={submitting} type="submit">{submitting?"Saving evaluation…":requiresCommandReview?"Submit for Command Review":"Issue Evaluation"}</button></div></form>
 
-  const average = useMemo(() => {
-    const values = Object.values(ratings);
-    return values.reduce((sum, value) => sum + value, 0) / values.length;
-  }, [ratings]);
-  const overall = overallLabel(average);
-  const selectedMember = personnel.find((member) => member.id === selectedMemberId) ?? null;
-  const memberHistory = selectedMemberId ? evaluations.filter((evaluation) => evaluation.subjectProfileId === selectedMemberId) : [];
-  const awaiting = evaluations.filter((evaluation) => evaluation.status === "Awaiting Acknowledgment").length;
+  {pendingCommand?<section className="portal-panel" style={{marginBottom:16}}><div className="portal-panel-heading"><div><p>Command oversight</p><h2>Pending Evaluation Review</h2></div><span>{pendingCommand}</span></div><div className="portal-approval-list">{evaluations.filter(evaluation=>evaluation.status==="Pending Approval").map(evaluation=><article key={evaluation.id}><span className="portal-record-type">EV</span><div className="portal-approval-id"><strong>G-{String(evaluation.guardianNumber).padStart(4,"0")}</strong><span>{evaluation.evaluationKind}</span></div><div><strong>{evaluation.subjectName}</strong><span>{evaluation.overallAverage.toFixed(2)} / 5 · {evaluation.overallRating}{evaluation.remediationRequired?" · Remediation":""}</span></div><span className="portal-priority portal-priority--routine">Command Review</span><small>{evaluation.authorName}</small>{commandUser?<><button className="portal-approval-review-button" disabled={processingId===evaluation.id} onClick={()=>reviewEvaluation(evaluation,"Denied")} type="button">Deny</button><button className="portal-approval-review-button" disabled={processingId===evaluation.id} onClick={()=>reviewEvaluation(evaluation,"Approved")} type="button">Approve</button></>:null}</article>)}</div></section>:null}
 
-  async function load() {
-    setLoading(true);
-    setError("");
-    const supabase = createClient() as any;
-    const [
-      { data: profileRows, error: profileError },
-      { data: purviewRows, error: purviewError },
-      { data: evaluationRows, error: evaluationError },
-    ] = await Promise.all([
-      supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,division,status").neq("status", "Deactivated").order("personnel_id"),
-      supabase.rpc("get_personnel_in_my_purview"),
-      supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,status,title,issued_at,created_at,follow_up_due_at,acknowledged_at,structured_fields").eq("record_type", "Performance Evaluation").order("created_at", { ascending: false }),
-    ]);
-
-    if (profileError || purviewError || evaluationError) {
-      setError(profileError?.message ?? purviewError?.message ?? evaluationError?.message ?? "Performance evaluations could not be loaded.");
-      setLoading(false);
-      return;
-    }
-
-    const profiles = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile]));
-    const purview = new Map<string, { row: any; labels: Set<string> }>();
-    for (const row of purviewRows ?? []) {
-      if (!row.profile_id || row.profile_id === currentProfile.id) continue;
-      const unit = row.organizational_unit_name || (row.scope === "department" ? "Department-wide" : "Direct assignment");
-      const authority = row.authority_type || "Supervisory authority";
-      const label = row.scope === "department" ? "Department-wide command authority" : `${unit} · ${authority}`;
-      const existing = purview.get(row.profile_id);
-      if (existing) existing.labels.add(label);
-      else purview.set(row.profile_id, { row, labels: new Set([label]) });
-    }
-
-    const options: PersonnelOption[] = [...purview.values()].map(({ row, labels }) => {
-      const profile = profiles.get(row.profile_id) as any;
-      return {
-        id: row.profile_id,
-        personnelId: profile?.personnel_id ?? row.personnel_id ?? "",
-        displayName: profile?.display_name ?? row.display_name ?? "Personnel",
-        rank: profile?.rank ?? row.rank ?? "Personnel",
-        callSign: profile?.call_sign ?? row.call_sign ?? null,
-        division: profile?.division ?? row.organizational_unit_name ?? "Unassigned",
-        authorityLabel: [...labels].join(" / "),
-      };
-    }).sort((a, b) => a.displayName.localeCompare(b.displayName));
-
-    const names = new Map((profileRows ?? []).map((profile: any) => [profile.id, profile]));
-    const rows: EvaluationRecord[] = (evaluationRows ?? []).map((record: any) => {
-      const subject = names.get(record.subject_profile_id) as any;
-      const author = names.get(record.author_profile_id) as any;
-      const fields = record.structured_fields && typeof record.structured_fields === "object" ? record.structured_fields : {};
-      return {
-        id: record.id,
-        guardianNumber: Number(record.guardian_number),
-        subjectProfileId: record.subject_profile_id,
-        subjectName: subject?.display_name ?? "Restricted personnel",
-        subjectPersonnelId: subject?.personnel_id ?? "",
-        authorName: author?.display_name ?? "Command",
-        status: record.status,
-        title: record.title,
-        issuedAt: record.issued_at ?? record.created_at,
-        followUpDueAt: record.follow_up_due_at,
-        acknowledgedAt: record.acknowledged_at,
-        evaluationKind: String(fields.evaluation_kind ?? "Performance"),
-        periodStart: String(fields.period_start ?? ""),
-        periodEnd: String(fields.period_end ?? ""),
-        overallAverage: Number(fields.overall_average ?? 0),
-        overallRating: String(fields.overall_rating ?? "Not rated"),
-      };
-    });
-
-    setPersonnel(options);
-    setEvaluations(rows);
-    if (!selectedMemberId && options.length === 1) setSelectedMemberId(options[0].id);
-    setLoading(false);
-  }
-
-  useEffect(() => { void load(); }, []);
-
-  async function submitEvaluation(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (submitting) return;
-    setError("");
-    setNotice("");
-    if (!selectedMemberId) return setError("Select the personnel member being evaluated.");
-    if (!periodStart || !periodEnd) return setError("Enter the evaluation period.");
-    if (new Date(`${periodEnd}T12:00:00`) < new Date(`${periodStart}T12:00:00`)) return setError("Evaluation period end must be on or after the start date.");
-    if (strengths.trim().length < 4) return setError("Document the member's strengths.");
-    if (improvementAreas.trim().length < 4) return setError("Document improvement areas or state that none were identified.");
-    if (goals.trim().length < 4) return setError("Document the next-period goals.");
-    if (supervisorSummary.trim().length < 10) return setError("Enter the supervisor's overall assessment.");
-
-    setSubmitting(true);
-    const supabase = createClient() as any;
-    const { data, error: rpcError } = await supabase.rpc("create_performance_evaluation", {
-      p_subject_profile_id: selectedMemberId,
-      p_evaluation_kind: evaluationKind,
-      p_period_start: periodStart,
-      p_period_end: periodEnd,
-      p_professional_conduct: ratings.professionalConduct,
-      p_policy_knowledge: ratings.policyKnowledge,
-      p_communication: ratings.communication,
-      p_judgment_decision_making: ratings.judgmentDecisionMaking,
-      p_report_documentation: ratings.reportDocumentation,
-      p_officer_safety_tactics: ratings.officerSafetyTactics,
-      p_initiative_reliability: ratings.initiativeReliability,
-      p_teamwork_leadership: ratings.teamworkLeadership,
-      p_strengths: strengths.trim(),
-      p_improvement_areas: improvementAreas.trim(),
-      p_goals: goals.trim(),
-      p_supervisor_summary: supervisorSummary.trim(),
-      p_follow_up_due_at: followUpDueAt ? new Date(followUpDueAt).toISOString() : null,
-    });
-    setSubmitting(false);
-    if (rpcError) {
-      setError(rpcError.message);
-      return;
-    }
-
-    const guardianNumber = data?.guardian_number ? `G-${String(data.guardian_number).padStart(4, "0")}` : "Performance evaluation";
-    setNotice(`${guardianNumber} issued to ${selectedMember?.displayName ?? "personnel"}. Member acknowledgment is now pending.`);
-    setStrengths("");
-    setImprovementAreas("");
-    setGoals("");
-    setSupervisorSummary("");
-    setFollowUpDueAt("");
-    setRatings(initialRatings());
-    await load();
-  }
-
-  if (loading) return <section className="portal-panel"><div className="portal-empty-state"><strong>Loading performance evaluations…</strong></div></section>;
-
-  return (
-    <div className="command-v2-directory">
-      <section className="deputy-summary-grid command-v2-record-metrics">
-        <article><span>Evaluations</span><strong>{String(evaluations.length).padStart(2, "0")}</strong><small>Permanent Guardian records</small></article>
-        <article><span>Awaiting acknowledgment</span><strong>{String(awaiting).padStart(2, "0")}</strong><small>Member action required</small></article>
-        <article><span>Current rating</span><strong>{average.toFixed(2)}</strong><small>{overall}</small></article>
-        <article><span>Disciplinary points</span><strong>00</strong><small>Evaluations are non-disciplinary</small></article>
-      </section>
-
-      <form onSubmit={submitEvaluation}>
-        <section className="portal-panel" style={{ marginBottom: 16 }}>
-          <div className="portal-panel-heading"><div><p>Guardian · Performance</p><h2>Issue Performance Evaluation</h2></div><span>Direct supervisor record</span></div>
-          <div className="portal-form-protection" style={{ marginTop: 14 }}><strong>Non-disciplinary Guardian record</strong><span>Performance evaluations carry zero disciplinary points. The member must acknowledge receipt and may attach a written response.</span></div>
-
-          <div className="portal-form-grid" style={{ marginTop: 18 }}>
-            <label>
-              Personnel member
-              <select value={selectedMemberId} onChange={(event) => setSelectedMemberId(event.target.value)} required>
-                <option value="">Select personnel</option>
-                {personnel.map((member) => <option key={member.id} value={member.id}>{member.rank} {member.displayName} · {member.callSign ?? member.personnelId}</option>)}
-              </select>
-              <small>{selectedMember?.authorityLabel ?? "Only personnel within your supervisory authority are available."}</small>
-            </label>
-            <label>
-              Evaluation type
-              <select value={evaluationKind} onChange={(event) => setEvaluationKind(event.target.value)}>{evaluationKinds.map((kind) => <option key={kind}>{kind}</option>)}</select>
-            </label>
-            <label>
-              Review period start
-              <input max={dateInput(today)} onChange={(event) => setPeriodStart(event.target.value)} required type="date" value={periodStart} />
-            </label>
-            <label>
-              Review period end
-              <input max={dateInput(today)} min={periodStart} onChange={(event) => setPeriodEnd(event.target.value)} required type="date" value={periodEnd} />
-            </label>
-            <label>
-              Follow-up date <span>Optional</span>
-              <input onChange={(event) => setFollowUpDueAt(event.target.value)} type="datetime-local" value={followUpDueAt} />
-            </label>
-          </div>
-        </section>
-
-        <section className="portal-panel" style={{ marginBottom: 16 }}>
-          <div className="portal-panel-heading"><div><p>1–5 rating scale</p><h2>Performance Categories</h2></div><span>{average.toFixed(2)} · {overall}</span></div>
-          <div className="portal-form-grid" style={{ marginTop: 16 }}>
-            {ratingFields.map((field) => (
-              <label key={field.key}>
-                {field.label}
-                <select value={ratings[field.key]} onChange={(event) => setRatings((current) => ({ ...current, [field.key]: Number(event.target.value) }))}>
-                  {[1, 2, 3, 4, 5].map((value) => <option key={value} value={value}>{value} — {ratingLabels[value]}</option>)}
-                </select>
-                <small>{field.detail}</small>
-              </label>
-            ))}
-          </div>
-          <div className="portal-form-protection" style={{ marginTop: 14 }}><strong>{overall} · {average.toFixed(2)} / 5.00</strong><span>Overall rating is calculated from all eight categories and stored with the evaluation.</span></div>
-        </section>
-
-        <section className="portal-panel" style={{ marginBottom: 16 }}>
-          <div className="portal-panel-heading"><div><p>Supervisor assessment</p><h2>Evaluation Narrative</h2></div></div>
-          <div className="portal-form-grid" style={{ marginTop: 16 }}>
-            <label style={{ gridColumn: "1 / -1" }}>
-              Overall assessment
-              <textarea maxLength={6000} onChange={(event) => setSupervisorSummary(event.target.value)} placeholder="Summarize performance during this review period." required rows={5} value={supervisorSummary} />
-            </label>
-            <label style={{ gridColumn: "1 / -1" }}>
-              Strengths
-              <textarea maxLength={6000} onChange={(event) => setStrengths(event.target.value)} placeholder="Document demonstrated strengths and positive performance." required rows={4} value={strengths} />
-            </label>
-            <label style={{ gridColumn: "1 / -1" }}>
-              Improvement areas
-              <textarea maxLength={6000} onChange={(event) => setImprovementAreas(event.target.value)} placeholder="Document development areas, or state that none were identified." required rows={4} value={improvementAreas} />
-            </label>
-            <label style={{ gridColumn: "1 / -1" }}>
-              Goals / next-period expectations
-              <textarea maxLength={6000} onChange={(event) => setGoals(event.target.value)} placeholder="Set clear goals or expectations for the next review period." required rows={4} value={goals} />
-            </label>
-          </div>
-          {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
-          {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>Evaluation issued</strong><span>{notice}</span></div> : null}
-          <div className="command-v2-action-row" style={{ marginTop: 16 }}>
-            <button className="portal-button portal-button--primary" disabled={submitting || !personnel.length} type="submit">{submitting ? "Issuing…" : "Issue evaluation"}</button>
-            <Link className="portal-button portal-button--secondary" href="/portal/command/guardians">Back to Guardians</Link>
-          </div>
-        </section>
-      </form>
-
-      <section className="portal-panel">
-        <div className="portal-panel-heading"><div><p>Permanent record</p><h2>{selectedMember ? `${selectedMember.displayName} · Evaluation History` : "Performance Evaluation History"}</h2></div><span>{selectedMember ? memberHistory.length : evaluations.length} records</span></div>
-        <div className="command-v2-personnel-results" style={{ marginTop: 12 }}>
-          {(selectedMember ? memberHistory : evaluations).map((evaluation) => (
-            <Link href={`/portal/command/guardians/${evaluation.guardianNumber}`} key={evaluation.id}>
-              <div><strong>G-{String(evaluation.guardianNumber).padStart(4, "0")} · {evaluation.evaluationKind}</strong><span>{evaluation.subjectName} · {dateLabel(evaluation.periodStart)} – {dateLabel(evaluation.periodEnd)} · {evaluation.authorName}</span></div>
-              <div><span>{evaluation.overallAverage.toFixed(2)} · {evaluation.overallRating}</span><b>{evaluation.status}</b></div>
-            </Link>
-          ))}
-          {!(selectedMember ? memberHistory : evaluations).length ? <div className="portal-empty-state"><strong>No performance evaluations are on file.</strong></div> : null}
-        </div>
-      </section>
-    </div>
-  );
+  <section className="portal-panel"><div className="portal-panel-heading"><div><p>Permanent Guardian history</p><h2>Evaluation History & Reporting</h2></div><span>{filteredHistory.length} records</span></div><div className="portal-form-grid" style={{marginTop:14}}><label>Search<input onChange={event=>setHistoryQuery(event.target.value)} placeholder="Employee, G-number, reviewer, rating..." value={historyQuery}/></label><label>Type<select onChange={event=>setHistoryKind(event.target.value)} value={historyKind}><option>All</option>{evaluationKinds.map(kind=><option key={kind}>{kind}</option>)}</select></label><label>Status<select onChange={event=>setHistoryStatus(event.target.value)} value={historyStatus}><option>All</option>{Array.from(new Set(evaluations.map(item=>item.status))).sort().map(status=><option key={status}>{status}</option>)}</select></label></div><div className="deputy-summary-grid" style={{marginTop:14}}><article><span>Matching records</span><strong>{String(filteredHistory.length).padStart(2,"0")}</strong><small>Current filters</small></article><article><span>Average rating</span><strong>{filteredHistory.length?historyAverage.toFixed(2):"—"}</strong><small>{filteredHistory.length?overallLabel(historyAverage):"No matching evaluations"}</small></article><article><span>Remediation plans</span><strong>{String(filteredHistory.filter(item=>item.remediationRequired).length).padStart(2,"0")}</strong><small>Training/development required</small></article><article><span>Promotion readiness</span><strong>{String(filteredHistory.filter(item=>item.evaluationKind==="Promotion Readiness").length).padStart(2,"0")}</strong><small>Promotion-specific reviews</small></article></div><div className="command-v2-personnel-results" style={{marginTop:14}}>{filteredHistory.slice(0,50).map(evaluation=><Link href={`/portal/command/guardians/${evaluation.guardianNumber}`} key={evaluation.id}><div><strong>G-{String(evaluation.guardianNumber).padStart(4,"0")} · {evaluation.subjectName}</strong><span>{evaluation.evaluationKind} · {dateLabel(evaluation.periodStart)} – {dateLabel(evaluation.periodEnd)} · Reviewer: {evaluation.authorName}</span></div><div><span>{evaluation.overallAverage.toFixed(2)} / 5 · {evaluation.overallRating}</span><b>{evaluation.status}</b></div></Link>)}{!filteredHistory.length?<div className="portal-empty-state"><strong>No performance evaluations match the current filters.</strong></div>:null}</div></section>
+  {notice?<div className="portal-toast" role="status">{notice}</div>:null}
+ </div>
 }
