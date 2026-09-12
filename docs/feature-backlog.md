@@ -13,17 +13,21 @@ A full promotion review system with three valid entry paths:
 
 All three paths should converge into one promotion case with source, requested/recommended rank, eligibility checks, reviewer assignment, supporting notes, review/interview steps if required, decision, effective date, and permanent personnel-history entry. Approval should update the existing personnel record rather than create a separate record.
 
-Future enhancement: configurable rank prerequisites, minimum time-in-grade, certifications, disciplinary/Guardian review, probation status, and automatic eligibility warnings.
+Future enhancement: configurable rank prerequisites, minimum time-in-grade, certifications, Guardian review, probation status, and automatic eligibility warnings.
 
-### Guardian performance evaluations
+### Guardian performance evaluations and record continuity
 Performance evaluations belong inside the Guardian system rather than as a separate personnel module.
+
+Guardian is part of the member's permanent personnel record. Guardian history follows the person through transfers, separation, rehire, reinstatement, and future personnel actions; it is not reset or detached because the member changes assignment, rank, or employment status.
 
 Guardian should eventually support scheduled and ad-hoc evaluations, evaluation categories, supervisor narrative, strengths/improvement areas, member acknowledgment, command review, and historical evaluations as part of the member's accountability/service record.
 
 ### Personnel record PDF export
 Command needs the ability to export an individual's personnel record as a professional PDF for lateral-transfer or records purposes.
 
-The export should be generated from the authoritative personnel record and allow Command to control which sections are included. Likely sections: identity/service summary, rank history, assignments, certifications, training, awards/commendations, employment dates, and other releasable service history. Guardian/disciplinary material should not automatically be included; any sensitive section should require explicit authorization.
+The export should be generated from the authoritative personnel record and allow Command to control which sections are included. Likely sections: identity/service summary, rank history, assignments, certifications, training, awards/commendations, employment dates, Guardian records, evaluations, and other service history.
+
+Guardian records are part of the personnel record and must be available for authorized personnel-record releases. The export/release workflow may still apply role-based access and release rules, but Guardian history is not treated as a separate record that disappears or is omitted by default simply because the member transfers, separates, or is rehired.
 
 ### Command Orders
 Create an internal Command Orders system modeled after the existing PSA publishing workflow, but inside the Personnel Portal.
@@ -55,7 +59,7 @@ Command Orders should support order number, title, issuing authority, effective 
 
 ### Personnel records and documents
 - **Personnel document vault** — controlled storage for appointment letters, certificates, signed acknowledgments, transfer paperwork, separation documents, and other official records.
-- **Record-release packet builder** — choose approved personnel-record sections and attachments, then generate one export package for lateral-transfer or records requests.
+- **Record-release packet builder** — choose authorized personnel-record sections and attachments, including Guardian material when applicable, then generate one export package for lateral-transfer or records requests.
 - **Employment verification letter generator** — Command can generate a standardized verification of service/rank/status PDF from current personnel data.
 - **Service milestone automation** — flag anniversaries, probation completion, time-in-rank milestones, and eligibility dates.
 - **Personnel record completeness check** — show missing supervisor, assignment, call sign, certifications, signatures, or other required administrative fields.
@@ -81,11 +85,12 @@ Command Orders should support order number, title, issuing authority, effective 
 - **Vehicle assignment records** — track permanent or temporary vehicle assignments independently from FiveM.
 - **Equipment request workflow** — personnel request authorized equipment; supervisor/Command reviews and records issuance.
 
-### Onboarding and separation
+### Onboarding, separation, rehire, and reinstatement
 - **Recruit onboarding checklist** — automatically created after the signed employment offer and Recruit appointment, including account setup, policy acknowledgments, academy enrollment, call sign, assignments, and required training.
 - **Probation workflow** — milestone reviews, supervisor check-ins, Guardian/evaluation links, extension if authorized, and final completion decision.
-- **Separation / exit workflow** — resignation, retirement, transfer, or termination triggers a checklist for assignments, delegated authority, equipment, account access, final service record, and archive.
-- **Rehire / reinstatement review** — structured review of former personnel using the historical personnel record instead of creating disconnected records.
+- **Separation / exit workflow** — resignation, retirement, transfer, or termination triggers a checklist for assignments, delegated authority, equipment, account access, final service record, and archive. The personnel record, including Guardian history, remains intact.
+- **Rehire / reinstatement review** — structured review of former personnel using the existing historical personnel record instead of creating disconnected records. The review should surface prior service, prior recruitment applications/interviews, separation reason, former rank/assignments, certifications, training, awards, Guardian history, and previous evaluations before Command decides whether to reinstate, rehire at a different rank, require a new interview, or require additional training.
+- **Prior-candidate recognition** — recruitment should detect when an applicant has previously applied or interviewed with LSCSO and surface that history to authorized Command staff instead of treating the person as a completely new candidate.
 
 ### Public-facing ideas
 - **Commendation / complaint portal** — public intake with tracking, staff review, and routing to the correct internal workflow.
@@ -99,6 +104,8 @@ Command Orders should support order number, title, issuing authority, effective 
 ## Design principles for future features
 
 - One authoritative personnel record; do not duplicate records between modules.
+- Guardian is part of the authoritative personnel record and follows the member through transfer, separation, rehire, and reinstatement.
+- Authorized personnel-record releases can include Guardian history as part of that record; release permissions determine access, not whether Guardian is considered part of the record.
 - Requests, recommendations, and Command-initiated actions should converge into the same underlying workflow when they represent the same personnel action.
 - Keep applicant/public information separate from internal notes and protected personnel information.
 - Important actions should be atomic, audited, and permission-controlled.
