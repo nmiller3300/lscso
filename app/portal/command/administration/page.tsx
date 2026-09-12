@@ -11,6 +11,7 @@ export default async function AdministrationWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
   const executive = profile.access_tier === "Executive";
+  const returnAuthority = ["Sheriff", "Undersheriff"].includes(profile.rank);
   const supabase = await createClient() as any;
   const { data: accessRows } = await supabase.rpc("get_my_roster_access");
   const delegations = new Set<string>(accessRows?.[0]?.active_delegations ?? []);
@@ -18,6 +19,7 @@ export default async function AdministrationWorkspacePage() {
 
   const tools: AdminTool[] = [
     ...(canManageAccounts ? [{ href: "/portal/command/administration/accounts", code: "AC", eyebrow: "Accounts & access", title: "Personnel Accounts", description: "Create department accounts, issue credentials, and manage account access.", group: "Personnel Administration" as const }] : []),
+    ...(returnAuthority ? [{ href: "/portal/command/administration/rehire", code: "RR", eyebrow: "Former personnel", title: "Rehire & Reinstatement", description: "Review prior service and return separated personnel to the existing record.", badge: "Executive", group: "Personnel Administration" as const }] : []),
     { href: "/portal/command/service-records", code: "SR", eyebrow: "Personnel actions", title: "Service Records", description: "Record administrative personnel actions and preserve the official service history.", group: "Personnel Administration" },
     { href: "/portal/command/activity", code: "AU", eyebrow: "Audit & accountability", title: "Activity & Audit", description: "Review recorded portal, personnel, and administrative activity.", group: "Department Governance" },
     ...(executive ? [
