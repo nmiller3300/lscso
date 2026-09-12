@@ -76,7 +76,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Recruitment — Applicant Tracking**: Added applicant-facing tracking and status history so applicants can follow a submitted application after submission.
 - **Recruitment — Applicant Communications History**: Added permanent applicant status-message and communication history with authorized Command visibility.
 - **Recruitment — Administrative Delete Controls**: Added protected administrative cleanup controls for recruitment records where removal is explicitly authorized.
-- **Recruitment — Hire Handoff**: Added the website-side handoff from a recruitment decision into personnel hiring while keeping acceptance separate from actual hiring.
+- **Recruitment — Hire Handoff**: Added the website-side handoff from an approved recruitment case into personnel hiring while keeping acceptance separate from actual hiring.
 - **Personnel — Manual and Open-Ended Leave**: Added Command entry of personnel LOA records, including open-ended leave when an end date is not yet known.
 - **Personnel — Family Leave Types**: Added paternity and maternity leave classifications to the leave workflow.
 - **Policy — AI Use Acknowledgment**: Added applicant acknowledgment of the recruitment AI-use policy and corrected the acknowledgment wrapper behavior.
