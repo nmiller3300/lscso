@@ -1,0 +1,37 @@
+.open-records-admin-metrics { grid-template-columns:repeat(3,minmax(0,1fr)); }
+.open-records-admin-law { margin-bottom:16px; }
+.open-records-admin-law-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-bottom:14px; }
+.open-records-admin-law-grid article { padding:14px; border:1px solid var(--portal-line); background:var(--portal-subtle); }
+.open-records-admin-law-grid strong,.open-records-admin-law-grid span { display:block; }
+.open-records-admin-law-grid strong { color:var(--portal-gold,#a48b45); font-size:.72rem; letter-spacing:.05em; text-transform:uppercase; }
+.open-records-admin-law-grid span { margin-top:5px; font-size:.8rem; font-weight:700; }
+.open-records-admin-law-grid p { margin:7px 0 0; color:var(--portal-muted); font-size:.76rem; line-height:1.5; }
+.open-records-admin-list { display:grid; gap:14px; }
+.open-records-admin-request { border:1px solid var(--portal-line); background:var(--portal-surface,#fff); }
+.open-records-admin-request>header { display:flex; justify-content:space-between; gap:18px; padding:16px; border-bottom:1px solid var(--portal-line); background:var(--portal-subtle); }
+.open-records-admin-request>header>div:first-child { min-width:0; }
+.open-records-admin-request>header span { color:var(--portal-gold,#a48b45); font-size:.7rem; font-weight:800; letter-spacing:.07em; }
+.open-records-admin-request>header h3 { margin:4px 0; }
+.open-records-admin-request>header p { margin:0; color:var(--portal-muted); font-size:.78rem; overflow-wrap:anywhere; }
+.open-records-admin-request>header>div:last-child { display:grid; gap:4px; justify-items:end; flex:0 0 auto; text-align:right; }
+.open-records-admin-request>header b { padding:4px 8px; border:1px solid rgba(164,139,69,.35); border-radius:999px; color:var(--portal-gold,#a48b45); font-size:.67rem; text-transform:uppercase; }
+.open-records-admin-request>header small { color:var(--portal-muted); font-size:.68rem; }
+.open-records-admin-request-body { display:grid; grid-template-columns:minmax(0,1.4fr) minmax(220px,.6fr); gap:16px; padding:16px; }
+.open-records-admin-request-body strong { display:block; margin-bottom:6px; font-size:.72rem; text-transform:uppercase; }
+.open-records-admin-request-body p { margin:0; color:var(--portal-muted); line-height:1.55; white-space:pre-wrap; }
+.open-records-admin-request-meta { display:grid; gap:10px; }
+.open-records-admin-request-meta span { display:grid; gap:3px; padding:10px; border:1px solid var(--portal-line); background:var(--portal-subtle); font-size:.76rem; }
+.open-records-admin-request-meta b { color:var(--portal-muted); font-size:.65rem; text-transform:uppercase; }
+.open-records-command-controls { display:grid; grid-template-columns:minmax(180px,.35fr) minmax(0,1fr) minmax(0,1fr); gap:12px; padding:16px; border-top:1px solid var(--portal-line); }
+.open-records-command-controls label { display:grid; gap:6px; align-content:start; color:var(--portal-muted); font-size:.68rem; font-weight:750; letter-spacing:.04em; text-transform:uppercase; }
+.open-records-command-controls select,.open-records-command-controls textarea { width:100%; box-sizing:border-box; border:1px solid var(--portal-line); background:var(--portal-input); color:var(--portal-text); padding:9px 10px; font:inherit; letter-spacing:normal; text-transform:none; }
+.open-records-command-controls textarea { resize:vertical; line-height:1.45; }
+.open-records-command-actions { grid-column:1/-1; display:flex; gap:10px; align-items:center; justify-content:flex-end; }
+.open-records-command-actions span { color:var(--portal-muted); font-size:.75rem; }
+@media (max-width:760px) {
+  .open-records-admin-metrics,.open-records-admin-law-grid,.open-records-admin-request-body,.open-records-command-controls { grid-template-columns:1fr; }
+  .open-records-admin-request>header { align-items:flex-start; }
+  .open-records-admin-request>header>div:last-child { justify-items:start; text-align:left; }
+  .open-records-command-actions { grid-column:auto; justify-content:stretch; flex-direction:column; align-items:stretch; }
+  .open-records-command-actions .portal-button { width:100%; justify-content:center; }
+}
