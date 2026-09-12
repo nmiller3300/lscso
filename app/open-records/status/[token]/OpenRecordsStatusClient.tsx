@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+const OPEN_RECORDS_ACT_URL = "https://lscso-gov.notion.site/San-Andreas-Open-Records-Act-OCSA-50-18-70-Series-3d9305c9558581be90f9e0059e76d13c";
+
 type ReleaseFile = {
   id: string;
   file_name: string;
@@ -93,7 +95,7 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
         <article><span>Release window</span><strong>{releaseCountdown || "Not released"}</strong><small>{request.release_expires_at ? `Expires ${formatDate(request.release_expires_at)}` : "48-hour window begins when files are released"}</small></article>
       </div>
 
-      {paymentRequired ? <section className="open-records-status-notice is-payment"><strong>In-city payment required</strong><p>LSCSO has assessed a fee of {formatMoney(request.fee_amount)}. Under OCSA § 50-18-71.3, processing will not advance beyond preliminary review until payment is made in city and a First Lieutenant or above confirms it.</p></section> : null}
+      {paymentRequired ? <section className="open-records-status-notice is-payment"><strong>In-city payment required</strong><p>LSCSO has assessed a fee of {formatMoney(request.fee_amount)}. Processing will remain paused until payment is made in city and confirmed by an authorized Records Custodian.</p></section> : null}
 
       <section className="open-records-status-card">
         <div className="open-records-form-heading"><p className="section-kicker section-kicker--dark">Original Request</p><h2>Records requested</h2></div>
@@ -109,14 +111,13 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
 
       {request.release_available_at ? <section className="open-records-status-card open-records-status-release">
         <div className="open-records-form-heading"><p className="section-kicker section-kicker--dark">Electronic Release</p><h2>{releaseCountdown === "Expired" ? "Release window expired" : "Your released records"}</h2></div>
-        <p>Released {formatDate(request.release_available_at)}. Under OCSA § 50-18-75, temporary release copies remain available for 48 hours and are then purged from active release storage.</p>
+        <p>Released {formatDate(request.release_available_at)}. Temporary release copies remain available for 48 hours and are then removed from active release storage.</p>
         {activeFiles.length ? <div className="open-records-download-list">{activeFiles.map((file) => <a href={file.download_url!} key={file.id} target="_blank" rel="noreferrer"><span><strong>{file.file_name}</strong><small>{[file.mime_type, formatBytes(file.size_bytes)].filter(Boolean).join(" · ")}</small></span><b>Download</b></a>)}</div> : <div className="open-records-status-notice"><strong>{releaseCountdown === "Expired" ? "Files are no longer available." : "No downloadable release files are currently available."}</strong><p>{releaseCountdown === "Expired" ? "The 48-hour release window has ended. The permanent request history remains on file, but temporary release copies are removed from active storage." : "If LSCSO has marked this request released, refresh this page after the files finish publishing."}</p></div>}
       </section> : null}
 
-      <section className="open-records-status-law">
-        <strong>Legal framework</strong>
-        <p>United States / Georgia: O.C.G.A. § 50-18-70 et seq. · State of San Andreas: OCSA § 50-18-70 et seq. A request may be fully granted, partially granted, or denied based on the records located and applicable exemptions.</p>
-      </section>
+      <div className="open-records-status-actions">
+        <a className="button button--outline" href={OPEN_RECORDS_ACT_URL} target="_blank" rel="noreferrer">View Open Records Act</a>
+      </div>
     </div>
   );
 }
