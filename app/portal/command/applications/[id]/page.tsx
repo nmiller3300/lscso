@@ -32,10 +32,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const alreadyFinalWithoutClosure = ["Denied", "Withdrawn"].includes(application.status);
-  const rawLatestOffer = offers?.[0] ?? null;
-  const latestOffer = rawLatestOffer?.status === "Pending" && rawLatestOffer?.expires_at && new Date(rawLatestOffer.expires_at).getTime() <= Date.now()
-    ? { ...rawLatestOffer, status: "Expired" }
-    : rawLatestOffer;
+  const latestOffer = offers?.[0] ?? null;
 
   return (
     <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Application review and recruitment workflow.">
