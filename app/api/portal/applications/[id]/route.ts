@@ -17,7 +17,12 @@ function actionErrorStatus(message: string) {
     normalized.includes("finalized") ||
     normalized.includes("must be accepted") ||
     normalized.includes("before recording a decision") ||
-    normalized.includes("hired as a recruit")
+    normalized.includes("hired as a recruit") ||
+    normalized.includes("cannot be closed") ||
+    normalized.includes("cannot be terminated") ||
+    normalized.includes("offer has") ||
+    normalized.includes("offer is") ||
+    normalized.includes("no longer")
   ) return 409;
   if (
     normalized.includes("invalid") ||
@@ -25,7 +30,8 @@ function actionErrorStatus(message: string) {
     normalized.includes("enter ") ||
     normalized.includes("required") ||
     normalized.includes("cannot exceed") ||
-    normalized.includes("only submitted")
+    normalized.includes("only submitted") ||
+    normalized.includes("must be in the future")
   ) return 400;
   return 500;
 }
