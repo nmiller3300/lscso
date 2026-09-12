@@ -3,6 +3,7 @@ type PdfSection = { title: string; lines: PdfLine[] };
 
 type PersonnelPdfInput = {
   departmentName: string;
+  documentLabel?: string;
   title: string;
   subtitle: string;
   generatedAt: string;
@@ -68,7 +69,9 @@ export function buildPersonnelRecordPdf(input: PersonnelPdfInput) {
 
   function pageHeader() {
     text(input.departmentName, LEFT, PAGE_H - 34, 8.5, true);
-    text("OFFICIAL PERSONNEL RECORD", PAGE_W - RIGHT - 132, PAGE_H - 34, 8, true);
+    const label = input.documentLabel || "OFFICIAL PERSONNEL RECORD";
+    const approximateWidth = Math.min(220, Math.max(110, label.length * 4.3));
+    text(label, PAGE_W - RIGHT - approximateWidth, PAGE_H - 34, 8, true);
     line(LEFT, PAGE_H - 42, PAGE_W - RIGHT, PAGE_H - 42, 0.8);
   }
 
