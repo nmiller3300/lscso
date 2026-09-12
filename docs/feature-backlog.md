@@ -34,6 +34,23 @@ Create an internal Command Orders system modeled after the existing PSA publishi
 
 Command Orders should support order number, title, issuing authority, effective date, body, attachments, active/rescinded status, target audience, required acknowledgment when applicable, and a permanent archive. Personnel should see active orders relevant to them from the portal.
 
+### Training record and FTO redesign
+Training history is broader than Recruit Academy or FTO. Personnel appointed directly into Deputy, supervisory, Command, Sheriff, Undersheriff, lateral-entry, rehire, or reinstatement positions can still have legitimate training history even when they never completed LSCSO Recruit/FTO training.
+
+The personnel record should distinguish three training record categories:
+
+1. **Department Training** — LSCSO Academy, FTO, remedial training, continuing education, leadership training, in-service training, qualifications, and other department-completed training.
+2. **Prior / Lateral Training** — training completed with another agency or organization and accepted into the LSCSO personnel record. Records should support source agency/provider, course, completion date when known, documentation, who verified it, and an acceptance status such as Verified, Accepted as Equivalent, or Recorded for History Only.
+3. **Training Requirement Disposition** — a permanent explanation when an entry requirement was not applicable or was formally waived, such as FTO Not Required — Appointed at Command Rank or Academy Waived — Verified Lateral Entry.
+
+`training_progress` should remain the active workflow for a member currently going through a program, but it should not be the entire historical training record. A permanent completed-training ledger should retain final training outcomes after the active workflow is closed.
+
+Completing or releasing a member from Academy/FTO should automatically write the permanent completion record and route any required final personnel action back to Command instead of ending at a percentage/status change with no next step.
+
+Training & FTO management should ultimately live in the main Personnel Portal rather than being buried in the separate roster-management workspace. Command should be able to start a training record, assign the trainer/FTO, and review progress there; assigned trainers should have a clear trainee workspace for recording phases, progress, evaluations, remediation, and release recommendations.
+
+Existing personnel should not receive fabricated backdated Academy/FTO records simply to fill blank history. Historical records should be added only when based on known, documented, or Command-verified information. Every existing member should eventually have an entry-training basis/disposition so a blank FTO section does not falsely imply missing training.
+
 ## Additional backlog ideas
 
 ### Career and personnel development
@@ -49,6 +66,8 @@ Command Orders should support order number, title, issuing authority, effective 
 - **Qualification matrix** — one Command view of personnel versus certifications/qualifications with current, missing, expiring, and expired status.
 - **Academy cohort dashboard** — manage a group of Recruits through onboarding, academy phases, FTO assignment, evaluations, remediation, and graduation.
 - **Remedial training plans** — Guardian or Training can assign required remediation with a deadline and completion evidence.
+- **Historical training intake** — Command can add verified prior-agency, lateral-entry, legacy LSCSO, leadership, and continuing-education training without creating a fake active training program.
+- **FTO release review** — an FTO can recommend release/completion, but Command receives the final release action before any downstream rank, probation, assignment, or certification change is made.
 
 ### Command and supervision
 - **Supervisor action center** — one page showing direct reports, probation deadlines, LOA, expiring certifications, promotion cases, Guardian items, pending requests, and required acknowledgments.
@@ -56,13 +75,15 @@ Command Orders should support order number, title, issuing authority, effective 
 - **Delegation / acting assignment workflow** — temporary acting supervisor or command assignments with start/end dates, authority scope, and automatic expiration.
 - **Succession / temporary command coverage** — document who has authority when a command member is unavailable without permanently changing rank.
 - **Meeting minutes / command brief archive** — restricted internal records tied to dates, attendees, decisions, and follow-up assignments.
+- **Smart action notifications** — notify personnel only when an event actually requires action, such as a policy acknowledgment, training evaluation, expiring certification, pending promotion review, interview, LOA decision, Guardian acknowledgment, or employment offer signature.
+- **Internal forms center** — standardized personnel forms and workflows for training requests, equipment requests, transfer requests, promotion interest, commendation recommendations, resignations, specialty assignments, and other recurring administrative actions.
 
 ### Personnel records and documents
 - **Personnel document vault** — controlled storage for appointment letters, certificates, signed acknowledgments, transfer paperwork, separation documents, and other official records.
 - **Record-release packet builder** — choose authorized personnel-record sections and attachments, including Guardian material when applicable, then generate one export package for lateral-transfer or records requests.
 - **Employment verification letter generator** — Command can generate a standardized verification of service/rank/status PDF from current personnel data.
 - **Service milestone automation** — flag anniversaries, probation completion, time-in-rank milestones, and eligibility dates.
-- **Personnel record completeness check** — show missing supervisor, assignment, call sign, certifications, signatures, or other required administrative fields.
+- **Personnel record completeness check** — show missing supervisor, assignment, call sign, certifications, signatures, entry-training disposition, or other required administrative fields.
 
 ### Recognition and awards
 - **Award / commendation nomination workflow** — supervisor, Command, or authorized personnel nominate a member; Command reviews and awards it into the existing service record.
@@ -91,6 +112,7 @@ Command Orders should support order number, title, issuing authority, effective 
 - **Separation / exit workflow** — resignation, retirement, transfer, or termination triggers a checklist for assignments, delegated authority, equipment, account access, final service record, and archive. The personnel record, including Guardian history, remains intact.
 - **Rehire / reinstatement review** — structured review of former personnel using the existing historical personnel record instead of creating disconnected records. The review should surface prior service, prior recruitment applications/interviews, separation reason, former rank/assignments, certifications, training, awards, Guardian history, and previous evaluations before Command decides whether to reinstate, rehire at a different rank, require a new interview, or require additional training.
 - **Prior-candidate recognition** — recruitment should detect when an applicant has previously applied or interviewed with LSCSO and surface that history to authorized Command staff instead of treating the person as a completely new candidate.
+- **Entry basis review** — every appointment, lateral, rehire, or reinstatement should record whether Academy/FTO is Required, Partially Required, Accepted as Equivalent, Waived, or Not Applicable and why.
 
 ### Public-facing ideas
 - **Commendation / complaint portal** — public intake with tracking, staff review, and routing to the correct internal workflow.
@@ -100,12 +122,15 @@ Command Orders should support order number, title, issuing authority, effective 
 - **Community calendar** — public events, recruitment events, ceremonies, and community programs.
 - **Public policy / standards library** — selected public-facing policies and procedures controlled by Command.
 - **Dynamic organization / command page** — pull current command structure and public-facing assignments from the personnel system instead of maintaining duplicate content.
+- **Recruitment eligibility pre-screen** — a short public minimum-qualification check before someone opens the full application. It should identify obvious eligibility problems without making or implying a hiring decision.
 
 ## Design principles for future features
 
 - One authoritative personnel record; do not duplicate records between modules.
 - Guardian is part of the authoritative personnel record and follows the member through transfer, separation, rehire, and reinstatement.
 - Authorized personnel-record releases can include Guardian history as part of that record; release permissions determine access, not whether Guardian is considered part of the record.
+- Training history belongs to the member's permanent personnel record even when the member did not enter through Recruit/FTO.
+- Do not fabricate historical training to eliminate blank screens; record verified history and explicit entry-training dispositions instead.
 - Requests, recommendations, and Command-initiated actions should converge into the same underlying workflow when they represent the same personnel action.
 - Keep applicant/public information separate from internal notes and protected personnel information.
 - Important actions should be atomic, audited, and permission-controlled.
