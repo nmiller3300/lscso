@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TrainingAssignmentLauncher } from "./TrainingAssignmentLauncher";
 import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
@@ -7,6 +8,12 @@ const ACTIVE_TRAINING_STATUSES = ["Not Started", "In Progress", "Needs Improveme
 
 function relationOne(value: any) {
   return Array.isArray(value) ? value[0] : value;
+}
+
+function dateLabel(value: string | null | undefined) {
+  if (!value) return "Date not recorded";
+  const normalized = value.length === 10 ? `${value}T12:00:00` : value;
+  return new Date(normalized).toLocaleDateString();
 }
 
 export default async function TrainingWorkspacePage() {
@@ -33,7 +40,7 @@ export default async function TrainingWorkspacePage() {
 
   if (!canManageTraining) activeTrainingQuery = activeTrainingQuery.eq("evaluator_profile_id", profile.id);
 
-  const [trainingResult, ftoResult, expiringResult, pendingResult] = await Promise.all([
+  const [trainingResult, ftoResult, expiringResult, pendingResult, personnelResult, historyResult, historyCountResult] = await Promise.all([
     canManageTraining || canTrainAssigned ? activeTrainingQuery : Promise.resolve({ data: [] }),
     supabase
       .from("certifications")
@@ -54,12 +61,33 @@ export default async function TrainingWorkspacePage() {
       .select("id,name,status,created_at,profile_id")
       .in("status", ["Requested", "Pending"])
       .order("created_at", { ascending: false }),
+    canManageTraining
+      ? supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,status,is_test_account").in("status", ["Active", "Acting"]).eq("is_test_account", false).order("display_name")
+      : Promise.resolve({ data: [] }),
+    canManageTraining || canTrainAssigned
+      ? supabase.from("personnel_training_records").select("id,profile_id,record_type,category,title,provider,completed_on,verification_status,created_at,personnel:personnel_profiles!personnel_training_records_profile_id_fkey(personnel_id,display_name,rank,call_sign)").order("created_at", { ascending: false }).limit(8)
+      : Promise.resolve({ data: [] }),
+    canManageTraining || canTrainAssigned
+      ? supabase.from("personnel_training_records").select("id", { count: "exact", head: true })
+      : Promise.resolve({ count: 0 }),
   ]);
 
   const trainingRows = trainingResult.data ?? [];
   const currentFtoRows = (ftoResult.data ?? []).filter((row: any) => !row.expires_on || row.expires_on >= todayKey);
   const expiringRows = expiringResult.data ?? [];
   const pendingRows = pendingResult.data ?? [];
+  const historyRows = historyResult.data ?? [];
+  const historyCount = Number(historyCountResult.count ?? 0);
+
+  const ftoIds = new Set(currentFtoRows.map((row: any) => row.profile_id));
+  const personnelOptions = (personnelResult.data ?? []).map((member: any) => ({
+    id: member.id,
+    personnelId: member.personnel_id,
+    displayName: member.display_name,
+    rank: member.rank,
+    callSign: member.call_sign,
+    ftoQualified: ftoIds.has(member.id),
+  }));
 
   const trainers = currentFtoRows
     .map((row: any) => {
@@ -78,30 +106,31 @@ export default async function TrainingWorkspacePage() {
     .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName));
 
   const needsAttention = trainingRows.filter((row: any) => row.status === "Needs Improvement").length;
-  const unassignedTraining = trainingRows.filter((row: any) => !row.evaluator_profile_id).length;
 
   return (
     <PortalShell
       active="training"
       eyebrow="Training & FTO"
       title="Training & FTO"
-      description={canManageTraining ? "Active trainees, FTO staffing, progress, and qualification readiness in one operational workspace." : "Your assigned trainees and current FTO responsibilities."}
-      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/certifications">Certification Center</Link>}
+      actions={(
+        <>
+          {canManageTraining ? <TrainingAssignmentLauncher personnel={personnelOptions} /> : null}
+          <Link className="portal-button portal-button--secondary" href="/portal/command/certifications">Certification Center</Link>
+        </>
+      )}
     >
       <div className="portal-metric-grid portal-training-metrics">
-        <article className="portal-metric portal-metric--gold"><span>{canManageTraining ? "Active trainees" : "My active trainees"}</span><strong>{trainingRows.length}</strong><small>Current training records</small></article>
-        <article className="portal-metric"><span>FTO authorized</span><strong>{trainers.length}</strong><small>Current Field Training Officer certifications</small></article>
-        <article className={`portal-metric ${needsAttention ? "portal-metric--warning" : ""}`}><span>Needs attention</span><strong>{needsAttention}</strong><small>Training records requiring review</small></article>
-        <article className="portal-metric"><span>{canManageTraining ? "Unassigned trainees" : "Expiring certs"}</span><strong>{canManageTraining ? unassignedTraining : expiringRows.length}</strong><small>{canManageTraining ? "No trainer assigned" : "Within 90 days"}</small></article>
+        <article className="portal-metric portal-metric--gold"><span>{canManageTraining ? "Active trainees" : "My active trainees"}</span><strong>{trainingRows.length}</strong><small>Current progression</small></article>
+        <article className="portal-metric"><span>FTO authorized</span><strong>{trainers.length}</strong><small>Current FTO certifications</small></article>
+        <article className={`portal-metric ${needsAttention ? "portal-metric--warning" : ""}`}><span>Needs attention</span><strong>{needsAttention}</strong><small>Training requiring review</small></article>
+        <article className="portal-metric"><span>Permanent records</span><strong>{historyCount}</strong><small>Completed and verified history</small></article>
       </div>
 
       <section className="portal-panel portal-training-board">
         <div className="portal-panel-heading">
-          <div><p>Training progression</p><h2>{canManageTraining ? "Active training board" : "My assigned trainees"}</h2></div>
+          <div><p>Active training</p><h2>{canManageTraining ? "Department training board" : "My assigned trainees"}</h2></div>
           <span>{trainingRows.length}</span>
         </div>
-        <p className="command-v2-compact-copy">Work the active training records here. Certification approvals stay in Approvals & Requests / Certification Center instead of being duplicated on this page.</p>
-
         <div className="command-v2-personnel-results portal-training-trainee-list">
           {trainingRows.length ? trainingRows.map((row: any) => {
             const trainee = relationOne(row.trainee);
@@ -118,21 +147,32 @@ export default async function TrainingWorkspacePage() {
                 </div>
               </Link>
             );
-          }) : <div className="portal-empty-state"><strong>No active training records.</strong><span>{canManageTraining ? "New trainee assignments will appear here when training begins." : "Personnel assigned to you for training will appear here."}</span></div>}
+          }) : <div className="portal-empty-state"><strong>No active training records.</strong></div>}
+        </div>
+      </section>
+
+      <section className="portal-panel portal-training-history-board">
+        <div className="portal-panel-heading"><div><p>Personnel record</p><h2>Recent Training History</h2></div><span>{historyCount}</span></div>
+        <div className="command-v2-mini-list portal-training-list">
+          {historyRows.length ? historyRows.map((row: any) => {
+            const member = relationOne(row.personnel);
+            return (
+              <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
+                <div><strong>{row.title}</strong><span>{member?.display_name ?? "Personnel"} · {row.record_type}</span></div>
+                <div><strong>{row.verification_status}</strong><span>{row.completed_on ? dateLabel(row.completed_on) : row.provider}</span></div>
+              </Link>
+            );
+          }) : <div className="portal-empty-state"><strong>No permanent training history recorded yet.</strong></div>}
         </div>
       </section>
 
       <div className="portal-training-grid">
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>FTO staffing</p><h2>Authorized FTOs</h2></div><span>{trainers.length}</span></div>
-          <p className="command-v2-compact-copy">FTO permissions exist only while the member holds a current Field Training Officer certification.</p>
           <div className="command-v2-mini-list portal-training-list">
             {trainers.length ? trainers.map((trainer: any) => (
               <Link key={trainer.id} href={`/portal/command/personnel/${trainer.personnelId}/training`}>
-                <div>
-                  <strong>{trainer.callSign ?? trainer.personnelId} · {trainer.displayName}</strong>
-                  <span>{trainer.rank} · FTO Authorized</span>
-                </div>
+                <div><strong>{trainer.callSign ?? trainer.personnelId} · {trainer.displayName}</strong><span>{trainer.rank} · FTO Authorized</span></div>
                 <div><strong>{trainer.activeTrainees}</strong><span>Active trainee{trainer.activeTrainees === 1 ? "" : "s"}</span></div>
               </Link>
             )) : <div className="portal-empty-state"><strong>No current FTO certifications found.</strong></div>}
@@ -141,10 +181,9 @@ export default async function TrainingWorkspacePage() {
 
         <section className="portal-panel portal-training-certification-launcher">
           <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification Center</h2></div><span>{pendingRows.length} pending</span></div>
-          <p className="command-v2-compact-copy">Issue, review, revoke, and monitor certifications in the dedicated Certification Center. Pending decisions are also surfaced in Approvals & Requests.</p>
           <div className="command-v2-action-row">
             <Link className="portal-button portal-button--primary" href="/portal/command/certifications">Open Certification Center</Link>
-            <Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Open pending requests</Link>
+            <Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Pending Requests</Link>
           </div>
         </section>
 
@@ -156,7 +195,7 @@ export default async function TrainingWorkspacePage() {
               return (
                 <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
                   <div><strong>{row.name}</strong><span>{member?.display_name ?? "Personnel"}</span></div>
-                  <div><strong>{new Date(`${row.expires_on}T12:00:00`).toLocaleDateString()}</strong><span>Expires</span></div>
+                  <div><strong>{dateLabel(row.expires_on)}</strong><span>Expires</span></div>
                 </Link>
               );
             }) : <div className="portal-empty-state"><strong>No certifications expire within 90 days.</strong></div>}
