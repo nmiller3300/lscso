@@ -3,6 +3,7 @@ type PdfSection = { title: string; lines: PdfLine[] };
 
 type PersonnelPdfInput = {
   departmentName: string;
+  documentLabel?: string;
   title: string;
   subtitle: string;
   generatedAt: string;
@@ -52,6 +53,14 @@ function wrapText(text: string, fontSize = 9, indent = 0) {
   return lines;
 }
 
+function inferredDocumentLabel(input: PersonnelPdfInput) {
+  if (input.documentLabel) return input.documentLabel;
+  if (input.title.startsWith("Open Records Request Personnel File")) return "OPEN RECORDS RELEASE COPY";
+  if (input.title.startsWith("Lateral Transfer Personnel File")) return "INTER-AGENCY PERSONNEL PACKET";
+  if (input.title.startsWith("Normal Personnel File")) return "INTERNAL PERSONNEL RECORD";
+  return "OFFICIAL PERSONNEL RECORD";
+}
+
 export function buildPersonnelRecordPdf(input: PersonnelPdfInput) {
   const pages: string[][] = [];
   let ops: string[] = [];
@@ -68,7 +77,9 @@ export function buildPersonnelRecordPdf(input: PersonnelPdfInput) {
 
   function pageHeader() {
     text(input.departmentName, LEFT, PAGE_H - 34, 8.5, true);
-    text("OFFICIAL PERSONNEL RECORD", PAGE_W - RIGHT - 132, PAGE_H - 34, 8, true);
+    const label = inferredDocumentLabel(input);
+    const approximateWidth = Math.min(220, Math.max(110, label.length * 4.3));
+    text(label, PAGE_W - RIGHT - approximateWidth, PAGE_H - 34, 8, true);
     line(LEFT, PAGE_H - 42, PAGE_W - RIGHT, PAGE_H - 42, 0.8);
   }
 
