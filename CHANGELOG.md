@@ -13,7 +13,11 @@ This file is the authoritative development history for the Los Santos County She
 
 ### Added
 - **Administration — Lifetime Changelog**: Added an Executive Administration workspace that renders the permanent repository changelog as a searchable, filterable dated timeline with lifetime statistics.
-- **Personnel Directory — File Export Shortcuts**: Added direct search-result actions for exporting a complete Lateral Transfer Personnel File or Normal Personnel File without opening the member’s full record first. Both exports continue through the protected personnel-record release pipeline and retain their release purpose in the audit trail.
+- **Personnel Directory — Three Personnel File Release Profiles**: Added direct search-result actions for Normal Personnel File, Lateral Transfer Personnel File, and Open Records Request Personnel File exports without requiring staff to open the member’s full record first.
+- **Personnel Records — Destination / Requesting Party Transmittal**: Added a required destination department, receiving agency, organization, or requesting party before a personnel PDF can be generated, and placed the destination and subject member directly into the generated packet.
+- **Public Site — Open Records Request Intake**: Added a public `/open-records` request form that preserves the requester, requested records, subject details, delivery preference, legal acknowledgment, submission date, and permanent ORR request number.
+- **Administration — Open Records Request Queue**: Added a Command/Executive records-custodian workspace for reviewing public requests, recording acknowledgment, maintaining request status, documenting production/withholding summaries, and preserving internal custodian notes.
+- **Records Law — Georgia and San Andreas Legal References**: Added Georgia Open Records Act references under O.C.G.A. § 50-18-70 et seq. together with a clearly labeled State of San Andreas roleplay analog using S.A.C.A. formatting. Both legal frameworks are presented in the public request process and personnel release documents.
 - **Recruitment — Employment Offers and Closure**: Added employment-offer handling, recruitment closure behavior, and tracking-expiration support so completed candidate cases can close cleanly without losing their history.
 - **Personnel — Promotion Review Workflow**: Added structured promotion review and required approved promotion review before rank increases are finalized.
 - **Personnel — Rehire and Reinstatement Workflow**: Added a structured return-to-service review that reuses the member’s existing permanent personnel record rather than creating a disconnected identity.
@@ -21,11 +25,20 @@ This file is the authoritative development history for the Los Santos County She
 - **Guardian — Performance Evaluations**: Added Guardian-native performance evaluations so evaluations remain part of the member’s permanent accountability and personnel history.
 
 ### Changed
+- **Personnel Records — Distinct Release Products**: Separated personnel exports into materially different products rather than cosmetic labels. Normal Personnel File is the fuller internal departmental record; Lateral Transfer Personnel File is an inter-agency employment/background packet that excludes internal administrative flags and Portal/access-control metadata; Open Records Request Personnel File is a narrower public-release review copy that excludes Guardian/accountability material, administrative flags, internal access data, and internal narrative notes.
+- **Personnel Records — Server-Enforced Release Scope**: Enforced section allowlists by export type on the server so changing URL parameters cannot convert an Open Records or Lateral packet into the fuller internal personnel file.
+- **Personnel Records — Document Classification Headers**: Added distinct running PDF labels for INTERNAL PERSONNEL RECORD, INTER-AGENCY PERSONNEL PACKET, and OPEN RECORDS RELEASE COPY so separated pages retain their release classification.
+- **Open Records — Georgia Response Model**: Modeled the request workflow around Georgia’s three-business-day response framework, including prompt production of available records, written timing when additional review is required, and specific legal authority for withholding/redaction.
 - **Recruitment — Applicant Dispositions**: Clarified applicant disposition reasons and status semantics so closures and adverse outcomes preserve a clearer historical explanation.
 - **Personnel History — Record Continuity**: Extended promotion, rehire/reinstatement, training, and Guardian workflows around the existing permanent personnel record instead of creating duplicate records.
 
 ### Fixed
 - **Personnel Records — Mobile Section Navigation**: Made the personnel-record section tabs horizontally swipeable on mobile so Overview, Administration, Training & Certifications, Accountability, Recognition, Documents, and Service History remain reachable instead of being clipped off-screen.
+
+### Security
+- **Open Records — Original Request Preservation**: Restricted staff updates to workflow fields so the requester’s original identity, requested-record description, subject information, and delivery selection remain preserved after submission.
+- **Open Records — Protected Public Intake**: Added a controlled database RPC for public request submission while keeping direct table access restricted and limiting Command/Executive access through RLS.
+- **Personnel Records — Public Release Guardrails**: Prevented the Open Records release profile from including Guardian/accountability records, administrative flags, or internal Portal/access metadata through client-side parameter changes.
 
 ### Operations
 - **Governance — Changelog Enforcement**: Added repository enforcement so future functional changes are required to update this lifetime changelog in the same change set.
