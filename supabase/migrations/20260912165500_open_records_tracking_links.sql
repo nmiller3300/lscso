@@ -16,13 +16,13 @@ create or replace function public.submit_open_records_request(
 returns table(request_number bigint, tracking_token text)
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_request_id uuid;
   v_request_number bigint;
-  v_tracking_token text := encode(gen_random_bytes(32), 'hex');
-  v_tracking_hash text := encode(digest(v_tracking_token, 'sha256'), 'hex');
+  v_tracking_token text := encode(extensions.gen_random_bytes(32), 'hex');
+  v_tracking_hash text := encode(extensions.digest(v_tracking_token, 'sha256'), 'hex');
   v_first text := trim(coalesce(p_first_name, ''));
   v_last text := trim(coalesce(p_last_name, ''));
   v_email text := lower(trim(coalesce(p_email, '')));
