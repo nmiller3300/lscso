@@ -38,6 +38,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Personnel History — Record Continuity**: Extended promotion, rehire/reinstatement, training, and Guardian workflows around the existing permanent personnel record instead of creating duplicate records.
 
 ### Fixed
+- **Public Site — Open Records Navigation**: Added a persistent public-services navigation link to `/open-records` so the ORR intake is directly discoverable from public pages on desktop and mobile.
 - **Personnel Records — Mobile Section Navigation**: Made the personnel-record section tabs horizontally swipeable on mobile so Overview, Administration, Training & Certifications, Accountability, Recognition, Documents, and Service History remain reachable instead of being clipped off-screen.
 - **Open Records — Tracking Token Crypto**: Corrected the secured public-submission RPC to resolve pgcrypto from the Supabase extensions schema so private request keys generate reliably while only their SHA-256 hashes are retained.
 
@@ -213,7 +214,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Personnel Portal — Core Schema and Access Model**: Added the initial Supabase-backed personnel schema, portal profiles, rank/access tiers, and protected server-side workflows.
 - **Portal — My Office**: Added My Office for every rank, including personal service information, points, awards, flags, leave, and access to elevated workspaces when authorized.
 - **Command — Command Portal Workspaces**: Added Command navigation and workspaces for personnel, approvals, service records, certifications, leave review, training, and administrative operations.
-- **Command — Activity and Audit Center**: Added a dedicated Command activity/audit workspace for recorded portal and administrative actions.
+- **Command — Activity and Audit Center**: Added a dedicated Command activity/audit workspace for recorded portal and administrative activity.
 - **Command — Approvals Center**: Added a dedicated approval/review workspace for matters requiring Command action.
 - **Personnel — Permanent Service Records**: Added service-record history including awards, personnel flags, leave, certifications, and career actions.
 - **Personnel — Document Vault**: Added protected personnel-document storage for records that belong with the member’s permanent file.
