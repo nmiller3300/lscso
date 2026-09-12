@@ -75,6 +75,8 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
     .filter((record) => record.followUpDueAt && !["Acknowledged", "Closed"].includes(record.status))
     .sort((a, b) => new Date(a.followUpDueAt!).getTime() - new Date(b.followUpDueAt!).getTime())
     .slice(0, 5);
+  const evaluations = records.filter((record) => record.recordType === "Performance Evaluation");
+  const evaluationAcknowledgments = evaluations.filter((record) => record.status === "Awaiting Acknowledgment").length;
 
   const showResults = query.trim().length > 0 || status !== null;
 
@@ -108,6 +110,13 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
 
       <div className="command-v2-workspace-grid command-v2-directory-lower">
         <section className="portal-panel command-v2-launcher">
+          <div className="portal-panel-heading"><div><p>Performance</p><h2>Performance Evaluations</h2></div><span>{evaluations.length}</span></div>
+          <p className="command-v2-compact-copy">Structured supervisor evaluations stay in Guardian as permanent, non-disciplinary personnel records.</p>
+          <div className="command-v2-inline-state" style={{ marginTop: 10 }}><strong>{evaluationAcknowledgments} awaiting acknowledgment</strong><span>Member acknowledgment confirms receipt, not agreement.</span></div>
+          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href="/portal/command/guardians/evaluations">Open evaluations</Link></div>
+        </section>
+
+        <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
           {recent.length ? <div className="command-v2-mini-list">{recent.map((record) => <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}><strong>G-{String(record.guardianNumber).padStart(4, "0")} · {record.subjectName}</strong><span>{record.recordType} · {record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed Guardians yet.</strong></div>}
         </section>
@@ -119,8 +128,8 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
 
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Actions</p><h2>Guardian management</h2></div></div>
-          <p className="command-v2-compact-copy">Open the full workspace to create, edit, approve, acknowledge, or manage Guardian records.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href="/portal/command/guardians/manage">Open Guardian workspace</Link></div>
+          <p className="command-v2-compact-copy">Create coaching, warnings, write-ups, commendations, or manage Guardian review actions.</p>
+          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href="/portal/command/guardians/manage">Open Guardian workspace</Link><Link className="portal-button portal-button--secondary" href="/portal/command/guardians/evaluations">Performance evaluations</Link></div>
         </section>
       </div>
     </div>
