@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -29,6 +30,8 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
   const [error, setError] = useState("");
   const role = useMemo(() => tierForRank[rank] ?? "Unknown", [rank]);
   const changed = rank !== currentRank || status !== currentStatus;
+  const currentRankIndex = ranks.indexOf(currentRank);
+  const nonPromotionRanks = currentRankIndex >= 0 ? ranks.slice(currentRankIndex) : [currentRank];
 
   async function save() {
     if (!changed || pending) return;
@@ -61,17 +64,15 @@ export function PersonnelIdentityManager({ profileId, personnelId, displayName, 
         <div><p>Personnel management</p><h2>Rank & status</h2></div>
         <span>{personnelId}</span>
       </div>
-      <p className="personnel-admin-control__intro">Change the member&apos;s official website rank or service status. Portal access is derived from the roster rank. Game/computer synchronization is currently disabled.</p>
-
       <div className="personnel-admin-fields personnel-admin-fields--identity">
-        <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}>{nonPromotionRanks.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label className="personnel-admin-derived"><span>Portal role</span><input value={role} readOnly /><small>Assigned automatically from rank</small></label>
         <label><span>Service status</span><select value={status} onChange={(event) => setStatus(event.target.value)}>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
       </div>
 
       <div className="personnel-admin-actions">
-        <span>{changed ? "Unsaved personnel change" : "No pending changes"}</span>
-        <button className="portal-button portal-button--primary" disabled={!changed || pending} onClick={() => void save()} type="button">{pending ? "Saving…" : "Apply change"}</button>
+        <span>Promotions use Promotion Review.</span>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}><Link className="portal-button portal-button--secondary" href="/portal/command/promotions">Promotion Review</Link><button className="portal-button portal-button--primary" disabled={!changed || pending} onClick={() => void save()} type="button">{pending ? "Saving…" : "Apply change"}</button></div>
       </div>
       {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
       {notice ? <div className="portal-form-success" role="status"><strong>Personnel updated</strong><span>{notice}</span></div> : null}
