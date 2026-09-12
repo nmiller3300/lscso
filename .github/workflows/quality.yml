@@ -13,6 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require lifetime changelog update
+        env:
+          CHANGELOG_BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/check-changelog-update.mjs
       - uses: actions/setup-node@v4
         with:
           node-version: 22
