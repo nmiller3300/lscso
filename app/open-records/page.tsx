@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { PageHero } from "../_components/PageHero";
-import { OpenRecordsRequestForm } from "./OpenRecordsRequestForm";
+import { OpenRecordsRequestWorkflowForm } from "./OpenRecordsRequestWorkflowForm";
 import "./open-records.css";
 
 export const metadata: Metadata = {
   title: "Open Records Request",
-  description: "Submit a public records request to the Los Santos County Sheriff's Office.",
+  description: "Submit and privately track a public records request to the Los Santos County Sheriff's Office.",
 };
 
 export default function OpenRecordsPage() {
@@ -14,7 +14,7 @@ export default function OpenRecordsPage() {
       <PageHero
         eyebrow="Public Records"
         title="Open Records Request"
-        description="Request existing LSCSO records for inspection or copying through the department's public records process."
+        description="Request existing LSCSO records, track the request privately, pay any assessed in-city fee, and receive approved release files electronically."
         image="/images/lscso-patch-subdued.png"
         imageAlt="Subdued LSCSO shoulder patch"
         containedImage
@@ -27,16 +27,16 @@ export default function OpenRecordsPage() {
             <h2>Ask for records. We review what the law permits us to release.</h2>
           </div>
           <div className="reading-column">
-            <p className="intro-serif">LSCSO uses Georgia's Open Records Act as the real-world legal model and a parallel San Andreas roleplay statute for in-universe documentation.</p>
-            <p>Requests should identify existing records as specifically as possible. Some information may be withheld or redacted when a statute, court order, privacy protection, investigative exemption, or other confidentiality rule applies.</p>
-            <p>The three-business-day rule does not mean every complex request must be fully produced within three days. When responsive records require additional review, the custodian may provide a timely description and production estimate while continuing the review.</p>
+            <p className="intro-serif">LSCSO uses the Georgia Open Records Act as its real-world legal model and OCSA § 50-18-70 et seq. as the State of San Andreas government-transparency statute.</p>
+            <p>Under OCSA, a First Lieutenant or above serves as the Records Custodian. LSCSO must acknowledge and make its initial determination within 72 hours, while complex collection, payment, redaction, or legal review may require additional production time.</p>
+            <p>Not every requested record is automatically releasable. Protected portions may be redacted or withheld under applicable law, and a partial grant or denial must identify the legal basis used.</p>
           </div>
         </div>
       </section>
 
       <section className="content-section open-records-workspace">
         <div className="site-shell">
-          <OpenRecordsRequestForm />
+          <OpenRecordsRequestWorkflowForm />
         </div>
       </section>
     </>
