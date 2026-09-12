@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { PersonnelFileExportDialog, type PersonnelFileExportKind } from "./PersonnelFileExportDialog";
+import { PersonnelFileExportDialog } from "./PersonnelFileExportDialog";
 
 type DirectoryMember = {
   personnelId: string;
@@ -17,7 +17,7 @@ type DirectoryMember = {
 };
 
 type PersonnelDirectoryProps = { personnel: DirectoryMember[] };
-type ExportTarget = { member: DirectoryMember; kind: PersonnelFileExportKind };
+type ExportTarget = { member: DirectoryMember };
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
@@ -84,9 +84,9 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     });
   }
 
-  function beginExport(member: DirectoryMember, kind: PersonnelFileExportKind) {
+  function beginExport(member: DirectoryMember) {
     remember(member.personnelId);
-    setExportTarget({ member, kind });
+    setExportTarget({ member });
   }
 
   function clearFilters() {
@@ -114,15 +114,13 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
 
     {activeFilters ? <section className="portal-panel"><div className="portal-panel-heading"><div><p>Results</p><h2>{filtered.length} found</h2></div><span>{[division, rank, status, probationOnly ? "Probation" : null].filter(Boolean).join(" · ") || "Search results"}</span></div><div className="command-v2-personnel-results" ref={resultsRef}>{filtered.map((member) => <article className="personnel-directory-result" key={member.personnelId}>
       <Link className="personnel-directory-result-main" href={`/portal/command/personnel/${member.personnelId}`} onClick={() => remember(member.personnelId)}><div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div><div><span>{member.division}</span><span className="personnel-directory-status"><b>{member.status}</b>{member.probationary ? <b title={member.probationEndsAt ? `Probation ends ${new Date(member.probationEndsAt).toLocaleDateString()}` : undefined}>PROBATION · {member.probationDaysRemaining}D</b> : null}</span></div></Link>
-      <div className="personnel-directory-result-actions" aria-label={`Personnel file exports for ${member.displayName}`}>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "lateral")}>Export Lateral Transfer Personnel File</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "normal")}>Export Normal Personnel File</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "open-records")}>Export Open Records Request Personnel File</button>
+      <div className="personnel-directory-result-actions" aria-label={`Personnel file export for ${member.displayName}`}>
+        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member)}>Export Personnel File</button>
       </div>
     </article>)}{!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current filters.</strong><span>Clear one or more filters to broaden the directory.</span></div> : null}</div></section> : null}
 
     <div className="command-v2-workspace-grid command-v2-directory-lower"><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>{favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}</section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>{recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}</section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Roster access</p><h2>Department roster</h2></div></div><p className="command-v2-compact-copy">The live roster is the department-wide personnel view. The Command roster keeps internal personnel and account-status tools.</p><div className="command-v2-action-row"><a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">Open Command roster</Link></div></section></div>
 
-    {exportTarget ? <PersonnelFileExportDialog personnelId={exportTarget.member.personnelId} displayName={exportTarget.member.displayName} rank={exportTarget.member.rank} kind={exportTarget.kind} onClose={() => setExportTarget(null)} /> : null}
+    {exportTarget ? <PersonnelFileExportDialog personnelId={exportTarget.member.personnelId} displayName={exportTarget.member.displayName} rank={exportTarget.member.rank} onClose={() => setExportTarget(null)} /> : null}
   </div>;
 }

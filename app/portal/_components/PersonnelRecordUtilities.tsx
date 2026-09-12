@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { PersonnelFileExportDialog, type PersonnelFileExportKind } from "./PersonnelFileExportDialog";
+import { PersonnelFileExportDialog } from "./PersonnelFileExportDialog";
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 
@@ -13,7 +13,7 @@ type PersonnelRecordUtilitiesProps = {
 
 export function PersonnelRecordUtilities({ personnelId, displayName }: PersonnelRecordUtilitiesProps) {
   const [copied, setCopied] = useState(false);
-  const [exportKind, setExportKind] = useState<PersonnelFileExportKind | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -40,7 +40,7 @@ export function PersonnelRecordUtilities({ personnelId, displayName }: Personnel
         </div>
         <div className="personnel-record-qol-actions">
           <Link className="portal-button portal-button--primary" href={`/portal/command/guardians?q=${encodeURIComponent(personnelId)}`}>Create Guardian</Link>
-          <button className="portal-button portal-button--secondary" onClick={() => setExportKind("normal")} type="button">Export Personnel PDF</button>
+          <button className="portal-button portal-button--secondary" onClick={() => setExportOpen(true)} type="button">Export Personnel File</button>
           <Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${personnelId}/documents#send-letter`}>Send welcome letter</Link>
           <Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${personnelId}/administration#assignments`}>Manage assignments</Link>
           <Link className="portal-button portal-button--secondary" href="/portal/command/certifications">Issue certification</Link>
@@ -48,7 +48,7 @@ export function PersonnelRecordUtilities({ personnelId, displayName }: Personnel
         </div>
       </section>
 
-      {exportKind ? <PersonnelFileExportDialog personnelId={personnelId} displayName={displayName} kind={exportKind} onClose={() => setExportKind(null)} /> : null}
+      {exportOpen ? <PersonnelFileExportDialog personnelId={personnelId} displayName={displayName} onClose={() => setExportOpen(false)} /> : null}
     </>
   );
 }
