@@ -1,0 +1,191 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { usePortalProfile } from "./PortalProfileProvider";
+
+type Evaluation = {
+  id: string;
+  guardianNumber: number;
+  status: string;
+  title: string;
+  issuedAt: string;
+  acknowledgedAt: string | null;
+  authorName: string;
+  evaluationKind: string;
+  periodStart: string;
+  periodEnd: string;
+  overallAverage: number;
+  overallRating: string;
+  ratings: Record<string, number>;
+  supervisorSummary: string;
+  strengths: string;
+  improvementAreas: string;
+  goals: string;
+  employeeResponse: string | null;
+};
+
+const ratingLabels: Record<string, string> = {
+  professional_conduct: "Professional Conduct",
+  policy_knowledge: "Policy Knowledge",
+  communication: "Communication",
+  judgment_decision_making: "Judgment & Decision-Making",
+  report_documentation: "Reports & Documentation",
+  officer_safety_tactics: "Officer Safety & Tactics",
+  initiative_reliability: "Initiative & Reliability",
+  teamwork_leadership: "Teamwork & Leadership",
+};
+
+function dateLabel(value: string | null | undefined) {
+  if (!value) return "Not recorded";
+  return new Date(value.length === 10 ? `${value}T12:00:00` : value).toLocaleDateString();
+}
+
+function ratingText(value: number) {
+  return value === 1 ? "Unsatisfactory" : value === 2 ? "Needs Improvement" : value === 3 ? "Meets Expectations" : value === 4 ? "Exceeds Expectations" : value === 5 ? "Exceptional" : "Not rated";
+}
+
+export function MyPerformanceEvaluations() {
+  const profile = usePortalProfile();
+  const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
+  const [selected, setSelected] = useState<Evaluation | null>(null);
+  const [signatureName, setSignatureName] = useState("");
+  const [responseText, setResponseText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [notice, setNotice] = useState("");
+
+  async function load() {
+    const supabase = createClient() as any;
+    const [{ data: rows }, { data: profiles }] = await Promise.all([
+      supabase.from("guardian_records").select("id,guardian_number,status,title,issued_at,created_at,acknowledged_at,author_profile_id,structured_fields,employee_response").eq("subject_profile_id", profile.id).eq("record_type", "Performance Evaluation").order("created_at", { ascending: false }),
+      supabase.from("personnel_profiles").select("id,display_name"),
+    ]);
+    const names = new Map((profiles ?? []).map((item: any) => [item.id, item.display_name]));
+    setEvaluations((rows ?? []).map((row: any) => {
+      const fields = row.structured_fields && typeof row.structured_fields === "object" ? row.structured_fields : {};
+      return {
+        id: row.id,
+        guardianNumber: Number(row.guardian_number),
+        status: row.status,
+        title: row.title,
+        issuedAt: row.issued_at ?? row.created_at,
+        acknowledgedAt: row.acknowledged_at,
+        authorName: names.get(row.author_profile_id) ?? "Supervisor",
+        evaluationKind: String(fields.evaluation_kind ?? "Performance"),
+        periodStart: String(fields.period_start ?? ""),
+        periodEnd: String(fields.period_end ?? ""),
+        overallAverage: Number(fields.overall_average ?? 0),
+        overallRating: String(fields.overall_rating ?? "Not rated"),
+        ratings: fields.ratings && typeof fields.ratings === "object" ? fields.ratings : {},
+        supervisorSummary: String(fields.supervisor_summary ?? "Not recorded"),
+        strengths: String(fields.strengths ?? "Not recorded"),
+        improvementAreas: String(fields.improvement_areas ?? "Not recorded"),
+        goals: String(fields.goals ?? "Not recorded"),
+        employeeResponse: row.employee_response,
+      };
+    }));
+  }
+
+  useEffect(() => { void load(); }, [profile.id]);
+
+  async function acknowledge() {
+    if (!selected || submitting) return;
+    const normalize = (value: string) => value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+    if (normalize(signatureName) !== normalize(profile.display_name)) {
+      setNotice(`Type your full personnel name exactly as shown: ${profile.display_name}.`);
+      return;
+    }
+    setSubmitting(true);
+    setNotice("");
+    const { error } = await (createClient() as any).rpc("acknowledge_guardian", {
+      record_id: selected.id,
+      signature_name: signatureName.trim(),
+      response_text: responseText.trim(),
+    });
+    setSubmitting(false);
+    if (error) {
+      setNotice(error.message);
+      return;
+    }
+    setSelected(null);
+    setSignatureName("");
+    setResponseText("");
+    setNotice("Performance evaluation acknowledged. Receipt does not indicate agreement.");
+    await load();
+    window.setTimeout(() => setNotice(""), 6000);
+  }
+
+  if (!evaluations.length) return null;
+  const pending = evaluations.filter((evaluation) => evaluation.status === "Awaiting Acknowledgment").length;
+
+  return (
+    <>
+      <section className="portal-panel" id="performance-evaluations" style={{ marginBottom: 16 }}>
+        <div className="portal-panel-heading"><div><p>Guardian · Professional development</p><h2>My Performance Evaluations</h2></div><span>{pending ? `${pending} action required` : `${evaluations.length} on file`}</span></div>
+        <div className="personnel-compact-records" style={{ marginTop: 12 }}>
+          {evaluations.map((evaluation) => (
+            <button key={evaluation.id} onClick={() => { setSelected(evaluation); setSignatureName(""); setResponseText(""); setNotice(""); }} style={{ textAlign: "left", width: "100%" }} type="button">
+              <strong>G-{String(evaluation.guardianNumber).padStart(4, "0")} · {evaluation.evaluationKind} · {evaluation.overallRating}</strong>
+              <span>{dateLabel(evaluation.periodStart)} – {dateLabel(evaluation.periodEnd)} · {evaluation.overallAverage.toFixed(2)} / 5 · {evaluation.status}</span>
+            </button>
+          ))}
+        </div>
+        <div className="portal-form-protection" style={{ marginTop: 12 }}><strong>Permanent personnel record</strong><span>Performance evaluations are non-disciplinary Guardian records. Acknowledgment confirms receipt only and does not indicate agreement.</span></div>
+      </section>
+
+      {selected ? (
+        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelected(null); }}>
+          <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="performance-evaluation-title">
+            <div className="portal-modal-heading"><div><span>G-{String(selected.guardianNumber).padStart(4, "0")} · Performance Evaluation</span><h2 id="performance-evaluation-title">{selected.evaluationKind} Evaluation</h2></div><button onClick={() => setSelected(null)} type="button" aria-label="Close performance evaluation">×</button></div>
+
+            <div className="deputy-guardian-detail">
+              <div><span>Review period</span><strong>{dateLabel(selected.periodStart)} – {dateLabel(selected.periodEnd)}</strong></div>
+              <div><span>Supervisor</span><strong>{selected.authorName}</strong></div>
+              <div><span>Overall rating</span><strong>{selected.overallAverage.toFixed(2)} / 5 · {selected.overallRating}</strong></div>
+              <div><span>Status</span><strong>{selected.status}</strong></div>
+              <div><span>Issued</span><strong>{dateLabel(selected.issuedAt)}</strong></div>
+              <div><span>Disciplinary points</span><strong>0 · Non-disciplinary</strong></div>
+            </div>
+
+            <div className="portal-form-grid" style={{ marginTop: 14 }}>
+              {Object.entries(ratingLabels).map(([key, label]) => {
+                const value = Number(selected.ratings[key] ?? 0);
+                return <div className="command-v2-inline-state" key={key}><strong>{label}</strong><span>{value || "—"} / 5{value ? ` · ${ratingText(value)}` : ""}</span></div>;
+              })}
+            </div>
+
+            <div className="deputy-guardian-narrative" style={{ marginTop: 14 }}>
+              <article><span>Overall assessment</span><p>{selected.supervisorSummary}</p></article>
+              <article><span>Strengths</span><p>{selected.strengths}</p></article>
+              <article><span>Improvement areas</span><p>{selected.improvementAreas}</p></article>
+              <article><span>Goals / next-period expectations</span><p>{selected.goals}</p></article>
+              {selected.employeeResponse ? <article><span>Your response</span><p>{selected.employeeResponse}</p></article> : null}
+            </div>
+
+            {selected.status === "Awaiting Acknowledgment" ? (
+              <div className="guardian-acknowledgment-form" style={{ marginTop: 14 }}>
+                <label>
+                  Typed acknowledgment
+                  <input autoComplete="name" onChange={(event) => setSignatureName(event.target.value)} placeholder={`Type your name (${profile.display_name})`} value={signatureName} />
+                  <small>Typing your name confirms receipt only. It does not indicate agreement with the evaluation.</small>
+                </label>
+                <label>
+                  Written response <span>Optional</span>
+                  <textarea onChange={(event) => setResponseText(event.target.value)} placeholder="Add a response that should remain attached to this evaluation." rows={4} value={responseText} />
+                </label>
+              </div>
+            ) : null}
+
+            {notice ? <div className="portal-form-error" role="alert" style={{ marginTop: 12 }}>{notice}</div> : null}
+            <div className="portal-modal-actions">
+              <button className="portal-button portal-button--secondary" onClick={() => setSelected(null)} type="button">Close</button>
+              {selected.status === "Awaiting Acknowledgment" ? <button className="portal-button portal-button--primary" disabled={submitting} onClick={acknowledge} type="button">{submitting ? "Saving…" : "Acknowledge evaluation"}</button> : null}
+            </div>
+          </section>
+        </div>
+      ) : null}
+
+      {notice && !selected ? <div className="portal-toast" role="status">{notice}</div> : null}
+    </>
+  );
+}
