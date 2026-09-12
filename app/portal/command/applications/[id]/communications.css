@@ -4,4 +4,13 @@
 .recruitment-applicant-message__history-item>div strong{color:#dfc87e;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase}
 .recruitment-applicant-message__history-item>div span{color:rgba(255,255,255,.5);font-size:.72rem}
 .recruitment-applicant-message__history-item p{margin:0;white-space:pre-wrap;color:rgba(255,255,255,.9);line-height:1.55}
-@media(max-width:720px){.recruitment-applicant-message__history-item>div{align-items:flex-start;flex-direction:column;gap:4px}}
+.recruitment-offer-record{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;margin:18px 0;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08)}
+.recruitment-offer-record>div{padding:14px 16px;background:rgba(0,0,0,.16)}
+.recruitment-offer-record dt{color:rgba(255,255,255,.48);font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.recruitment-offer-record dd{margin:.42rem 0 0;color:#fff;font-weight:700}
+.recruitment-offer-terms{margin:16px 0;padding:16px 18px;border:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.14)}
+.recruitment-offer-terms span{display:block;color:#dfc87e;font-size:.7rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.recruitment-offer-terms p{margin:.6rem 0 0;white-space:pre-wrap;line-height:1.55}
+.recruitment-offer-success{margin:16px 0;color:#9bd6a9;font-weight:750}
+.recruitment-closure-record small{display:block;margin-top:12px;color:rgba(255,255,255,.5)}
+@media(max-width:720px){.recruitment-applicant-message__history-item>div{align-items:flex-start;flex-direction:column;gap:4px}.recruitment-offer-record{grid-template-columns:1fr}}
