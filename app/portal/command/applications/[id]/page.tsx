@@ -31,6 +31,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
   const label = applicationLabel(application.application_number);
   const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
+  const alreadyFinalWithoutClosure = ["Denied", "Withdrawn"].includes(application.status);
   const latestOffer = offers?.[0] ?? null;
 
   return (
@@ -49,7 +50,7 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
         applicationId={application.id}
         applicantName={application.full_name}
         closed={closed}
-        hired={isHired}
+        hired={isHired || alreadyFinalWithoutClosure}
         closureCode={application.recruitment_closure_code}
         closureReason={application.recruitment_closure_reason}
         closedAt={application.recruitment_closed_at}
