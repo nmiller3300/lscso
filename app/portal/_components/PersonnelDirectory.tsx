@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { PersonnelFileExportDialog, type PersonnelFileExportKind } from "./PersonnelFileExportDialog";
 
 type DirectoryMember = {
   personnelId: string;
@@ -16,26 +17,15 @@ type DirectoryMember = {
 };
 
 type PersonnelDirectoryProps = { personnel: DirectoryMember[] };
+type ExportTarget = { member: DirectoryMember; kind: PersonnelFileExportKind };
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
-const COMPLETE_RECORD_SECTIONS = "career,assignments,certifications,training,awards,guardians,administrative";
 
 function probationSummary(member: DirectoryMember) {
   return member.probationary && member.probationDaysRemaining
     ? `Probation · ${member.probationDaysRemaining}d remaining`
     : null;
-}
-
-function exportHref(personnelId: string, purpose: "lateral" | "normal") {
-  const releasePurpose = purpose === "lateral"
-    ? "Lateral Transfer Personnel File"
-    : "Normal Personnel File";
-  const query = new URLSearchParams({
-    purpose: releasePurpose,
-    sections: COMPLETE_RECORD_SECTIONS,
-  });
-  return `/api/portal/personnel/${encodeURIComponent(personnelId)}/record-export?${query.toString()}`;
 }
 
 export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
@@ -46,6 +36,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
   const [probationOnly, setProbationOnly] = useState(false);
   const [recentIds, setRecentIds] = useState<string[]>([]);
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const [exportTarget, setExportTarget] = useState<ExportTarget | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -80,15 +71,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
       if (rank && member.rank !== rank) return false;
       if (status && member.status !== status) return false;
       if (probationOnly && !member.probationary) return false;
-      const haystack = [
-        member.displayName,
-        member.personnelId,
-        member.callSign,
-        member.rank,
-        member.division,
-        member.status,
-        member.probationary ? "probation probationary" : "",
-      ].filter(Boolean).join(" ").toLowerCase();
+      const haystack = [member.displayName, member.personnelId, member.callSign, member.rank, member.division, member.status, member.probationary ? "probation probationary" : ""].filter(Boolean).join(" ").toLowerCase();
       return !normalized || haystack.includes(normalized);
     });
   }, [activeFilters, division, personnel, probationOnly, query, rank, status]);
@@ -99,6 +82,11 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
       try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
+  }
+
+  function beginExport(member: DirectoryMember, kind: PersonnelFileExportKind) {
+    remember(member.personnelId);
+    setExportTarget({ member, kind });
   }
 
   function clearFilters() {
@@ -113,84 +101,28 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     window.requestAnimationFrame(() => resultsRef.current?.querySelector<HTMLElement>("a[href]")?.focus());
   }
 
-  return (
-    <div className="command-v2-directory">
-      <section className="portal-panel command-v2-directory-search">
-        <div className="portal-panel-heading">
-          <div><p>Find personnel</p><h2>Personnel directory</h2></div>
-          {activeFilters ? <button className="portal-text-button" onClick={clearFilters} type="button">Clear all</button> : null}
-        </div>
-        <label className="command-v2-search-field">
-          <span>Search</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "ArrowDown" && filtered.length) {
-                event.preventDefault();
-                focusFirstResult();
-              }
-            }}
-            placeholder="Name, call sign, personnel ID, rank, division..."
-          />
-        </label>
-        <div className="personnel-directory-filters">
-          <label><span>Division</span><select value={division} onChange={(event) => setDivision(event.target.value)}><option value="">All divisions</option>{divisions.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}><option value="">All ranks</option>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label className="personnel-directory-probation"><input checked={probationOnly} onChange={(event) => setProbationOnly(event.target.checked)} type="checkbox" /><span>Probation only</span></label>
-        </div>
-      </section>
-
-      {activeFilters ? (
-        <section className="portal-panel">
-          <div className="portal-panel-heading">
-            <div><p>Results</p><h2>{filtered.length} found</h2></div>
-            <span>{[division, rank, status, probationOnly ? "Probation" : null].filter(Boolean).join(" · ") || "Search results"}</span>
-          </div>
-          <div className="command-v2-personnel-results" ref={resultsRef}>
-            {filtered.map((member) => (
-              <article className="personnel-directory-result" key={member.personnelId}>
-                <Link className="personnel-directory-result-main" href={`/portal/command/personnel/${member.personnelId}`} onClick={() => remember(member.personnelId)}>
-                  <div>
-                    <strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong>
-                    <span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span>
-                  </div>
-                  <div>
-                    <span>{member.division}</span>
-                    <span className="personnel-directory-status">
-                      <b>{member.status}</b>
-                      {member.probationary ? <b title={member.probationEndsAt ? `Probation ends ${new Date(member.probationEndsAt).toLocaleDateString()}` : undefined}>PROBATION · {member.probationDaysRemaining}D</b> : null}
-                    </span>
-                  </div>
-                </Link>
-                <div className="personnel-directory-result-actions" aria-label={`Personnel file exports for ${member.displayName}`}>
-                  <a className="portal-button portal-button--secondary" href={exportHref(member.personnelId, "lateral")} onClick={() => remember(member.personnelId)}>Export Lateral Transfer Personnel File</a>
-                  <a className="portal-button portal-button--secondary" href={exportHref(member.personnelId, "normal")} onClick={() => remember(member.personnelId)}>Export Normal Personnel File</a>
-                </div>
-              </article>
-            ))}
-            {!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current filters.</strong><span>Clear one or more filters to broaden the directory.</span></div> : null}
-          </div>
-        </section>
-      ) : null}
-
-      <div className="command-v2-workspace-grid command-v2-directory-lower">
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>
-          {favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}
-        </section>
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
-          {recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}
-        </section>
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Roster access</p><h2>Department roster</h2></div></div>
-          <p className="command-v2-compact-copy">The live roster is the department-wide personnel view. The Command roster keeps internal personnel and account-status tools.</p>
-          <div className="command-v2-action-row"><a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">Open Command roster</Link></div>
-        </section>
+  return <div className="command-v2-directory">
+    <section className="portal-panel command-v2-directory-search"><div className="portal-panel-heading"><div><p>Find personnel</p><h2>Personnel directory</h2></div>{activeFilters ? <button className="portal-text-button" onClick={clearFilters} type="button">Clear all</button> : null}</div>
+      <label className="command-v2-search-field"><span>Search</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "ArrowDown" && filtered.length) { event.preventDefault(); focusFirstResult(); } }} placeholder="Name, call sign, personnel ID, rank, division..." /></label>
+      <div className="personnel-directory-filters">
+        <label><span>Division</span><select value={division} onChange={(event) => setDivision(event.target.value)}><option value="">All divisions</option>{divisions.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}><option value="">All ranks</option>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label className="personnel-directory-probation"><input checked={probationOnly} onChange={(event) => setProbationOnly(event.target.checked)} type="checkbox" /><span>Probation only</span></label>
       </div>
-    </div>
-  );
+    </section>
+
+    {activeFilters ? <section className="portal-panel"><div className="portal-panel-heading"><div><p>Results</p><h2>{filtered.length} found</h2></div><span>{[division, rank, status, probationOnly ? "Probation" : null].filter(Boolean).join(" · ") || "Search results"}</span></div><div className="command-v2-personnel-results" ref={resultsRef}>{filtered.map((member) => <article className="personnel-directory-result" key={member.personnelId}>
+      <Link className="personnel-directory-result-main" href={`/portal/command/personnel/${member.personnelId}`} onClick={() => remember(member.personnelId)}><div><strong>{favoriteIds.includes(member.personnelId) ? "★ " : ""}{member.displayName}</strong><span>{member.rank} · {member.callSign || "No call sign"} · {member.personnelId}</span></div><div><span>{member.division}</span><span className="personnel-directory-status"><b>{member.status}</b>{member.probationary ? <b title={member.probationEndsAt ? `Probation ends ${new Date(member.probationEndsAt).toLocaleDateString()}` : undefined}>PROBATION · {member.probationDaysRemaining}D</b> : null}</span></div></Link>
+      <div className="personnel-directory-result-actions" aria-label={`Personnel file exports for ${member.displayName}`}>
+        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "lateral")}>Export Lateral Transfer Personnel File</button>
+        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "normal")}>Export Normal Personnel File</button>
+        <button className="portal-button portal-button--secondary" type="button" onClick={() => beginExport(member, "open-records")}>Export Open Records Request Personnel File</button>
+      </div>
+    </article>)}{!filtered.length ? <div className="portal-empty-state"><strong>No personnel match the current filters.</strong><span>Clear one or more filters to broaden the directory.</span></div> : null}</div></section> : null}
+
+    <div className="command-v2-workspace-grid command-v2-directory-lower"><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Priority access</p><h2>Pinned personnel</h2></div></div>{favorites.length ? <div className="command-v2-mini-list">{favorites.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>★ {member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No personnel pinned yet.</strong><span>Open a personnel record and use Pin personnel for fast repeat access.</span></div>}</section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>{recent.length ? <div className="command-v2-mini-list">{recent.map((member) => <Link href={`/portal/command/personnel/${member.personnelId}`} key={member.personnelId} onClick={() => remember(member.personnelId)}><strong>{member.displayName}</strong><span>{member.rank} · {member.callSign || member.personnelId}{probationSummary(member) ? ` · ${probationSummary(member)}` : ""}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed personnel yet.</strong></div>}</section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Roster access</p><h2>Department roster</h2></div></div><p className="command-v2-compact-copy">The live roster is the department-wide personnel view. The Command roster keeps internal personnel and account-status tools.</p><div className="command-v2-action-row"><a className="portal-button portal-button--secondary" href="https://lscsoroster.vercel.app" target="_blank" rel="noreferrer">Open live roster</a><Link className="portal-button portal-button--secondary" href="/portal/command/personnel/roster">Open Command roster</Link></div></section></div>
+
+    {exportTarget ? <PersonnelFileExportDialog personnelId={exportTarget.member.personnelId} displayName={exportTarget.member.displayName} rank={exportTarget.member.rank} kind={exportTarget.kind} onClose={() => setExportTarget(null)} /> : null}
+  </div>;
 }
