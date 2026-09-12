@@ -38,7 +38,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Personnel History — Record Continuity**: Extended promotion, rehire/reinstatement, training, and Guardian workflows around the existing permanent personnel record instead of creating duplicate records.
 
 ### Fixed
-- **Public Site — Open Records Navigation**: Added a persistent public-services navigation link to `/open-records` so the ORR intake is directly discoverable from public pages on desktop and mobile.
+- **Public Site — Open Records Navigation**: Integrated Open Records directly into the primary desktop and mobile navigation and removed the separate public-services strip that caused clipping and overlap on mobile.
 - **Personnel Records — Mobile Section Navigation**: Made the personnel-record section tabs horizontally swipeable on mobile so Overview, Administration, Training & Certifications, Accountability, Recognition, Documents, and Service History remain reachable instead of being clipped off-screen.
 - **Open Records — Tracking Token Crypto**: Corrected the secured public-submission RPC to resolve pgcrypto from the Supabase extensions schema so private request keys generate reliably while only their SHA-256 hashes are retained.
 
