@@ -44,7 +44,7 @@
 }
 
 .personnel-export-dialog {
-  width:min(640px,100%);
+  width:min(680px,100%);
 }
 
 .personnel-export-subject {
@@ -55,6 +55,29 @@
 
 .personnel-export-subject strong {
   color:var(--portal-text);
+}
+
+.personnel-export-profile {
+  margin-bottom:14px;
+  padding:12px 14px;
+  border:1px solid var(--portal-line);
+  background:var(--portal-subtle);
+}
+
+.personnel-export-profile strong {
+  display:block;
+  margin-bottom:5px;
+  color:var(--portal-gold,#a48b45);
+  font-size:.7rem;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+
+.personnel-export-profile p {
+  margin:0;
+  color:var(--portal-muted);
+  font-size:.78rem;
+  line-height:1.5;
 }
 
 .personnel-export-notice-preview {
@@ -86,6 +109,38 @@
   line-height:1.55;
 }
 
+.personnel-export-law-preview {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+
+.personnel-export-law-preview>div {
+  display:grid;
+  gap:4px;
+  padding:11px 12px;
+  border:1px solid var(--portal-line);
+  background:var(--portal-surface,#fff);
+}
+
+.personnel-export-law-preview strong {
+  font-size:.68rem;
+  letter-spacing:.05em;
+  text-transform:uppercase;
+}
+
+.personnel-export-law-preview span,
+.personnel-export-law-preview small {
+  color:var(--portal-muted);
+  font-size:.69rem;
+  line-height:1.45;
+}
+
+.personnel-export-law-preview small {
+  font-family:Georgia,serif;
+}
+
 @media (max-width:620px) {
   .personnel-directory-result-main {
     align-items:flex-start;
@@ -104,6 +159,10 @@
     width:100%;
     justify-content:center;
     text-align:center;
+  }
+
+  .personnel-export-law-preview {
+    grid-template-columns:1fr;
   }
 
   .personnel-record-shell .command-v2-record-tabs {
