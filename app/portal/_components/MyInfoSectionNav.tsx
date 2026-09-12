@@ -1,8 +1,10 @@
 import Link from "next/link";
 
 const items = [
+  ["#promotion-review", "Promotion"],
   ["#documents", "Documents"],
   ["#certifications", "Qualifications"],
+  ["#training", "Training"],
   ["#awards", "Awards"],
   ["#assignments", "Assignments"],
   ["#leave-requests", "Leave"],
