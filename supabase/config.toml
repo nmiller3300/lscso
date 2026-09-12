@@ -5,3 +5,6 @@ verify_jwt = true
 
 [functions.bootstrap-lscso-accounts]
 verify_jwt = false
+
+[functions.open-records-purge]
+verify_jwt = false
