@@ -137,3 +137,4 @@ Existing personnel should not receive fabricated backdated Academy/FTO records s
 - Put actions next to the record or decision they affect; avoid separate pages merely because a feature was added later.
 - Prefer concise UI labels and clear outcomes over explanatory filler.
 - FiveM/computer integration remains optional and separate from authoritative website personnel workflows until intentionally re-enabled.
+- Every functional create, add, remove, fix, security change, workflow change, schema change, permission change, integration change, or operational behavior change must include a dated `CHANGELOG.md` entry in the same change set. `CHANGELOG.md` is the authoritative source rendered by Administration → Lifetime Changelog.

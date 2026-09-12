@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  outputFileTracingIncludes: {
+    "/*": ["./CHANGELOG.md"],
+  },
   images: {
     remotePatterns: [
       {

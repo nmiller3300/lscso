@@ -24,6 +24,7 @@ export default async function AdministrationWorkspacePage() {
     { href: "/portal/command/activity", code: "AU", eyebrow: "Audit & accountability", title: "Activity & Audit", description: "Review recorded portal, personnel, and administrative activity.", group: "Department Governance" },
     ...(executive ? [
       { href: "/portal/command/administration/structure", code: "CS", eyebrow: "Organization", title: "Command Structure", description: "Manage units, assignments, authority, and the department command structure.", badge: "Executive", group: "Department Governance" as const },
+      { href: "/portal/command/administration/changelog", code: "CL", eyebrow: "System history", title: "Lifetime Changelog", description: "Review the complete dated history of website and Personnel Portal additions, changes, fixes, removals, security work, and operations.", badge: "Executive", group: "Department Governance" as const },
       { href: "/portal/command/administration/maintenance", code: "MT", eyebrow: "System operations", title: "Maintenance Center", description: "Control public and Portal availability, schedule maintenance, notify users, and restore service.", badge: "Executive", group: "Department Governance" as const },
     ] : []),
   ];
