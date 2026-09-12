@@ -11,7 +11,7 @@ import { PortalNotificationLink } from "./PortalNotificationLink";
 import { PortalPolicyDirectory } from "./PortalPolicyDirectory";
 
 type PortalShellProps = {
-  active: "overview" | "personnel" | "supervision" | "training" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
+  active: "overview" | "personnel" | "supervision" | "training" | "promotions" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
