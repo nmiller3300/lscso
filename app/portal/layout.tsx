@@ -5,7 +5,6 @@ import "./portal.css";
 import "./medals.css";
 import "./certifications.css";
 import "./command-v2.css";
-import "./personnel-directory-exports.css";
 import "./quick-find.css";
 import "./home-v2.css";
 import "./supervision-v2.css";
@@ -27,6 +26,7 @@ import "./portal-legacy-dialog-bridge.css";
 import "./fivem-pairing.css";
 import "./portal-copy-compact.css";
 import "./training-operations.css";
+import "./personnel-directory-exports.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
