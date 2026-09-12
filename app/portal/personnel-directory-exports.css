@@ -1,0 +1,97 @@
+.personnel-directory-result {
+  overflow:hidden;
+  border:1px solid rgba(82,68,51,.13);
+  border-radius:10px;
+  background:var(--portal-surface,#fff);
+}
+
+.personnel-directory-result-main {
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:center;
+  padding:12px 14px;
+  color:inherit;
+  text-decoration:none;
+}
+
+.personnel-directory-result-main:hover {
+  background:rgba(116,89,53,.035);
+}
+
+.personnel-directory-result-main>div {
+  min-width:0;
+}
+
+.personnel-directory-result-main>div:last-child {
+  flex:0 0 auto;
+  text-align:right;
+}
+
+.personnel-directory-result-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  padding:10px 12px;
+  border-top:1px solid rgba(82,68,51,.1);
+  background:rgba(116,89,53,.025);
+}
+
+.personnel-directory-result-actions .portal-button {
+  min-height:38px;
+  padding:8px 11px;
+  font-size:.72rem;
+}
+
+@media (max-width:620px) {
+  .personnel-directory-result-main {
+    align-items:flex-start;
+  }
+
+  .personnel-directory-result-main>div:last-child {
+    max-width:38%;
+  }
+
+  .personnel-directory-result-actions {
+    display:grid;
+    grid-template-columns:1fr;
+  }
+
+  .personnel-directory-result-actions .portal-button {
+    width:100%;
+    justify-content:center;
+    text-align:center;
+  }
+
+  .personnel-record-shell .command-v2-record-tabs {
+    display:flex;
+    grid-template-columns:none;
+    gap:0;
+    overflow-x:auto;
+    overflow-y:hidden;
+    overscroll-behavior-inline:contain;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+    scrollbar-width:thin;
+    touch-action:pan-x;
+  }
+
+  .personnel-record-shell .command-v2-record-tabs a,
+  .personnel-record-shell .command-v2-record-tabs a:nth-child(n) {
+    flex:0 0 168px;
+    min-width:168px;
+    border-right:1px solid var(--portal-line);
+    border-bottom:3px solid transparent;
+    border-left:0;
+    scroll-snap-align:start;
+  }
+
+  .personnel-record-shell .command-v2-record-tabs a:last-child {
+    border-right:0;
+  }
+
+  .personnel-record-shell .command-v2-record-tabs a.is-active {
+    border-left:0;
+    border-bottom-color:var(--portal-gold,#a48b45);
+  }
+}
