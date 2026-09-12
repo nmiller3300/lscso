@@ -13,6 +13,7 @@ This file is the authoritative development history for the Los Santos County She
 
 ### Added
 - **Administration — Lifetime Changelog**: Added an Executive Administration workspace that renders the permanent repository changelog as a searchable, filterable dated timeline with lifetime statistics.
+- **Personnel Directory — File Export Shortcuts**: Added direct search-result actions for exporting a complete Lateral Transfer Personnel File or Normal Personnel File without opening the member’s full record first. Both exports continue through the protected personnel-record release pipeline and retain their release purpose in the audit trail.
 - **Recruitment — Employment Offers and Closure**: Added employment-offer handling, recruitment closure behavior, and tracking-expiration support so completed candidate cases can close cleanly without losing their history.
 - **Personnel — Promotion Review Workflow**: Added structured promotion review and required approved promotion review before rank increases are finalized.
 - **Personnel — Rehire and Reinstatement Workflow**: Added a structured return-to-service review that reuses the member’s existing permanent personnel record rather than creating a disconnected identity.
@@ -22,6 +23,9 @@ This file is the authoritative development history for the Los Santos County She
 ### Changed
 - **Recruitment — Applicant Dispositions**: Clarified applicant disposition reasons and status semantics so closures and adverse outcomes preserve a clearer historical explanation.
 - **Personnel History — Record Continuity**: Extended promotion, rehire/reinstatement, training, and Guardian workflows around the existing permanent personnel record instead of creating duplicate records.
+
+### Fixed
+- **Personnel Records — Mobile Section Navigation**: Made the personnel-record section tabs horizontally swipeable on mobile so Overview, Administration, Training & Certifications, Accountability, Recognition, Documents, and Service History remain reachable instead of being clipped off-screen.
 
 ### Operations
 - **Governance — Changelog Enforcement**: Added repository enforcement so future functional changes are required to update this lifetime changelog in the same change set.
