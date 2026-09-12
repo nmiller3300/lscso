@@ -28,6 +28,7 @@ create index if not exists open_records_requests_status_idx
 
 alter table public.open_records_requests enable row level security;
 revoke all on table public.open_records_requests from anon, authenticated;
+grant select, update on table public.open_records_requests to authenticated;
 
 create or replace function public.submit_open_records_request(
   p_first_name text,
@@ -99,7 +100,7 @@ to authenticated
 using (
   exists (
     select 1 from public.personnel_profiles p
-    where p.user_id = auth.uid()
+    where p.auth_user_id = auth.uid()
       and p.access_tier in ('Executive','Command')
   )
 );
@@ -111,14 +112,14 @@ to authenticated
 using (
   exists (
     select 1 from public.personnel_profiles p
-    where p.user_id = auth.uid()
+    where p.auth_user_id = auth.uid()
       and p.access_tier in ('Executive','Command')
   )
 )
 with check (
   exists (
     select 1 from public.personnel_profiles p
-    where p.user_id = auth.uid()
+    where p.auth_user_id = auth.uid()
       and p.access_tier in ('Executive','Command')
   )
 );
