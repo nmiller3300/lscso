@@ -16,7 +16,7 @@ export default async function GuardianCenterPage({ searchParams }: PageProps) {
   const supabase = await createClient() as any;
   const [{ data: guardians }, { data: personnel }, params] = await Promise.all([
     supabase.from("guardian_records")
-      .select("id,guardian_number,record_type,status,title,subject_profile_id,author_profile_id,created_at,follow_up_due_at")
+      .select("id,guardian_number,record_type,status,title,subject_profile_id,author_profile_id,created_at,follow_up_due_at,structured_fields")
       .order("created_at", { ascending: false }),
     supabase.from("personnel_profiles").select("id,personnel_id,display_name"),
     searchParams,
@@ -25,15 +25,11 @@ export default async function GuardianCenterPage({ searchParams }: PageProps) {
   const names = new Map<string, GuardianDirectoryPerson>(
     ((personnel ?? []) as GuardianDirectoryPerson[]).map((member) => [member.id, member]),
   );
+  const visibleGuardians = (guardians ?? []).filter((record: any) => record.structured_fields?.lifecycle_state !== "Scheduled");
 
   return (
-    <PortalShell
-      active="guardians"
-      eyebrow="Supervision"
-      title="Guardians"
-      description="Find, review, and create authorized Guardian records."
-    >
-      <GuardianDirectory initialQuery={params.q?.slice(0, 120) ?? ""} records={(guardians ?? []).map((record:any) => ({
+    <PortalShell active="guardians" eyebrow="Supervision" title="Guardians" description="Find, review, and create authorized Guardian records.">
+      <GuardianDirectory initialQuery={params.q?.slice(0, 120) ?? ""} records={visibleGuardians.map((record:any) => ({
         id: record.id,
         guardianNumber: Number(record.guardian_number),
         recordType: record.record_type,
