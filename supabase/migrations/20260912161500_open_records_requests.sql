@@ -20,15 +20,13 @@ create table if not exists public.open_records_requests (
   updated_at timestamptz not null default now()
 );
 
-create index if not exists open_records_requests_created_at_idx
-  on public.open_records_requests (created_at desc);
-
-create index if not exists open_records_requests_status_idx
-  on public.open_records_requests (status, created_at desc);
+create index if not exists open_records_requests_created_at_idx on public.open_records_requests (created_at desc);
+create index if not exists open_records_requests_status_idx on public.open_records_requests (status, created_at desc);
 
 alter table public.open_records_requests enable row level security;
 revoke all on table public.open_records_requests from anon, authenticated;
-grant select, update on table public.open_records_requests to authenticated;
+grant select on table public.open_records_requests to authenticated;
+grant update (status, internal_notes, response_summary, acknowledged_at, completed_at, updated_at) on table public.open_records_requests to authenticated;
 
 create or replace function public.submit_open_records_request(
   p_first_name text,
@@ -62,27 +60,16 @@ begin
   if coalesce(p_preferred_delivery, 'Electronic') not in ('Electronic','Inspection','Paper Copy') then raise exception 'Select a valid delivery method.'; end if;
 
   insert into public.open_records_requests (
-    requester_first_name,
-    requester_last_name,
-    requester_email,
-    requester_phone,
-    requester_organization,
-    subject_name,
-    subject_personnel_id,
-    records_description,
-    preferred_delivery,
-    legal_acknowledgement
+    requester_first_name, requester_last_name, requester_email, requester_phone,
+    requester_organization, subject_name, subject_personnel_id, records_description,
+    preferred_delivery, legal_acknowledgement
   ) values (
-    v_first,
-    v_last,
-    v_email,
+    v_first, v_last, v_email,
     nullif(trim(coalesce(p_phone, '')), ''),
     nullif(trim(coalesce(p_organization, '')), ''),
     nullif(trim(coalesce(p_subject_name, '')), ''),
     nullif(upper(trim(coalesce(p_subject_personnel_id, ''))), ''),
-    v_description,
-    coalesce(p_preferred_delivery, 'Electronic'),
-    true
+    v_description, coalesce(p_preferred_delivery, 'Electronic'), true
   )
   returning open_records_requests.request_number into v_request_number;
 
@@ -94,32 +81,25 @@ revoke all on function public.submit_open_records_request(text,text,text,text,te
 grant execute on function public.submit_open_records_request(text,text,text,text,text,text,text,text,text,boolean) to anon, authenticated;
 
 create policy "command can read open records requests"
-on public.open_records_requests
-for select
-to authenticated
+on public.open_records_requests for select to authenticated
 using (
   exists (
     select 1 from public.personnel_profiles p
-    where p.auth_user_id = auth.uid()
-      and p.access_tier in ('Executive','Command')
+    where p.auth_user_id = auth.uid() and p.access_tier in ('Executive','Command')
   )
 );
 
 create policy "command can update open records requests"
-on public.open_records_requests
-for update
-to authenticated
+on public.open_records_requests for update to authenticated
 using (
   exists (
     select 1 from public.personnel_profiles p
-    where p.auth_user_id = auth.uid()
-      and p.access_tier in ('Executive','Command')
+    where p.auth_user_id = auth.uid() and p.access_tier in ('Executive','Command')
   )
 )
 with check (
   exists (
     select 1 from public.personnel_profiles p
-    where p.auth_user_id = auth.uid()
-      and p.access_tier in ('Executive','Command')
+    where p.auth_user_id = auth.uid() and p.access_tier in ('Executive','Command')
   )
 );
