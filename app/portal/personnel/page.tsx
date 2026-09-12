@@ -26,12 +26,14 @@ export default async function PersonnelPortalPage() {
   const supabase = await createClient() as any;
   const probation = getPersonnelProbationState(profile.probation_ends_at);
 
-  const [certifications, assignments, guardians, requests, training, notifications, actingGrants, awards, flags, pointEvents, disciplinaryPoints, correspondence] = await Promise.all([
+  const [certifications, assignments, guardians, requests, training, trainingHistory, trainingRequirements, notifications, actingGrants, awards, flags, pointEvents, disciplinaryPoints, correspondence] = await Promise.all([
     supabase.from("certifications").select("*").eq("profile_id", profile.id).order("created_at", { ascending: false }),
     supabase.from("personnel_unit_assignments").select("id,assignment_type,starts_at,notes,organizational_units(name,unit_type)").eq("profile_id", profile.id).is("ends_at", null).order("starts_at", { ascending: false }),
     supabase.from("guardian_records").select("id,status,record_type,points_assessed").eq("subject_profile_id", profile.id),
     supabase.from("personnel_requests").select("id,status").eq("requester_profile_id", profile.id),
-    supabase.from("training_progress").select("*").eq("profile_id", profile.id).order("created_at"),
+    supabase.from("training_progress").select("*").eq("profile_id", profile.id).order("created_at", { ascending: false }),
+    supabase.from("personnel_training_records").select("id,record_type,category,title,provider,completed_on,verification_status,notes,created_at").eq("profile_id", profile.id).order("completed_on", { ascending: false, nullsFirst: false }).order("created_at", { ascending: false }),
+    supabase.from("training_requirement_dispositions").select("id,requirement,disposition,reason,effective_at").eq("profile_id", profile.id).order("effective_at", { ascending: false }),
     supabase.from("notifications").select("id,notification_type,title,message,href,read_at,created_at").eq("recipient_profile_id", profile.id).order("created_at", { ascending: false }).limit(4),
     supabase.from("acting_supervisor_grants").select("*").eq("profile_id", profile.id).is("revoked_at", null).gt("expires_at", new Date().toISOString()),
     supabase.from("personnel_awards").select("id,award_name,citation,awarded_on,image_asset_path,awarded_by").eq("profile_id", profile.id).order("awarded_on", { ascending: false }),
@@ -48,6 +50,12 @@ export default async function PersonnelPortalPage() {
   const openRequests = (requests.data ?? []).filter((item: any) => !["Approved", "Denied", "Cancelled", "Completed"].includes(item.status)).length;
   const commandAccess = ["Executive", "Command"].includes(profile.access_tier);
   const pendingAcknowledgments = (guardians.data ?? []).filter((item: any) => !["Acknowledged", "Closed"].includes(item.status)).length;
+  const trainingRows = training.data ?? [];
+  const trainingHistoryRows = trainingHistory.data ?? [];
+  const requirementRows = trainingRequirements.data ?? [];
+  const academyRequirement = requirementRows.find((item: any) => item.requirement === "Academy");
+  const ftoRequirement = requirementRows.find((item: any) => item.requirement === "FTO");
+  const activeTraining = trainingRows.find((item: any) => ["Not Started", "In Progress", "Needs Improvement"].includes(item.status));
   const letterRows = (correspondence.data ?? []).map((item: any) => {
     const author = Array.isArray(item.author) ? item.author[0] : item.author;
     return { id: item.id, subject: item.subject, body: item.body, sentAt: item.sent_at, authorName: author?.display_name ?? "Command", authorRank: author?.rank ?? "Command" };
@@ -59,7 +67,6 @@ export default async function PersonnelPortalPage() {
       audience="deputy"
       eyebrow={`${profile.is_test_account ? "Test personnel file" : "Personnel file"} · ${profile.call_sign ?? "No call sign"} · ${profile.personnel_id}`}
       title={<LocalGreeting />}
-      description="Your LSCSO personnel file, documents, qualifications, service history, and requests in one place."
       actions={<>{commandAccess ? <Link className="portal-button portal-button--secondary" href="/portal/command">Command workspace</Link> : null}<Link className="portal-button portal-button--primary" href="#requests">Start a request</Link></>}
     >
       <TestAccountBanner />
@@ -74,13 +81,12 @@ export default async function PersonnelPortalPage() {
       <section className="deputy-summary-grid">
         <article><span>Documents</span><strong>{String(letterRows.length + (guardians.data?.length ?? 0)).padStart(2, "0")}</strong><small>{pendingAcknowledgments} awaiting acknowledgment</small></article>
         <article><span>Current certifications</span><strong>{String(currentCertifications.length).padStart(2, "0")}</strong><small>{pendingCertifications.length} pending review</small></article>
-        <article><span>Medals</span><strong>{String(awards.data?.length ?? 0).padStart(2, "0")}</strong><small>Permanent decorations</small></article>
+        <article><span>Training records</span><strong>{String(trainingHistoryRows.length).padStart(2, "0")}</strong><small>{activeTraining ? `${activeTraining.program_type} active` : "No active program"}</small></article>
         <article><span>Open requests</span><strong>{String(openRequests).padStart(2, "0")}</strong><small>Awaiting action</small></article>
       </section>
 
       <section className="portal-panel deputy-document-center" id="documents">
         <div className="portal-panel-heading"><div><p>Protected personnel file</p><h2>My Documents</h2></div><span>{pendingAcknowledgments ? `${pendingAcknowledgments} action required` : "Up to date"}</span></div>
-        <p className="personnel-section-intro">Welcome letters, disciplinary actions, commendations, and other issued personnel records are kept here. Records requiring acknowledgment remain clearly marked until you complete them.</p>
         <div className="deputy-document-summary">
           <div><span>Command letters</span><strong>{letterRows.length}</strong></div>
           <div><span>Guardian records</span><strong>{guardians.data?.length ?? 0}</strong></div>
@@ -101,7 +107,6 @@ export default async function PersonnelPortalPage() {
 
       <section className="portal-panel deputy-certifications" id="certifications">
         <div className="portal-panel-heading"><div><p>Qualifications</p><h2>My Certifications</h2></div><Link href="#requests">Request certification</Link></div>
-        <p className="personnel-section-intro">Current qualifications are shown first. Pending requests and prior certifications stay available without turning this page into one long list.</p>
         <div className="personnel-certification-summary"><div><strong>{currentCertifications.length}</strong><span>Current</span></div><div><strong>{pendingCertifications.length}</strong><span>Pending</span></div><div><strong>{pastCertifications.length}</strong><span>Previous</span></div></div>
         <div className="personnel-certification-grid">
           {currentCertifications.map((certification: any) => <article key={certification.id}><span>Current</span><strong>{certification.name}</strong><small>{certification.issuer}</small><dl><div><dt>Issued</dt><dd>{dateLabel(certification.issued_on)}</dd></div><div><dt>Expires</dt><dd>{certification.expires_on ? dateLabel(certification.expires_on) : "No expiration"}</dd></div></dl></article>)}
@@ -124,7 +129,18 @@ export default async function PersonnelPortalPage() {
 
       {(flags.data ?? []).length ? <section className="portal-panel" id="personnel-flags"><div className="portal-panel-heading"><div><p>Administrative indicators</p><h2>Personnel flags</h2></div><span>Flags do not replace Guardian documents</span></div><div className="deputy-request-history">{(flags.data ?? []).map((flag: any) => <article key={flag.id}><span>PF</span><div><strong>{flag.flag_type}</strong><small>{flag.notes ?? "No administrative note"}</small></div><b>Active</b></article>)}</div></section> : null}
 
-      <section className="deputy-progress-section"><div className="portal-section-heading"><div><p>Professional development</p><h2>Training progress</h2></div><span>Academy and FTO records remain part of your personnel history.</span></div><div className="deputy-progress-card"><div><span>{training.data?.[0]?.program_type ?? "Training record"}</span><strong>{training.data?.[0]?.status ?? "No active program"}</strong><p>{training.data?.[0]?.evaluation_notes ?? "Command has not assigned an Academy or FTO progress record."}</p></div><div className="deputy-progress-track" aria-label="Training progress">{(training.data ?? []).map((progress: any, index: number) => <div className={["Complete", "Released"].includes(progress.status) ? "is-complete" : undefined} key={progress.id}><span>{index + 1}</span><strong>{progress.phase}</strong><small>{progress.status}</small></div>)}</div></div></section>
+      <section className="portal-panel" id="training">
+        <div className="portal-panel-heading"><div><p>Professional development</p><h2>My Training</h2></div><span>{trainingHistoryRows.length} permanent</span></div>
+        <div className="training-requirement-grid">
+          {[{ label: "Academy", row: academyRequirement }, { label: "FTO", row: ftoRequirement }].map(({ label, row }) => <article key={label}><span>{label}</span><strong>{row?.disposition ?? "Not Recorded"}</strong><small>{row?.reason ?? "No entry-training disposition on file."}</small>{row?.effective_at ? <b>{dateLabel(row.effective_at)}</b> : null}</article>)}
+        </div>
+        {activeTraining ? <div className="deputy-progress-card" style={{ marginTop: 12 }}><div><span>{activeTraining.program_type}</span><strong>{activeTraining.status}</strong><p>{activeTraining.evaluation_notes ?? `${activeTraining.phase} · ${activeTraining.progress_percent}%`}</p></div><div className="deputy-progress-track" aria-label="Training progress">{trainingRows.map((progress: any, index: number) => <div className={["Complete", "Released"].includes(progress.status) ? "is-complete" : undefined} key={progress.id}><span>{index + 1}</span><strong>{progress.phase}</strong><small>{progress.status}</small></div>)}</div></div> : null}
+        <div className="training-history-list" style={{ marginTop: 12 }}>
+          {trainingHistoryRows.map((item: any) => <article key={item.id}><div className="training-history-list__mark">{item.category === "FTO" ? "FTO" : "TRN"}</div><div><span>{item.record_type} · {item.category}</span><strong>{item.title}</strong><small>{item.provider}{item.completed_on ? ` · ${dateLabel(item.completed_on)}` : " · Completion date not recorded"}</small>{item.notes ? <p>{item.notes}</p> : null}</div><b>{item.verification_status}</b></article>)}
+          {!trainingHistoryRows.length && !activeTraining ? <div className="portal-empty-state"><strong>No training history is on file.</strong></div> : null}
+        </div>
+      </section>
+
       <LeaveRequestCenter />
       <DeputyRequestCenter />
     </PortalShell>
