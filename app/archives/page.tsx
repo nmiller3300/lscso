@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { ArchiveEntrance } from "./ArchiveEntrance";
 import "./archive-refinements.css";
+import "./archive-depth.css";
 
 export const metadata: Metadata = {
   title: "Historical Records & Archives",
