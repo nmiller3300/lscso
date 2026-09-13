@@ -1,0 +1,330 @@
+/* Final composition and motion polish for the circular Personnel Portal login. */
+
+.portal-glow-login__card {
+  box-shadow:
+    0 42px 110px rgba(0,0,0,.66),
+    0 0 0 1px rgba(212,190,121,.035),
+    0 0 76px rgba(187,164,95,.10),
+    inset 0 1px 2px rgba(255,255,255,.22),
+    inset 0 -24px 58px rgba(0,0,0,.22);
+  animation: portalGlowLoginBreath 5.8s ease-in-out infinite;
+}
+
+/* Make the moving part of the ring visually legible instead of a nearly-uniform gold outline. */
+.portal-glow-login__card::before {
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(250,239,198,1) 0deg,
+      rgba(231,205,119,.98) 20deg,
+      rgba(212,190,121,.44) 54deg,
+      rgba(82,84,71,.34) 108deg,
+      rgba(82,84,71,.70) 154deg,
+      rgba(212,190,121,.20) 214deg,
+      rgba(139,111,48,.72) 258deg,
+      rgba(246,229,166,.88) 314deg,
+      rgba(250,239,198,1) 360deg
+    );
+  filter: drop-shadow(0 0 11px rgba(225,200,117,.23));
+  animation: portalGlowLoginRing 5.8s linear infinite;
+}
+
+/* A slow glass highlight travelling over the face of the orb. */
+.portal-glow-login__card::after {
+  animation: portalGlowLoginSheen 7.5s ease-in-out infinite;
+}
+
+.portal-glow-login__wave--one {
+  animation-duration: 16s;
+}
+
+.portal-glow-login__wave--two {
+  animation-duration: 21s;
+}
+
+.portal-glow-login__halo--gold {
+  animation-duration: 10s;
+}
+
+.portal-glow-login__halo--olive {
+  animation-duration: 13s;
+}
+
+.portal-glow-login__mark {
+  animation: portalGlowMarkFloat 4.8s ease-in-out infinite;
+}
+
+.portal-glow-login .portal-auth__submit {
+  position: relative;
+  overflow: hidden;
+}
+
+.portal-glow-login .portal-auth__submit::before {
+  animation: portalGlowLoginButtonShine 2.9s ease-in-out infinite;
+}
+
+@keyframes portalGlowLoginBreath {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    box-shadow:
+      0 42px 110px rgba(0,0,0,.66),
+      0 0 0 1px rgba(212,190,121,.035),
+      0 0 58px rgba(187,164,95,.07),
+      inset 0 1px 2px rgba(255,255,255,.22),
+      inset 0 -24px 58px rgba(0,0,0,.22);
+  }
+  50% {
+    transform: translateY(-2px) scale(1.0025);
+    box-shadow:
+      0 46px 118px rgba(0,0,0,.69),
+      0 0 0 1px rgba(212,190,121,.055),
+      0 0 92px rgba(187,164,95,.14),
+      inset 0 1px 2px rgba(255,255,255,.24),
+      inset 0 -24px 58px rgba(0,0,0,.22);
+  }
+}
+
+@keyframes portalGlowLoginSheen {
+  0%, 18% { transform: translate(0, 0) scale(.92); opacity: .26; }
+  48% { transform: translate(250px, 170px) scale(1.14); opacity: .42; }
+  78%, 100% { transform: translate(360px, 260px) scale(.96); opacity: .16; }
+}
+
+@keyframes portalGlowMarkFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@media (max-width: 980px) {
+  .portal-gateway--glow-login .portal-gateway__brand {
+    min-height: 146px;
+    padding: 20px 24px;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__watermark {
+    top: 54%;
+    right: -70px;
+    width: 300px;
+    opacity: .075;
+  }
+
+  .portal-glow-login {
+    min-height: calc(100svh - 146px);
+    padding: 28px 18px 44px;
+  }
+}
+
+@media (max-width: 620px) {
+  .portal-gateway--glow-login .portal-gateway__brand {
+    min-height: 118px;
+    padding: 15px 16px;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency {
+    gap: 11px;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency-mark {
+    width: 46px;
+    height: 46px;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency-mark img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency span {
+    font-size: .50rem;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency strong {
+    font-size: .82rem;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__agency small {
+    font-size: .46rem;
+  }
+
+  .portal-gateway--glow-login .portal-gateway__watermark {
+    top: 58%;
+    right: -76px;
+    width: 260px;
+    opacity: .07;
+  }
+
+  .portal-glow-login {
+    min-height: calc(100svh - 118px);
+    padding: 18px 10px 34px;
+  }
+
+  .portal-glow-login__stage {
+    width: min(100%, 500px);
+    grid-template-columns: minmax(0,1fr) minmax(0,1fr);
+    column-gap: 8px;
+    row-gap: 11px;
+  }
+
+  .portal-glow-login__status {
+    position: relative;
+    top: auto;
+    right: auto;
+    left: auto;
+    min-height: 27px;
+    max-width: 100%;
+    padding: 0 9px;
+    overflow: hidden;
+    background: rgba(8,11,15,.66);
+    font-size: .42rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .portal-glow-login__status--node {
+    justify-self: start;
+  }
+
+  .portal-glow-login__status--class {
+    justify-self: end;
+  }
+
+  .portal-glow-login__card,
+  .portal-glow-login__below {
+    grid-column: 1 / -1;
+  }
+
+  .portal-glow-login__card {
+    width: min(90vw, 430px);
+  }
+
+  .portal-glow-login__content {
+    width: 78%;
+  }
+
+  .portal-glow-login__mark {
+    width: 46px;
+    height: 46px;
+    margin-bottom: 4px;
+    border-radius: 15px;
+  }
+
+  .portal-glow-login__mark img {
+    width: 40px;
+    height: 40px;
+  }
+
+  .portal-glow-login__heading {
+    margin-bottom: 11px;
+  }
+
+  .portal-glow-login__heading > span {
+    font-size: .42rem;
+  }
+
+  .portal-glow-login__heading h2 {
+    margin: 5px 0 4px;
+    font-size: clamp(1.5rem, 7vw, 1.9rem);
+  }
+
+  .portal-glow-login__heading p {
+    max-width: 270px;
+    font-size: .51rem;
+    line-height: 1.35;
+  }
+
+  .portal-glow-login .portal-auth__form {
+    gap: 9px;
+  }
+
+  .portal-glow-login .portal-auth__input-shell {
+    min-height: 44px;
+  }
+
+  .portal-root .portal-glow-login .portal-auth__input-shell input {
+    min-height: 42px;
+    font-size: .69rem;
+  }
+
+  .portal-glow-login .portal-auth__submit {
+    min-height: 44px;
+    font-size: .64rem;
+  }
+
+  /* The protection summary below the orb already communicates these points on phones. */
+  .portal-glow-login .portal-auth__trust-row {
+    display: none;
+  }
+
+  .portal-glow-login__below {
+    width: min(92%, 430px);
+    margin-top: 2px;
+  }
+
+  .portal-glow-login__security {
+    min-height: 58px;
+    padding: 10px 12px;
+    border-color: rgba(212,190,121,.10);
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.042), rgba(187,164,95,.018)),
+      rgba(8,11,15,.48);
+  }
+
+  .portal-glow-login__security strong {
+    font-size: .63rem;
+  }
+
+  .portal-glow-login__footer {
+    font-size: .50rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .portal-gateway--glow-login .portal-gateway__brand {
+    min-height: 104px;
+  }
+
+  .portal-glow-login {
+    min-height: calc(100svh - 104px);
+  }
+
+  .portal-glow-login__stage {
+    grid-template-columns: 1fr;
+    row-gap: 9px;
+  }
+
+  .portal-glow-login__status {
+    justify-self: center;
+  }
+
+  .portal-glow-login__status--class {
+    display: inline-flex;
+  }
+
+  .portal-glow-login__card {
+    width: min(92vw, 390px);
+  }
+
+  .portal-glow-login__content {
+    width: 80%;
+  }
+
+  .portal-glow-login__mark {
+    display: grid;
+  }
+
+  .portal-glow-login__heading p {
+    display: block;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-glow-login__card,
+  .portal-glow-login__card::before,
+  .portal-glow-login__card::after,
+  .portal-glow-login__mark,
+  .portal-glow-login__wave,
+  .portal-glow-login__halo,
+  .portal-glow-login .portal-auth__submit::before {
+    animation: none !important;
+  }
+}
