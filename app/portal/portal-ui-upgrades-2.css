@@ -1,0 +1,104 @@
+/* LSCSO Portal UI upgrades — utility controls and responsive polish. */
+
+.portal-sidebar-utility {
+  margin-top: auto;
+  padding: 14px 10px 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.065);
+}
+
+.portal-coffee-launch {
+  width: 100%;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  padding: 9px 12px;
+  border: 1px solid rgba(212, 190, 121, 0.14);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(212, 190, 121, 0.08), transparent 42%),
+    linear-gradient(145deg, rgba(255,255,255,0.032), rgba(255,255,255,0.012));
+  color: #e9e6de;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 1px rgba(255,255,255,0.035);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+}
+
+.portal-coffee-launch:hover,
+.portal-coffee-launch:focus-visible {
+  border-color: rgba(212, 190, 121, 0.34);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(212, 190, 121, 0.14), transparent 44%),
+    linear-gradient(145deg, rgba(255,255,255,0.052), rgba(187,164,95,0.025));
+  box-shadow: 0 12px 28px rgba(0,0,0,0.18), inset 0 1px rgba(255,255,255,0.045);
+  outline: none;
+  transform: translateY(-1px);
+}
+
+.portal-coffee-launch__cup {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(212, 190, 121, 0.18);
+  border-radius: 12px;
+  background: rgba(187, 164, 95, 0.075);
+  font-size: 17px;
+  box-shadow: inset 0 1px rgba(255,255,255,0.04);
+}
+
+.portal-coffee-launch__copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.portal-coffee-launch__copy strong {
+  color: #eae6db;
+  font-size: 0.71rem;
+  font-weight: 720;
+  letter-spacing: 0.01em;
+}
+
+.portal-coffee-launch__copy small {
+  color: #7f858d;
+  font-size: 0.57rem;
+  font-weight: 650;
+}
+
+.portal-mobile-menu-footer > .portal-coffee-launch {
+  min-height: 58px;
+  grid-template-columns: 40px minmax(0, 1fr);
+  border-color: rgba(219, 197, 119, 0.24);
+  border-radius: 18px;
+  background: rgba(197, 170, 90, 0.055);
+}
+
+.portal-mobile-menu-footer > .portal-coffee-launch .portal-coffee-launch__copy strong {
+  font-size: 0.78rem;
+}
+
+.portal-mobile-menu-footer > .portal-coffee-launch .portal-coffee-launch__copy small {
+  font-size: 0.63rem;
+}
+
+@media (max-width: 860px) {
+  .portal-sidebar-utility {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-coffee-launch {
+    transition: none;
+  }
+
+  .portal-coffee-launch:hover,
+  .portal-coffee-launch:focus-visible {
+    transform: none;
+  }
+}
