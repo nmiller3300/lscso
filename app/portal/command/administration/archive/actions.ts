@@ -70,3 +70,13 @@ export async function saveArchiveRecord(formData: FormData) {
   if (result.error) throw new Error(result.error.message);
   revalidatePath("/portal/command/administration/archive");
 }
+
+export async function removeArchiveRecord(formData: FormData) {
+  await requireArchiveAuthority();
+  const id = text(formData, "id");
+  if (!id) throw new Error("Archive record id is required");
+  const supabase = await createClient() as any;
+  const { error } = await supabase.from("current_administration_archive").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+  revalidatePath("/portal/command/administration/archive");
+}
