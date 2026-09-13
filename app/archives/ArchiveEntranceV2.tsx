@@ -176,6 +176,7 @@ export function ArchiveEntranceV2({ currentAdministrationRecords = [] }: Archive
   const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
+  const suppressBayClick = useRef(false);
 
   const recordsForCollection = (slug: string | null): PublicArchiveRecord[] => {
     if (!slug) return [];
@@ -256,6 +257,19 @@ export function ArchiveEntranceV2({ currentAdministrationRecords = [] }: Archive
 
   const moveBay = (direction: -1 | 1) => {
     setRoomBay((current) => Math.max(0, Math.min(2, current + direction)) as RoomBay);
+  };
+
+  const handleBayPointerUp = (direction: -1 | 1, event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.pointerType === "mouse") return;
+    event.preventDefault();
+    suppressBayClick.current = true;
+    moveBay(direction);
+    window.setTimeout(() => { suppressBayClick.current = false; }, 450);
+  };
+
+  const handleBayClick = (direction: -1 | 1) => {
+    if (suppressBayClick.current) return;
+    moveBay(direction);
   };
 
   const renderAdministrationBox = (administration: (typeof administrations)[number], index: number) => {
@@ -437,9 +451,21 @@ export function ArchiveEntranceV2({ currentAdministrationRecords = [] }: Archive
 
       {lightsOn && !collectionOpen ? (
         <nav className="archive-room-nav" aria-label="Archive room stacks">
-          <button type="button" onClick={() => moveBay(-1)} disabled={roomBay === 0} aria-label="Previous archive stack"><span aria-hidden="true">←</span><small>Previous</small></button>
+          <button
+            type="button"
+            onPointerUp={(event) => handleBayPointerUp(-1, event)}
+            onClick={() => handleBayClick(-1)}
+            disabled={roomBay === 0}
+            aria-label="Previous archive stack"
+          ><span aria-hidden="true">←</span><small>Previous</small></button>
           <div><span>{roomBayLabels[roomBay].stack}</span><strong>{roomBayLabels[roomBay].title}</strong><small>{roomBayLabels[roomBay].detail}</small></div>
-          <button type="button" onClick={() => moveBay(1)} disabled={roomBay === 2} aria-label="Next archive stack"><small>Next</small><span aria-hidden="true">→</span></button>
+          <button
+            type="button"
+            onPointerUp={(event) => handleBayPointerUp(1, event)}
+            onClick={() => handleBayClick(1)}
+            disabled={roomBay === 2}
+            aria-label="Next archive stack"
+          ><small>Next</small><span aria-hidden="true">→</span></button>
         </nav>
       ) : null}
 

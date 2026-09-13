@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
+import { CoffeeBreakButton } from "./CoffeeBreakButton";
 import { CommandQuickFind } from "./CommandQuickFind";
 import { LegacyPortalModalBridge } from "./LegacyPortalModalBridge";
 import { MyInfoSectionNav } from "./MyInfoSectionNav";
@@ -25,7 +26,7 @@ type PortalShellProps = {
 export function PortalShell({ active, audience = "command", eyebrow, title, actions, children }: PortalShellProps) {
   return <div className="portal-app">
     <LegacyPortalModalBridge />
-    <aside className="portal-sidebar"><Link className="portal-brand" href="/portal" aria-label="LSCSO portal entry"><Image src="/images/lscso-patch-color.png" alt="" width={58} height={58} priority /><span><strong>LSCSO</strong><small>Personnel Operations</small></span></Link><div className="portal-sidebar-label">{audience === "command" ? "Command workspace" : "Personnel workspace"}</div><PortalNavigation active={active} audience={audience} /><div className="portal-sidebar-foot"><span className="portal-security-pulse" aria-hidden="true" /><div><strong>Restricted access</strong><small>Protected department records</small></div></div></aside>
+    <aside className="portal-sidebar"><Link className="portal-brand" href="/portal" aria-label="LSCSO portal entry"><Image src="/images/lscso-patch-color.png" alt="" width={58} height={58} priority /><span><strong>LSCSO</strong><small>Personnel Operations</small></span></Link><div className="portal-sidebar-label">{audience === "command" ? "Command workspace" : "Personnel workspace"}</div><PortalNavigation active={active} audience={audience} /><div className="portal-sidebar-utility"><CoffeeBreakButton /></div><div className="portal-sidebar-foot"><span className="portal-security-pulse" aria-hidden="true" /><div><strong>Restricted access</strong><small>Protected department records</small></div></div></aside>
     <section className="portal-workspace">
       <header className="portal-topbar"><div className="portal-environment"><span>Internal</span><strong>{eyebrow}</strong></div><div className="portal-topbar-actions"><div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>{audience === "command" ? <CommandQuickFind /> : null}<PortalNotificationLink audience={audience} /><PortalAccountMenu /></div></header>
       <main className="portal-content"><div className="portal-page-heading"><div><p>{eyebrow}</p><h1>{title}</h1></div>{actions ? <div className="portal-page-actions">{actions}</div> : null}</div>{active === "notifications" ? <BrowserPushControl /> : null}{active === "record" && audience === "deputy" ? <><MyInfoSectionNav /><PromotionSelfReviewCenter /><MyPerformanceEvaluations /><PortalPolicyDirectory /></> : null}{children}</main>

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { PasswordEyes } from "./PasswordEyes";
 
 type ActiveProfile = {
   display_name: string;
@@ -214,7 +215,8 @@ export function PortalLogin() {
               aria-pressed={showPassword}
               onClick={() => setShowPassword((current) => !current)}
             >
-              {showPassword ? "Hide" : "Show"}
+              <PasswordEyes open={showPassword} />
+              <span className="portal-auth__toggle-label">{showPassword ? "Hide password" : "Show password"}</span>
             </button>
           </div>
         </label>

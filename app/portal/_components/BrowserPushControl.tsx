@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { GlassBlobToggle } from "./GlassBlobToggle";
 import styles from "./BrowserPushControl.module.css";
 
 const VAPID_PUBLIC_KEY = "BEAt_Q-eKw8MMnCkl-I8X2ikUm_lCAOrWGpab1jzY3nrfJEOkvnkjPEepDcVfOIvsEEUhTImb3AYtQosUJL8xc4";
@@ -123,9 +124,15 @@ export function BrowserPushControl() {
   }
 
   const isEnabled = state === "enabled";
+  const toggleDisabled = busy || state === "checking" || state === "blocked" || state === "unsupported";
+
+  const handleToggle = (next: boolean) => {
+    if (next) void enable();
+    else void disable();
+  };
 
   return (
-    <section className={styles.panel} aria-label="Browser notification settings">
+    <section className={`${styles.panel} portal-glass-card portal-glass-card--quiet`} aria-label="Browser notification settings">
       <div className={styles.copy}>
         <small>Device alerts</small>
         <strong>Browser notifications</strong>
@@ -133,11 +140,12 @@ export function BrowserPushControl() {
       {state === "unsupported" ? <span className={styles.unsupported}>Not supported on this browser</span> : (
         <div className={styles.actions}>
           <span className={`${styles.status} ${isEnabled ? styles.statusOn : ""}`}>{state === "checking" ? "Checking" : state === "blocked" ? "Blocked" : isEnabled ? "Enabled" : "Off"}</span>
-          {isEnabled ? (
-            <button className={`${styles.button} ${styles.buttonOff}`} disabled={busy} onClick={() => void disable()} type="button">{busy ? "Updating…" : "Turn Off"}</button>
-          ) : (
-            <button className={styles.button} disabled={busy || state === "checking" || state === "blocked"} onClick={() => void enable()} type="button">{busy ? "Enabling…" : state === "blocked" ? "Blocked" : "Enable"}</button>
-          )}
+          <GlassBlobToggle
+            checked={isEnabled}
+            disabled={toggleDisabled}
+            label={isEnabled ? "Disable browser notifications" : "Enable browser notifications"}
+            onChange={handleToggle}
+          />
         </div>
       )}
       {state === "blocked" ? <p className={styles.notice}>Allow notifications in browser settings.</p> : null}

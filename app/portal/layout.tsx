@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { MaintenanceNotice } from "../_components/MaintenanceNotice";
+import { LateNightCoffee } from "./_components/LateNightCoffee";
 import "./portal.css";
 import "./medals.css";
 import "./certifications.css";
@@ -27,6 +28,12 @@ import "./fivem-pairing.css";
 import "./portal-copy-compact.css";
 import "./training-operations.css";
 import "./personnel-directory-exports.css";
+import "./portal-ui-upgrades.css";
+import "./portal-ui-upgrades-2.css";
+import "./portal-ui-release-polish.css";
+import "./portal-glow-login.css";
+import "./portal-glow-login-polish.css";
+import "./portal-glow-login-mobile.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
@@ -34,13 +41,12 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function PortalLayout({
-  children,
-}: Readonly<{ children: ReactNode }>) {
+export default function PortalLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="portal-root" data-theme="dark" id="lscso-portal-root">
       <MaintenanceNotice scope="personnel_portal" variant="portal" />
       {children}
+      <LateNightCoffee />
     </div>
   );
 }
