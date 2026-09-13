@@ -2,7 +2,7 @@
  * Uses the existing real archive folder buttons and record counts; no duplicate data layer.
  */
 
-@media (min-width: 860px) {
+@media (min-width: 720px) {
   .archive-folder-directory {
     position: relative;
     min-height: 390px;
@@ -224,8 +224,12 @@
   }
 }
 
-@media (max-width: 1050px) and (min-width: 860px) {
-  .archive-folder-directory { min-height: 350px; transform: scale(.9); transform-origin: center center; }
+@media (max-width: 1050px) and (min-width: 720px) {
+  .archive-folder-directory {
+    min-height: 350px;
+    transform: scale(.84);
+    transform-origin: center center;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
