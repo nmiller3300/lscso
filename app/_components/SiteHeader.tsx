@@ -14,6 +14,7 @@ const divisions = [
 const mobilePrimaryNavigation = [
   { href: "/", label: "Home", detail: "LSCSO overview" },
   { href: "/about", label: "About", detail: "Mission, values & service" },
+  { href: "/archives", label: "Historical Archives", detail: "Department history & released records" },
   { href: "/office-of-the-sheriff", label: "Office of the Sheriff", detail: "Executive leadership" },
   { href: "/open-records", label: "Open Records", detail: "Request public records & track releases" },
 ];
@@ -71,7 +72,27 @@ export function SiteHeader() {
         </Link>
 
         <nav className="desktop-navigation refined-desktop-navigation" aria-label="Primary navigation">
-          <Link href="/about">About</Link>
+          <details className="division-menu about-menu">
+            <summary>
+              <span>About</span>
+              <span className="division-chevron" aria-hidden="true">⌄</span>
+            </summary>
+            <div className="division-dropdown about-dropdown">
+              <div className="division-dropdown-heading">
+                <small>Agency &amp; History</small>
+                <strong>About the Sheriff&apos;s Office</strong>
+              </div>
+              <Link href="/about">
+                <span>About LSCSO</span>
+                <span aria-hidden="true">↗</span>
+              </Link>
+              <Link href="/archives">
+                <span>Historical Archives</span>
+                <span aria-hidden="true">↗</span>
+              </Link>
+            </div>
+          </details>
+
           <Link href="/office-of-the-sheriff">Office of the Sheriff</Link>
 
           <details className="division-menu">
@@ -251,6 +272,12 @@ export function SiteHeader() {
             background: rgba(12, 12, 10, 0.98);
             box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(18px);
+          }
+
+          .about-dropdown {
+            right: auto;
+            left: -16px;
+            width: 300px;
           }
 
           .division-dropdown-heading {

@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { AgencyHistoryNav } from "./AgencyHistoryNav";
 import { MaintenanceNotice } from "./MaintenanceNotice";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
@@ -20,7 +19,6 @@ export function PublicSiteFrame({ children }: { children: ReactNode }) {
     <>
       <MaintenanceNotice scope="public_site" variant="public" />
       <SiteHeader />
-      <AgencyHistoryNav />
       <StatewideJurisdictionAlert />
       <main>{children}</main>
       <SiteFooter />

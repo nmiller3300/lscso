@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { BrowserPushControl } from "./BrowserPushControl";
 import { usePortalProfile } from "./PortalProfileProvider";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
 import { PortalSignOut } from "./PortalSignOut";
@@ -32,6 +33,9 @@ export function PortalAccountMenu() {
             <small>{profile.rank} · {profile.personnel_id}</small>
             {profile.is_test_account ? <b>Test account</b> : null}
           </div>
+        </div>
+        <div className="portal-account-menu__push">
+          <BrowserPushControl />
         </div>
         <Link href="/portal/my-office">My Info</Link>
         <Link href="/portal/account">FiveM connection</Link>
