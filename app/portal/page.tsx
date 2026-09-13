@@ -4,7 +4,7 @@ import { PortalLogin } from "./_components/PortalLogin";
 
 export default function PortalEntryPage() {
   return (
-    <main className="portal-gateway">
+    <main className="portal-gateway portal-gateway--glow-login">
       <section className="portal-gateway__brand" aria-label="Los Santos County Sheriff’s Office Personnel Portal">
         <div className="portal-gateway__ambient" aria-hidden="true">
           <span className="portal-gateway__orb portal-gateway__orb--one" />
@@ -74,42 +74,57 @@ export default function PortalEntryPage() {
         </footer>
       </section>
 
-      <section className="portal-gateway__access" aria-label="Personnel portal sign in">
-        <div className="portal-gateway__access-shell portal-gateway__access-shell--glow">
-          <div className="portal-gateway__access-topline">
-            <div className="portal-gateway__node-status"><span /> Secure access node</div>
-            <div className="portal-gateway__classification">Personnel Restricted</div>
+      <section className="portal-gateway__access portal-glow-login" aria-label="Personnel portal sign in">
+        <div className="portal-glow-login__background" aria-hidden="true">
+          <span className="portal-glow-login__wave portal-glow-login__wave--one" />
+          <span className="portal-glow-login__wave portal-glow-login__wave--two" />
+          <span className="portal-glow-login__halo portal-glow-login__halo--gold" />
+          <span className="portal-glow-login__halo portal-glow-login__halo--olive" />
+        </div>
+
+        <div className="portal-glow-login__stage">
+          <div className="portal-glow-login__status portal-glow-login__status--node">
+            <span /> Secure access node
+          </div>
+          <div className="portal-glow-login__status portal-glow-login__status--class">
+            Personnel Restricted
           </div>
 
-          <div className="portal-gateway__mobile-mark">
-            <Image
-              src="/images/lscso-patch-color.png"
-              alt="Los Santos County Sheriff’s Office patch"
-              width={96}
-              height={96}
-              priority
-            />
-          </div>
+          <div className="portal-glow-login__card">
+            <div className="portal-glow-login__content">
+              <div className="portal-glow-login__mark">
+                <Image
+                  src="/images/lscso-patch-color.png"
+                  alt="Los Santos County Sheriff’s Office patch"
+                  width={76}
+                  height={76}
+                  priority
+                />
+              </div>
 
-          <div className="portal-gateway__access-heading">
-            <span>LSCSO Personnel Operations</span>
-            <h2>Welcome back.</h2>
-            <p>Authenticate with the credentials assigned to your personnel account.</p>
-          </div>
+              <header className="portal-glow-login__heading">
+                <span>LSCSO Personnel Operations</span>
+                <h2>Secure Sign In</h2>
+                <p>Authenticate with the credentials assigned to your personnel account.</p>
+              </header>
 
-          <PortalLogin />
-
-          <div className="portal-gateway__security-note portal-glass-card portal-glass-card--quiet">
-            <span className="portal-gateway__security-icon" aria-hidden="true">S4</span>
-            <div>
-              <strong>Protected department system</strong>
-              <p>Authentication, protected personnel actions, and account-security events are recorded for accountability.</p>
+              <PortalLogin />
             </div>
           </div>
 
-          <div className="portal-gateway__access-footer">
-            <Link href="/">Return to public website</Link>
-            <span>Need access? Contact LSCSO Command.</span>
+          <div className="portal-glow-login__below">
+            <div className="portal-glow-login__security">
+              <span aria-hidden="true">S4</span>
+              <div>
+                <strong>Protected department system</strong>
+                <small>Authentication and protected personnel actions are recorded for accountability.</small>
+              </div>
+            </div>
+
+            <div className="portal-glow-login__footer">
+              <Link href="/">Return to public website</Link>
+              <span>Need access? Contact LSCSO Command.</span>
+            </div>
           </div>
         </div>
       </section>
