@@ -1,0 +1,190 @@
+/* Spatial refinement pass: make the archive read as a room rather than a shelf filling the viewport. */
+
+.archive-room {
+  perspective: 1800px;
+  perspective-origin: 50% 46%;
+}
+
+.archive-room::before,
+.archive-room::after {
+  position: absolute;
+  z-index: 1;
+  top: 8vh;
+  bottom: 0;
+  width: clamp(28px, 7vw, 130px);
+  content: "";
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 700ms ease 180ms;
+}
+
+.archive-room::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(4,4,3,0.95), rgba(24,22,18,0.68) 44%, transparent);
+  clip-path: polygon(0 0, 100% 7%, 82% 100%, 0 100%);
+}
+
+.archive-room::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(4,4,3,0.95), rgba(24,22,18,0.68) 44%, transparent);
+  clip-path: polygon(0 7%, 100% 0, 100% 100%, 18% 100%);
+}
+
+.archive-experience.is-lit:not(.is-collection-open) .archive-room::before,
+.archive-experience.is-lit:not(.is-collection-open) .archive-room::after {
+  opacity: 0.82;
+}
+
+.archive-bay {
+  transform-style: preserve-3d;
+}
+
+.archive-shelf-wall--bay,
+.archive-case-shelf {
+  transition: transform 760ms cubic-bezier(0.2, 0.72, 0.2, 1), filter 520ms ease;
+}
+
+@media (min-width: 761px) {
+  .archive-shelf-wall--bay {
+    top: 15vh;
+    right: clamp(74px, 9vw, 168px);
+    width: min(70vw, 1120px);
+    height: 70vh;
+    transform: perspective(1700px) rotateY(-1.1deg) translateZ(-12px);
+    transform-origin: 52% 50%;
+  }
+
+  .archive-bay--investigations .archive-case-shelf,
+  .archive-bay--standards .archive-case-shelf {
+    top: 15vh;
+    right: clamp(72px, 8vw, 144px);
+    left: clamp(72px, 8vw, 144px);
+    min-height: 68vh;
+    transform: perspective(1750px) rotateY(0.55deg) translateZ(-14px);
+  }
+
+  .archive-room-floor {
+    transform-origin: 50% 100%;
+  }
+
+  .archive-room-nav {
+    bottom: 26px;
+  }
+
+  .archive-room-nav::before {
+    position: absolute;
+    right: calc(100% + 18px);
+    top: 50%;
+    width: min(12vw, 150px);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(187,164,95,0.24));
+    content: "";
+  }
+
+  .archive-room-nav::after {
+    position: absolute;
+    left: calc(100% + 18px);
+    top: 50%;
+    width: min(12vw, 150px);
+    height: 1px;
+    background: linear-gradient(90deg, rgba(187,164,95,0.24), transparent);
+    content: "";
+  }
+
+  .archive-bay--executive::after,
+  .archive-bay--investigations::after,
+  .archive-bay--standards::after {
+    position: absolute;
+    z-index: 2;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 19vh;
+    background: linear-gradient(180deg, transparent, rgba(4,4,3,0.55) 62%, rgba(3,3,2,0.86));
+    content: "";
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .archive-experience.is-lit:not(.is-collection-open) {
+    min-height: 132dvh;
+  }
+
+  .archive-experience.is-lit:not(.is-collection-open) .archive-room,
+  .archive-experience.is-lit:not(.is-collection-open) .archive-room-exposure,
+  .archive-experience.is-lit:not(.is-collection-open) .archive-room-vignette,
+  .archive-bay-track,
+  .archive-bay {
+    min-height: 132dvh;
+    height: 132dvh;
+  }
+
+  .archive-room::before,
+  .archive-room::after {
+    top: 13dvh;
+    width: 8vw;
+  }
+
+  .archive-shelf-wall--bay {
+    top: 20dvh;
+    right: 2.5vw;
+    width: 95vw;
+    height: 78dvh;
+    transform: perspective(1300px) rotateY(-0.45deg);
+  }
+
+  .archive-case-shelf {
+    top: 20dvh;
+    right: 2.5vw;
+    left: 2.5vw;
+    min-height: 84dvh;
+    padding: 34px 5vw 38px;
+    border-right-width: 7px;
+    border-left-width: 7px;
+  }
+
+  .archive-room-sign {
+    right: 3vw;
+    left: 3vw;
+    width: auto;
+  }
+
+  .archive-room-nav {
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: calc(100vw - 24px);
+  }
+
+  .archive-room-nav > div small {
+    display: none;
+  }
+
+  .archive-experience.is-lit .archive-lamp-stage {
+    bottom: -15vh;
+    opacity: 0.32;
+    transform: scale(0.3);
+  }
+
+  .archive-bay--executive::after,
+  .archive-bay--investigations::after,
+  .archive-bay--standards::after {
+    position: absolute;
+    z-index: 2;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 21dvh;
+    background: linear-gradient(180deg, transparent, rgba(2,2,2,0.52) 58%, rgba(2,2,2,0.9));
+    content: "";
+    pointer-events: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-shelf-wall--bay,
+  .archive-case-shelf,
+  .archive-room::before,
+  .archive-room::after {
+    transition-duration: 1ms !important;
+  }
+}
