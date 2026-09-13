@@ -89,7 +89,7 @@ export function BrowserPushControl() {
         push_endpoint: subscription.endpoint,
         push_p256dh: p256dh,
         push_auth: auth,
-        push_user_agent: null,
+        push_user_agent: navigator.userAgent,
       });
       if (error) throw error;
 
