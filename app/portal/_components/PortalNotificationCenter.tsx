@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { NotificationCategory, NotificationPriority } from "@/lib/notifications/notification-meta";
-import { GlassBlobToggle } from "./GlassBlobToggle";
 
 export type NotificationCenterItem = {
   id: string;
@@ -188,13 +187,13 @@ export function PortalNotificationCenter({
               </button>
             ))}
           </div>
-          <div className="portal-inbox-unread portal-inbox-unread--glass">
-            <span>Unread only</span>
-            <GlassBlobToggle
-              checked={unreadOnly}
-              label={unreadOnly ? "Show all notifications" : "Show unread notifications only"}
-              onChange={setUnreadOnly}
-            />
+          <div className="command-v2-division-browser" aria-label="Notification read-state filter">
+            <button className={!unreadOnly ? "is-active" : undefined} onClick={() => setUnreadOnly(false)} type="button">
+              <strong>All</strong>
+            </button>
+            <button className={unreadOnly ? "is-active" : undefined} onClick={() => setUnreadOnly(true)} type="button">
+              <strong>Unread</strong>
+            </button>
           </div>
         </div>
 
