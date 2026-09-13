@@ -1,10 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PortalCinematicBackdrop } from "./_components/PortalCinematicBackdrop";
 import { PortalLogin } from "./_components/PortalLogin";
 
 export default function PortalEntryPage() {
   return (
     <main className="portal-gateway portal-gateway--glow-login">
+      <PortalCinematicBackdrop />
+
       <section className="portal-gateway__brand" aria-label="Los Santos County Sheriff’s Office Personnel Portal">
         <div className="portal-gateway__ambient" aria-hidden="true">
           <span className="portal-gateway__orb portal-gateway__orb--one" />
