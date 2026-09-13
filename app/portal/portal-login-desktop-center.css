@@ -1,45 +1,30 @@
+.portal-cinematic-backdrop {
+  display: none;
+}
+
 @media (min-width: 981px) {
   .portal-gateway--glow-login {
     position: relative;
     display: block;
     min-height: 100svh;
     overflow: hidden;
+    isolation: isolate;
     background:
-      radial-gradient(ellipse 40% 52% at 50% 44%, rgba(211, 185, 103, .105) 0%, rgba(166, 136, 62, .035) 42%, transparent 76%),
-      radial-gradient(ellipse 42% 56% at -2% 95%, rgba(39, 59, 83, .24) 0%, transparent 70%),
-      radial-gradient(ellipse 38% 48% at 101% 4%, rgba(92, 88, 65, .20) 0%, transparent 72%),
-      linear-gradient(145deg, rgba(255,255,255,.018) 0%, transparent 26%, transparent 74%, rgba(203,177,96,.025) 100%),
-      linear-gradient(132deg, #121923 0%, #0d131b 30%, #090e14 64%, #070a0f 100%);
+      radial-gradient(ellipse 46% 58% at 50% 46%, rgba(213, 184, 101, .072) 0%, transparent 68%),
+      radial-gradient(ellipse 44% 60% at 0% 100%, rgba(49, 79, 110, .16) 0%, transparent 72%),
+      radial-gradient(ellipse 42% 52% at 100% 0%, rgba(126, 111, 70, .12) 0%, transparent 72%),
+      linear-gradient(128deg, #111923 0%, #0b121a 34%, #080d13 66%, #06090e 100%);
   }
 
   .portal-gateway--glow-login::before {
     position: absolute;
-    inset: -4%;
-    z-index: 0;
-    background-image:
-      url("/images/lscso-patch-subdued.png"),
-      url("/images/lscso-portal-patch.webp"),
-      linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px),
-      linear-gradient(118deg, transparent 0 17%, rgba(214,188,108,.05) 17.08%, transparent 17.34%),
-      linear-gradient(62deg, transparent 0 79%, rgba(255,255,255,.025) 79.08%, transparent 79.3%);
-    background-repeat: no-repeat, no-repeat, repeat, repeat, no-repeat, no-repeat;
-    background-position:
-      -10vw 8vh,
-      calc(100% - 6vw) calc(100% - 7vh),
-      0 0,
-      0 0,
-      center,
-      center;
-    background-size:
-      min(35vw, 560px) auto,
-      min(15vw, 225px) auto,
-      68px 68px,
-      68px 68px,
-      100% 100%,
-      100% 100%;
-    opacity: .23;
-    filter: saturate(.72) contrast(1.04);
+    inset: 0;
+    z-index: -2;
+    background:
+      linear-gradient(116deg, rgba(255,255,255,.018) 0 1px, transparent 1px 100%) 0 0 / 118px 118px,
+      linear-gradient(26deg, transparent 0 34%, rgba(215,188,107,.022) 34.1%, transparent 34.35% 100%),
+      linear-gradient(154deg, transparent 0 71%, rgba(91,121,151,.025) 71.1%, transparent 71.35% 100%);
+    opacity: .72;
     content: "";
     pointer-events: none;
   }
@@ -47,14 +32,100 @@
   .portal-gateway--glow-login::after {
     position: absolute;
     inset: 0;
-    z-index: 0;
+    z-index: 4;
     background:
-      linear-gradient(112deg, transparent 0 8%, rgba(204,177,96,.035) 8.1%, rgba(204,177,96,.012) 18%, transparent 28%),
-      linear-gradient(292deg, transparent 0 10%, rgba(66,87,110,.045) 10.1%, rgba(66,87,110,.014) 21%, transparent 31%),
-      linear-gradient(90deg, rgba(0,0,0,.34) 0%, transparent 19%, transparent 81%, rgba(0,0,0,.36) 100%),
-      linear-gradient(180deg, rgba(0,0,0,.12) 0%, transparent 22%, transparent 78%, rgba(0,0,0,.28) 100%);
+      radial-gradient(ellipse at center, transparent 0 42%, rgba(4,7,11,.12) 70%, rgba(3,5,8,.54) 100%),
+      linear-gradient(90deg, rgba(3,6,10,.30), transparent 18%, transparent 82%, rgba(3,6,10,.34));
     content: "";
     pointer-events: none;
+  }
+
+  .portal-cinematic-backdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .portal-cinematic-backdrop__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .92;
+  }
+
+  .portal-cinematic-backdrop__crest {
+    position: absolute;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    pointer-events: none;
+  }
+
+  .portal-cinematic-backdrop__crest--left {
+    top: 48%;
+    left: -9vw;
+    width: clamp(390px, 31vw, 650px);
+    aspect-ratio: 1;
+    background-image: url("/images/lscso-patch-subdued.png");
+    opacity: .13;
+    filter: saturate(.55) contrast(1.1) drop-shadow(0 30px 70px rgba(0,0,0,.34));
+    transform: translateY(-50%) rotate(-9deg) scale(1.03);
+    -webkit-mask-image: linear-gradient(90deg, #000 0 42%, rgba(0,0,0,.78) 66%, transparent 96%);
+    mask-image: linear-gradient(90deg, #000 0 42%, rgba(0,0,0,.78) 66%, transparent 96%);
+    animation: portal-crest-left-drift 19s ease-in-out infinite alternate;
+  }
+
+  .portal-cinematic-backdrop__crest--right {
+    right: -3.5vw;
+    bottom: 5vh;
+    width: clamp(190px, 15vw, 300px);
+    aspect-ratio: 1;
+    background-image: url("/images/lscso-portal-patch.webp");
+    opacity: .115;
+    filter: saturate(.72) contrast(1.08) drop-shadow(0 24px 58px rgba(0,0,0,.38));
+    transform: rotate(8deg);
+    -webkit-mask-image: radial-gradient(circle at 45% 48%, #000 0 48%, rgba(0,0,0,.86) 64%, transparent 88%);
+    mask-image: radial-gradient(circle at 45% 48%, #000 0 48%, rgba(0,0,0,.86) 64%, transparent 88%);
+    animation: portal-crest-right-drift 23s ease-in-out infinite alternate;
+  }
+
+  .portal-cinematic-backdrop__sheen {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(107deg, transparent 0 7%, rgba(226,198,112,.035) 7.08%, rgba(226,198,112,.01) 12%, transparent 20%),
+      linear-gradient(287deg, transparent 0 9%, rgba(99,137,176,.04) 9.08%, rgba(99,137,176,.012) 14%, transparent 23%),
+      radial-gradient(ellipse 18% 48% at 4% 44%, rgba(222,188,91,.055), transparent 72%),
+      radial-gradient(ellipse 20% 45% at 97% 60%, rgba(75,108,143,.055), transparent 74%);
+    mix-blend-mode: screen;
+    opacity: .92;
+  }
+
+  .portal-cinematic-backdrop__sheen::before {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 34vw;
+    height: 38vh;
+    background: linear-gradient(145deg, rgba(217,185,98,.055), rgba(69,89,111,.025) 56%, transparent 56.5%);
+    clip-path: polygon(0 28%, 100% 100%, 0 100%);
+    opacity: .48;
+    content: "";
+  }
+
+  .portal-cinematic-backdrop__sheen::after {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(231,218,173,.11) 0 .7px, transparent .9px);
+    background-size: 34px 34px;
+    opacity: .11;
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 28%, transparent 72%, #000 100%);
+    mask-image: linear-gradient(90deg, #000 0%, transparent 28%, transparent 72%, #000 100%);
+    content: "";
   }
 
   .portal-gateway--glow-login > .portal-gateway__brand {
@@ -63,7 +134,7 @@
 
   .portal-gateway--glow-login > .portal-gateway__access {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     width: 100%;
     min-width: 0;
     height: 100svh;
@@ -93,6 +164,16 @@
   }
 }
 
+@keyframes portal-crest-left-drift {
+  from { transform: translateY(-50%) rotate(-9deg) scale(1.03); }
+  to { transform: translate(12px, calc(-50% - 8px)) rotate(-7.8deg) scale(1.045); }
+}
+
+@keyframes portal-crest-right-drift {
+  from { transform: translate(0, 0) rotate(8deg) scale(1); }
+  to { transform: translate(-10px, -7px) rotate(9.2deg) scale(1.025); }
+}
+
 @media (min-width: 981px) and (max-height: 760px) {
   .portal-gateway--glow-login > .portal-gateway__access {
     padding-block: 16px;
@@ -104,5 +185,11 @@
 
   .portal-gateway--glow-login .portal-glow-login__card {
     width: min(540px, calc(100svh - 170px), calc(100vw - 80px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-cinematic-backdrop__crest {
+    animation: none !important;
   }
 }
