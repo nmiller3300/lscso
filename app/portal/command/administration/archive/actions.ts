@@ -8,6 +8,7 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 const VALID_OWNERS = new Set(["Administration", "Sheriff", "Undersheriff"]);
 const VALID_FOLDERS = new Set(["Leadership", "Criminal Organizations", "Operations", "Cold Cases", "Internal Affairs", "Achievements", "Correspondence", "Photos & Artifacts"]);
 const VALID_RELEASES = new Set(["Draft", "Internal", "Public", "Partially Released", "Sealed"]);
+const RELEASED_STATUSES = new Set(["Public", "Partially Released", "Sealed"]);
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -37,7 +38,6 @@ async function requireArchiveAuthority() {
 function revalidateArchiveViews() {
   revalidatePath("/portal/command/administration/archive");
   revalidatePath("/archives");
-  revalidatePath("/archives/current");
 }
 
 export async function loadArchiveRecords() {
@@ -63,8 +63,27 @@ export async function saveArchiveRecord(formData: FormData) {
   if (!VALID_OWNERS.has(recordOwner) || !VALID_FOLDERS.has(folder) || !VALID_RELEASES.has(releaseStatus)) throw new Error("Invalid archive record");
   if (!title || !dateLabel) throw new Error("Title and date are required");
 
-  const released = ["Public", "Partially Released", "Sealed"].includes(releaseStatus);
+  const admin = createAdminClient() as any;
+  let existing: { published_at: string | null } | null = null;
+  if (id) {
+    const { data, error } = await admin
+      .from("current_administration_archive")
+      .select("published_at")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Archive record not found");
+    existing = data;
+  }
+
+  const released = RELEASED_STATUSES.has(releaseStatus);
   const now = new Date().toISOString();
+  const submittedPublicBody = text(formData, "public_body")
+    .split(/\n\s*\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const summary = text(formData, "summary") || (releaseStatus === "Sealed" ? "Record existence acknowledged. Contents remain sealed." : "");
+
   const payload = {
     administration: "miller-white",
     record_owner: recordOwner,
@@ -75,12 +94,12 @@ export async function saveArchiveRecord(formData: FormData) {
     release_status: releaseStatus,
     status: text(formData, "status") || null,
     stamp: text(formData, "stamp") || null,
-    summary: text(formData, "summary"),
-    public_body: text(formData, "public_body").split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean),
+    summary,
+    public_body: releaseStatus === "Sealed" ? [] : submittedPublicBody,
     internal_notes: text(formData, "internal_notes") || null,
     updated_by: profile.id,
     updated_at: now,
-    published_at: released ? now : null,
+    published_at: released ? existing?.published_at ?? now : null,
   };
 
   const supabase = await createClient() as any;
