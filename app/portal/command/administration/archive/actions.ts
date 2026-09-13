@@ -95,6 +95,19 @@ export async function removeArchiveRecord(formData: FormData) {
   await requireArchiveAuthority();
   const id = text(formData, "id");
   if (!id) throw new Error("Archive record id is required");
+
+  const admin = createAdminClient() as any;
+  const { data: existing, error: lookupError } = await admin
+    .from("current_administration_archive")
+    .select("release_status")
+    .eq("id", id)
+    .maybeSingle();
+  if (lookupError) throw new Error(lookupError.message);
+  if (!existing) throw new Error("Archive record not found");
+  if (!["Draft", "Internal"].includes(existing.release_status)) {
+    throw new Error("Released archive records must be withdrawn to Draft or Internal before removal.");
+  }
+
   const supabase = await createClient() as any;
   const { error } = await supabase.from("current_administration_archive").delete().eq("id", id);
   if (error) throw new Error(error.message);
