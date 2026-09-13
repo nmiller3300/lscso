@@ -712,7 +712,7 @@ export function GuardianWorkspace() {
       </section>
 
       {selectedRecord ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
           <section className="portal-modal portal-modal--guardian-review" role="dialog" aria-modal="true" aria-labelledby="guardian-review-title">
             <div className="portal-modal-heading">
               <div><span>{selectedRecord.id} · {selectedRecord.status}</span><h2 id="guardian-review-title">{selectedRecord.type} for {selectedRecord.member}</h2></div>
