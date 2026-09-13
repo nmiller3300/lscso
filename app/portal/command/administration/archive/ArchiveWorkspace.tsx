@@ -66,16 +66,16 @@ export function ArchiveWorkspace({ records, editing }: { records: ArchiveRow[]; 
             </label>
           </div>
 
-          <label>Archive summary
-            <textarea name="summary" rows={3} defaultValue={editing?.summary ?? ""} />
+          <label>Archive summary / public index summary
+            <textarea name="summary" rows={3} defaultValue={editing?.summary ?? ""} placeholder="Short description safe to show in the public archive index. For Sealed records, do not place confidential detail here." />
           </label>
 
           <label>Public record text
-            <textarea name="public_body" rows={10} defaultValue={(editing?.public_body ?? []).join("\n\n")} placeholder="Separate paragraphs with a blank line. Use {{REDACTED}} where the public copy should visibly redact material." />
+            <textarea name="public_body" rows={10} defaultValue={(editing?.public_body ?? []).join("\n\n")} placeholder="Separate paragraphs with a blank line. Use {{REDACTED}} where a Public or Partially Released copy should visibly redact material. This field is discarded when Release status is Sealed." />
           </label>
 
           <label>Internal archive notes
-            <textarea name="internal_notes" rows={5} defaultValue={editing?.internal_notes ?? ""} placeholder="Executive-only notes. This field is not granted to the public role." />
+            <textarea name="internal_notes" rows={5} defaultValue={editing?.internal_notes ?? ""} placeholder="Executive-only notes and confidential detail. This field is never exposed to the public archive reader." />
           </label>
 
           <p className="archive-admin-owner-note">Use Administration for shared Miller–White records, Sheriff for Sheriff Miller’s leadership file, or Undersheriff for Undersheriff White’s leadership file.</p>
@@ -83,10 +83,11 @@ export function ArchiveWorkspace({ records, editing }: { records: ArchiveRow[]; 
           <div className="archive-admin-actions">
             <button className="portal-button portal-button--primary" type="submit">{editing ? "Save Changes" : "Add to Archive"}</button>
             {editing ? <Link className="portal-button portal-button--secondary" href="/portal/command/administration/archive">Cancel Edit</Link> : null}
+            <Link className="portal-button portal-button--secondary" href="/archives">Open Public Archive</Link>
           </div>
         </form>
 
-        <p className="archive-admin-section-note">A Sealed record exposes only its index existence in the public experience. Draft and Internal records remain completely absent from public archive queries. Released records must be withdrawn back to Draft or Internal before they can be removed.</p>
+        <p className="archive-admin-section-note">A Sealed record exposes only its public index information; its public record body is discarded when saved. Keep confidential detail in Internal archive notes. Draft and Internal records remain completely absent from public archive queries. Released records must be withdrawn back to Draft or Internal before they can be removed.</p>
       </section>
 
       <aside className="portal-panel">
