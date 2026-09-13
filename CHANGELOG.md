@@ -9,6 +9,38 @@ This file is the authoritative development history for the Los Santos County She
 - Historical entries from August 20 through September 11, 2026 were backfilled from the repository commit history and database migrations. Temporary implementation churn and immediately reverted experiments are summarized by the meaningful final behavior rather than copied as raw Git noise.
 - Git remains the forensic commit-level record. This changelog records the lasting system capability and behavior people actually need to understand.
 
+## 2026-09-13
+
+### Added
+- **Public Site — Historical Records & Archives**: Added the immersive `/archives` experience with a physical lamp entrance, dark-to-lit archive reveal, institutional shelving, three navigable record stacks, and dedicated historical collection browsing rather than a conventional index page.
+- **Historical Archives — Prior Administration Collections**: Added deep canonical archive holdings for the McCall–Bell, Vance–Cole, Hale–Navarro, Mercer–Whitaker, and Rourke–Ellison administrations, including leadership history, criminal-organization dossiers, operations and stings, cold cases, Internal Affairs and professional-standards records, achievements, correspondence, sealed indexes, and partially released/redacted material.
+- **Historical Archives — Photos & Artifacts Holdings**: Added accessioned photographs and physical-artifact records for each prior administration, including command portraits, duty ledgers, patrol and radio equipment, maps, training/contact sheets, evidence-media holdings, command binders, and executive-transition artifacts.
+- **Administration — Living Miller–White Archive**: Added a Sheriff/Undersheriff-only Historical Archive Administration workspace for creating and maintaining current-administration records as RP history develops instead of hardcoding the active administration.
+- **Living Archive — Release States**: Added Draft, Internal, Public, Partially Released, and Sealed archive states, plus Administration/Sheriff/Undersheriff ownership, archive folders, record codes, public summaries, public record text, redaction markers, stamps/statuses, and executive-only internal notes.
+- **Historical Archives — Current Administration Integration**: Integrated released Miller–White records directly into the same immersive archive room and folder/index experience used by prior administrations.
+
+### Changed
+- **Historical Archives — Desktop and Mobile Spatial Navigation**: Expanded the archive from a single cramped shelf wall into Executive Records, Investigations & Operations, and Cold Case & Professional Standards stacks with previous/next controls, desktop keyboard navigation, mobile swipe navigation, vertical mobile depth, and more visual aisle space around shelving.
+- **Historical Archives — Era Presentation**: Added era-sensitive record and artifact presentation so early administrations read as older institutional holdings while later collections progressively reflect modern records, media, and preservation practices.
+- **Historical Archives — Collection Depth**: Expanded prior-administration folders from shallow one-file demonstrations into multi-record collections with cross-era institutional continuity and realistic mixtures of routine, investigative, executive, accountability, and restricted holdings.
+- **Living Archive — Publication History**: Preserved the original publication timestamp when released Miller–White records are edited instead of silently treating every edit as a new publication.
+
+### Fixed
+- **Historical Archives — Mobile Stack Isolation**: Fixed mobile/Safari compositing that allowed neighboring archive stacks and case labels to bleed through one another or appear before the lamp was turned on.
+- **Historical Archives — Mobile Scrolling and Composition**: Removed the locked single-viewport feel, restored vertical movement through the lit archive, reduced entrance-copy/lamp competition, and made the archive room the primary composition after entry.
+- **Historical Archives — Interaction Integrity**: Audited archive controls so visual buttons correspond to working actions while ambient archive cartons remain clearly non-interactive; added Escape/back behavior for opened collections.
+- **Historical Archives — Prototype Cleanup**: Removed the superseded first archive component, obsolete released-holdings link treatment, and duplicate standalone current-administration archive route after the living archive was integrated into the main experience.
+
+### Security
+- **Living Archive — Executive Write Authority**: Restricted current-administration archive management to active/acting Sheriff or Undersheriff authority through server checks and database RLS, while retaining audit logging for archive mutations.
+- **Living Archive — Internal Notes Separation**: Kept executive internal notes outside public-reader privileges and separated public-release copy from management-only archive context.
+- **Living Archive — Sealed Record Guardrails**: Changed Sealed saves so public-body text is discarded and only public index information is eligible for display; staged a hardened public-reader migration that masks sealed contents at the database/API boundary and removes direct public table reads.
+- **Living Archive — Release Removal Guardrail**: Prevented released records from being deleted until they are deliberately withdrawn to Draft or Internal status.
+
+### Operations
+- **Historical Archives — Migration Ledger Alignment**: Reconciled archive migration files with the migration versions actually applied to the LSCSO Supabase project and staged one forward-only public-reader hardening migration for production rollout.
+- **Historical Archives — Release Candidate Isolation**: Kept the complete archive development on the isolated `archive-entrance-stage-1` branch so the public production branch remains unchanged until final rollout authorization.
+
 ## 2026-09-12
 
 ### Added
