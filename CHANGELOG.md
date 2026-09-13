@@ -18,12 +18,18 @@ This file is the authoritative development history for the Los Santos County She
 - **Administration — Living Miller–White Archive**: Added a Sheriff/Undersheriff-only Historical Archive Administration workspace for creating and maintaining current-administration records as RP history develops instead of hardcoding the active administration.
 - **Living Archive — Release States**: Added Draft, Internal, Public, Partially Released, and Sealed archive states, plus Administration/Sheriff/Undersheriff ownership, archive folders, record codes, public summaries, public record text, redaction markers, stamps/statuses, and executive-only internal notes.
 - **Historical Archives — Current Administration Integration**: Integrated released Miller–White records directly into the same immersive archive room and folder/index experience used by prior administrations.
+- **Personnel Portal — Circular Glowing Sign-In**: Replaced the legacy rectangular access console with an LSCSO-branded circular glass sign-in system using a moving conic glow ring, animated glass sheen, ambient halo motion, agency patch treatment, protected-system context, and responsive desktop/mobile composition while retaining the existing Supabase authentication workflow.
+- **Personnel Portal — Animated Password Eyes**: Added the approved animated cartoon-eye password visibility control, including open/closed eye states, periodic pupil movement, accessible show/hide semantics, and reduced-motion handling.
+- **Portal UI — Glass Blob Toggle**: Added a reusable accessible glass-blob switch and deployed it to reversible portal preferences including browser notifications and the Notification Center’s Unread-only filter.
+- **Personnel Portal — Coffee Break Easter Egg**: Added the interactive coffee-machine Easter egg with a real pour/steam animation, manual Coffee Break access on desktop and mobile, and an automatic once-per-night late-shift prompt between midnight and 5:00 AM Eastern using the message “Burning the midnight oil? Have a cup of joe.”
 
 ### Changed
 - **Historical Archives — Desktop and Mobile Spatial Navigation**: Expanded the archive from a single cramped shelf wall into Executive Records, Investigations & Operations, and Cold Case & Professional Standards stacks with previous/next controls, desktop keyboard navigation, mobile swipe navigation, vertical mobile depth, and more visual aisle space around shelving.
 - **Historical Archives — Era Presentation**: Added era-sensitive record and artifact presentation so early administrations read as older institutional holdings while later collections progressively reflect modern records, media, and preservation practices.
 - **Historical Archives — Collection Depth**: Expanded prior-administration folders from shallow one-file demonstrations into multi-record collections with cross-era institutional continuity and realistic mixtures of routine, investigative, executive, accountability, and restricted holdings.
 - **Living Archive — Publication History**: Preserved the original publication timestamp when released Miller–White records are edited instead of silently treating every edit as a new publication.
+- **Personnel Portal — Restrained Glass Surface System**: Rolled the LSCSO glass treatment into selected Command task cards, attention summaries, dashboard metrics, notification/action cards, Administration access panels, maintenance-scope cards, dialogs, and portal capability cards while keeping destructive and high-risk personnel controls visually sober.
+- **Personnel Portal — Mobile Sign-In Composition**: Reworked the mobile sign-in so the LSCSO brand field and watermark extend behind the circular login instead of ending at a hard horizontal seam, reduced the mobile submit action footprint, and retained the animated ring and password eyes without crowding the form.
 
 ### Fixed
 - **Historical Archives — Mobile Stack Isolation**: Fixed mobile/Safari compositing that allowed neighboring archive stacks and case labels to bleed through one another or appear before the lamp was turned on.
@@ -31,16 +37,20 @@ This file is the authoritative development history for the Los Santos County She
 - **Historical Archives — Interaction Integrity**: Audited archive controls so visual buttons correspond to working actions while ambient archive cartons remain clearly non-interactive; added Escape/back behavior for opened collections.
 - **Historical Archives — Stack Navigation Buttons**: Fixed the previous/next stack controls in mobile and WebKit in-app browsers by hardening their hit targets and handling touch/pen pointer activation directly.
 - **Historical Archives — Prototype Cleanup**: Removed the superseded first archive component, obsolete released-holdings link treatment, and duplicate standalone current-administration archive route after the living archive was integrated into the main experience.
+- **Personnel Portal — Coffee Dialog Interaction**: Hardened the coffee break modal with Escape-to-close, focus containment, background scroll locking, and focus restoration to the control that opened it so the Easter egg does not disrupt active portal work.
+- **Personnel Portal — UI Iteration Cleanup**: Consolidated one-off mobile login overrides into a single responsive stylesheet and removed superseded mobile composition files before release.
 
 ### Security
 - **Living Archive — Executive Write Authority**: Restricted current-administration archive management to active/acting Sheriff or Undersheriff authority through server checks and database RLS, while retaining audit logging for archive mutations.
 - **Living Archive — Internal Notes Separation**: Kept executive internal notes outside public-reader privileges and separated public-release copy from management-only archive context.
-- **Living Archive — Sealed Record Guardrails**: Changed Sealed saves so public-body text is discarded and only public index information is eligible for display; staged a hardened public-reader migration that masks sealed contents at the database/API boundary and removes direct public table reads.
+- **Living Archive — Sealed Record Guardrails**: Changed Sealed saves so public-body text is discarded and only public index information is eligible for display; applied the hardened public-reader database boundary that masks sealed contents and removes direct public table reads.
 - **Living Archive — Release Removal Guardrail**: Prevented released records from being deleted until they are deliberately withdrawn to Draft or Internal status.
+- **Personnel Portal — Authentication Preservation**: Kept username conversion, Supabase password authentication, active/deactivated personnel checks, current-session continuation, required password-change routing, and sign-in audit events intact while replacing the visible login system.
 
 ### Operations
-- **Historical Archives — Migration Ledger Alignment**: Reconciled archive migration files with the migration versions actually applied to the LSCSO Supabase project and staged one forward-only public-reader hardening migration for production rollout.
-- **Historical Archives — Release Candidate Isolation**: Kept the complete archive development on the isolated `archive-entrance-stage-1` branch so the public production branch remains unchanged until final rollout authorization.
+- **Historical Archives — Migration Ledger Alignment**: Reconciled archive migration files with the migration versions actually applied to the LSCSO Supabase project and applied the forward-only public-reader hardening migration during the production rollout.
+- **Historical Archives — Production Release**: Released the completed Historical Records & Archives experience to production, exposed Historical Archives from the public site footer, and retained the Sheriff/Undersheriff living-archive Administration workflow.
+- **Personnel Portal — UI Upgrade Isolation**: Kept the glowing login, glass surfaces/toggles, password eyes, and coffee-break interaction on the isolated preview branch pending final authenticated smoke testing and production authorization.
 
 ## 2026-09-12
 
