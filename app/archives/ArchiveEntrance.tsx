@@ -2,8 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useRef, useState } from "react";
+import { Fragment, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent } from "react";
+import {
+  archiveCollections,
+  archiveFolders,
+  getArchiveCollection,
+  type ArchiveFolder,
+  type ArchiveRecord,
+} from "./archive-canon";
+import { sealedArchiveRecords } from "./archive-sealed";
 import "./archives.css";
 
 type PullState = {
@@ -11,34 +19,25 @@ type PullState = {
   y: number;
 };
 
-type Administration = {
-  sheriff: string;
-  undersheriff: string;
-  years: string;
+type RoomBay = 0 | 1 | 2;
+
+type ShelfShortcut = {
   slug: string;
-};
-
-type FolderKey = "executive" | "founding" | "orders" | "photographs";
-
-type FolderRecord = {
-  key: FolderKey;
+  recordId: string;
   label: string;
-  fileNumber: string;
-  title: string;
   years: string;
-  body: string;
-  footer: string;
-  available: boolean;
+  marker: string;
 };
 
-const administrations: Administration[] = [
-  { sheriff: "Warren McCall", undersheriff: "Arthur Bell", years: "1963–1978", slug: "mccall-bell" },
-  { sheriff: "Elena Vance", undersheriff: "Raymond Cole", years: "1978–1994", slug: "vance-cole" },
-  { sheriff: "Robert Hale", undersheriff: "Teresa Navarro", years: "1994–2009", slug: "hale-navarro" },
-  { sheriff: "Daniel Mercer", undersheriff: "James Whitaker", years: "2009–2021", slug: "mercer-whitaker" },
-  { sheriff: "Thomas Rourke", undersheriff: "Marcus Ellison", years: "2021–2026", slug: "rourke-ellison" },
-  { sheriff: "Nicholas Miller", undersheriff: "Michael White", years: "2026–Present", slug: "miller-white" },
-];
+const currentAdministration = {
+  slug: "miller-white",
+  sheriff: "Nicholas Miller",
+  undersheriff: "Michael White",
+  years: "2026–Present",
+  descriptor: "Active Administration",
+};
+
+const administrations = [...archiveCollections, currentAdministration];
 
 const ambientBoxes = [
   "PATROL RECORDS",
@@ -51,71 +50,79 @@ const ambientBoxes = [
   "COUNTY SERVICE FILES",
 ];
 
-const mccallBellFolders: FolderRecord[] = [
-  {
-    key: "executive",
-    label: "Executive File",
-    fileNumber: "EXECUTIVE FILE · FOUNDING ADMINISTRATION",
-    title: "Warren McCall / Arthur Bell",
-    years: "1963–1978",
-    body:
-      "The McCall–Bell administration established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization in 1963. The pair organized the first unified patrol structure, created a formal chain of command, opened the Office’s original headquarters, and established early standards for report writing, prisoner handling, and countywide calls for service as Los Santos County began a period of rapid growth.",
-    footer: "Permanent Historical Retention",
-    available: true,
-  },
-  {
-    key: "founding",
-    label: "Founding Records",
-    fileNumber: "FOUNDING RECORD · ORGANIZATIONAL ESTABLISHMENT",
-    title: "Establishment of the Sheriff’s Office",
-    years: "1963",
-    body:
-      "In 1963, Sheriff Warren McCall and Undersheriff Arthur Bell established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization. Their administration organized the Office’s first unified patrol structure, created a formal chain of command, and opened the original headquarters.",
-    footer: "Office Formation Record",
-    available: true,
-  },
-  {
-    key: "orders",
-    label: "Administrative Orders",
-    fileNumber: "ADMINISTRATIVE ORDERS · EARLY OPERATING STANDARDS",
-    title: "Early Department Standards",
-    years: "1963–1978",
-    body:
-      "During the McCall–Bell administration, the Sheriff’s Office established early operating standards for report writing, prisoner handling, and countywide calls for service. These standards were developed as Los Santos County entered a period of rapid growth and the new Office assumed a broader countywide service role.",
-    footer: "Executive Administrative Series",
-    available: true,
-  },
-  {
-    key: "photographs",
-    label: "Photographs",
-    fileNumber: "PHOTOGRAPHIC HOLDINGS · COLLECTION INDEX",
-    title: "Photographic Materials",
-    years: "1963–1978",
-    body:
-      "Photographic holdings for the founding administration remain under archival cataloging. Individual materials will be released to this collection only after historical review and identification are complete.",
-    footer: "Cataloging in Progress",
-    available: false,
-  },
+const investigationShortcuts: ShelfShortcut[] = [
+  { slug: "mccall-bell", recordId: "operation-iron-range", label: "Operation Iron Range", years: "1969–1971", marker: "OP-IR-69" },
+  { slug: "vance-cole", recordId: "operation-streetlight", label: "Operation Streetlight", years: "1986–1988", marker: "OP-ST-86" },
+  { slug: "hale-navarro", recordId: "operation-cold-harbor", label: "Operation Cold Harbor", years: "1999–2003", marker: "OP-CH-99" },
+  { slug: "mercer-whitaker", recordId: "operation-glass-ledger", label: "Operation Glass Ledger", years: "2012–2014", marker: "OP-GL-12" },
+  { slug: "rourke-ellison", recordId: "operation-canyon-watch", label: "Operation Canyon Watch", years: "2022–2023", marker: "OP-CW-22" },
+  { slug: "hale-navarro", recordId: "blackwater-group-dossier", label: "Blackwater Group", years: "1997–2004", marker: "ORG-98-009" },
 ];
+
+const standardsShortcuts: ShelfShortcut[] = [
+  { slug: "mccall-bell", recordId: "dry-creek-file", label: "Dry Creek Disappearance", years: "1972", marker: "CC-72-031" },
+  { slug: "vance-cole", recordId: "route-nine-cold-case", label: "Route Nine Courier", years: "1987", marker: "CC-87-044" },
+  { slug: "hale-navarro", recordId: "transfer-yard-seven", label: "Transfer Yard Seven", years: "1997", marker: "CC-97-062" },
+  { slug: "mercer-whitaker", recordId: "warehouse-41", label: "Warehouse 41", years: "2011", marker: "CC-11-028" },
+  { slug: "rourke-ellison", recordId: "route-68-night-run", label: "Route 68 Night Run", years: "2022", marker: "CC-22-019" },
+  { slug: "mccall-bell", recordId: "property-room-review", label: "Property Room Ledger Review", years: "1973–1974", marker: "IA-73-006" },
+  { slug: "hale-navarro", recordId: "evidence-room-three-audit", label: "Evidence Room Three Audit", years: "2001", marker: "IA-01-019" },
+  { slug: "rourke-ellison", recordId: "division-consistency-review", label: "Division Consistency Review", years: "2021–2022", marker: "IA-21-003" },
+];
+
+const roomBayLabels = [
+  { stack: "STACK A", title: "Executive Records", detail: "Sheriff & Undersheriff administrations" },
+  { stack: "STACK B", title: "Investigations & Operations", detail: "Organized crime, stings & major cases" },
+  { stack: "STACK C", title: "Cold Case & Standards", detail: "Cold cases, internal review & accountability" },
+] as const;
+
+const currentAdministrationSummary =
+  "The Miller–White administration is focused on building a modern Sheriff’s Office without losing the practical traditions that shaped LSCSO. Current priorities include professional accountability, stronger personnel development, clearly defined supervisory authority, accessible command systems, and consistent standards across every division. The administration continues to expand the Office’s operational structure while emphasizing judgment, leadership, service, and trust at every level of the organization.";
+
+function recordsForCollection(slug: string | null): ArchiveRecord[] {
+  if (!slug) return [];
+  const collection = getArchiveCollection(slug);
+  if (!collection) return [];
+  return [...collection.records, ...(sealedArchiveRecords[slug] ?? [])];
+}
+
+function RedactedText({ text }: { text: string }) {
+  const pieces = text.split("{{REDACTED}}");
+
+  return (
+    <>
+      {pieces.map((piece, index) => (
+        <Fragment key={`${piece.slice(0, 18)}-${index}`}>
+          {piece}
+          {index < pieces.length - 1 ? (
+            <span className="archive-redaction" role="img" aria-label="Redacted information">
+              <span aria-hidden="true">REDACTED MATERIAL</span>
+            </span>
+          ) : null}
+        </Fragment>
+      ))}
+    </>
+  );
+}
 
 export function ArchiveEntrance() {
   const [lightsOn, setLightsOn] = useState(false);
   const [pull, setPull] = useState<PullState>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
+  const [roomBay, setRoomBay] = useState<RoomBay>(0);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
-  const [selectedFolder, setSelectedFolder] = useState<FolderKey>("executive");
+  const [selectedFolder, setSelectedFolder] = useState<ArchiveFolder>("Leadership");
+  const [selectedRecordId, setSelectedRecordId] = useState<string | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
 
-  const shelfBoxes = useMemo(() => {
-    return administrations.map((administration, index) => ({
-      ...administration,
-      number: String(index + 1).padStart(2, "0"),
-    }));
-  }, []);
-
-  const collectionOpen = selectedCollection === "mccall-bell";
-  const activeRecord = mccallBellFolders.find((folder) => folder.key === selectedFolder) ?? mccallBellFolders[0];
+  const collectionOpen = selectedCollection !== null;
+  const currentCollectionOpen = selectedCollection === "miller-white";
+  const historicalCollection = getArchiveCollection(selectedCollection);
+  const collectionRecords = recordsForCollection(selectedCollection);
+  const folderRecords = collectionRecords.filter((record) => record.folder === selectedFolder);
+  const activeRecord =
+    folderRecords.find((record) => record.id === selectedRecordId) ?? folderRecords[0] ?? collectionRecords[0] ?? null;
 
   const toggleLights = () => {
     if (collectionOpen) return;
@@ -161,47 +168,74 @@ export function ArchiveEntrance() {
     }
   };
 
-  const openMcCallBell = () => {
+  const openCollection = (slug: string) => {
     if (!lightsOn) return;
-    setSelectedFolder("executive");
-    setSelectedCollection("mccall-bell");
+    const records = recordsForCollection(slug);
+    const firstFolder = records[0]?.folder ?? "Leadership";
+    setSelectedFolder(firstFolder);
+    setSelectedRecordId(records[0]?.id ?? null);
+    setSelectedCollection(slug);
   };
 
-  const renderAdministrationBox = (administration: (typeof shelfBoxes)[number]) => {
-    const content = (
-      <>
+  const openRecordLocation = (slug: string, recordId: string) => {
+    if (!lightsOn) return;
+    const record = recordsForCollection(slug).find((item) => item.id === recordId);
+    if (!record) return;
+    setSelectedFolder(record.folder);
+    setSelectedRecordId(record.id);
+    setSelectedCollection(slug);
+  };
+
+  const closeCollection = () => {
+    setSelectedCollection(null);
+    setSelectedRecordId(null);
+  };
+
+  const chooseFolder = (folder: ArchiveFolder) => {
+    const nextRecords = collectionRecords.filter((record) => record.folder === folder);
+    setSelectedFolder(folder);
+    setSelectedRecordId(nextRecords[0]?.id ?? null);
+  };
+
+  const moveBay = (direction: -1 | 1) => {
+    setRoomBay((current) => Math.max(0, Math.min(2, current + direction)) as RoomBay);
+  };
+
+  const renderAdministrationBox = (administration: (typeof administrations)[number], index: number) => {
+    const current = administration.slug === "miller-white";
+    return (
+      <button
+        className={`archive-box archive-box--administration archive-box--available ${current ? "archive-box--active-admin" : ""}`}
+        type="button"
+        key={administration.slug}
+        onClick={() => openCollection(administration.slug)}
+        aria-label={`Open the ${administration.sheriff} and ${administration.undersheriff} administration archive`}
+        disabled={!lightsOn}
+      >
         <div className="archive-box-lid" />
-        <div className="archive-box-corner-sticker" aria-hidden="true">{administration.number}</div>
+        <div className="archive-box-corner-sticker" aria-hidden="true">{String(index + 1).padStart(2, "0")}</div>
         <div className="archive-box-label">
-          <span>Office of the Sheriff · Box {administration.number}</span>
+          <span>Office of the Sheriff · Box {String(index + 1).padStart(2, "0")}</span>
           <strong>{administration.sheriff} / {administration.undersheriff}</strong>
           <small>{administration.years}</small>
-          {administration.slug === "mccall-bell" ? <em>Available for historical review</em> : null}
+          <em>{current ? "Active records · archival transfer pending" : "Available for historical review"}</em>
         </div>
-      </>
-    );
-
-    if (administration.slug === "mccall-bell") {
-      return (
-        <button
-          className="archive-box archive-box--administration archive-box--available"
-          type="button"
-          key={administration.slug}
-          onClick={openMcCallBell}
-          aria-label="Open the Warren McCall and Arthur Bell administration archive"
-          disabled={!lightsOn}
-        >
-          {content}
-        </button>
-      );
-    }
-
-    return (
-      <article className="archive-box archive-box--administration" key={administration.slug}>
-        {content}
-      </article>
+      </button>
     );
   };
+
+  const renderShortcutBox = (shortcut: ShelfShortcut, index: number) => (
+    <button
+      className={`archive-case-box archive-case-box--tone-${(index % 3) + 1}`}
+      key={`${shortcut.slug}-${shortcut.recordId}`}
+      type="button"
+      onClick={() => openRecordLocation(shortcut.slug, shortcut.recordId)}
+    >
+      <span>{shortcut.marker}</span>
+      <strong>{shortcut.label}</strong>
+      <small>{shortcut.years}</small>
+    </button>
+  );
 
   return (
     <div className={`archive-experience ${lightsOn ? "is-lit" : "is-dark"} ${collectionOpen ? "is-collection-open" : ""}`}>
@@ -232,41 +266,86 @@ export function ArchiveEntrance() {
           </div>
         </div>
 
-        <section className="archive-shelf-wall" aria-label="Sheriff's Office historical collections">
-          <div className="archive-shelf-id" aria-hidden="true">
-            <span>STACK A</span>
-            <span>EXECUTIVE RECORDS</span>
-          </div>
-
-          <div className="archive-shelf-row archive-shelf-row--ambient">
-            {ambientBoxes.slice(0, 4).map((label, index) => (
-              <div className={`archive-box archive-box--ambient archive-box--tone-${(index % 3) + 1}`} key={label}>
-                <span>{label}</span>
+        <div
+          className="archive-bay-track"
+          style={{ transform: `translate3d(-${roomBay * 100}vw, 0, 0)` }}
+        >
+          <section className="archive-bay archive-bay--executive" aria-label="Executive records stack">
+            <section className="archive-shelf-wall archive-shelf-wall--bay">
+              <div className="archive-shelf-id" aria-hidden="true">
+                <span>STACK A</span>
+                <span>EXECUTIVE RECORDS</span>
               </div>
-            ))}
-          </div>
 
-          <div className="archive-shelf-row archive-shelf-row--administrations">
-            {shelfBoxes.slice(0, 3).map(renderAdministrationBox)}
-          </div>
-
-          <div className="archive-shelf-row archive-shelf-row--administrations archive-shelf-row--lower">
-            {shelfBoxes.slice(3).map(renderAdministrationBox)}
-          </div>
-
-          <div className="archive-shelf-row archive-shelf-row--ambient archive-shelf-row--bottom">
-            {ambientBoxes.slice(4).map((label, index) => (
-              <div className={`archive-box archive-box--ambient archive-box--tone-${((index + 1) % 3) + 1}`} key={label}>
-                <span>{label}</span>
+              <div className="archive-shelf-row archive-shelf-row--ambient">
+                {ambientBoxes.slice(0, 4).map((label, index) => (
+                  <div className={`archive-box archive-box--ambient archive-box--tone-${(index % 3) + 1}`} key={label}>
+                    <span>{label}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
 
-        <div className="archive-mobile-depth" aria-hidden="true">
-          <span>STACK A · LOWER RECORDS</span>
-          <strong>EXECUTIVE ARCHIVE</strong>
-          <small>Continue through the collection</small>
+              <div className="archive-shelf-row archive-shelf-row--administrations">
+                {administrations.slice(0, 3).map(renderAdministrationBox)}
+              </div>
+
+              <div className="archive-shelf-row archive-shelf-row--administrations archive-shelf-row--lower">
+                {administrations.slice(3).map((administration, index) => renderAdministrationBox(administration, index + 3))}
+              </div>
+
+              <div className="archive-shelf-row archive-shelf-row--ambient archive-shelf-row--bottom">
+                {ambientBoxes.slice(4).map((label, index) => (
+                  <div className={`archive-box archive-box--ambient archive-box--tone-${((index + 1) % 3) + 1}`} key={label}>
+                    <span>{label}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </section>
+
+          <section className="archive-bay archive-bay--investigations" aria-label="Investigations and operations stack">
+            <section className="archive-case-shelf archive-case-shelf--operations">
+              <div className="archive-shelf-id" aria-hidden="true">
+                <span>STACK B</span>
+                <span>INVESTIGATIONS &amp; OPERATIONS</span>
+              </div>
+              <div className="archive-case-shelf-heading">
+                <small>Major case holdings</small>
+                <strong>Organized Crime / Special Operations</strong>
+                <span>Selected public-release case cartons</span>
+              </div>
+              <div className="archive-case-grid">
+                {investigationShortcuts.map(renderShortcutBox)}
+              </div>
+              <div className="archive-case-shelf-lower" aria-hidden="true">
+                <span>INTELLIGENCE INDEX</span>
+                <span>SURVEILLANCE LOGS</span>
+                <span>WARRANT RETURNS</span>
+                <span>AFTER-ACTION REPORTS</span>
+              </div>
+            </section>
+          </section>
+
+          <section className="archive-bay archive-bay--standards" aria-label="Cold case and professional standards stack">
+            <section className="archive-case-shelf archive-case-shelf--standards">
+              <div className="archive-shelf-id" aria-hidden="true">
+                <span>STACK C</span>
+                <span>COLD CASE &amp; PROFESSIONAL STANDARDS</span>
+              </div>
+              <div className="archive-case-shelf-heading">
+                <small>Restricted historical holdings</small>
+                <strong>Cold Case / Internal Review</strong>
+                <span>Released indexes and historical review copies</span>
+              </div>
+              <div className="archive-case-grid archive-case-grid--dense">
+                {standardsShortcuts.map(renderShortcutBox)}
+              </div>
+              <div className="archive-sealed-cartons" aria-hidden="true">
+                <span>SEALED PERSONNEL APPENDICES</span>
+                <span>CONFIDENTIAL SOURCE REGISTERS</span>
+              </div>
+            </section>
+          </section>
         </div>
 
         <div className="archive-room-floor" aria-hidden="true" />
@@ -280,7 +359,7 @@ export function ArchiveEntrance() {
         <h1>Historical Records<br />&amp; Archives</h1>
         <p>
           {lightsOn
-            ? "Archive lighting active. Select a historical collection to begin review."
+            ? "Archive lighting active. Move between record stacks or select a historical collection."
             : "Pull the lamp chain to enter the Sheriff’s Office historical archives."}
         </p>
       </div>
@@ -329,83 +408,204 @@ export function ArchiveEntrance() {
         </div>
       </div>
 
+      {lightsOn && !collectionOpen ? (
+        <nav className="archive-room-nav" aria-label="Archive room stacks">
+          <button type="button" onClick={() => moveBay(-1)} disabled={roomBay === 0} aria-label="Previous archive stack">
+            <span aria-hidden="true">←</span>
+            <small>Previous</small>
+          </button>
+          <div>
+            <span>{roomBayLabels[roomBay].stack}</span>
+            <strong>{roomBayLabels[roomBay].title}</strong>
+            <small>{roomBayLabels[roomBay].detail}</small>
+          </div>
+          <button type="button" onClick={() => moveBay(1)} disabled={roomBay === 2} aria-label="Next archive stack">
+            <small>Next</small>
+            <span aria-hidden="true">→</span>
+          </button>
+        </nav>
+      ) : null}
+
       <div className="archive-status" aria-hidden="true">
         <span className={lightsOn ? "archive-status-dot is-on" : "archive-status-dot"} />
         {lightsOn ? "ARCHIVE LIGHTING — ON" : "ARCHIVE LIGHTING — OFF"}
       </div>
 
       {collectionOpen ? (
-        <section className="archive-collection-focus" role="dialog" aria-modal="true" aria-labelledby="mccall-bell-title">
-          <button
-            className="archive-collection-close"
-            type="button"
-            onClick={() => setSelectedCollection(null)}
-          >
+        <section className="archive-collection-focus" role="dialog" aria-modal="true" aria-labelledby="archive-collection-title">
+          <button className="archive-collection-close" type="button" onClick={closeCollection}>
             <span aria-hidden="true">←</span>
-            Back to shelves
+            Back to room
           </button>
 
-          <div className="archive-collection-meta">
-            <span>Office of the Sheriff</span>
-            <strong id="mccall-bell-title">McCall–Bell Administration</strong>
-            <small>1963–1978 · Founding Administration</small>
-          </div>
-
-          <div className="archive-worktable" aria-label="McCall Bell administration archive box">
-            <div className="archive-open-box">
-              <div className="archive-open-box-lid" aria-hidden="true" />
-              <div className="archive-open-box-back" aria-hidden="true" />
-              <div className="archive-folder-stack" aria-label="Archive folders">
-                {mccallBellFolders.map((folder, index) => (
-                  <button
-                    className={`archive-folder archive-folder--${index + 1} ${selectedFolder === folder.key ? "is-selected" : ""}`}
-                    key={folder.key}
-                    type="button"
-                    onClick={() => {
-                      if (folder.available) setSelectedFolder(folder.key);
-                    }}
-                    disabled={!folder.available}
-                    aria-pressed={selectedFolder === folder.key}
-                  >
-                    <span>{folder.label}</span>
-                    {!folder.available ? <small>Cataloging</small> : null}
-                  </button>
-                ))}
-              </div>
-              <div className="archive-open-box-front">
-                <span>Los Santos County Sheriff&apos;s Office</span>
-                <strong>McCall / Bell</strong>
-                <small>Executive Records · 1963–1978</small>
-              </div>
-            </div>
-
-            <article className="archive-record-sheet" key={activeRecord.key}>
-              <div className="archive-record-accession" aria-hidden="true">
-                <span>RG-01</span>
-                <strong>BOX 01</strong>
-                <small>PERM.</small>
+          {currentCollectionOpen ? (
+            <>
+              <div className="archive-collection-meta">
+                <span>Office of the Sheriff · Active Records</span>
+                <strong id="archive-collection-title">Miller–White Administration</strong>
+                <small>2026–Present · Active Administration</small>
               </div>
 
-              <div className="archive-record-letterhead">
-                <Image src="/images/lscso-patch-subdued.png" alt="" width={54} height={54} />
-                <div>
-                  <span>Los Santos County Sheriff&apos;s Office</span>
-                  <strong>Office of the Sheriff — Historical Record</strong>
-                  <small>Public Historical Review Copy</small>
-                </div>
+              <div className="archive-current-administration">
+                <article className="archive-current-brief">
+                  <div className="archive-record-letterhead">
+                    <Image src="/images/lscso-patch-subdued.png" alt="" width={62} height={62} />
+                    <div>
+                      <span>Los Santos County Sheriff&apos;s Office</span>
+                      <strong>Active Executive Records</strong>
+                      <small>Historical transfer remains in progress</small>
+                    </div>
+                  </div>
+                  <h2>Current Administration Overview</h2>
+                  <p>{currentAdministrationSummary}</p>
+                  <div className="archive-active-stamp">ACTIVE RECORDS</div>
+                </article>
+
+                <aside className="archive-current-leadership">
+                  <p className="archive-current-kicker">Executive leadership files</p>
+                  <div>
+                    <span>S-401</span>
+                    <strong>Sheriff Nicholas Miller</strong>
+                    <small>2026–Present</small>
+                  </div>
+                  <div>
+                    <span>S-402</span>
+                    <strong>Undersheriff Michael White</strong>
+                    <small>2026–Present</small>
+                  </div>
+                  <p className="archive-current-note">
+                    Records from an active administration are transferred into public historical holdings following release, archival review, or closure. Current RP history will populate this collection over time.
+                  </p>
+                </aside>
+              </div>
+            </>
+          ) : historicalCollection ? (
+            <>
+              <div className="archive-collection-meta">
+                <span>Office of the Sheriff · Historical Collection</span>
+                <strong id="archive-collection-title">{historicalCollection.sheriff} / {historicalCollection.undersheriff}</strong>
+                <small>{historicalCollection.years} · {historicalCollection.descriptor} · {collectionRecords.length} indexed records</small>
               </div>
 
-              <div className="archive-record-rule" />
-              <p className="archive-record-file-number">{activeRecord.fileNumber}</p>
-              <h2>{activeRecord.title}</h2>
-              <p className="archive-record-years">{activeRecord.years}</p>
-              <p className="archive-record-summary">{activeRecord.body}</p>
-              <div className="archive-record-footer">
-                <span>{activeRecord.footer}</span>
-                <span>LSCSO Archives</span>
+              <div className="archive-deep-worktable">
+                <aside className="archive-folder-directory" aria-label="Archive folders">
+                  <div className="archive-directory-box-label">
+                    <span>Los Santos County Sheriff&apos;s Office</span>
+                    <strong>{historicalCollection.sheriff} / {historicalCollection.undersheriff}</strong>
+                    <small>{historicalCollection.years}</small>
+                  </div>
+                  {archiveFolders.map((folder) => {
+                    const count = collectionRecords.filter((record) => record.folder === folder).length;
+                    return (
+                      <button
+                        type="button"
+                        key={folder}
+                        className={selectedFolder === folder ? "is-selected" : ""}
+                        onClick={() => chooseFolder(folder)}
+                        disabled={count === 0}
+                      >
+                        <span>{folder}</span>
+                        <small>{count} {count === 1 ? "file" : "files"}</small>
+                      </button>
+                    );
+                  })}
+                </aside>
+
+                <section className="archive-record-index" aria-label={`${selectedFolder} file index`}>
+                  <div className="archive-index-heading">
+                    <span>{selectedFolder}</span>
+                    <strong>File Index</strong>
+                    <small>{folderRecords.length} indexed {folderRecords.length === 1 ? "record" : "records"}</small>
+                  </div>
+                  <div className="archive-index-list">
+                    {folderRecords.map((record) => (
+                      <button
+                        key={record.id}
+                        type="button"
+                        className={activeRecord?.id === record.id ? "is-selected" : ""}
+                        onClick={() => setSelectedRecordId(record.id)}
+                      >
+                        <span>{record.documentCode}</span>
+                        <strong>{record.title}</strong>
+                        <small>{record.dateLabel}</small>
+                        <em className={`archive-release archive-release--${record.release.toLowerCase().replaceAll(" ", "-")}`}>
+                          {record.release}
+                        </em>
+                      </button>
+                    ))}
+                  </div>
+                </section>
+
+                {activeRecord ? (
+                  activeRecord.release === "Sealed" ? (
+                    <article className="archive-record-sheet archive-record-sheet--sealed" key={activeRecord.id}>
+                      <div className="archive-sealed-index-card">
+                        <span>{activeRecord.documentCode}</span>
+                        <strong>SEALED RECORD</strong>
+                        <small>{activeRecord.dateLabel}</small>
+                      </div>
+                      <div className="archive-record-letterhead">
+                        <Image src="/images/lscso-patch-subdued.png" alt="" width={54} height={54} />
+                        <div>
+                          <span>Los Santos County Sheriff&apos;s Office</span>
+                          <strong>Historical Archive Index</strong>
+                          <small>Record existence acknowledged · contents restricted</small>
+                        </div>
+                      </div>
+                      <div className="archive-record-rule" />
+                      <p className="archive-record-file-number">{activeRecord.folder} · {activeRecord.documentCode}</p>
+                      <h2>{activeRecord.title}</h2>
+                      <p className="archive-record-years">{activeRecord.dateLabel}</p>
+                      <p className="archive-record-summary">{activeRecord.summary}</p>
+                      <div className="archive-sealed-notice">
+                        <strong>SEALED</strong>
+                        <p>The contents of this record are not available for public historical review. Only the archival index entry is released.</p>
+                      </div>
+                      <div className="archive-record-footer">
+                        <span>Restricted Historical Holding</span>
+                        <span>LSCSO Archives</span>
+                      </div>
+                    </article>
+                  ) : (
+                    <article className="archive-record-sheet" key={activeRecord.id}>
+                      <div className="archive-record-accession" aria-hidden="true">
+                        <span>{activeRecord.release === "Partially Released" ? "PARTIAL" : "PUBLIC"}</span>
+                        <strong>{activeRecord.documentCode}</strong>
+                        <small>{activeRecord.status ?? "ARCHIVE"}</small>
+                      </div>
+
+                      <div className="archive-record-letterhead">
+                        <Image src="/images/lscso-patch-subdued.png" alt="" width={54} height={54} />
+                        <div>
+                          <span>Los Santos County Sheriff&apos;s Office</span>
+                          <strong>Office of the Sheriff — Historical Record</strong>
+                          <small>{activeRecord.release === "Partially Released" ? "Public Release Copy · Redactions May Remain" : "Public Historical Review Copy"}</small>
+                        </div>
+                      </div>
+
+                      <div className="archive-record-rule" />
+                      <p className="archive-record-file-number">{activeRecord.folder} · {activeRecord.documentCode}</p>
+                      <h2>{activeRecord.title}</h2>
+                      <p className="archive-record-years">{activeRecord.dateLabel}{activeRecord.status ? ` · ${activeRecord.status}` : ""}</p>
+                      <p className="archive-record-deck">{activeRecord.summary}</p>
+                      <div className="archive-record-body">
+                        {activeRecord.body.map((paragraph, index) => (
+                          <p key={`${activeRecord.id}-${index}`}><RedactedText text={paragraph} /></p>
+                        ))}
+                      </div>
+                      {activeRecord.stamp ? <div className="archive-document-stamp">{activeRecord.stamp}</div> : null}
+                      <div className="archive-record-footer">
+                        <span>{activeRecord.release}</span>
+                        <span>LSCSO Archives</span>
+                      </div>
+                    </article>
+                  )
+                ) : (
+                  <div className="archive-empty-folder">No released records are indexed in this folder.</div>
+                )}
               </div>
-            </article>
-          </div>
+            </>
+          ) : null}
         </section>
       ) : null}
     </div>
