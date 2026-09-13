@@ -30,10 +30,10 @@ import "./training-operations.css";
 import "./personnel-directory-exports.css";
 import "./portal-ui-upgrades.css";
 import "./portal-ui-upgrades-2.css";
+import "./portal-ui-release-polish.css";
 import "./portal-glow-login.css";
 import "./portal-glow-login-polish.css";
-import "./portal-mobile-submit-polish.css";
-import "./portal-mobile-brand-overlap.css";
+import "./portal-glow-login-mobile.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
