@@ -33,6 +33,17 @@ async function requireArchiveAuthority() {
   return profile;
 }
 
+export async function loadArchiveRecords() {
+  await requireArchiveAuthority();
+  const supabase = await createClient() as any;
+  const { data, error } = await supabase
+    .from("current_administration_archive")
+    .select("id,record_owner,folder,document_code,title,date_label,release_status,status,stamp,summary,public_body,created_at,updated_at,published_at")
+    .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
+  return data ?? [];
+}
+
 export async function saveArchiveRecord(formData: FormData) {
   await requireArchiveAuthority();
   const id = text(formData, "id");
