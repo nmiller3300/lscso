@@ -86,7 +86,7 @@ export function ArchiveWorkspace({ records, editing }: { records: ArchiveRow[]; 
           </div>
         </form>
 
-        <p className="archive-admin-section-note">A Sealed record exposes only its index existence in the public experience. Draft and Internal records remain completely absent from public archive queries.</p>
+        <p className="archive-admin-section-note">A Sealed record exposes only its index existence in the public experience. Draft and Internal records remain completely absent from public archive queries. Released records must be withdrawn back to Draft or Internal before they can be removed.</p>
       </section>
 
       <aside className="portal-panel">
@@ -97,24 +97,29 @@ export function ArchiveWorkspace({ records, editing }: { records: ArchiveRow[]; 
 
         {records.length === 0 ? <div className="archive-admin-empty">No Miller–White historical records have been added yet.</div> : (
           <div className="archive-admin-list">
-            {records.map((record) => (
-              <article key={record.id} className={`archive-admin-record ${editing?.id === record.id ? "is-editing" : ""}`}>
-                <small>{record.folder} · {record.document_code}</small>
-                <strong>{record.title}</strong>
-                <p>{record.date_label}{record.status ? ` · ${record.status}` : ""}</p>
-                <span className={`archive-admin-release archive-admin-release--${record.release_status.toLowerCase().replaceAll(" ", "-")}`}>{record.release_status}</span>
-                <footer>
-                  <div>
-                    <Link className="portal-button portal-button--secondary" href={`/portal/command/administration/archive?edit=${record.id}`}>Edit</Link>
-                    <form action={removeArchiveRecord}>
-                      <input type="hidden" name="id" value={record.id} />
-                      <button className="portal-button portal-button--secondary archive-admin-danger" type="submit">Remove</button>
-                    </form>
-                  </div>
-                  <small>{record.record_owner}</small>
-                </footer>
-              </article>
-            ))}
+            {records.map((record) => {
+              const removable = record.release_status === "Draft" || record.release_status === "Internal";
+              return (
+                <article key={record.id} className={`archive-admin-record ${editing?.id === record.id ? "is-editing" : ""}`}>
+                  <small>{record.folder} · {record.document_code}</small>
+                  <strong>{record.title}</strong>
+                  <p>{record.date_label}{record.status ? ` · ${record.status}` : ""}</p>
+                  <span className={`archive-admin-release archive-admin-release--${record.release_status.toLowerCase().replaceAll(" ", "-")}`}>{record.release_status}</span>
+                  <footer>
+                    <div>
+                      <Link className="portal-button portal-button--secondary" href={`/portal/command/administration/archive?edit=${record.id}`}>Edit</Link>
+                      {removable ? (
+                        <form action={removeArchiveRecord}>
+                          <input type="hidden" name="id" value={record.id} />
+                          <button className="portal-button portal-button--secondary archive-admin-danger" type="submit">Remove</button>
+                        </form>
+                      ) : null}
+                    </div>
+                    <small>{record.record_owner}</small>
+                  </footer>
+                </article>
+              );
+            })}
           </div>
         )}
       </aside>
