@@ -1,0 +1,47 @@
+/*
+ * Folder hit-area hardening.
+ *
+ * The physical folder presentation intentionally overlaps folder faces. Raising
+ * the selected folder above every sibling also raises its entire rectangular
+ * hit box, which can sit invisibly over the exposed tabs of neighboring
+ * folders on touch browsers (especially iOS Safari). Keep the natural stack
+ * order so every exposed folder remains reachable after a selection.
+ */
+
+.archive-folder-directory > button:nth-of-type(1).is-selected { z-index: 28; }
+.archive-folder-directory > button:nth-of-type(2).is-selected { z-index: 27; }
+.archive-folder-directory > button:nth-of-type(3).is-selected { z-index: 26; }
+.archive-folder-directory > button:nth-of-type(4).is-selected { z-index: 25; }
+.archive-folder-directory > button:nth-of-type(5).is-selected { z-index: 24; }
+.archive-folder-directory > button:nth-of-type(6).is-selected { z-index: 23; }
+.archive-folder-directory > button:nth-of-type(7).is-selected { z-index: 22; }
+.archive-folder-directory > button:nth-of-type(8).is-selected { z-index: 21; }
+
+.archive-folder-directory::before {
+  pointer-events: none;
+}
+
+.archive-folder-directory > button {
+  touch-action: manipulation;
+}
+
+/* Touch browsers can keep :hover latched after a tap. Do not let that temporary
+ * visual state become a higher invisible hit layer over sibling folders. */
+@media (hover: none), (pointer: coarse) {
+  .archive-folder-directory > button:nth-of-type(1):hover,
+  .archive-folder-directory > button:nth-of-type(1):focus-visible { z-index: 28; }
+  .archive-folder-directory > button:nth-of-type(2):hover,
+  .archive-folder-directory > button:nth-of-type(2):focus-visible { z-index: 27; }
+  .archive-folder-directory > button:nth-of-type(3):hover,
+  .archive-folder-directory > button:nth-of-type(3):focus-visible { z-index: 26; }
+  .archive-folder-directory > button:nth-of-type(4):hover,
+  .archive-folder-directory > button:nth-of-type(4):focus-visible { z-index: 25; }
+  .archive-folder-directory > button:nth-of-type(5):hover,
+  .archive-folder-directory > button:nth-of-type(5):focus-visible { z-index: 24; }
+  .archive-folder-directory > button:nth-of-type(6):hover,
+  .archive-folder-directory > button:nth-of-type(6):focus-visible { z-index: 23; }
+  .archive-folder-directory > button:nth-of-type(7):hover,
+  .archive-folder-directory > button:nth-of-type(7):focus-visible { z-index: 22; }
+  .archive-folder-directory > button:nth-of-type(8):hover,
+  .archive-folder-directory > button:nth-of-type(8):focus-visible { z-index: 21; }
+}

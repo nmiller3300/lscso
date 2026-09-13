@@ -147,7 +147,7 @@ export function LateNightCoffee() {
     <div
       className="portal-coffee-overlay"
       role="presentation"
-      onMouseDown={(event) => {
+      onPointerDown={(event) => {
         if (event.target === event.currentTarget) closeCoffee();
       }}
     >

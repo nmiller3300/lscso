@@ -88,7 +88,7 @@ export function CommandApprovalQueue({ initialItems }: { initialItems: CommandAp
       </div>
 
       {selectedItem ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedItem(null); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setSelectedItem(null); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="request-review-title">
             <div className="portal-modal-heading">
               <div><span>{selectedItem.id} · {selectedItem.type}</span><h2 id="request-review-title">Review {selectedItem.subject}</h2></div>

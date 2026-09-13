@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "audit:portal": "node scripts/portal-static-audit.mjs"
+    "audit:portal": "node scripts/portal-static-audit.mjs",
+    "audit:responsive": "node scripts/responsive-static-audit.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "0.12.4",

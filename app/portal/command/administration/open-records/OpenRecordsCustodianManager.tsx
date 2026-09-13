@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PortalUploadProgressCard, type PortalUploadState } from "../../../_components/PortalUploadProgressCard";
 
 type ReleaseFile = { id: string; file_name: string; mime_type: string | null; size_bytes: number; uploaded_at: string };
 type RequestRow = {
@@ -18,6 +19,13 @@ type RequestRow = {
   releaseAvailableAt: string | null;
   releaseExpiresAt: string | null;
   files: ReleaseFile[];
+};
+
+type UploadView = {
+  state: PortalUploadState;
+  fileName: string;
+  fileSize: string;
+  progress: number | null;
 };
 
 const reviewStages = ["Under Initial Review", "Records Collection", "Redaction & Legal Review", "Ready for Release"];
@@ -41,6 +49,7 @@ export function OpenRecordsCustodianManager({ request }: { request: RequestRow }
   const [files, setFiles] = useState<ReleaseFile[]>(request.files);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
+  const [uploadView, setUploadView] = useState<UploadView>({ state: "idle", fileName: "", fileSize: "", progress: null });
 
   async function action(name: string, extra: Record<string, unknown> = {}) {
     setBusy(name);
@@ -67,18 +76,49 @@ export function OpenRecordsCustodianManager({ request }: { request: RequestRow }
     const file = event.target.files?.[0];
     event.target.value = "";
     if (!file) return;
+
+    const fileSize = bytes(file.size);
     setBusy("upload");
     setMessage("");
+    setUploadView({ state: "uploading", fileName: file.name, fileSize, progress: 0 });
+
     try {
       const form = new FormData();
       form.append("file", file);
-      const response = await fetch(`/api/portal/open-records/${encodeURIComponent(request.id)}/files`, { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "The release file could not be uploaded.");
+
+      const data = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("POST", `/api/portal/open-records/${encodeURIComponent(request.id)}/files`);
+        xhr.responseType = "json";
+
+        xhr.upload.addEventListener("progress", (progressEvent) => {
+          const progress = progressEvent.lengthComputable
+            ? (progressEvent.loaded / progressEvent.total) * 100
+            : null;
+          setUploadView((current) => ({ ...current, progress }));
+        });
+
+        xhr.addEventListener("load", () => {
+          const payload = xhr.response ?? (() => {
+            try { return JSON.parse(xhr.responseText); } catch { return {}; }
+          })();
+          if (xhr.status < 200 || xhr.status >= 300) {
+            reject(new Error(payload?.error || "The release file could not be uploaded."));
+            return;
+          }
+          resolve(payload);
+        });
+        xhr.addEventListener("error", () => reject(new Error("The release file could not be uploaded.")));
+        xhr.addEventListener("abort", () => reject(new Error("The release file upload was cancelled.")));
+        xhr.send(form);
+      });
+
       setFiles((current) => [...current, data.file]);
+      setUploadView({ state: "complete", fileName: file.name, fileSize, progress: 100 });
       setMessage("File uploaded");
       router.refresh();
     } catch (caught) {
+      setUploadView((current) => ({ ...current, state: "error" }));
       setMessage(caught instanceof Error ? caught.message : "The release file could not be uploaded.");
     } finally {
       setBusy("");
@@ -140,7 +180,8 @@ export function OpenRecordsCustodianManager({ request }: { request: RequestRow }
       <section className="open-records-custodian-section">
         <div><span>Step 4</span><strong>Stage approved release files</strong></div>
         <p className="command-v2-compact-copy">Files may be uploaded only after an assessed fee is paid or waived. Each file is limited to 25 MB and remains private until the custodian publishes the release.</p>
-        <label className={`portal-button portal-button--secondary open-records-upload-button ${!paymentReady || finalState ? "is-disabled" : ""}`}>Upload Release File<input type="file" disabled={!paymentReady || finalState || Boolean(busy)} onChange={(event) => void upload(event)} accept=".pdf,.jpg,.jpeg,.png,.txt,.csv,.zip,.docx,.xlsx" /></label>
+        <label className={`portal-button portal-button--secondary open-records-upload-button ${!paymentReady || finalState ? "is-disabled" : ""}`}>Select Release File<input type="file" disabled={!paymentReady || finalState || Boolean(busy)} onChange={(event) => void upload(event)} accept=".pdf,.jpg,.jpeg,.png,.txt,.csv,.zip,.docx,.xlsx" /></label>
+        <PortalUploadProgressCard state={uploadView.state} fileName={uploadView.fileName} fileSize={uploadView.fileSize} progress={uploadView.progress} label="ORR Release" />
         {files.length ? <div className="open-records-staged-files">{files.map((file) => <article key={file.id}><span><strong>{file.file_name}</strong><small>{file.mime_type || "File"} · {bytes(file.size_bytes)}</small></span><button type="button" disabled={Boolean(busy) || finalState} onClick={() => void removeFile(file.id)}>{busy === `delete-${file.id}` ? "Removing…" : "Remove"}</button></article>)}</div> : <div className="portal-empty-state"><strong>No release files staged.</strong><span>Upload the final redacted files that are approved for requester access.</span></div>}
       </section>
 

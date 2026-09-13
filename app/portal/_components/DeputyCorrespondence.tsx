@@ -29,7 +29,7 @@ export function DeputyCorrespondence({ letters }: { letters: Letter[] }) {
       </div>
 
       {selected ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelected(null); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setSelected(null); }}>
           <section className="portal-modal personnel-letter-modal" role="dialog" aria-modal="true" aria-labelledby="personnel-letter-title">
             <div className="portal-modal-heading"><div><span>Welcome Letter · {new Date(selected.sentAt).toLocaleDateString()}</span><h2 id="personnel-letter-title">{selected.subject}</h2></div><button onClick={() => setSelected(null)} type="button" aria-label="Close welcome letter">×</button></div>
             <div className="personnel-letter-body">{selected.body.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>

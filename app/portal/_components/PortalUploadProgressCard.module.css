@@ -1,0 +1,233 @@
+.card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+  margin-top: 14px;
+  padding: 18px 20px;
+  overflow: hidden;
+  border: 1px solid rgba(187, 164, 95, .28);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 8% 10%, rgba(187, 164, 95, .09), transparent 34%),
+    linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018));
+  box-shadow: inset 0 1px rgba(255,255,255,.08), 0 16px 34px rgba(0,0,0,.14);
+  backdrop-filter: blur(16px) saturate(1.06);
+  -webkit-backdrop-filter: blur(16px) saturate(1.06);
+}
+
+.card::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(118deg, rgba(255,255,255,.09), transparent 27%, transparent 72%, rgba(212,190,121,.04));
+  content: "";
+  pointer-events: none;
+}
+
+.folder {
+  position: relative;
+  width: 102px;
+  height: 76px;
+  perspective: 520px;
+  transform: rotate(-1.5deg);
+}
+
+.folderBack,
+.folderFront {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  border: 1px solid rgba(70, 54, 31, .5);
+  background: #a88950;
+  box-shadow: 0 8px 18px rgba(0,0,0,.2);
+}
+
+.folderBack {
+  height: 62px;
+  border-radius: 5px 8px 5px 5px;
+}
+
+.folderBack::before {
+  position: absolute;
+  top: -10px;
+  left: 8px;
+  width: 40px;
+  height: 12px;
+  border: inherit;
+  border-bottom: 0;
+  border-radius: 5px 7px 0 0;
+  background: #a88950;
+  content: "";
+}
+
+.paper {
+  position: absolute;
+  z-index: 2;
+  right: 9px;
+  bottom: 14px;
+  left: 9px;
+  height: 48px;
+  border: 1px solid rgba(73, 68, 58, .25);
+  background: #e9e2d1;
+  box-shadow: 0 4px 10px rgba(0,0,0,.15);
+  transform: translateY(-9px) rotate(.8deg);
+}
+
+.paper::before,
+.paper::after {
+  position: absolute;
+  left: 10px;
+  height: 1px;
+  background: rgba(70, 65, 54, .24);
+  content: "";
+}
+
+.paper::before { top: 15px; width: 55%; }
+.paper::after { top: 23px; width: 70%; }
+
+.folderFront {
+  z-index: 3;
+  height: 48px;
+  border-radius: 4px 4px 7px 7px;
+  background: linear-gradient(180deg, #b89a5c, #9c7e45);
+  transform-origin: bottom center;
+  transform: rotateX(-13deg);
+}
+
+.folder b {
+  position: absolute;
+  z-index: 4;
+  right: 12px;
+  bottom: 14px;
+  left: 12px;
+  padding: 5px 6px;
+  border: 1px solid rgba(60, 52, 39, .24);
+  background: rgba(234, 226, 207, .84);
+  color: rgba(52, 47, 39, .82);
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.uploading .paper {
+  animation: paperLift 1.55s ease-in-out infinite alternate;
+}
+
+.uploading .folderFront {
+  animation: folderBreathe 1.55s ease-in-out infinite alternate;
+}
+
+.body { min-width: 0; }
+
+.heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.statusLine {
+  min-width: 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.statusLine > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.statusLine strong {
+  color: var(--portal-text, #f8f5ec);
+  font-size: 13px;
+}
+
+.statusLine small {
+  overflow: hidden;
+  color: var(--portal-text-muted, rgba(255,255,255,.55));
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stateIcon {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 2px solid rgba(212,190,121,.22);
+  border-top-color: #d4be79;
+  border-radius: 999px;
+  color: #d4be79;
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.uploading .stateIcon { animation: spin .82s linear infinite; }
+.complete .stateIcon { border-color: rgba(135,167,118,.65); color: #b8d1a9; }
+.error .stateIcon { border-color: rgba(184,92,75,.62); color: #e0a397; }
+
+.percent {
+  flex: 0 0 auto;
+  color: #d4be79;
+  font-size: 15px;
+  font-weight: 760;
+  letter-spacing: -.02em;
+}
+
+.track {
+  position: relative;
+  height: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 999px;
+  background: rgba(255,255,255,.055);
+}
+
+.track > span {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8e7c45, #d4be79);
+  box-shadow: 0 0 18px rgba(187,164,95,.22);
+  transition: width 180ms linear;
+}
+
+.indeterminate > span {
+  width: 34%;
+  animation: indeterminate 1.1s ease-in-out infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes paperLift { to { transform: translateY(-14px) rotate(-.5deg); } }
+@keyframes folderBreathe { to { transform: rotateX(-22deg); } }
+@keyframes indeterminate { from { transform: translateX(-105%); } to { transform: translateX(305%); } }
+
+@media (max-width: 620px) {
+  .card { grid-template-columns: 76px minmax(0, 1fr); gap: 14px; padding: 14px; }
+  .folder { width: 70px; height: 56px; }
+  .folderBack { height: 45px; }
+  .paper { right: 7px; bottom: 10px; left: 7px; height: 35px; }
+  .folderFront { height: 35px; }
+  .folder b { right: 8px; bottom: 9px; left: 8px; padding: 3px; font-size: 5px; }
+  .heading { gap: 9px; }
+  .stateIcon { width: 24px; height: 24px; }
+  .statusLine small { max-width: 160px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .uploading .paper,
+  .uploading .folderFront,
+  .uploading .stateIcon,
+  .indeterminate > span { animation: none; }
+}

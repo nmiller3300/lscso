@@ -41,7 +41,7 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
       </section>
 
       {rankOpen && selected ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setRankOpen(false); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setRankOpen(false); }}>
           <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="roster-rank-manager-title">
             <div className="portal-modal-heading">
               <div><span>Roster personnel controls</span><h2 id="roster-rank-manager-title">Promote / Change Rank</h2></div>
@@ -67,7 +67,7 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
       ) : null}
 
       {loaOpen && selected ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setLoaOpen(false); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setLoaOpen(false); }}>
           <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="roster-loa-manager-title">
             <div className="portal-modal-heading">
               <div><span>Roster personnel controls</span><h2 id="roster-loa-manager-title">Record / End LOA</h2></div>
