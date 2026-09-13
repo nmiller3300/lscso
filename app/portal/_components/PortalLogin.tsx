@@ -121,7 +121,7 @@ export function PortalLogin() {
 
       await supabase.rpc("record_session_event", {
         session_event_type: "Sign In",
-        session_user_agent: null,
+        session_user_agent: navigator.userAgent,
       });
 
       const authenticatedProfile: ActiveProfile = {
