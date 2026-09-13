@@ -15,8 +15,6 @@
 }
 
 .card {
-  --stack-index: 0;
-  --stack-count: 1;
   position: absolute;
   right: 0;
   bottom: 0;
@@ -36,12 +34,7 @@
   backdrop-filter: blur(22px) saturate(1.08);
   -webkit-backdrop-filter: blur(22px) saturate(1.08);
   color: rgba(255,255,255,.92);
-  opacity: calc(1 - (var(--stack-index) * .08));
   pointer-events: auto;
-  transform:
-    translateY(calc(var(--stack-index) * 12px))
-    scale(calc(1 - (var(--stack-index) * .045)))
-    rotateX(calc(var(--stack-index) * -1.2deg));
   transform-origin: center bottom;
   transition:
     transform 520ms cubic-bezier(.22,1,.36,1),
@@ -50,9 +43,9 @@
     box-shadow 220ms ease;
 }
 
-.card:nth-child(1) { z-index: 8; }
-.card:nth-child(2) { z-index: 7; }
-.card:nth-child(3) { z-index: 6; }
+.card:nth-child(1) { z-index: 8; opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+.card:nth-child(2) { z-index: 7; opacity: .92; transform: translateY(12px) scale(.955) rotateX(-1.2deg); }
+.card:nth-child(3) { z-index: 6; opacity: .84; transform: translateY(24px) scale(.91) rotateX(-2.4deg); }
 
 .card::before {
   position: absolute;
