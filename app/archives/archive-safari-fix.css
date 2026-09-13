@@ -4,9 +4,21 @@
  * The active bay is marked by the navigation enhancer from the same translated
  * room state used by React. Hit testing no longer depends on CSS :has()
  * support or on inferring state from the previous/next controls.
+ *
+ * Only the active stack participates in layout and hit testing. React still
+ * writes the translated room position inline, which the navigation enhancer
+ * reads to determine the active stack, but the rendered room itself is kept at
+ * a single viewport width so inactive shelves cannot remain composited beside
+ * or over the box a user is trying to open.
  */
 
+.archive-bay-track {
+  width: 100% !important;
+  transform: none !important;
+}
+
 .archive-bay-track > .archive-bay {
+  display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
@@ -14,6 +26,9 @@
 
 .archive-experience.is-lit:not(.is-collection-open)
   .archive-bay-track > .archive-bay.is-active {
+  display: block !important;
+  width: 100% !important;
+  min-width: 100% !important;
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
