@@ -1,6 +1,9 @@
-import type { ArchiveRecord } from "./archive-canon";
+import { archiveFolders, type ArchiveFolder, type ArchiveRecord } from "./archive-canon";
 import { supplementalArchiveRecords } from "./archive-supplemental";
 import { archiveArtifactRecords } from "./archive-artifacts";
+
+const artifactFolder = "Photos & Artifacts" as ArchiveFolder;
+if (!archiveFolders.includes(artifactFolder)) archiveFolders.push(artifactFolder);
 
 export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   "mccall-bell": [
