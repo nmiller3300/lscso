@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../../_components/PortalShell";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
+import { ArchiveEditor } from "./ArchiveEditor";
 
 export const runtime = "nodejs";
 
@@ -18,10 +19,7 @@ export default async function AdministrationArchivePage() {
       description="Build the living Miller–White administration archive and control public historical releases."
       actions={<Link className="portal-button portal-button--secondary" href="/portal/command/administration">Back to Administration</Link>}
     >
-      <section className="portal-panel">
-        <div className="portal-panel-heading"><div><p>Current administration</p><h2>Miller–White living archive</h2></div><span>Executive</span></div>
-        <p>This workspace is reserved for Sheriff and Undersheriff historical records.</p>
-      </section>
+      <ArchiveEditor />
     </PortalShell>
   );
 }
