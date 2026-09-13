@@ -174,7 +174,7 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
       </section>
 
       {selectedRecord ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="guardian-record-title">
             <div className="portal-modal-heading">
               <div><span>{selectedRecord.id} · Personnel Guardian</span><h2 id="guardian-record-title">{selectedRecord.type}</h2></div>
@@ -229,7 +229,7 @@ export function DeputyGuardianRecords({ records }: { records: PersonnelGuardian[
       ) : null}
 
       {showRights ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setShowRights(false); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setShowRights(false); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="record-rights-title">
             <div className="portal-modal-heading"><div><span>Personnel protection</span><h2 id="record-rights-title">Response and appeal rights</h2></div><button onClick={() => setShowRights(false)} type="button" aria-label="Close record rights">×</button></div>
             <div className="deputy-rights-list">
@@ -352,7 +352,7 @@ export function DeputyRequestCenter() {
       ) : null}
 
       {selectedKind ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedKind(null); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setSelectedKind(null); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="request-form-title">
             <div className="portal-modal-heading"><div><span>{requestTypes[selectedKind].routing}</span><h2 id="request-form-title">{requestTypes[selectedKind].label}</h2></div><button onClick={() => setSelectedKind(null)} type="button" aria-label="Close request form">×</button></div>
             <form onSubmit={submitRequest}>
