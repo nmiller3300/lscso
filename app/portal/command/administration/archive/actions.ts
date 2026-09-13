@@ -33,19 +33,24 @@ async function requireArchiveAuthority() {
   return profile;
 }
 
+function revalidateArchiveViews() {
+  revalidatePath("/portal/command/administration/archive");
+  revalidatePath("/archives");
+}
+
 export async function loadArchiveRecords() {
   await requireArchiveAuthority();
   const supabase = await createClient() as any;
   const { data, error } = await supabase
     .from("current_administration_archive")
-    .select("id,record_owner,folder,document_code,title,date_label,release_status,status,stamp,summary,public_body,created_at,updated_at,published_at")
+    .select("id,record_owner,folder,document_code,title,date_label,release_status,status,stamp,summary,public_body,internal_notes,created_at,updated_at,published_at")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return data ?? [];
 }
 
 export async function saveArchiveRecord(formData: FormData) {
-  await requireArchiveAuthority();
+  const profile = await requireArchiveAuthority();
   const id = text(formData, "id");
   const recordOwner = text(formData, "record_owner") || "Administration";
   const folder = text(formData, "folder");
@@ -57,6 +62,7 @@ export async function saveArchiveRecord(formData: FormData) {
   if (!title || !dateLabel) throw new Error("Title and date are required");
 
   const released = ["Public", "Partially Released", "Sealed"].includes(releaseStatus);
+  const now = new Date().toISOString();
   const payload = {
     administration: "miller-white",
     record_owner: recordOwner,
@@ -70,16 +76,17 @@ export async function saveArchiveRecord(formData: FormData) {
     summary: text(formData, "summary"),
     public_body: text(formData, "public_body").split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean),
     internal_notes: text(formData, "internal_notes") || null,
-    updated_at: new Date().toISOString(),
-    published_at: released ? new Date().toISOString() : null,
+    updated_by: profile.id,
+    updated_at: now,
+    published_at: released ? now : null,
   };
 
   const supabase = await createClient() as any;
   const result = id
     ? await supabase.from("current_administration_archive").update(payload).eq("id", id)
-    : await supabase.from("current_administration_archive").insert(payload);
+    : await supabase.from("current_administration_archive").insert({ ...payload, created_by: profile.id });
   if (result.error) throw new Error(result.error.message);
-  revalidatePath("/portal/command/administration/archive");
+  revalidateArchiveViews();
 }
 
 export async function removeArchiveRecord(formData: FormData) {
@@ -89,5 +96,5 @@ export async function removeArchiveRecord(formData: FormData) {
   const supabase = await createClient() as any;
   const { error } = await supabase.from("current_administration_archive").delete().eq("id", id);
   if (error) throw new Error(error.message);
-  revalidatePath("/portal/command/administration/archive");
+  revalidateArchiveViews();
 }
