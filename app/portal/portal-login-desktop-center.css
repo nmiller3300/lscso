@@ -1,21 +1,47 @@
 /* Desktop-only Personnel Portal entry cleanup.
- * Keep the existing phone/tablet composition intact. On PC, remove the old
- * marketing split-screen and let the real authentication experience own the page.
+ * Keep the existing phone/tablet composition intact. On PC, reuse the original
+ * LSCSO brand field as the full-screen background, remove its marketing copy,
+ * and center the real authentication experience over it.
  */
 
 @media (min-width: 981px) {
   .portal-gateway--glow-login {
+    position: relative;
+    display: block;
     min-height: 100svh;
-    grid-template-columns: minmax(0, 1fr);
     overflow: hidden;
-    background: #05070a;
+    background: #07090c;
   }
 
+  /* Reuse the original left-side LSCSO treatment as the page background. */
   .portal-gateway--glow-login > .portal-gateway__brand {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    min-height: 100svh;
+    padding: 0;
+    border-right: 0;
+    pointer-events: none;
+  }
+
+  /* Keep only the background artwork from the former marketing panel. */
+  .portal-gateway--glow-login .portal-gateway__agency,
+  .portal-gateway--glow-login .portal-gateway__hero,
+  .portal-gateway--glow-login .portal-gateway__capabilities,
+  .portal-gateway--glow-login .portal-gateway__brand-footer {
+    display: none;
+  }
+
+  /* The original brand panel also had a large outlined circle. Do not place
+   * that around the centered login. */
+  .portal-gateway--glow-login > .portal-gateway__brand::after {
     display: none;
   }
 
   .portal-gateway--glow-login > .portal-gateway__access {
+    position: relative;
+    z-index: 1;
     width: 100%;
     min-width: 0;
     height: 100svh;
@@ -25,24 +51,14 @@
     overflow-x: hidden;
     overflow-y: auto;
     padding: clamp(18px, 3vh, 32px) 28px;
-    background:
-      radial-gradient(circle at 50% 44%, rgba(194, 166, 84, .10), transparent 28rem),
-      radial-gradient(circle at 7% 100%, rgba(169, 135, 55, .15), transparent 30rem),
-      radial-gradient(circle at 95% 3%, rgba(83, 87, 71, .18), transparent 26rem),
-      linear-gradient(135deg, #06090d 0%, #05070a 48%, #080b0d 100%);
+    background: transparent;
   }
 
-  /* Keep the LSCSO identity visible as a subdued full-screen watermark. */
-  .portal-gateway--glow-login .portal-glow-login::after {
-    right: 50%;
-    width: min(72vw, 1050px);
-    opacity: .065;
-    filter: saturate(.5) contrast(1.08) drop-shadow(0 34px 90px rgba(0,0,0,.5));
-    transform: translate(50%, -50%) rotate(2deg);
-  }
-
-  /* Remove the oversized decorative orbit around the login UI. */
-  .portal-gateway--glow-login .portal-glow-login__wave {
+  /* Let the original brand field be the only page background treatment. */
+  .portal-gateway--glow-login > .portal-gateway__access::before,
+  .portal-gateway--glow-login .portal-glow-login::before,
+  .portal-gateway--glow-login .portal-glow-login::after,
+  .portal-gateway--glow-login .portal-glow-login__background {
     display: none;
   }
 
