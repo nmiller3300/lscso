@@ -29,6 +29,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Historical Archives — Mobile Stack Isolation**: Fixed mobile/Safari compositing that allowed neighboring archive stacks and case labels to bleed through one another or appear before the lamp was turned on.
 - **Historical Archives — Mobile Scrolling and Composition**: Removed the locked single-viewport feel, restored vertical movement through the lit archive, reduced entrance-copy/lamp competition, and made the archive room the primary composition after entry.
 - **Historical Archives — Interaction Integrity**: Audited archive controls so visual buttons correspond to working actions while ambient archive cartons remain clearly non-interactive; added Escape/back behavior for opened collections.
+- **Historical Archives — Stack Navigation Buttons**: Fixed the previous/next stack controls in mobile and WebKit in-app browsers by hardening their hit targets and handling touch/pen pointer activation directly.
 - **Historical Archives — Prototype Cleanup**: Removed the superseded first archive component, obsolete released-holdings link treatment, and duplicate standalone current-administration archive route after the living archive was integrated into the main experience.
 
 ### Security
