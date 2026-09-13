@@ -1,0 +1,32 @@
+/* Desktop-only Personnel Portal entry cleanup.
+ * Keep the existing mobile/tablet composition intact, but remove the marketing
+ * split-screen on PC and center the actual authentication experience.
+ */
+
+@media (min-width: 981px) {
+  .portal-gateway--glow-login {
+    min-height: 100svh;
+    grid-template-columns: minmax(0, 1fr);
+    background: #05070a;
+  }
+
+  .portal-gateway--glow-login > .portal-gateway__brand {
+    display: none;
+  }
+
+  .portal-gateway--glow-login > .portal-gateway__access {
+    width: 100%;
+    min-height: 100svh;
+    padding: 36px 28px;
+  }
+
+  .portal-gateway--glow-login .portal-glow-login::after {
+    right: 50%;
+    width: min(62vw, 900px);
+    transform: translate(50%, -50%) rotate(3deg);
+  }
+
+  .portal-gateway--glow-login .portal-glow-login__stage {
+    width: min(700px, 100%);
+  }
+}
