@@ -54,15 +54,15 @@ export default function PortalEntryPage() {
         </div>
 
         <div className="portal-gateway__capabilities" aria-label="Portal capabilities">
-          <article>
+          <article className="portal-glass-card">
             <span>01</span>
             <div><strong>Personnel Operations</strong><small>Records, assignments, credentials, and service history.</small></div>
           </article>
-          <article>
+          <article className="portal-glass-card">
             <span>02</span>
             <div><strong>Supervision & Training</strong><small>Guardians, FTO progression, certifications, and follow-up.</small></div>
           </article>
-          <article>
+          <article className="portal-glass-card">
             <span>03</span>
             <div><strong>Command Accountability</strong><small>Routed decisions, approvals, protected actions, and audit history.</small></div>
           </article>
@@ -75,7 +75,7 @@ export default function PortalEntryPage() {
       </section>
 
       <section className="portal-gateway__access" aria-label="Personnel portal sign in">
-        <div className="portal-gateway__access-shell">
+        <div className="portal-gateway__access-shell portal-gateway__access-shell--glow">
           <div className="portal-gateway__access-topline">
             <div className="portal-gateway__node-status"><span /> Secure access node</div>
             <div className="portal-gateway__classification">Personnel Restricted</div>
@@ -99,7 +99,7 @@ export default function PortalEntryPage() {
 
           <PortalLogin />
 
-          <div className="portal-gateway__security-note">
+          <div className="portal-gateway__security-note portal-glass-card portal-glass-card--quiet">
             <span className="portal-gateway__security-icon" aria-hidden="true">S4</span>
             <div>
               <strong>Protected department system</strong>
