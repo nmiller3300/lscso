@@ -35,18 +35,32 @@ function applyArchiveContext() {
   if (!focus) return;
 
   const meta = focus.querySelector<HTMLElement>(".archive-collection-meta small")?.textContent ?? "";
-  focus.dataset.era = deriveEra(meta);
+  const era = deriveEra(meta);
+  if (focus.dataset.era !== era) focus.dataset.era = era;
 
   const selectedFolder = focus.querySelector<HTMLElement>(".archive-folder-directory > button.is-selected span")?.textContent ?? "";
-  if (selectedFolder) focus.dataset.folder = normalizeFolder(selectedFolder);
-  else delete focus.dataset.folder;
+  const normalizedFolder = selectedFolder ? normalizeFolder(selectedFolder) : "";
+  if (normalizedFolder) {
+    if (focus.dataset.folder !== normalizedFolder) focus.dataset.folder = normalizedFolder;
+  } else if (focus.dataset.folder) {
+    delete focus.dataset.folder;
+  }
 
   const sheet = focus.querySelector<HTMLElement>(".archive-record-sheet");
-  if (sheet && focus.dataset.folder === "artifacts") {
-    sheet.dataset.artifactKind = deriveArtifactKind(sheet);
-    sheet.classList.add("archive-record-sheet--artifact");
-  } else if (sheet) {
-    delete sheet.dataset.artifactKind;
+  if (!sheet) return;
+
+  const shouldUseArtifactPresentation = focus.dataset.folder === "artifacts";
+  if (shouldUseArtifactPresentation) {
+    const artifactKind = deriveArtifactKind(sheet);
+    if (sheet.dataset.artifactKind !== artifactKind) sheet.dataset.artifactKind = artifactKind;
+    if (!sheet.classList.contains("archive-record-sheet--artifact")) {
+      sheet.classList.add("archive-record-sheet--artifact");
+    }
+    return;
+  }
+
+  if (sheet.dataset.artifactKind) delete sheet.dataset.artifactKind;
+  if (sheet.classList.contains("archive-record-sheet--artifact")) {
     sheet.classList.remove("archive-record-sheet--artifact");
   }
 }
