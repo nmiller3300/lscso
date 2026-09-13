@@ -2,195 +2,271 @@
 
 import { useEffect, useRef } from "react";
 
+const vertexShaderSource = `#version 300 es
+precision highp float;
+
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}
+`;
+
+const fragmentShaderSource = `#version 300 es
+precision highp float;
+
+uniform vec2 uResolution;
+uniform float uTime;
+uniform vec2 uPointer;
+uniform float uEnergy;
+out vec4 outColor;
+
+float hash21(vec2 p) {
+  p = fract(p * vec2(123.34, 345.45));
+  p += dot(p, p + 34.345);
+  return fract(p.x * p.y);
+}
+
+float noise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  float a = hash21(i);
+  float b = hash21(i + vec2(1.0, 0.0));
+  float c = hash21(i + vec2(0.0, 1.0));
+  float d = hash21(i + vec2(1.0, 1.0));
+  return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
+}
+
+float fbm(vec2 p) {
+  float value = 0.0;
+  float amp = 0.5;
+  mat2 rot = mat2(0.82, -0.57, 0.57, 0.82);
+  for (int i = 0; i < 5; i++) {
+    value += amp * noise(p);
+    p = rot * p * 2.03 + 11.7;
+    amp *= 0.5;
+  }
+  return value;
+}
+
+float lineField(vec2 uv, float phase, float bend) {
+  float n = fbm(uv * 1.55 + phase);
+  float wave = uv.y + sin(uv.x * 2.25 + phase + n * 3.2) * bend;
+  return exp(-abs(wave) * 8.0);
+}
+
+void main() {
+  vec2 res = max(uResolution, vec2(1.0));
+  vec2 uv = (gl_FragCoord.xy - 0.5 * res.xy) / res.y;
+  vec2 pointer = vec2(uPointer.x * res.x / res.y, uPointer.y) * 0.48;
+  float t = uTime * 0.075;
+
+  vec2 q;
+  q.x = fbm(uv * 1.35 + vec2(0.0, t));
+  q.y = fbm(uv * 1.35 + vec2(5.2, -t * 0.72));
+
+  vec2 r;
+  r.x = fbm(uv * 1.9 + q * 2.35 + vec2(1.7, t * 0.48));
+  r.y = fbm(uv * 1.9 + q * 2.15 + vec2(8.3, -t * 0.41));
+
+  float warped = fbm(uv * 2.25 + r * 2.7);
+  float distToPointer = length(uv - pointer);
+  float ripple = sin(distToPointer * 24.0 - uTime * 1.9) * exp(-distToPointer * 5.7);
+  warped += ripple * 0.055 * uEnergy;
+
+  float centerDist = length(uv * vec2(0.9, 1.0));
+  float calmCenter = 1.0 - smoothstep(0.18, 0.58, centerDist);
+  float detailMask = mix(1.0, 0.32, calmCenter);
+
+  float goldRibbon = lineField(uv + vec2(0.0, -0.34), t * 0.85 + warped, 0.11);
+  float blueRibbon = lineField(vec2(uv.x, -uv.y) + vec2(0.0, -0.29), -t * 0.72 + warped * 1.2, 0.095);
+  float fineRibbon = lineField(uv * 1.12 + vec2(0.0, 0.04), t * 0.38 + warped * 1.7, 0.052);
+
+  float causticA = abs(sin((warped + q.x * 0.65) * 18.0 - t * 3.2));
+  float causticB = abs(sin((warped + r.y * 0.75) * 13.0 + t * 2.6));
+  float caustics = pow(max(0.0, 1.0 - min(causticA, causticB)), 5.5) * detailMask;
+
+  vec3 baseA = vec3(0.020, 0.031, 0.046);
+  vec3 baseB = vec3(0.055, 0.075, 0.100);
+  vec3 color = mix(baseA, baseB, smoothstep(-0.9, 0.8, uv.x + uv.y * 0.32));
+
+  vec3 gold = vec3(0.82, 0.64, 0.26);
+  vec3 paleGold = vec3(0.98, 0.88, 0.53);
+  vec3 steelBlue = vec3(0.16, 0.34, 0.53);
+  vec3 iceBlue = vec3(0.38, 0.63, 0.82);
+
+  color += gold * goldRibbon * 0.20 * detailMask;
+  color += steelBlue * blueRibbon * 0.18 * detailMask;
+  color += mix(gold, paleGold, warped) * fineRibbon * 0.075 * detailMask;
+  color += mix(steelBlue, iceBlue, q.y) * caustics * 0.105;
+
+  float pointerGlow = exp(-distToPointer * 3.5) * 0.055 * uEnergy;
+  color += mix(gold, iceBlue, 0.5 + 0.5 * sin(t)) * pointerGlow;
+
+  float edgeGold = exp(-abs(uv.x + 0.78) * 4.4) * 0.055;
+  float edgeBlue = exp(-abs(uv.x - 0.82) * 4.8) * 0.05;
+  color += gold * edgeGold;
+  color += steelBlue * edgeBlue;
+
+  float vignette = smoothstep(1.14, 0.22, length(uv * vec2(0.82, 1.05)));
+  color *= mix(0.44, 1.0, vignette);
+
+  float grain = hash21(gl_FragCoord.xy + fract(uTime) * 173.0) - 0.5;
+  color += grain * 0.012;
+
+  outColor = vec4(color, 1.0);
+}
+`;
+
+function createShader(gl: WebGL2RenderingContext, type: number, source: string) {
+  const shader = gl.createShader(type);
+  if (!shader) return null;
+  gl.shaderSource(shader, source);
+  gl.compileShader(shader);
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    gl.deleteShader(shader);
+    return null;
+  }
+  return shader;
+}
+
 export function PortalCinematicBackdrop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const root = rootRef.current;
+    if (!canvas || !root) return;
 
-    const context = canvas.getContext("2d");
-    if (!context) return;
+    const gl = canvas.getContext("webgl2", {
+      alpha: false,
+      antialias: false,
+      depth: false,
+      stencil: false,
+      powerPreference: "high-performance",
+      preserveDrawingBuffer: false,
+    });
 
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const pointer = { x: 0, y: 0, targetX: 0, targetY: 0 };
-    const glints = Array.from({ length: 34 }, (_, index) => ({
-      x: Math.random(),
-      y: Math.random(),
-      size: 0.55 + Math.random() * 1.35,
-      phase: Math.random() * Math.PI * 2,
-      speed: 0.18 + Math.random() * 0.32,
-      edgeBias: index % 2 === 0 ? -1 : 1,
-    }));
-
-    const grainCanvas = document.createElement("canvas");
-    grainCanvas.width = 128;
-    grainCanvas.height = 128;
-    const grainContext = grainCanvas.getContext("2d");
-    let grainPattern: CanvasPattern | null = null;
-
-    if (grainContext) {
-      const grain = grainContext.createImageData(128, 128);
-      for (let i = 0; i < grain.data.length; i += 4) {
-        const value = 115 + Math.floor(Math.random() * 95);
-        grain.data[i] = value;
-        grain.data[i + 1] = value;
-        grain.data[i + 2] = value;
-        grain.data[i + 3] = 18 + Math.floor(Math.random() * 18);
-      }
-      grainContext.putImageData(grain, 0, 0);
-      grainPattern = context.createPattern(grainCanvas, "repeat");
+    if (!gl) {
+      root.dataset.renderer = "fallback";
+      return;
     }
 
-    let width = 0;
-    let height = 0;
-    let animationFrame = 0;
+    const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+    const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+    if (!vertexShader || !fragmentShader) {
+      root.dataset.renderer = "fallback";
+      return;
+    }
+
+    const program = gl.createProgram();
+    if (!program) return;
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      root.dataset.renderer = "fallback";
+      return;
+    }
+
+    const resolutionLocation = gl.getUniformLocation(program, "uResolution");
+    const timeLocation = gl.getUniformLocation(program, "uTime");
+    const pointerLocation = gl.getUniformLocation(program, "uPointer");
+    const energyLocation = gl.getUniformLocation(program, "uEnergy");
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0, energy: 0.35, targetEnergy: 0.35 };
+    let frame = 0;
+    let width = 1;
+    let height = 1;
+    let hidden = document.hidden;
+
+    root.dataset.renderer = "webgl";
+    gl.useProgram(program);
 
     const resize = () => {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = Math.max(1, rect.width);
-      height = Math.max(1, rect.height);
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-
-    const drawGlow = (
-      x: number,
-      y: number,
-      radius: number,
-      color: [number, number, number],
-      alpha: number,
-    ) => {
-      const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
-      gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
-      gradient.addColorStop(0.4, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.38})`);
-      gradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
-      context.fillStyle = gradient;
-      context.beginPath();
-      context.arc(x, y, radius, 0, Math.PI * 2);
-      context.fill();
-    };
-
-    const drawRibbon = (
-      baseY: number,
-      amplitude: number,
-      lineWidth: number,
-      color: [number, number, number],
-      alpha: number,
-      phase: number,
-      time: number,
-    ) => {
-      const gradient = context.createLinearGradient(0, 0, width, 0);
-      gradient.addColorStop(0, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
-      gradient.addColorStop(0.2, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.72})`);
-      gradient.addColorStop(0.5, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha})`);
-      gradient.addColorStop(0.8, `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.7})`);
-      gradient.addColorStop(1, `rgba(${color[0]}, ${color[1]}, ${color[2]}, 0)`);
-
-      context.beginPath();
-      for (let x = -80; x <= width + 80; x += 30) {
-        const y =
-          height * baseY +
-          Math.sin(x * 0.0045 + time * 0.00022 + phase) * height * amplitude +
-          Math.cos(x * 0.0018 - time * 0.00012 + phase * 1.7) * height * amplitude * 0.35 +
-          pointer.y * 12;
-        if (x === -80) context.moveTo(x, y);
-        else context.lineTo(x, y);
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.35);
+      width = Math.max(1, Math.floor(rect.width * dpr));
+      height = Math.max(1, Math.floor(rect.height * dpr));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
       }
-
-      context.strokeStyle = gradient;
-      context.lineWidth = lineWidth;
-      context.lineCap = "round";
-      context.shadowBlur = 52;
-      context.shadowColor = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${alpha * 0.72})`;
-      context.stroke();
-      context.shadowBlur = 0;
+      gl.viewport(0, 0, width, height);
     };
 
-    const draw = (time: number) => {
-      if (!width || !height) resize();
+    const render = (now: number) => {
+      resize();
+      pointer.x += (pointer.tx - pointer.x) * 0.045;
+      pointer.y += (pointer.ty - pointer.y) * 0.045;
+      pointer.energy += (pointer.targetEnergy - pointer.energy) * 0.04;
 
-      pointer.x += (pointer.targetX - pointer.x) * 0.035;
-      pointer.y += (pointer.targetY - pointer.y) * 0.035;
+      gl.useProgram(program);
+      gl.uniform2f(resolutionLocation, width, height);
+      gl.uniform1f(timeLocation, now * 0.001);
+      gl.uniform2f(pointerLocation, pointer.x, pointer.y);
+      gl.uniform1f(energyLocation, reducedMotion.matches ? 0.0 : pointer.energy);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-      context.clearRect(0, 0, width, height);
-      context.save();
-      context.globalCompositeOperation = "screen";
-
-      drawGlow(width * (0.14 + pointer.x * 0.012), height * (0.28 + pointer.y * 0.012), Math.max(width, height) * 0.34, [194, 157, 72], 0.105);
-      drawGlow(width * (0.86 + pointer.x * 0.014), height * (0.72 + pointer.y * 0.014), Math.max(width, height) * 0.31, [72, 105, 142], 0.095);
-      drawGlow(width * 0.7, height * 0.12, Math.max(width, height) * 0.2, [132, 119, 78], 0.055);
-
-      drawRibbon(0.21, 0.055, 66, [206, 177, 94], 0.055, 0.6, time);
-      drawRibbon(0.78, 0.048, 54, [77, 113, 151], 0.045, 2.4, time);
-      drawRibbon(0.55, 0.028, 24, [173, 145, 77], 0.03, 4.2, time);
-
-      context.restore();
-
-      for (const glint of glints) {
-        const pulse = 0.35 + Math.sin(time * 0.001 * glint.speed + glint.phase) * 0.25;
-        const edgeShift = glint.edgeBias * width * 0.08;
-        const x = glint.x * width + edgeShift + pointer.x * 8;
-        const y = glint.y * height + pointer.y * 6;
-        context.fillStyle = `rgba(230, 216, 169, ${Math.max(0.05, pulse) * 0.26})`;
-        context.beginPath();
-        context.arc(x, y, glint.size, 0, Math.PI * 2);
-        context.fill();
-      }
-
-      if (grainPattern) {
-        context.save();
-        context.globalAlpha = 0.045;
-        context.fillStyle = grainPattern;
-        context.translate((time * 0.003) % 128, (time * 0.002) % 128);
-        context.fillRect(-128, -128, width + 256, height + 256);
-        context.restore();
-      }
-
-      if (!reducedMotion.matches) {
-        animationFrame = window.requestAnimationFrame(draw);
-      }
+      if (!reducedMotion.matches && !hidden) frame = window.requestAnimationFrame(render);
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
-      pointer.targetX = (event.clientX / Math.max(window.innerWidth, 1) - 0.5) * 2;
-      pointer.targetY = (event.clientY / Math.max(window.innerHeight, 1) - 0.5) * 2;
+    const onPointerMove = (event: PointerEvent) => {
+      pointer.tx = (event.clientX / Math.max(window.innerWidth, 1) - 0.5) * 2;
+      pointer.ty = -((event.clientY / Math.max(window.innerHeight, 1) - 0.5) * 2);
+      pointer.targetEnergy = 1;
+      root.style.setProperty("--portal-px", pointer.tx.toFixed(3));
+      root.style.setProperty("--portal-py", pointer.ty.toFixed(3));
     };
 
-    const handlePointerLeave = () => {
-      pointer.targetX = 0;
-      pointer.targetY = 0;
+    const onPointerLeave = () => {
+      pointer.tx = 0;
+      pointer.ty = 0;
+      pointer.targetEnergy = 0.35;
+      root.style.setProperty("--portal-px", "0");
+      root.style.setProperty("--portal-py", "0");
     };
 
-    const handleMotionChange = () => {
-      window.cancelAnimationFrame(animationFrame);
-      draw(performance.now());
+    const onVisibility = () => {
+      hidden = document.hidden;
+      window.cancelAnimationFrame(frame);
+      if (!hidden) render(performance.now());
     };
 
-    resize();
+    const onMotionChange = () => {
+      window.cancelAnimationFrame(frame);
+      render(performance.now());
+    };
+
     window.addEventListener("resize", resize, { passive: true });
-    window.addEventListener("pointermove", handlePointerMove, { passive: true });
-    document.documentElement.addEventListener("pointerleave", handlePointerLeave, { passive: true });
-    reducedMotion.addEventListener("change", handleMotionChange);
+    window.addEventListener("pointermove", onPointerMove, { passive: true });
+    document.documentElement.addEventListener("pointerleave", onPointerLeave, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
+    reducedMotion.addEventListener("change", onMotionChange);
 
-    draw(performance.now());
+    render(performance.now());
 
     return () => {
-      window.cancelAnimationFrame(animationFrame);
+      window.cancelAnimationFrame(frame);
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", handlePointerMove);
-      document.documentElement.removeEventListener("pointerleave", handlePointerLeave);
-      reducedMotion.removeEventListener("change", handleMotionChange);
+      window.removeEventListener("pointermove", onPointerMove);
+      document.documentElement.removeEventListener("pointerleave", onPointerLeave);
+      document.removeEventListener("visibilitychange", onVisibility);
+      reducedMotion.removeEventListener("change", onMotionChange);
+      gl.deleteProgram(program);
+      gl.deleteShader(vertexShader);
+      gl.deleteShader(fragmentShader);
     };
   }, []);
 
   return (
-    <div className="portal-cinematic-backdrop" aria-hidden="true">
+    <div ref={rootRef} className="portal-cinematic-backdrop" aria-hidden="true">
       <canvas ref={canvasRef} className="portal-cinematic-backdrop__canvas" />
       <div className="portal-cinematic-backdrop__crest portal-cinematic-backdrop__crest--left" />
       <div className="portal-cinematic-backdrop__crest portal-cinematic-backdrop__crest--right" />
+      <div className="portal-cinematic-backdrop__prism" />
       <div className="portal-cinematic-backdrop__sheen" />
     </div>
   );
