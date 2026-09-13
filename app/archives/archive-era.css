@@ -1,0 +1,181 @@
+.archive-collection-focus[data-era="founding"] .archive-record-sheet {
+  background:
+    radial-gradient(circle at 16% 11%, rgba(113, 87, 44, 0.08), transparent 26%),
+    repeating-linear-gradient(0deg, rgba(76, 63, 43, 0.022) 0 1px, transparent 1px 6px),
+    #e2d8bf;
+  filter: sepia(0.08) saturate(0.94);
+}
+
+.archive-collection-focus[data-era="founding"] .archive-record-sheet h2,
+.archive-collection-focus[data-era="founding"] .archive-record-body p,
+.archive-collection-focus[data-era="founding"] .archive-record-deck {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.archive-collection-focus[data-era="growth"] .archive-record-sheet {
+  background:
+    repeating-linear-gradient(0deg, rgba(89, 72, 49, 0.018) 0 1px, transparent 1px 5px),
+    #e6ddc8;
+}
+
+.archive-collection-focus[data-era="operational"] .archive-record-sheet {
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.025), transparent 7%, transparent 93%, rgba(0, 0, 0, 0.018)),
+    repeating-linear-gradient(0deg, rgba(66, 62, 55, 0.014) 0 1px, transparent 1px 4px),
+    #e8e4d9;
+}
+
+.archive-collection-focus[data-era="digital-transition"] .archive-record-sheet {
+  background:
+    linear-gradient(180deg, rgba(79, 83, 80, 0.025), transparent 18%),
+    #ece9e0;
+}
+
+.archive-collection-focus[data-era="standardization"] .archive-record-sheet,
+.archive-collection-focus[data-era="active"] .archive-record-sheet {
+  background: #efede6;
+}
+
+.archive-collection-focus[data-era="founding"] .archive-folder-directory,
+.archive-collection-focus[data-era="growth"] .archive-folder-directory {
+  box-shadow: 0 25px 44px rgba(0, 0, 0, 0.34), inset 0 0 30px rgba(77, 57, 29, 0.08);
+}
+
+.archive-collection-focus[data-era="operational"] .archive-folder-directory,
+.archive-collection-focus[data-era="digital-transition"] .archive-folder-directory {
+  filter: saturate(0.88);
+}
+
+.archive-collection-focus[data-era="active"] .archive-folder-directory {
+  filter: saturate(0.76) brightness(1.02);
+}
+
+.archive-record-sheet--artifact {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(78, 68, 51, 0.62);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.025), transparent 18%),
+    #171511 !important;
+  color: #e7dfcc;
+  box-shadow:
+    0 34px 70px rgba(0,0,0,0.48),
+    inset 0 0 0 10px #242019,
+    inset 0 0 0 11px rgba(212,190,121,0.12);
+  filter: none !important;
+}
+
+.archive-record-sheet--artifact::before {
+  display: grid;
+  min-height: clamp(190px, 28vw, 310px);
+  place-items: center;
+  margin: 80px 0 34px;
+  border: 1px solid rgba(222, 213, 190, 0.12);
+  background:
+    radial-gradient(circle at 50% 40%, rgba(212,190,121,0.08), transparent 42%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.012) 0 1px, transparent 1px 14px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.01) 0 1px, transparent 1px 14px),
+    #0e0d0b;
+  color: rgba(226, 216, 192, 0.54);
+  content: "ARCHIVAL OBJECT · PRESERVATION VIEW";
+  font-size: 9px;
+  font-weight: 780;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+  box-shadow: inset 0 0 80px rgba(0,0,0,0.55);
+}
+
+.archive-record-sheet--artifact[data-artifact-kind="photograph"]::before { content: "PHOTOGRAPHIC HOLDING · PRESERVATION PRINT"; }
+.archive-record-sheet--artifact[data-artifact-kind="map"]::before { content: "MAP HOLDING · FLAT STORAGE PRESERVATION VIEW"; }
+.archive-record-sheet--artifact[data-artifact-kind="equipment"]::before { content: "EQUIPMENT HOLDING · ACCESSION OBJECT"; }
+.archive-record-sheet--artifact[data-artifact-kind="uniform"]::before { content: "UNIFORM HOLDING · ACCESSION OBJECT"; }
+.archive-record-sheet--artifact[data-artifact-kind="digital-media"]::before { content: "DIGITAL MEDIA HOLDING · PRESERVATION OBJECT"; }
+.archive-record-sheet--artifact[data-artifact-kind="binder"]::before { content: "DOCUMENTARY OBJECT · PRESERVATION VIEW"; }
+.archive-record-sheet--artifact[data-artifact-kind="accession"]::before { content: "ACCESSION MATERIAL · ARCHIVE TRANSFER OBJECT"; }
+
+.archive-record-sheet--artifact .archive-record-letterhead {
+  position: absolute;
+  top: 28px;
+  right: 34px;
+  left: 34px;
+  z-index: 2;
+  color: #ddd4bf;
+}
+
+.archive-record-sheet--artifact .archive-record-letterhead span,
+.archive-record-sheet--artifact .archive-record-letterhead small {
+  color: rgba(221, 212, 191, 0.46);
+}
+
+.archive-record-sheet--artifact .archive-record-letterhead strong {
+  color: rgba(239, 233, 219, 0.88);
+}
+
+.archive-record-sheet--artifact .archive-record-rule {
+  display: none;
+}
+
+.archive-record-sheet--artifact .archive-record-accession {
+  z-index: 3;
+  border-color: rgba(212,190,121,0.25);
+  color: rgba(212,190,121,0.62);
+}
+
+.archive-record-sheet--artifact .archive-record-file-number,
+.archive-record-sheet--artifact .archive-record-years {
+  color: rgba(212,190,121,0.55);
+}
+
+.archive-record-sheet--artifact h2 {
+  color: #f0eadc;
+}
+
+.archive-record-sheet--artifact .archive-record-deck,
+.archive-record-sheet--artifact .archive-record-body p {
+  color: rgba(230, 223, 207, 0.72);
+}
+
+.archive-record-sheet--artifact .archive-record-deck {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+
+.archive-record-sheet--artifact .archive-document-stamp {
+  border-color: rgba(196, 163, 96, 0.34);
+  color: rgba(196, 163, 96, 0.48);
+}
+
+.archive-record-sheet--artifact .archive-record-footer {
+  border-top-color: rgba(255,255,255,0.08);
+  color: rgba(230,223,207,0.42);
+}
+
+.archive-collection-focus[data-folder="artifacts"] .archive-record-index {
+  background: rgba(10,9,7,0.72);
+}
+
+.archive-collection-focus[data-folder="artifacts"] .archive-index-list > button {
+  background: #d6cfbd;
+}
+
+@media (max-width: 760px) {
+  .archive-record-sheet--artifact::before {
+    min-height: 180px;
+    margin: 74px 0 28px;
+    padding: 24px;
+    font-size: 7px;
+    line-height: 1.5;
+  }
+
+  .archive-record-sheet--artifact .archive-record-letterhead {
+    top: 24px;
+    right: 22px;
+    left: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-record-sheet--artifact {
+    scroll-behavior: auto;
+  }
+}
