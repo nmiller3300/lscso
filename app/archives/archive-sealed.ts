@@ -1,9 +1,11 @@
 import type { ArchiveRecord } from "./archive-canon";
 import { supplementalArchiveRecords } from "./archive-supplemental";
+import { archiveArtifactRecords } from "./archive-artifacts";
 
 export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   "mccall-bell": [
     ...(supplementalArchiveRecords["mccall-bell"] ?? []),
+    ...(archiveArtifactRecords["mccall-bell"] ?? []),
     {
       id: "red-mesa-source-appendix",
       folder: "Criminal Organizations",
@@ -19,6 +21,7 @@ export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   ],
   "vance-cole": [
     ...(supplementalArchiveRecords["vance-cole"] ?? []),
+    ...(archiveArtifactRecords["vance-cole"] ?? []),
     {
       id: "north-division-personnel-appendix",
       folder: "Internal Affairs",
@@ -34,6 +37,7 @@ export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   ],
   "hale-navarro": [
     ...(supplementalArchiveRecords["hale-navarro"] ?? []),
+    ...(archiveArtifactRecords["hale-navarro"] ?? []),
     {
       id: "cold-harbor-source-register",
       folder: "Operations",
@@ -49,6 +53,7 @@ export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   ],
   "mercer-whitaker": [
     ...(supplementalArchiveRecords["mercer-whitaker"] ?? []),
+    ...(archiveArtifactRecords["mercer-whitaker"] ?? []),
     {
       id: "access-review-personnel-disposition",
       folder: "Internal Affairs",
@@ -64,6 +69,7 @@ export const sealedArchiveRecords: Record<string, ArchiveRecord[]> = {
   ],
   "rourke-ellison": [
     ...(supplementalArchiveRecords["rourke-ellison"] ?? []),
+    ...(archiveArtifactRecords["rourke-ellison"] ?? []),
     {
       id: "transition-personnel-appendix",
       folder: "Correspondence",
