@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import styles from "./PortalNotificationStack.module.css";
 
 export type NotificationStackItem = {
@@ -76,7 +75,6 @@ export function PortalNotificationStack({ actionCount, unreadCount, notification
             key={card.id}
             className={`${styles.card} ${card.urgent ? styles.urgent : ""}`}
             href={card.href}
-            style={{ "--stack-index": index, "--stack-count": cards.length } as CSSProperties}
           >
             <div className={styles.icon} aria-hidden="true">{card.urgent ? "!" : String(index + 1).padStart(2, "0")}</div>
             <div className={styles.copy}>
