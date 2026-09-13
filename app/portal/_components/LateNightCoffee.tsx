@@ -111,7 +111,7 @@ export function LateNightCoffee() {
 
         <div className="portal-coffee-copy">
           <span>LSCSO Night Shift</span>
-          <h2 id="portal-coffee-title">Burning the midnight oil? Have a cup of joe instead.</h2>
+          <h2 id="portal-coffee-title">Burning the midnight oil? Have a cup of joe.</h2>
           <p>{ready ? "Fresh pot. Back to the shift." : "The pot is always on in Personnel Operations. Take a minute, then get back to it."}</p>
         </div>
 
