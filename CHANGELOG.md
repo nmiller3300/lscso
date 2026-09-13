@@ -22,6 +22,7 @@ This file is the authoritative development history for the Los Santos County She
 - **Personnel Portal — Animated Password Eyes**: Added the approved animated cartoon-eye password visibility control, including open/closed eye states, periodic pupil movement, accessible show/hide semantics, and reduced-motion handling.
 - **Portal UI — Glass Blob Toggle**: Added a reusable accessible glass-blob switch and deployed it to reversible portal preferences including browser notifications and the Notification Center’s Unread-only filter.
 - **Personnel Portal — Coffee Break Easter Egg**: Added the interactive coffee-machine Easter egg with a real pour/steam animation, manual Coffee Break access on desktop and mobile, and an automatic once-per-night late-shift prompt between midnight and 5:00 AM Eastern using the message “Burning the midnight oil? Have a cup of joe.”
+- **Public Site — Agency & History Navigation**: Added a dedicated desktop/mobile agency-history navigation strip exposing About LSCSO, Office of the Sheriff, and Historical Archives without replacing the existing primary website navigation.
 
 ### Changed
 - **Historical Archives — Desktop and Mobile Spatial Navigation**: Expanded the archive from a single cramped shelf wall into Executive Records, Investigations & Operations, and Cold Case & Professional Standards stacks with previous/next controls, desktop keyboard navigation, mobile swipe navigation, vertical mobile depth, and more visual aisle space around shelving.
@@ -50,7 +51,7 @@ This file is the authoritative development history for the Los Santos County She
 ### Operations
 - **Historical Archives — Migration Ledger Alignment**: Reconciled archive migration files with the migration versions actually applied to the LSCSO Supabase project and applied the forward-only public-reader hardening migration during the production rollout.
 - **Historical Archives — Production Release**: Released the completed Historical Records & Archives experience to production, exposed Historical Archives from the public site footer, and retained the Sheriff/Undersheriff living-archive Administration workflow.
-- **Personnel Portal — UI Upgrade Isolation**: Kept the glowing login, glass surfaces/toggles, password eyes, and coffee-break interaction on the isolated preview branch pending final authenticated smoke testing and production authorization.
+- **Personnel Portal — Visual System Production Release**: Released the approved circular glowing login, animated password eyes, LSCSO glass surfaces and blob toggles, coffee-break Easter egg, Notification Center polish, mobile sign-in refinements, and archive mobile-navigation fix to production.
 
 ## 2026-09-12
 
