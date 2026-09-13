@@ -1,12 +1,9 @@
 /*
  * Hard isolation for archive room bays.
  *
- * Mobile Safari can paint filtered/transformed descendants outside the expected
- * clipping region when several large translated panels remain composited at
- * once. The archive room intentionally keeps only the selected bay paintable.
- * The existing room navigation already exposes the selected bay through its
- * disabled previous/next controls, so this CSS can isolate the active stack
- * without changing the archive interaction state.
+ * The active bay is marked by the navigation enhancer from the same translated
+ * room state used by React. Hit testing no longer depends on CSS :has()
+ * support or on inferring state from the previous/next controls.
  */
 
 .archive-bay-track > .archive-bay {
@@ -15,28 +12,34 @@
   pointer-events: none !important;
 }
 
-/* Stack A — first bay. */
-.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:first-child:disabled)
-  .archive-bay-track > .archive-bay:nth-child(1) {
+.archive-experience.is-lit:not(.is-collection-open)
+  .archive-bay-track > .archive-bay.is-active {
   visibility: visible !important;
   opacity: 1 !important;
   pointer-events: auto !important;
 }
 
-/* Stack B — middle bay. */
-.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:first-child:not(:disabled)):has(.archive-room-nav > button:last-child:not(:disabled))
-  .archive-bay-track > .archive-bay:nth-child(2) {
-  visibility: visible !important;
-  opacity: 1 !important;
+/* Keep the actual archive cartons as the hit targets. Decorative descendants
+ * cannot steal the pointer from their parent button. */
+.archive-experience.is-lit:not(.is-collection-open)
+  .archive-bay.is-active .archive-box--available,
+.archive-experience.is-lit:not(.is-collection-open)
+  .archive-bay.is-active .archive-case-box {
   pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* Stack C — final bay. */
-.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:last-child:disabled)
-  .archive-bay-track > .archive-bay:nth-child(3) {
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
+.archive-box--available > *,
+.archive-case-box > * {
+  pointer-events: none;
+}
+
+.archive-shelf-id,
+.archive-case-shelf-heading,
+.archive-case-shelf-lower,
+.archive-sealed-cartons {
+  pointer-events: none;
 }
 
 /* Nothing readable from the stacks is painted before the lamp is turned on. */
