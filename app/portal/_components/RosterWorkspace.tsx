@@ -545,7 +545,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       </div>
 
       {showCreate ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) closeCreate(); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) closeCreate(); }}>
           <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="create-account-title">
             <div className="portal-modal-heading">
               <div><span>Command credential assignment</span><h2 id="create-account-title">Create personnel account</h2></div>
@@ -576,7 +576,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       ) : null}
 
       {showCallSignEditor && selected ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setShowCallSignEditor(false); }}>
+        <div className="portal-modal-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) setShowCallSignEditor(false); }}>
           <section className="portal-modal portal-modal--compact" role="dialog" aria-modal="true" aria-labelledby="call-sign-title">
             <div className="portal-modal-heading">
               <div><span>Operational assignment</span><h2 id="call-sign-title">Reassign call sign</h2></div>
