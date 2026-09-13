@@ -1,0 +1,234 @@
+/* Physical archive-folder interaction adapted from the public 3D folder demo.
+ * Uses the existing real archive folder buttons and record counts; no duplicate data layer.
+ */
+
+@media (min-width: 860px) {
+  .archive-folder-directory {
+    position: relative;
+    min-height: 390px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    perspective: 1200px;
+    transform-style: preserve-3d;
+    overflow: visible;
+  }
+
+  .archive-folder-directory::before {
+    position: absolute;
+    z-index: 2;
+    right: 5%;
+    bottom: 42px;
+    left: 5%;
+    height: 250px;
+    border: 1px solid rgba(67, 51, 29, .72);
+    border-radius: 5px 8px 7px 7px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 5px),
+      linear-gradient(90deg, rgba(55,42,25,.08), transparent 15%, transparent 84%, rgba(55,42,25,.12)),
+      #8c7147;
+    box-shadow: inset 0 14px 28px rgba(39,28,16,.24), 0 24px 45px rgba(0,0,0,.34);
+    content: "";
+    transform: rotateY(2.4deg) rotateX(1deg);
+    transform-origin: bottom center;
+  }
+
+  .archive-folder-directory::after {
+    position: absolute;
+    z-index: 40;
+    right: 2%;
+    bottom: 20px;
+    left: 2%;
+    height: 166px;
+    border: 1px solid rgba(61, 47, 28, .8);
+    border-radius: 5px 5px 9px 9px;
+    background:
+      repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 5px),
+      linear-gradient(180deg, #9c7d4d 0%, #84673e 100%);
+    box-shadow: 0 25px 44px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.05);
+    content: "";
+    pointer-events: none;
+    transform: rotateX(-22deg) rotateY(1deg);
+    transform-origin: bottom center;
+    transition: transform 520ms cubic-bezier(.2,.72,.2,1);
+  }
+
+  .archive-folder-directory:hover::after,
+  .archive-folder-directory:focus-within::after {
+    transform: rotateX(-37deg) rotateY(1deg);
+  }
+
+  .archive-directory-box-label {
+    position: absolute;
+    z-index: 45;
+    right: 13%;
+    bottom: 69px;
+    left: 13%;
+    min-height: 74px;
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    padding: 11px 16px;
+    border: 1px solid rgba(78,68,52,.42);
+    background:
+      repeating-linear-gradient(0deg, rgba(92,81,61,.025) 0 1px, transparent 1px 4px),
+      #ddd4bd;
+    box-shadow: 0 4px 10px rgba(36,28,18,.15);
+    pointer-events: none;
+    transform: rotate(-.35deg) translateZ(18px);
+  }
+
+  .archive-directory-box-label span,
+  .archive-directory-box-label small {
+    color: rgba(78,68,52,.7);
+    font-size: 7px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+
+  .archive-directory-box-label strong {
+    overflow: hidden;
+    color: #373129;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 14px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .archive-folder-directory > button {
+    position: absolute;
+    z-index: 10;
+    right: 10%;
+    bottom: 116px;
+    left: 10%;
+    height: 112px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-content: start;
+    gap: 7px 14px;
+    padding: 18px 17px 14px;
+    border: 1px solid rgba(91,69,34,.45);
+    border-radius: 5px 8px 5px 5px;
+    background:
+      repeating-linear-gradient(0deg, rgba(104,79,35,.025) 0 1px, transparent 1px 4px),
+      linear-gradient(180deg, #c9ad70, #b99758);
+    box-shadow: 0 8px 15px rgba(0,0,0,.2);
+    color: #3f321f;
+    cursor: pointer;
+    text-align: left;
+    transform-origin: bottom center;
+    transition:
+      transform 520ms cubic-bezier(.22,1,.36,1),
+      filter 220ms ease,
+      box-shadow 220ms ease,
+      opacity 220ms ease;
+    will-change: transform;
+  }
+
+  .archive-folder-directory > button::before {
+    position: absolute;
+    top: -18px;
+    left: 7%;
+    width: 43%;
+    height: 20px;
+    border: inherit;
+    border-bottom: 0;
+    border-radius: 4px 8px 0 0;
+    background: inherit;
+    content: "";
+  }
+
+  .archive-folder-directory > button::after {
+    position: absolute;
+    top: 44px;
+    right: 15px;
+    left: 15px;
+    height: 1px;
+    background: rgba(75,58,31,.15);
+    box-shadow: 0 17px rgba(75,58,31,.11), 0 34px rgba(75,58,31,.08);
+    content: "";
+    pointer-events: none;
+  }
+
+  .archive-folder-directory > button span,
+  .archive-folder-directory > button small {
+    position: relative;
+    z-index: 2;
+  }
+
+  .archive-folder-directory > button span {
+    overflow: hidden;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .archive-folder-directory > button small {
+    padding: 3px 5px;
+    border: 1px solid rgba(78,59,29,.22);
+    background: rgba(238,226,196,.5);
+    color: rgba(67,52,29,.68);
+    font-size: 6px;
+    font-weight: 780;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+  }
+
+  .archive-folder-directory > button:nth-of-type(1) { z-index: 28; transform: translateY(-158px) translateX(-12px) rotate(-7deg) translateZ(30px); }
+  .archive-folder-directory > button:nth-of-type(2) { z-index: 27; transform: translateY(-137px) translateX(13px) rotate(5deg) translateZ(24px); }
+  .archive-folder-directory > button:nth-of-type(3) { z-index: 26; transform: translateY(-115px) translateX(-7px) rotate(-4deg) translateZ(18px); }
+  .archive-folder-directory > button:nth-of-type(4) { z-index: 25; transform: translateY(-93px) translateX(11px) rotate(3deg) translateZ(12px); }
+  .archive-folder-directory > button:nth-of-type(5) { z-index: 24; transform: translateY(-71px) translateX(-5px) rotate(-2deg) translateZ(8px); }
+  .archive-folder-directory > button:nth-of-type(6) { z-index: 23; transform: translateY(-49px) translateX(8px) rotate(1.4deg) translateZ(4px); }
+  .archive-folder-directory > button:nth-of-type(7) { z-index: 22; transform: translateY(-29px) translateX(-3px) rotate(-1deg); }
+  .archive-folder-directory > button:nth-of-type(8) { z-index: 21; transform: translateY(-10px) translateX(4px) rotate(.8deg); }
+
+  .archive-folder-directory > button:not(:disabled):hover,
+  .archive-folder-directory > button:not(:disabled):focus-visible {
+    z-index: 35;
+    filter: brightness(1.045);
+    box-shadow: 0 18px 28px rgba(0,0,0,.32), 0 0 0 1px rgba(212,190,121,.13);
+    outline: none;
+  }
+
+  .archive-folder-directory > button:nth-of-type(1):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(1):focus-visible { transform: translateY(-174px) translateX(-12px) rotate(-7deg) translateZ(42px); }
+  .archive-folder-directory > button:nth-of-type(2):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(2):focus-visible { transform: translateY(-153px) translateX(13px) rotate(5deg) translateZ(36px); }
+  .archive-folder-directory > button:nth-of-type(3):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(3):focus-visible { transform: translateY(-131px) translateX(-7px) rotate(-4deg) translateZ(30px); }
+  .archive-folder-directory > button:nth-of-type(4):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(4):focus-visible { transform: translateY(-109px) translateX(11px) rotate(3deg) translateZ(24px); }
+  .archive-folder-directory > button:nth-of-type(5):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(5):focus-visible { transform: translateY(-87px) translateX(-5px) rotate(-2deg) translateZ(20px); }
+  .archive-folder-directory > button:nth-of-type(6):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(6):focus-visible { transform: translateY(-65px) translateX(8px) rotate(1.4deg) translateZ(16px); }
+  .archive-folder-directory > button:nth-of-type(7):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(7):focus-visible { transform: translateY(-45px) translateX(-3px) rotate(-1deg) translateZ(12px); }
+  .archive-folder-directory > button:nth-of-type(8):not(:disabled):hover,
+  .archive-folder-directory > button:nth-of-type(8):focus-visible { transform: translateY(-26px) translateX(4px) rotate(.8deg) translateZ(10px); }
+
+  .archive-folder-directory > button.is-selected {
+    z-index: 38;
+    border-color: rgba(116,83,35,.72);
+    filter: brightness(1.08) saturate(.92);
+    box-shadow: 0 20px 32px rgba(0,0,0,.36), 0 0 0 2px rgba(212,190,121,.22);
+  }
+
+  .archive-folder-directory > button:disabled {
+    opacity: .36;
+    cursor: default;
+    filter: grayscale(.28);
+  }
+}
+
+@media (max-width: 1050px) and (min-width: 860px) {
+  .archive-folder-directory { min-height: 350px; transform: scale(.9); transform-origin: center center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-folder-directory::after,
+  .archive-folder-directory > button { transition: none !important; }
+}
