@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { PortalDialog } from "../../../_components/PortalDialog";
+import { GlassBlobToggle } from "../../../_components/GlassBlobToggle";
 import type { ApplicationQuestionType, RecruitmentApplicationQuestion } from "@/lib/recruitment/application";
 import styles from "./ApplicationEditor.module.css";
 
@@ -184,7 +185,13 @@ export function ApplicationEditor({ initialQuestions }: { initialQuestions: Recr
           <div className={styles.two}><label>Sidebar title<input value={draft.sectionShortTitle} onChange={(event) => setDraft({ ...draft, sectionShortTitle: event.target.value })} placeholder="Short section name" /></label><label>Section eyebrow<input value={draft.sectionEyebrow} onChange={(event) => setDraft({ ...draft, sectionEyebrow: event.target.value })} placeholder="Example: Candidate Judgment" /></label></div>
           <label>Section description<textarea rows={2} value={draft.sectionDescription} onChange={(event) => setDraft({ ...draft, sectionDescription: event.target.value })} /></label>
           <label>Question<textarea rows={3} value={draft.prompt} onChange={(event) => setDraft({ ...draft, prompt: event.target.value })} placeholder="Enter the question applicants will see…" /></label>
-          <div className={styles.two}><label>Format<select value={draft.questionType} disabled={draft.locked} onChange={(event) => setDraft({ ...draft, questionType: event.target.value as ApplicationQuestionType })}><option value="short_text">Text</option><option value="long_text">Long Text</option><option value="multiple_choice">Multiple Choice</option><option value="yes_no">Yes / No</option></select></label><label className={styles.check}><input type="checkbox" checked={draft.required} disabled={draft.locked} onChange={(event) => setDraft({ ...draft, required: event.target.checked })} /><span>Required question</span></label></div>
+          <div className={styles.two}>
+            <label>Format<select value={draft.questionType} disabled={draft.locked} onChange={(event) => setDraft({ ...draft, questionType: event.target.value as ApplicationQuestionType })}><option value="short_text">Text</option><option value="long_text">Long Text</option><option value="multiple_choice">Multiple Choice</option><option value="yes_no">Yes / No</option></select></label>
+            <div className="portal-glass-setting-row portal-glass-setting-row--compact">
+              <div><strong>Required question</strong><small>Applicants must answer this question before submitting.</small></div>
+              <GlassBlobToggle checked={draft.required} disabled={draft.locked} label="Require this application question" onChange={(required) => setDraft({ ...draft, required })} />
+            </div>
+          </div>
           {draft.questionType === "multiple_choice" ? <label>Multiple choice options<textarea rows={5} value={draft.optionsText} onChange={(event) => setDraft({ ...draft, optionsText: event.target.value })} placeholder={"One option per line\nOption A\nOption B"} /><small>Enter one choice per line. At least two are required.</small></label> : null}
           <label>Helper text <small>Optional</small><textarea rows={2} value={draft.helpText} onChange={(event) => setDraft({ ...draft, helpText: event.target.value })} placeholder="Additional context shown below the question…" /></label>
           {(draft.questionType === "short_text" || draft.questionType === "long_text") ? <label>Placeholder <small>Optional</small><input value={draft.placeholder} onChange={(event) => setDraft({ ...draft, placeholder: event.target.value })} placeholder="Example response or guidance…" /></label> : null}

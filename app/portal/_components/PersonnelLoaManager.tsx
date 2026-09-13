@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { GlassBlobToggle } from "./GlassBlobToggle";
 
 type ActiveLeave = {
   id: string;
@@ -37,6 +38,7 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
   const [leaveType, setLeaveType] = useState("Personal");
   const [startsOn, setStartsOn] = useState(today);
   const [expectedReturnOn, setExpectedReturnOn] = useState("");
+  const [openEnded, setOpenEnded] = useState(true);
   const [notes, setNotes] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -50,7 +52,11 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       setError("Enter the LOA start date.");
       return;
     }
-    if (expectedReturnOn && expectedReturnOn < startsOn) {
+    if (!openEnded && !expectedReturnOn) {
+      setError("Enter the expected return date or turn on Open-ended LOA.");
+      return;
+    }
+    if (!openEnded && expectedReturnOn < startsOn) {
       setError("Expected return date must be on or after the LOA start date.");
       return;
     }
@@ -60,7 +66,7 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       p_profile_id: profileId,
       p_leave_type: leaveType,
       p_starts_on: startsOn,
-      p_expected_return_on: expectedReturnOn || null,
+      p_expected_return_on: openEnded ? null : expectedReturnOn,
       p_notes: notes.trim() || null,
     });
     setPending(false);
@@ -70,11 +76,12 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       return;
     }
 
-    setNotice(expectedReturnOn
-      ? `${displayName} now has an approved LOA record through ${formatDate(expectedReturnOn)}.`
-      : `${displayName} now has an open-ended approved LOA and will remain LOA until you manually end it.`);
+    setNotice(openEnded
+      ? `${displayName} now has an open-ended approved LOA and will remain LOA until you manually end it.`
+      : `${displayName} now has an approved LOA record through ${formatDate(expectedReturnOn)}.`);
     setNotes("");
     setExpectedReturnOn("");
+    setOpenEnded(true);
     router.refresh();
   }
 
@@ -106,7 +113,7 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
         <div><p>Personnel administration</p><h2>Leave of Absence</h2></div>
         <span>{personnelId}</span>
       </div>
-      <p className="personnel-admin-control__intro">Record an approved LOA directly for this member. The expected return date is optional; leave it blank for an open-ended LOA that stays active until Command manually ends it.</p>
+      <p className="personnel-admin-control__intro">Record an approved LOA directly for this member. Use the open-ended setting when Command does not yet know the expected return date.</p>
 
       {activeLeave ? (
         <div className="portal-form-success" role="status">
@@ -115,10 +122,26 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
         </div>
       ) : null}
 
+      <div className="portal-glass-setting-row portal-glass-setting-row--compact personnel-loa-open-ended">
+        <div>
+          <strong>Open-ended LOA</strong>
+          <small>Leave remains active until Command manually ends it. Turn this off to set an expected return date.</small>
+        </div>
+        <GlassBlobToggle
+          checked={openEnded}
+          disabled={pending}
+          label="Use an open-ended LOA"
+          onChange={(checked) => {
+            setOpenEnded(checked);
+            if (checked) setExpectedReturnOn("");
+          }}
+        />
+      </div>
+
       <div className="personnel-admin-fields personnel-admin-fields--identity">
         <label><span>Leave type</span><select value={leaveType} onChange={(event) => setLeaveType(event.target.value)} disabled={pending}>{leaveTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label><span>Starts on</span><input type="date" value={startsOn} onChange={(event) => setStartsOn(event.target.value)} disabled={pending} /></label>
-        <label><span>Expected return <small style={{ opacity: .65 }}>(optional)</small></span><input type="date" value={expectedReturnOn} min={startsOn || undefined} onChange={(event) => setExpectedReturnOn(event.target.value)} disabled={pending} /></label>
+        <label><span>Expected return <small style={{ opacity: .65 }}>{openEnded ? "(open-ended)" : "(required)"}</small></span><input type="date" value={expectedReturnOn} min={startsOn || undefined} onChange={(event) => setExpectedReturnOn(event.target.value)} disabled={pending || openEnded} /></label>
       </div>
 
       <label className="portal-call-sign-field">
@@ -127,10 +150,10 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
       </label>
 
       <div className="personnel-admin-actions">
-        <span>{activeLeave ? "Current / upcoming approved LOA detected" : expectedReturnOn ? "LOA will use the selected expected return date" : "No return date set · LOA will stay active until ended"}</span>
+        <span>{activeLeave ? "Current / upcoming approved LOA detected" : openEnded ? "Open-ended · LOA will stay active until ended" : expectedReturnOn ? "LOA will use the selected expected return date" : "Expected return date required"}</span>
         <div className="portal-control-actions">
           {activeLeave ? <button className="portal-button portal-button--danger" disabled={pending} onClick={() => void endLeave()} type="button">{pending ? "Saving…" : "End / Cancel LOA"}</button> : null}
-          <button className="portal-button portal-button--primary" disabled={pending || !startsOn} onClick={() => void recordLeave()} type="button">{pending ? "Saving…" : "Record LOA"}</button>
+          <button className="portal-button portal-button--primary" disabled={pending || !startsOn || (!openEnded && !expectedReturnOn)} onClick={() => void recordLeave()} type="button">{pending ? "Saving…" : "Record LOA"}</button>
         </div>
       </div>
 

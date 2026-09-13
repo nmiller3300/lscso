@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { GlassBlobToggle } from "./GlassBlobToggle";
 
 type PortalTheme = "light" | "dark";
 
@@ -18,8 +19,7 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     if (current === "dark" || current === "light") setTheme(current);
   }, []);
 
-  function toggleTheme() {
-    const nextTheme: PortalTheme = theme === "dark" ? "light" : "dark";
+  function applyTheme(nextTheme: PortalTheme) {
     setTheme(nextTheme);
     const root = getPortalRoot();
     if (root) root.dataset.theme = nextTheme;
@@ -31,16 +31,20 @@ export function ThemeToggle({ compact = false }: { compact?: boolean }) {
     }
   }
 
+  const dark = theme === "dark";
+
   return (
-    <button
-      aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-      aria-pressed={theme === "dark"}
-      className={compact ? "portal-theme-toggle portal-theme-toggle--compact" : "portal-theme-toggle"}
-      onClick={toggleTheme}
-      type="button"
-    >
-      <span aria-hidden="true">{theme === "dark" ? "☀" : "◐"}</span>
-      <strong>{theme === "dark" ? "Light" : "Dark"} mode</strong>
-    </button>
+    <div className={`${compact ? "portal-theme-toggle portal-theme-toggle--compact" : "portal-theme-toggle"} portal-theme-toggle--glass`}>
+      <span className="portal-theme-toggle__icon" aria-hidden="true">{dark ? "☾" : "☀"}</span>
+      <div className="portal-theme-toggle__copy">
+        <strong>{dark ? "Dark mode" : "Light mode"}</strong>
+        {!compact ? <small>Portal appearance</small> : null}
+      </div>
+      <GlassBlobToggle
+        checked={dark}
+        label="Use dark portal mode"
+        onChange={(checked) => applyTheme(checked ? "dark" : "light")}
+      />
+    </div>
   );
 }

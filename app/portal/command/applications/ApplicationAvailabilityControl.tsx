@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { GlassBlobToggle } from "../../_components/GlassBlobToggle";
 
 type Props = {
   initialIsOpen: boolean;
@@ -77,13 +78,18 @@ export function ApplicationAvailabilityControl({
         </div>
 
         <div className="recruitment-availability__controls">
-          <label className="portal-checkbox-row">
-            <input checked={isOpen} disabled={pending} onChange={(event) => setIsOpen(event.target.checked)} type="checkbox" />
-            <span>
+          <div className="portal-glass-setting-row portal-glass-setting-row--compact">
+            <div>
               <strong>Accept new applications</strong>
-              <small>Turning this off immediately blocks the form and all new submissions.</small>
-            </span>
-          </label>
+              <small>Turning this off immediately blocks the form and all new submissions after you save.</small>
+            </div>
+            <GlassBlobToggle
+              checked={isOpen}
+              disabled={pending}
+              label="Accept new applications"
+              onChange={setIsOpen}
+            />
+          </div>
           <button className="portal-button portal-button--primary" disabled={pending || !hasChanges} onClick={save} type="button">
             {pending ? "Updating…" : hasChanges ? (isOpen ? "Open applications" : "Close applications") : "Status saved"}
           </button>

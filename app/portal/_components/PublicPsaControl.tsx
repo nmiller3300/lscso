@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
+import { GlassBlobToggle } from "./GlassBlobToggle";
 import styles from "./PublicPsaControl.module.css";
 
 type PsaState = {
@@ -109,14 +110,18 @@ export function PublicPsaControl() {
             </label>
           </div>
 
-          <label className="portal-checkbox-row" style={{ marginTop: 14 }}>
-            <input
+          <div className="portal-glass-setting-row" style={{ marginTop: 14 }}>
+            <div>
+              <strong>Show PSA on the public homepage</strong>
+              <small>Turn this off and save to immediately remove the banner without deleting the message.</small>
+            </div>
+            <GlassBlobToggle
               checked={psa.isActive}
-              onChange={(event) => setPsa((current) => ({ ...current, isActive: event.target.checked }))}
-              type="checkbox"
+              disabled={pending}
+              label="Show PSA on the public homepage"
+              onChange={(isActive) => setPsa((current) => ({ ...current, isActive }))}
             />
-            <span><strong>Show PSA on the public homepage</strong><small>Turn this off and save to immediately remove the banner without deleting the message.</small></span>
-          </label>
+          </div>
 
           {error ? <div className="portal-form-error" role="alert" style={{ marginTop: 14 }}>{error}</div> : null}
           {notice ? <div className="portal-form-protection" role="status" style={{ marginTop: 14 }}><strong>PSA updated</strong><span>{notice}</span></div> : null}
