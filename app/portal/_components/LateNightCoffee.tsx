@@ -40,6 +40,17 @@ export function LateNightCoffee() {
   const pourTimer = useRef<number | null>(null);
 
   useEffect(() => {
+    const handleManualOpen = () => {
+      setPouring(false);
+      setReady(false);
+      setOpen(true);
+    };
+
+    window.addEventListener("lscso:coffee-break", handleManualOpen);
+    return () => window.removeEventListener("lscso:coffee-break", handleManualOpen);
+  }, []);
+
+  useEffect(() => {
     if (!isPortalWorkArea(pathname)) return;
 
     const forcePreview = new URLSearchParams(window.location.search).get("coffee") === "1";
@@ -100,8 +111,8 @@ export function LateNightCoffee() {
 
         <div className="portal-coffee-copy">
           <span>LSCSO Night Shift</span>
-          <h2 id="portal-coffee-title">Up late? Have a cup of joe.</h2>
-          <p>{ready ? "Fresh pot. Back to the shift." : "It’s after midnight at the Sheriff’s Office. Even paperwork needs caffeine."}</p>
+          <h2 id="portal-coffee-title">Burning the midnight oil? Have a cup of joe instead.</h2>
+          <p>{ready ? "Fresh pot. Back to the shift." : "The pot is always on in Personnel Operations. Take a minute, then get back to it."}</p>
         </div>
 
         <div className="portal-coffee-actions">
