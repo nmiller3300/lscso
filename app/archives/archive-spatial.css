@@ -180,6 +180,22 @@
   }
 }
 
+/* Keep the fixed stack navigator above decorative/composited archive layers and
+   make taps deterministic in iOS/WebKit in-app browsers. */
+.archive-room-nav {
+  z-index: 90;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}
+
+.archive-room-nav > button {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .archive-shelf-wall--bay,
   .archive-case-shelf,
