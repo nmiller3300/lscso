@@ -11,8 +11,9 @@ export function PublicSiteFrame({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const portalRoute = pathname.startsWith("/portal");
   const maintenanceRoute = pathname === "/maintenance";
+  const archiveRoute = pathname.startsWith("/archives");
 
-  if (portalRoute || maintenanceRoute) return <>{children}</>;
+  if (portalRoute || maintenanceRoute || archiveRoute) return <>{children}</>;
 
   return (
     <>
