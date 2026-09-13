@@ -10,7 +10,7 @@ export function PortalSignOut({ label }: { label: string }) {
     const supabase = createClient();
     await supabase.rpc("record_session_event", {
       session_event_type: "Sign Out",
-      session_user_agent: null,
+      session_user_agent: navigator.userAgent,
     });
     await supabase.auth.signOut({ scope: "local" });
     router.replace("/portal");
