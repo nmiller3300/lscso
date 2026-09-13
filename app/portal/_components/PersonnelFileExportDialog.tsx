@@ -84,7 +84,7 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
   }
 
   return (
-    <div className="portal-modal-backdrop personnel-export-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+    <div className="portal-modal-backdrop personnel-export-backdrop" role="presentation" onPointerDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
       <section className="portal-modal personnel-export-dialog" role="dialog" aria-modal="true" aria-labelledby="personnel-file-export-title">
         <div className="portal-modal-heading personnel-export-heading">
           <div><span>Official personnel file release</span><h2 id="personnel-file-export-title">Export Personnel File</h2></div>
