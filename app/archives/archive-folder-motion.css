@@ -1,0 +1,101 @@
+/*
+ * Folder-only interaction polish adapted from the supplied folder animation reference.
+ * This file intentionally does not touch the archive lamp, room navigation, shelving,
+ * or collection overlay. It only enhances the existing real archive folder controls.
+ */
+
+.archive-folder-directory > button {
+  isolation: isolate;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.archive-folder-directory > button > span,
+.archive-folder-directory > button > small {
+  position: relative;
+  z-index: 3;
+}
+
+/* When a real archive folder is selected, let a paper slip settle into the folder.
+ * The paper lives inside the button, so it cannot create a second interaction layer
+ * over neighboring folders. */
+.archive-folder-directory > button.is-selected::after {
+  position: absolute;
+  z-index: 1;
+  top: -15px;
+  right: 14%;
+  left: 14%;
+  height: 32px;
+  border: 1px solid rgba(94, 82, 62, 0.32);
+  border-radius: 3px 4px 1px 1px;
+  background:
+    repeating-linear-gradient(0deg, rgba(84, 76, 63, 0.025) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg, #f1ecdf, #ddd4c2);
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.16);
+  content: "";
+  opacity: 1;
+  pointer-events: none;
+  transform-origin: 50% 100%;
+  animation: archiveFolderPaperSettle 430ms cubic-bezier(.22, 1, .36, 1) both;
+}
+
+@media (min-width: 720px) {
+  .archive-folder-directory > button.is-selected::after {
+    top: -42px;
+    right: 16%;
+    left: 16%;
+    height: 56px;
+    border-radius: 4px 5px 1px 1px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .archive-folder-directory > button.is-selected {
+    animation: archiveFolderFaceSettle 420ms cubic-bezier(.22, 1, .36, 1) both;
+  }
+}
+
+/* Coarse-pointer browsers can retain :hover after a tap. Keep the visual feedback
+ * inside the selected folder instead of lifting a full rectangular hit layer. */
+@media (hover: none), (pointer: coarse) {
+  .archive-folder-directory > button {
+    touch-action: manipulation;
+  }
+
+  .archive-folder-directory > button:active:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .archive-folder-directory > button.is-selected::after {
+    animation-duration: 360ms;
+  }
+}
+
+@keyframes archiveFolderPaperSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) scale(.86);
+  }
+  58% {
+    opacity: 1;
+    transform: translateY(3px) scale(1.025);
+  }
+  78% {
+    transform: translateY(-2px) scale(.99);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes archiveFolderFaceSettle {
+  0% { filter: brightness(1); }
+  48% { filter: brightness(1.11) saturate(.94); }
+  100% { filter: brightness(1.08) saturate(.92); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .archive-folder-directory > button.is-selected,
+  .archive-folder-directory > button.is-selected::after {
+    animation: none !important;
+  }
+}
