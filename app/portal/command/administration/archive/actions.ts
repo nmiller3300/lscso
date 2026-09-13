@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
@@ -36,12 +37,13 @@ async function requireArchiveAuthority() {
 function revalidateArchiveViews() {
   revalidatePath("/portal/command/administration/archive");
   revalidatePath("/archives");
+  revalidatePath("/archives/current");
 }
 
 export async function loadArchiveRecords() {
   await requireArchiveAuthority();
-  const supabase = await createClient() as any;
-  const { data, error } = await supabase
+  const admin = createAdminClient() as any;
+  const { data, error } = await admin
     .from("current_administration_archive")
     .select("id,record_owner,folder,document_code,title,date_label,release_status,status,stamp,summary,public_body,internal_notes,created_at,updated_at,published_at")
     .order("created_at", { ascending: false });
