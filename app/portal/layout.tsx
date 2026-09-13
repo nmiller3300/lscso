@@ -29,6 +29,7 @@ import "./portal-copy-compact.css";
 import "./training-operations.css";
 import "./personnel-directory-exports.css";
 import "./portal-ui-upgrades.css";
+import "./portal-ui-upgrades-2.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
@@ -36,9 +37,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default function PortalLayout({
-  children,
-}: Readonly<{ children: ReactNode }>) {
+export default function PortalLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="portal-root" data-theme="dark" id="lscso-portal-root">
       <MaintenanceNotice scope="personnel_portal" variant="portal" />
