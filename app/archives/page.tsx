@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { ArchiveEntranceV2, type PublicArchiveRecord } from "./ArchiveEntranceV2";
+import { ArchiveNavigationEnhancer } from "./ArchiveNavigationEnhancer";
 import "./archive-refinements.css";
 import "./archive-depth.css";
 import "./archive-room.css";
+import "./archive-spatial.css";
 
 export const metadata: Metadata = {
   title: "Historical Records & Archives",
@@ -32,5 +34,10 @@ export default async function ArchivesPage() {
         body: Array.isArray(row.public_body) ? row.public_body : [],
       }));
 
-  return <ArchiveEntranceV2 currentAdministrationRecords={currentAdministrationRecords} />;
+  return (
+    <>
+      <ArchiveEntranceV2 currentAdministrationRecords={currentAdministrationRecords} />
+      <ArchiveNavigationEnhancer />
+    </>
+  );
 }
