@@ -21,8 +21,8 @@ scanRoots.forEach(collect);
 
 const errors = [];
 const forbidden = [
-  [/navigator\.userAgent/i, "Do not device-sniff userAgent; use responsive CSS/capability queries."],
-  [/navigator\.platform/i, "Do not device-sniff navigator.platform; use responsive CSS/capability queries."],
+  [/navigator\.(?:userAgent|platform)\s*\.(?:includes|match|indexOf|startsWith|endsWith|toLowerCase)\s*\(/i, "Do not branch UI behavior by browser/device identity; use responsive CSS or capability queries."],
+  [/(?:if|switch)\s*\([^)]*navigator\.(?:userAgent|platform)/i, "Do not branch UI behavior by browser/device identity; use responsive CSS or capability queries."],
   [/screen\.(width|height)/i, "Do not branch behavior on physical screen dimensions; use layout/capability queries."],
   [/onMouse(?:Down|Up|Move|Enter|Leave)\s*=/, "Use pointer/click/focus behavior instead of mouse-only interaction handlers."],
   [/onTouch(?:Start|Move|End|Cancel)\s*=/, "Use Pointer Events instead of touch-only interaction handlers."],
