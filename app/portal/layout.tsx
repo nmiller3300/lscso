@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { MaintenanceNotice } from "../_components/MaintenanceNotice";
+import { LateNightCoffee } from "./_components/LateNightCoffee";
 import "./portal.css";
 import "./medals.css";
 import "./certifications.css";
@@ -27,6 +28,7 @@ import "./fivem-pairing.css";
 import "./portal-copy-compact.css";
 import "./training-operations.css";
 import "./personnel-directory-exports.css";
+import "./portal-ui-upgrades.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
@@ -41,6 +43,7 @@ export default function PortalLayout({
     <div className="portal-root" data-theme="dark" id="lscso-portal-root">
       <MaintenanceNotice scope="personnel_portal" variant="portal" />
       {children}
+      <LateNightCoffee />
     </div>
   );
 }
