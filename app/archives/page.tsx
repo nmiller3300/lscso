@@ -8,6 +8,7 @@ import "./archive-depth.css";
 import "./archive-room.css";
 import "./archive-spatial.css";
 import "./archive-era.css";
+import "./archive-folder-readability.css";
 
 export const metadata: Metadata = {
   title: "Historical Records & Archives",
