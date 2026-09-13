@@ -18,6 +18,19 @@ type Administration = {
   slug: string;
 };
 
+type FolderKey = "executive" | "founding" | "orders" | "photographs";
+
+type FolderRecord = {
+  key: FolderKey;
+  label: string;
+  fileNumber: string;
+  title: string;
+  years: string;
+  body: string;
+  footer: string;
+  available: boolean;
+};
+
 const administrations: Administration[] = [
   { sheriff: "Warren McCall", undersheriff: "Arthur Bell", years: "1963–1978", slug: "mccall-bell" },
   { sheriff: "Elena Vance", undersheriff: "Raymond Cole", years: "1978–1994", slug: "vance-cole" },
@@ -38,14 +51,51 @@ const ambientBoxes = [
   "COUNTY SERVICE FILES",
 ];
 
-const mccallBellSummary =
-  "The McCall–Bell administration established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization in 1963. The pair organized the first unified patrol structure, created a formal chain of command, opened the Office’s original headquarters, and established early standards for report writing, prisoner handling, and countywide calls for service as Los Santos County began a period of rapid growth.";
-
-const mccallBellFolders = [
-  "Executive File",
-  "Founding Records",
-  "Administrative Orders",
-  "Photographs",
+const mccallBellFolders: FolderRecord[] = [
+  {
+    key: "executive",
+    label: "Executive File",
+    fileNumber: "EXECUTIVE FILE · FOUNDING ADMINISTRATION",
+    title: "Warren McCall / Arthur Bell",
+    years: "1963–1978",
+    body:
+      "The McCall–Bell administration established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization in 1963. The pair organized the first unified patrol structure, created a formal chain of command, opened the Office’s original headquarters, and established early standards for report writing, prisoner handling, and countywide calls for service as Los Santos County began a period of rapid growth.",
+    footer: "Permanent Historical Retention",
+    available: true,
+  },
+  {
+    key: "founding",
+    label: "Founding Records",
+    fileNumber: "FOUNDING RECORD · ORGANIZATIONAL ESTABLISHMENT",
+    title: "Establishment of the Sheriff’s Office",
+    years: "1963",
+    body:
+      "In 1963, Sheriff Warren McCall and Undersheriff Arthur Bell established the Los Santos County Sheriff’s Office as a permanent county law-enforcement organization. Their administration organized the Office’s first unified patrol structure, created a formal chain of command, and opened the original headquarters.",
+    footer: "Office Formation Record",
+    available: true,
+  },
+  {
+    key: "orders",
+    label: "Administrative Orders",
+    fileNumber: "ADMINISTRATIVE ORDERS · EARLY OPERATING STANDARDS",
+    title: "Early Department Standards",
+    years: "1963–1978",
+    body:
+      "During the McCall–Bell administration, the Sheriff’s Office established early operating standards for report writing, prisoner handling, and countywide calls for service. These standards were developed as Los Santos County entered a period of rapid growth and the new Office assumed a broader countywide service role.",
+    footer: "Executive Administrative Series",
+    available: true,
+  },
+  {
+    key: "photographs",
+    label: "Photographs",
+    fileNumber: "PHOTOGRAPHIC HOLDINGS · COLLECTION INDEX",
+    title: "Photographic Materials",
+    years: "1963–1978",
+    body:
+      "Photographic holdings for the founding administration remain under archival cataloging. Individual materials will be released to this collection only after historical review and identification are complete.",
+    footer: "Cataloging in Progress",
+    available: false,
+  },
 ];
 
 export function ArchiveEntrance() {
@@ -53,6 +103,7 @@ export function ArchiveEntrance() {
   const [pull, setPull] = useState<PullState>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<string | null>(null);
+  const [selectedFolder, setSelectedFolder] = useState<FolderKey>("executive");
   const origin = useRef<{ x: number; y: number } | null>(null);
   const suppressClick = useRef(false);
 
@@ -64,6 +115,7 @@ export function ArchiveEntrance() {
   }, []);
 
   const collectionOpen = selectedCollection === "mccall-bell";
+  const activeRecord = mccallBellFolders.find((folder) => folder.key === selectedFolder) ?? mccallBellFolders[0];
 
   const toggleLights = () => {
     if (collectionOpen) return;
@@ -109,6 +161,12 @@ export function ArchiveEntrance() {
     }
   };
 
+  const openMcCallBell = () => {
+    if (!lightsOn) return;
+    setSelectedFolder("executive");
+    setSelectedCollection("mccall-bell");
+  };
+
   const renderAdministrationBox = (administration: (typeof shelfBoxes)[number]) => {
     const content = (
       <>
@@ -118,6 +176,7 @@ export function ArchiveEntrance() {
           <span>Office of the Sheriff · Box {administration.number}</span>
           <strong>{administration.sheriff} / {administration.undersheriff}</strong>
           <small>{administration.years}</small>
+          {administration.slug === "mccall-bell" ? <em>Available for historical review</em> : null}
         </div>
       </>
     );
@@ -128,9 +187,7 @@ export function ArchiveEntrance() {
           className="archive-box archive-box--administration archive-box--available"
           type="button"
           key={administration.slug}
-          onClick={() => {
-            if (lightsOn) setSelectedCollection("mccall-bell");
-          }}
+          onClick={openMcCallBell}
           aria-label="Open the Warren McCall and Arthur Bell administration archive"
           disabled={!lightsOn}
         >
@@ -205,6 +262,12 @@ export function ArchiveEntrance() {
             ))}
           </div>
         </section>
+
+        <div className="archive-mobile-depth" aria-hidden="true">
+          <span>STACK A · LOWER RECORDS</span>
+          <strong>EXECUTIVE ARCHIVE</strong>
+          <small>Continue through the collection</small>
+        </div>
 
         <div className="archive-room-floor" aria-hidden="true" />
       </div>
@@ -289,14 +352,24 @@ export function ArchiveEntrance() {
           </div>
 
           <div className="archive-worktable" aria-label="McCall Bell administration archive box">
-            <div className="archive-open-box" aria-hidden="true">
-              <div className="archive-open-box-lid" />
-              <div className="archive-open-box-back" />
-              <div className="archive-folder-stack">
+            <div className="archive-open-box">
+              <div className="archive-open-box-lid" aria-hidden="true" />
+              <div className="archive-open-box-back" aria-hidden="true" />
+              <div className="archive-folder-stack" aria-label="Archive folders">
                 {mccallBellFolders.map((folder, index) => (
-                  <div className={`archive-folder archive-folder--${index + 1}`} key={folder}>
-                    <span>{folder}</span>
-                  </div>
+                  <button
+                    className={`archive-folder archive-folder--${index + 1} ${selectedFolder === folder.key ? "is-selected" : ""}`}
+                    key={folder.key}
+                    type="button"
+                    onClick={() => {
+                      if (folder.available) setSelectedFolder(folder.key);
+                    }}
+                    disabled={!folder.available}
+                    aria-pressed={selectedFolder === folder.key}
+                  >
+                    <span>{folder.label}</span>
+                    {!folder.available ? <small>Cataloging</small> : null}
+                  </button>
                 ))}
               </div>
               <div className="archive-open-box-front">
@@ -306,7 +379,13 @@ export function ArchiveEntrance() {
               </div>
             </div>
 
-            <article className="archive-record-sheet">
+            <article className="archive-record-sheet" key={activeRecord.key}>
+              <div className="archive-record-accession" aria-hidden="true">
+                <span>RG-01</span>
+                <strong>BOX 01</strong>
+                <small>PERM.</small>
+              </div>
+
               <div className="archive-record-letterhead">
                 <Image src="/images/lscso-patch-subdued.png" alt="" width={54} height={54} />
                 <div>
@@ -317,12 +396,12 @@ export function ArchiveEntrance() {
               </div>
 
               <div className="archive-record-rule" />
-              <p className="archive-record-file-number">EXECUTIVE FILE · FOUNDING ADMINISTRATION</p>
-              <h2>Warren McCall / Arthur Bell</h2>
-              <p className="archive-record-years">1963–1978</p>
-              <p className="archive-record-summary">{mccallBellSummary}</p>
+              <p className="archive-record-file-number">{activeRecord.fileNumber}</p>
+              <h2>{activeRecord.title}</h2>
+              <p className="archive-record-years">{activeRecord.years}</p>
+              <p className="archive-record-summary">{activeRecord.body}</p>
               <div className="archive-record-footer">
-                <span>Permanent Historical Retention</span>
+                <span>{activeRecord.footer}</span>
                 <span>LSCSO Archives</span>
               </div>
             </article>
