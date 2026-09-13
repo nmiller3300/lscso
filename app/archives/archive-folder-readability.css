@@ -1,0 +1,28 @@
+/* Keep the manila archive directory readable against the collection backdrop. */
+.archive-folder-directory > button {
+  color: #3f2d18;
+}
+
+.archive-folder-directory > button span {
+  color: #382714 !important;
+  font-weight: 780;
+  text-shadow: 0 1px 0 rgba(255, 244, 214, 0.16);
+}
+
+.archive-folder-directory > button small {
+  color: #52391c !important;
+  font-weight: 860;
+  text-shadow: 0 1px 0 rgba(255, 244, 214, 0.12);
+}
+
+.archive-folder-directory > button:hover:not(:disabled) span,
+.archive-folder-directory > button:focus-visible:not(:disabled) span,
+.archive-folder-directory > button.is-selected span {
+  color: #2e1f0e !important;
+}
+
+.archive-folder-directory > button:hover:not(:disabled) small,
+.archive-folder-directory > button:focus-visible:not(:disabled) small,
+.archive-folder-directory > button.is-selected small {
+  color: #473015 !important;
+}
