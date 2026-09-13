@@ -1,0 +1,68 @@
+/*
+ * Hard isolation for archive room bays.
+ *
+ * Mobile Safari can paint filtered/transformed descendants outside the expected
+ * clipping region when several large translated panels remain composited at
+ * once. The archive room intentionally keeps only the selected bay paintable.
+ * The existing room navigation already exposes the selected bay through its
+ * disabled previous/next controls, so this CSS can isolate the active stack
+ * without changing the archive interaction state.
+ */
+
+.archive-bay-track > .archive-bay {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Stack A — first bay. */
+.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:first-child:disabled)
+  .archive-bay-track > .archive-bay:nth-child(1) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Stack B — middle bay. */
+.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:first-child:not(:disabled)):has(.archive-room-nav > button:last-child:not(:disabled))
+  .archive-bay-track > .archive-bay:nth-child(2) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Stack C — final bay. */
+.archive-experience.is-lit:not(.is-collection-open):has(.archive-room-nav > button:last-child:disabled)
+  .archive-bay-track > .archive-bay:nth-child(3) {
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Nothing readable from the stacks is painted before the lamp is turned on. */
+.archive-experience.is-dark .archive-bay-track,
+.archive-experience.is-dark .archive-bay {
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* The entrance itself remains intentionally dark rather than showing readable
+   case names through the low-exposure room treatment. */
+.archive-experience.is-dark .archive-room-sign,
+.archive-experience.is-dark .archive-room-ceiling {
+  visibility: hidden !important;
+}
+
+@media (max-width: 760px) {
+  /* A fresh stacking context keeps iOS Safari from compositing neighboring
+     bays over the selected mobile room. */
+  .archive-bay-track {
+    isolation: isolate;
+    contain: layout paint;
+  }
+
+  .archive-bay {
+    contain: layout paint;
+  }
+}
