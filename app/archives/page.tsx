@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ArchiveEntranceV2, type PublicArchiveRecord } from "./ArchiveEntranceV2";
 import { ArchiveNavigationEnhancer } from "./ArchiveNavigationEnhancer";
 import { ArchiveImmersionEnhancer } from "./ArchiveImmersionEnhancer";
+import { ArchiveInteractionDiagnostics } from "./ArchiveInteractionDiagnostics";
 import "./archive-refinements.css";
 import "./archive-depth.css";
 import "./archive-room.css";
@@ -53,6 +54,7 @@ export default async function ArchivesPage() {
       <ArchiveEntranceV2 currentAdministrationRecords={currentAdministrationRecords} />
       <ArchiveNavigationEnhancer />
       <ArchiveImmersionEnhancer />
+      <ArchiveInteractionDiagnostics />
     </>
   );
 }
