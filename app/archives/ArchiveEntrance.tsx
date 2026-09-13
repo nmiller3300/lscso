@@ -36,6 +36,7 @@ export function ArchiveEntrance() {
   const [pull, setPull] = useState<PullState>({ x: 0, y: 0 });
   const [dragging, setDragging] = useState(false);
   const origin = useRef<{ x: number; y: number } | null>(null);
+  const suppressClick = useRef(false);
 
   const shelfBoxes = useMemo(() => {
     return administrations.map((administration, index) => ({
@@ -75,7 +76,13 @@ export function ArchiveEntrance() {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
 
-    if (shouldToggle) toggleLights();
+    if (shouldToggle) {
+      suppressClick.current = true;
+      toggleLights();
+      window.setTimeout(() => {
+        suppressClick.current = false;
+      }, 0);
+    }
   };
 
   return (
@@ -194,6 +201,10 @@ export function ArchiveEntrance() {
             onPointerMove={handlePointerMove}
             onPointerUp={finishPull}
             onPointerCancel={finishPull}
+            onClick={() => {
+              if (suppressClick.current) return;
+              toggleLights();
+            }}
             onKeyDown={(event) => {
               if (event.key === "Enter" || event.key === " ") {
                 event.preventDefault();
