@@ -4,14 +4,16 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
+import { PortalNotificationStack, type NotificationStackItem } from "./PortalNotificationStack";
 
 const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
-const DISMISS_KEY = "lscso.portal.notification-attention:v2";
+const DISMISS_KEY = "lscso.portal.notification-attention:v3";
 
 export function PortalNotificationLink({ audience }: { audience: "command" | "deputy" }) {
   const profile = usePortalProfile();
   const [unreadCount, setUnreadCount] = useState(0);
   const [actionCount, setActionCount] = useState(0);
+  const [latestNotifications, setLatestNotifications] = useState<NotificationStackItem[]>([]);
   const [dismissedSignature, setDismissedSignature] = useState("");
 
   useEffect(() => {
@@ -26,8 +28,16 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
         .eq("recipient_profile_id", profile.id)
         .is("read_at", null);
 
+      let latestNotificationQuery = supabase.from("notifications")
+        .select("id,notification_type,title,message,href,created_at")
+        .eq("recipient_profile_id", profile.id)
+        .is("read_at", null)
+        .order("created_at", { ascending: false })
+        .limit(3);
+
       if (!DEPARTMENT_COMMAND_RANKS.has(profile.rank)) {
         notificationQuery = notificationQuery.neq("notification_type", "Guardian Approval");
+        latestNotificationQuery = latestNotificationQuery.neq("notification_type", "Guardian Approval");
       }
 
       const assignedRequestQuery = supabase.from("personnel_requests")
@@ -39,8 +49,9 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
         ? supabase.from("personnel_requests").select("id", { count: "exact", head: true }).eq("routing_fallback", true).is("current_reviewer_profile_id", null).in("status", ["Submitted", "In Review"]).neq("requester_profile_id", profile.id)
         : Promise.resolve({ count: 0 });
 
-      const [notificationResult, guardianAckResult, assignedRequestResult, fallbackRequestResult] = await Promise.all([
+      const [notificationResult, latestNotificationResult, guardianAckResult, assignedRequestResult, fallbackRequestResult] = await Promise.all([
         notificationQuery,
+        latestNotificationQuery,
         supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("subject_profile_id", profile.id).eq("status", "Awaiting Acknowledgment"),
         assignedRequestQuery,
         fallbackRequestQuery,
@@ -78,6 +89,14 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
       if (!cancelled) {
         setUnreadCount(notificationResult.count ?? 0);
         setActionCount(nextActionCount);
+        setLatestNotifications((latestNotificationResult.data ?? []).map((item: any) => ({
+          id: String(item.id),
+          title: String(item.title || "Portal notification"),
+          message: String(item.message || "Open the Notification Center for details."),
+          href: item.href ? String(item.href) : null,
+          createdAt: String(item.created_at || ""),
+          type: String(item.notification_type || "Portal notification"),
+        })));
       }
     }
 
@@ -92,7 +111,8 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
     };
   }, [audience, profile.access_tier, profile.id, profile.rank]);
 
-  const attentionSignature = useMemo(() => `${profile.id}:${actionCount}:${unreadCount}`, [profile.id, actionCount, unreadCount]);
+  const latestSignature = useMemo(() => latestNotifications.map((item) => item.id).join(","), [latestNotifications]);
+  const attentionSignature = useMemo(() => `${profile.id}:${actionCount}:${unreadCount}:${latestSignature}`, [profile.id, actionCount, unreadCount, latestSignature]);
 
   useEffect(() => {
     if (!actionCount && !unreadCount) {
@@ -121,7 +141,7 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
     ? `${actionCount} items require action and ${unreadCount} unread notifications`
     : `${unreadCount} unread portal notifications`;
   const hasAttention = actionCount > 0 || unreadCount > 0;
-  const showAttentionCard = hasAttention && dismissedSignature !== attentionSignature;
+  const showAttentionStack = hasAttention && dismissedSignature !== attentionSignature;
 
   return (
     <>
@@ -135,17 +155,13 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
         {actionCount > 0 ? "Action required" : "Notifications"}
       </Link>
 
-      {showAttentionCard ? (
-        <aside aria-live="polite" className={`portal-notification-attention${actionCount > 0 ? " has-actions" : " has-unread"}`} role="status">
-          <button aria-label="Dismiss notification alert" className="portal-notification-attention-close" onClick={dismissAttention} type="button">×</button>
-          <div className="portal-notification-attention-icon" aria-hidden="true">!</div>
-          <div className="portal-notification-attention-copy">
-            <small>{actionCount > 0 ? "LSCSO ACTION REQUIRED" : "NEW PORTAL ACTIVITY"}</small>
-            <strong>{actionCount > 0 ? `${actionCount} item${actionCount === 1 ? "" : "s"} require${actionCount === 1 ? "s" : ""} your attention.` : `${unreadCount} new notification${unreadCount === 1 ? "" : "s"} waiting.`}</strong>
-            <span>{actionCount > 0 && unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"} are also waiting.` : "Open the Notification & Action Center to review the details."}</span>
-          </div>
-          <Link className="portal-notification-attention-link" href="/portal/notifications">Review now →</Link>
-        </aside>
+      {showAttentionStack ? (
+        <PortalNotificationStack
+          actionCount={actionCount}
+          unreadCount={unreadCount}
+          notifications={latestNotifications}
+          onDismiss={dismissAttention}
+        />
       ) : null}
     </>
   );
