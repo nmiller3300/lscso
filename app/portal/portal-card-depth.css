@@ -1,0 +1,398 @@
+/*
+ * Personnel Portal dimensional card system.
+ * Presentation-only layer loaded after the cinematic shell.
+ * Gives dashboard and workspace surfaces stronger hierarchy without changing portal logic.
+ */
+
+.portal-app {
+  --portal-card-gold: 216, 194, 125;
+  --portal-card-steel: 125, 170, 205;
+  --portal-card-ink: rgba(8, 12, 17, .82);
+}
+
+/* ---------- Command dashboard: metric instruments ---------- */
+.portal-app .command-v2-home-metrics > article {
+  --card-accent: var(--portal-card-gold);
+  isolation: isolate;
+  position: relative;
+  min-height: 168px;
+  justify-content: flex-end;
+  padding: 22px 20px 18px;
+  border: 1px solid rgba(var(--card-accent), .18) !important;
+  border-radius: 22px !important;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 86% 9%, rgba(var(--card-accent), .16), transparent 29%),
+    linear-gradient(145deg, rgba(255,255,255,.045), transparent 34%),
+    linear-gradient(160deg, rgba(var(--card-accent), .075), transparent 48%),
+    rgba(8, 13, 18, .78) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.055),
+    inset 0 0 0 1px rgba(0,0,0,.18),
+    0 22px 46px rgba(0,0,0,.18),
+    0 0 42px rgba(var(--card-accent), .025) !important;
+  transition: transform 190ms cubic-bezier(.2,.75,.2,1), border-color 190ms ease, box-shadow 190ms ease;
+}
+
+.portal-app .command-v2-home-metrics > article:nth-child(2),
+.portal-app .command-v2-home-metrics > article:nth-child(5) {
+  --card-accent: var(--portal-card-steel);
+}
+
+.portal-app .command-v2-home-metrics > article:hover {
+  transform: translateY(-4px);
+  border-color: rgba(var(--card-accent), .31) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.075),
+    inset 0 0 0 1px rgba(0,0,0,.16),
+    0 30px 60px rgba(0,0,0,.24),
+    0 0 46px rgba(var(--card-accent), .055) !important;
+}
+
+.portal-app .command-v2-home-metrics > article::before {
+  top: 16px !important;
+  right: 18px !important;
+  left: auto !important;
+  width: 46px;
+  height: 5px !important;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(var(--card-accent), .25), rgba(var(--card-accent), .86)) !important;
+  box-shadow: 0 0 18px rgba(var(--card-accent), .22);
+}
+
+.portal-app .command-v2-home-metrics > article::after {
+  position: absolute;
+  top: -30px;
+  right: -28px;
+  width: 126px;
+  height: 126px;
+  border: 1px solid rgba(var(--card-accent), .12);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 14px rgba(var(--card-accent), .018),
+    0 0 0 36px rgba(var(--card-accent), .010);
+  content: "";
+  pointer-events: none;
+}
+
+.portal-app .command-v2-home-metrics > article > span {
+  position: relative;
+  z-index: 1;
+  order: 2;
+  margin-top: 5px;
+  color: rgba(var(--card-accent), .76) !important;
+  font-size: 9px !important;
+  font-weight: 820;
+  letter-spacing: .145em !important;
+}
+
+.portal-app .command-v2-home-metrics > article > strong {
+  position: relative;
+  z-index: 1;
+  order: 1;
+  margin: auto 0 0 !important;
+  color: #f5f1e7 !important;
+  font-size: clamp(2.65rem, 4vw, 4.15rem) !important;
+  font-weight: 560;
+  letter-spacing: -.075em !important;
+  line-height: .9;
+  text-shadow: 0 14px 34px rgba(0,0,0,.26);
+}
+
+.portal-app .command-v2-home-metrics > article > small {
+  position: relative;
+  z-index: 1;
+  order: 3;
+  max-width: 92%;
+  margin-top: 10px !important;
+  color: rgba(224,229,232,.42) !important;
+  line-height: 1.35;
+}
+
+/* ---------- Priority summary: individual control tiles ---------- */
+.portal-app .command-v2-attention-summary > a {
+  --summary-accent: var(--portal-card-gold);
+  isolation: isolate;
+  position: relative;
+  min-height: 104px !important;
+  border: 1px solid rgba(var(--summary-accent), .13) !important;
+  border-radius: 18px !important;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .10), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.028), transparent 48%),
+    rgba(6,10,14,.48) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.03), 0 12px 28px rgba(0,0,0,.10);
+}
+
+.portal-app .command-v2-attention-summary > a:nth-child(2),
+.portal-app .command-v2-attention-summary > a:nth-child(3),
+.portal-app .command-v2-attention-summary > a:nth-child(6) {
+  --summary-accent: var(--portal-card-steel);
+}
+
+.portal-app .command-v2-attention-summary > a::before {
+  position: absolute;
+  top: 14px;
+  bottom: 14px;
+  left: 0;
+  width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(var(--summary-accent), .90), rgba(var(--summary-accent), .07));
+  box-shadow: 0 0 16px rgba(var(--summary-accent), .22);
+  content: "";
+}
+
+.portal-app .command-v2-attention-summary > a::after {
+  position: absolute;
+  right: -18px;
+  bottom: -38px;
+  width: 78px;
+  height: 78px;
+  border: 1px solid rgba(var(--summary-accent), .075);
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+.portal-app .command-v2-attention-summary > a:hover {
+  border-color: rgba(var(--summary-accent), .26) !important;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .16), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.04), transparent 48%),
+    rgba(8,13,18,.60) !important;
+  transform: translateY(-3px) !important;
+}
+
+.portal-app .command-v2-attention-summary > a strong {
+  position: relative;
+  z-index: 1;
+  font-size: 1.9rem !important;
+  font-weight: 580;
+}
+
+.portal-app .command-v2-attention-summary > a span {
+  position: relative;
+  z-index: 1;
+  color: rgba(var(--summary-accent), .70) !important;
+}
+
+/* ---------- Main panels: less flat, more architectural ---------- */
+.portal-app .portal-panel {
+  isolation: isolate;
+  border: 1px solid rgba(255,255,255,.085) !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 88% -12%, rgba(125,170,205,.055), transparent 32%),
+    linear-gradient(125deg, rgba(216,194,125,.042), transparent 31%),
+    linear-gradient(150deg, rgba(255,255,255,.025), transparent 44%),
+    rgba(8,13,18,.70) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.045),
+    inset 0 0 0 1px rgba(0,0,0,.16),
+    0 28px 62px rgba(0,0,0,.16) !important;
+}
+
+.portal-app .portal-panel::after {
+  position: absolute;
+  right: 18px;
+  bottom: 16px;
+  z-index: -1;
+  width: 68px;
+  height: 68px;
+  opacity: .032;
+  background: #d8c27d;
+  -webkit-mask: url("/images/lscso-patch-color.png") center / contain no-repeat;
+  mask: url("/images/lscso-patch-color.png") center / contain no-repeat;
+  content: "";
+  pointer-events: none;
+}
+
+.portal-app .portal-panel-heading {
+  position: relative;
+  min-height: 78px !important;
+  padding-block: 15px;
+}
+
+.portal-app .portal-panel-heading::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(216,194,125,.18), rgba(255,255,255,.045) 38%, transparent 82%);
+  content: "";
+}
+
+.portal-app .portal-panel-heading h2 {
+  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  font-weight: 620;
+  letter-spacing: -.035em !important;
+}
+
+/* ---------- Quick actions: numbered command strips ---------- */
+.portal-app .command-home-quick-actions nav {
+  counter-reset: portalQuickAction;
+  gap: 9px !important;
+}
+
+.portal-app .command-home-quick-actions nav > a {
+  counter-increment: portalQuickAction;
+  grid-template-columns: 42px minmax(0, 1fr) auto !important;
+  min-height: 72px !important;
+  gap: 12px;
+  padding: 10px 13px 10px 10px !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 17px !important;
+  background:
+    linear-gradient(105deg, rgba(216,194,125,.048), transparent 38%),
+    rgba(255,255,255,.022) !important;
+}
+
+.portal-app .command-home-quick-actions nav > a::before {
+  grid-column: 1;
+  grid-row: 1 / span 2;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  align-self: center;
+  border: 1px solid rgba(216,194,125,.15);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255,255,255,.08), transparent 38%),
+    rgba(216,194,125,.06);
+  color: rgba(229,210,150,.78);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: .06em;
+  content: counter(portalQuickAction, decimal-leading-zero);
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+}
+
+.portal-app .command-home-quick-actions nav > a span,
+.portal-app .command-home-quick-actions nav > a strong {
+  grid-column: 2 !important;
+}
+
+.portal-app .command-home-quick-actions nav > a b {
+  grid-column: 3 !important;
+}
+
+.portal-app .command-home-quick-actions nav > a:hover {
+  border-color: rgba(216,194,125,.20) !important;
+  background:
+    linear-gradient(105deg, rgba(216,194,125,.085), transparent 42%),
+    rgba(255,255,255,.03) !important;
+}
+
+/* ---------- Task/navigation cards across the portal ---------- */
+.portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a) {
+  isolation: isolate;
+  position: relative;
+  min-height: 154px;
+  padding: 18px !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+  border-radius: 20px !important;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 92% 2%, rgba(125,170,205,.075), transparent 31%),
+    linear-gradient(135deg, rgba(216,194,125,.055), transparent 38%),
+    rgba(8,13,18,.63) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.035), 0 18px 38px rgba(0,0,0,.12);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a)::after {
+  position: absolute;
+  right: -24px;
+  bottom: -42px;
+  width: 104px;
+  height: 104px;
+  border: 1px solid rgba(216,194,125,.075);
+  border-radius: 50%;
+  box-shadow: 0 0 0 18px rgba(216,194,125,.012);
+  content: "";
+  pointer-events: none;
+}
+
+.portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a):hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(216,194,125,.22) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.05), 0 28px 52px rgba(0,0,0,.18) !important;
+}
+
+/* ---------- Lists should read like records, not more cards ---------- */
+.portal-app .command-v2-mini-list > a,
+.portal-app .command-v2-personnel-results > a {
+  border-radius: 13px !important;
+  background: linear-gradient(90deg, rgba(255,255,255,.022), transparent 72%) !important;
+  box-shadow: none !important;
+}
+
+.portal-app .command-v2-mini-list > a:hover,
+.portal-app .command-v2-personnel-results > a:hover {
+  transform: translateX(3px) !important;
+}
+
+/* ---------- Mobile/tablet: preserve the depth without wasting space ---------- */
+@media (max-width: 1180px) {
+  .portal-app .command-v2-home-metrics {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .portal-app .command-v2-home-metrics > article {
+    min-height: 150px;
+  }
+}
+
+@media (max-width: 760px) {
+  .portal-app .command-v2-home-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .portal-app .command-v2-home-metrics > article {
+    min-height: 142px;
+    padding: 17px 15px 15px;
+    border-radius: 18px !important;
+  }
+
+  .portal-app .command-v2-home-metrics > article > strong {
+    font-size: clamp(2.35rem, 12vw, 3.4rem) !important;
+  }
+
+  .portal-app .command-v2-attention-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .portal-app .portal-panel {
+    border-radius: 20px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .portal-app .command-v2-home-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .portal-app .command-v2-home-metrics > article {
+    min-height: 130px;
+  }
+
+  .portal-app .command-v2-attention-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .portal-app .command-home-quick-actions nav > a {
+    grid-template-columns: 38px minmax(0, 1fr) 28px !important;
+    gap: 9px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portal-app .command-v2-home-metrics > article,
+  .portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a) {
+    transition: none !important;
+  }
+}
