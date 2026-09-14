@@ -4,47 +4,84 @@
  */
 
 /* Let the ambient portal background breathe through the major surfaces. */
+.portal-app .portal-workspace {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.008), transparent 15%),
+    rgba(6,10,14,.24) !important;
+  backdrop-filter: blur(8px) saturate(1.03) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.03) !important;
+}
+
+.portal-app .portal-page-heading {
+  background:
+    linear-gradient(120deg, rgba(216,194,125,.040), transparent 35%),
+    linear-gradient(145deg, rgba(255,255,255,.018), transparent 34%),
+    rgba(9,14,19,.22) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.03),
+    0 18px 42px rgba(0,0,0,.10) !important;
+  backdrop-filter: blur(8px) saturate(1.03) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.03) !important;
+}
+
 .portal-app .portal-panel {
   background:
-    radial-gradient(circle at 88% -12%, rgba(125,170,205,.035), transparent 32%),
-    linear-gradient(125deg, rgba(216,194,125,.026), transparent 31%),
-    linear-gradient(150deg, rgba(255,255,255,.016), transparent 44%),
-    rgba(8,13,18,.40) !important;
+    radial-gradient(circle at 88% -12%, rgba(125,170,205,.025), transparent 32%),
+    linear-gradient(125deg, rgba(216,194,125,.018), transparent 31%),
+    linear-gradient(150deg, rgba(255,255,255,.010), transparent 44%),
+    rgba(8,13,18,.18) !important;
   box-shadow:
-    inset 0 1px rgba(255,255,255,.04),
-    inset 0 0 0 1px rgba(0,0,0,.11),
-    0 24px 54px rgba(0,0,0,.11) !important;
-  backdrop-filter: blur(14px) saturate(1.04);
-  -webkit-backdrop-filter: blur(14px) saturate(1.04);
+    inset 0 1px rgba(255,255,255,.035),
+    inset 0 0 0 1px rgba(0,0,0,.08),
+    0 18px 42px rgba(0,0,0,.08) !important;
+  backdrop-filter: blur(7px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(7px) saturate(1.02) !important;
+}
+
+/* These are the two large Command Home containers visible in the screenshot. */
+.portal-app .command-v2-home-attention,
+.portal-app .command-home-quick-actions {
+  background:
+    radial-gradient(circle at 92% -8%, rgba(125,170,205,.022), transparent 34%),
+    linear-gradient(125deg, rgba(216,194,125,.014), transparent 32%),
+    rgba(6,10,14,.12) !important;
+  backdrop-filter: blur(6px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(1.02) !important;
 }
 
 .portal-app .command-v2-home-metrics > article {
   background:
-    radial-gradient(circle at 86% 9%, rgba(var(--card-accent), .10), transparent 29%),
-    linear-gradient(145deg, rgba(255,255,255,.026), transparent 34%),
-    linear-gradient(160deg, rgba(var(--card-accent), .045), transparent 48%),
-    rgba(8,13,18,.48) !important;
+    radial-gradient(circle at 86% 9%, rgba(var(--card-accent), .065), transparent 29%),
+    linear-gradient(145deg, rgba(255,255,255,.015), transparent 34%),
+    linear-gradient(160deg, rgba(var(--card-accent), .025), transparent 48%),
+    rgba(8,13,18,.20) !important;
+  backdrop-filter: blur(6px) saturate(1.02) !important;
+  -webkit-backdrop-filter: blur(6px) saturate(1.02) !important;
 }
 
 .portal-app .command-v2-attention-summary > a {
   background:
-    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .065), transparent 34%),
-    linear-gradient(135deg, rgba(255,255,255,.018), transparent 48%),
-    rgba(6,10,14,.30) !important;
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .040), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.010), transparent 48%),
+    rgba(6,10,14,.12) !important;
 }
 
 .portal-app .command-v2-attention-summary > a:hover {
   background:
-    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .10), transparent 36%),
-    linear-gradient(135deg, rgba(255,255,255,.028), transparent 48%),
-    rgba(8,13,18,.40) !important;
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .070), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent 48%),
+    rgba(8,13,18,.18) !important;
 }
 
 .portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a) {
   background:
-    radial-gradient(circle at 92% 2%, rgba(125,170,205,.045), transparent 31%),
-    linear-gradient(135deg, rgba(216,194,125,.032), transparent 38%),
-    rgba(8,13,18,.38) !important;
+    radial-gradient(circle at 92% 2%, rgba(125,170,205,.030), transparent 31%),
+    linear-gradient(135deg, rgba(216,194,125,.022), transparent 38%),
+    rgba(8,13,18,.16) !important;
+}
+
+.portal-app .portal-empty-state {
+  background: rgba(255,255,255,.010) !important;
 }
 
 /* Remove the decorative number boxes and micro-badge accents from the last pass. */
@@ -58,8 +95,8 @@
   gap: 10px;
   padding: 11px 13px 11px 15px !important;
   background:
-    linear-gradient(105deg, rgba(216,194,125,.025), transparent 38%),
-    rgba(255,255,255,.014) !important;
+    linear-gradient(105deg, rgba(216,194,125,.015), transparent 38%),
+    rgba(255,255,255,.008) !important;
 }
 
 .portal-app .command-home-quick-actions nav > a::before,
@@ -76,12 +113,20 @@
 
 .portal-app .command-home-quick-actions nav > a b {
   grid-column: 2 !important;
+  grid-row: 1 !important;
 }
 
 .portal-app .command-home-quick-actions nav > a:hover {
   background:
-    linear-gradient(105deg, rgba(216,194,125,.045), transparent 42%),
-    rgba(255,255,255,.02) !important;
+    linear-gradient(105deg, rgba(216,194,125,.030), transparent 42%),
+    rgba(255,255,255,.014) !important;
+}
+
+/* Remove the small pill/badge clutter added by the shell redesign on Command Home. */
+.portal-app[data-portal-active="overview"] .portal-environment > span,
+.portal-app .command-home-quick-actions .portal-panel-heading > span,
+.portal-app .command-home-quick-actions nav > a > span {
+  display: none !important;
 }
 
 @media (max-width: 430px) {
