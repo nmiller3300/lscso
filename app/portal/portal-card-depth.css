@@ -1,0 +1,11 @@
+/*
+ * Personnel Portal dimensional card system.
+ * Presentation-only layer loaded after the cinematic shell.
+ * Gives dashboard and workspace surfaces stronger hierarchy without changing portal logic.
+ */
+
+.portal-app {
+  --portal-card-gold: 216, 194, 125;
+  --portal-card-steel: 125, 170, 205;
+  --portal-card-ink: rgba(8, 12, 17, .82);
+}
