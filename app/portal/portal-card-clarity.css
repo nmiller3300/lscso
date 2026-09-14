@@ -1,0 +1,91 @@
+/* Personnel Portal card clarity pass.
+ * Presentation-only overrides loaded after the dimensional card system.
+ * Keeps the cinematic background visible and removes decorative micro-badges.
+ */
+
+/* Let the ambient portal background breathe through the major surfaces. */
+.portal-app .portal-panel {
+  background:
+    radial-gradient(circle at 88% -12%, rgba(125,170,205,.035), transparent 32%),
+    linear-gradient(125deg, rgba(216,194,125,.026), transparent 31%),
+    linear-gradient(150deg, rgba(255,255,255,.016), transparent 44%),
+    rgba(8,13,18,.40) !important;
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.04),
+    inset 0 0 0 1px rgba(0,0,0,.11),
+    0 24px 54px rgba(0,0,0,.11) !important;
+  backdrop-filter: blur(14px) saturate(1.04);
+  -webkit-backdrop-filter: blur(14px) saturate(1.04);
+}
+
+.portal-app .command-v2-home-metrics > article {
+  background:
+    radial-gradient(circle at 86% 9%, rgba(var(--card-accent), .10), transparent 29%),
+    linear-gradient(145deg, rgba(255,255,255,.026), transparent 34%),
+    linear-gradient(160deg, rgba(var(--card-accent), .045), transparent 48%),
+    rgba(8,13,18,.48) !important;
+}
+
+.portal-app .command-v2-attention-summary > a {
+  background:
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .065), transparent 34%),
+    linear-gradient(135deg, rgba(255,255,255,.018), transparent 48%),
+    rgba(6,10,14,.30) !important;
+}
+
+.portal-app .command-v2-attention-summary > a:hover {
+  background:
+    radial-gradient(circle at 90% 5%, rgba(var(--summary-accent), .10), transparent 36%),
+    linear-gradient(135deg, rgba(255,255,255,.028), transparent 48%),
+    rgba(8,13,18,.40) !important;
+}
+
+.portal-app :is(.command-v2-task-grid > a, .command-v2-home-shortcuts > a) {
+  background:
+    radial-gradient(circle at 92% 2%, rgba(125,170,205,.045), transparent 31%),
+    linear-gradient(135deg, rgba(216,194,125,.032), transparent 38%),
+    rgba(8,13,18,.38) !important;
+}
+
+/* Remove the decorative number boxes and micro-badge accents from the last pass. */
+.portal-app .command-home-quick-actions nav {
+  counter-reset: none !important;
+}
+
+.portal-app .command-home-quick-actions nav > a {
+  counter-increment: none !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px;
+  padding: 11px 13px 11px 15px !important;
+  background:
+    linear-gradient(105deg, rgba(216,194,125,.025), transparent 38%),
+    rgba(255,255,255,.014) !important;
+}
+
+.portal-app .command-home-quick-actions nav > a::before,
+.portal-app .command-v2-home-metrics > article::before,
+.portal-app .command-v2-attention-summary > a::before {
+  display: none !important;
+  content: none !important;
+}
+
+.portal-app .command-home-quick-actions nav > a span,
+.portal-app .command-home-quick-actions nav > a strong {
+  grid-column: 1 !important;
+}
+
+.portal-app .command-home-quick-actions nav > a b {
+  grid-column: 2 !important;
+}
+
+.portal-app .command-home-quick-actions nav > a:hover {
+  background:
+    linear-gradient(105deg, rgba(216,194,125,.045), transparent 42%),
+    rgba(255,255,255,.02) !important;
+}
+
+@media (max-width: 430px) {
+  .portal-app .command-home-quick-actions nav > a {
+    grid-template-columns: minmax(0, 1fr) 28px !important;
+  }
+}
