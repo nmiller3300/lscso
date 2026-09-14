@@ -38,6 +38,7 @@ import "./portal-production-hotfix.css";
 import "./portal-login-desktop-center.css";
 import "./portal-login-responsive-cinematic.css";
 import "./portal-cinematic-shell.css";
+import "./portal-cinematic-shell-v2.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
