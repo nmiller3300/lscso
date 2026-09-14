@@ -25,9 +25,9 @@ type PortalShellProps = {
   actions?: ReactNode;
 };
 
-export function PortalShell({ active, audience = "command", eyebrow, title, actions, children }: PortalShellProps) {
+export function PortalShell({ active, audience = "command", eyebrow, title, description, actions, children }: PortalShellProps) {
   return (
-    <div className="portal-app">
+    <div className="portal-app" data-portal-active={active} data-portal-audience={audience}>
       <PortalInteriorBackdrop />
       <LegacyPortalModalBridge />
 
@@ -50,7 +50,10 @@ export function PortalShell({ active, audience = "command", eyebrow, title, acti
 
       <section className="portal-workspace">
         <header className="portal-topbar">
-          <div className="portal-environment"><span>LSCSO</span><strong>{eyebrow}</strong></div>
+          <div className="portal-environment">
+            <span><i className="portal-environment__pulse" aria-hidden="true" />LSCSO</span>
+            <strong>{eyebrow}</strong>
+          </div>
           <div className="portal-topbar-actions">
             <div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>
             {audience === "command" ? <CommandQuickFind /> : null}
@@ -61,7 +64,11 @@ export function PortalShell({ active, audience = "command", eyebrow, title, acti
 
         <main className="portal-content">
           <div className="portal-page-heading">
-            <div><p>{eyebrow}</p><h1>{title}</h1></div>
+            <div className="portal-page-heading__copy">
+              <p>{eyebrow}</p>
+              <h1>{title}</h1>
+              {description ? <span className="portal-page-heading__description">{description}</span> : null}
+            </div>
             {actions ? <div className="portal-page-actions">{actions}</div> : null}
           </div>
           {active === "notifications" ? <BrowserPushControl /> : null}
