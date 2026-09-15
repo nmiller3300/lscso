@@ -16,14 +16,17 @@ This file is the authoritative development history for the Los Santos County She
 - **Recruitment — Premium Case Workflow Overview**: Added an LSCSO-branded Command case header with an end-to-end Intake → Review → Interview → Offer → Appointment → Disposition rail that reflects the stages actually reached by the candidate without falsely marking skipped stages complete.
 - **Recruitment — Objective Intake Integrity Checks**: Added non-AI system checks for recorded applicant identity/contact information, electronic signature, AI-policy acknowledgment, and private applicant access. These checks identify record completeness only and do not score writing, judgment, character, or applicant suitability.
 - **Recruitment — Communication Starters & Discord Copy**: Added editable recruitment message starters for routine applicant communications plus a copy-for-Discord action, while keeping the message actually sent through the system as the permanent applicant-facing recruitment record.
+- **Recruitment — Final Interview Disposition Confirmation**: Added an explicit confirmation step before Command records Interview Failed or Interview No Show, clearly warning that the action closes the recruitment case and converts the applicant’s private link into the final disposition record.
 
 ### Changed
 - **Recruitment — Premium Candidate Application Presentation**: Reworked the public Deputy Candidate Application with the same premium LSCSO visual language established by the Personnel Portal sign-in: charcoal depth, restrained gold/steel lighting, smoked glass, stronger hierarchy, connected process presentation, premium form surfaces, and responsive mobile/tablet treatment without changing the underlying submission or certification rules.
 - **Recruitment — Offer & Appointment Clarity**: Updated public recruitment process language so a passed interview advances to a formal employment offer before the separate Recruit appointment/hiring action, preserving the rule that application acceptance or offer acceptance is not itself a hire.
+- **Recruitment — Structured Interview Workflow**: Reframed the Command interview workspace around Schedule → Conduct → Outcome, with clearer interviewer, scheduled-time, panel-notes, and result-summary controls. Pass advances to the offer stage; Failed and No Show are treated as terminal outcomes rather than ordinary status edits.
 
 ### Fixed
 - **Recruitment — Original Applicant Link Resend**: Reworked applicant-link recovery so Command can resend or copy the exact private public tracking link originally issued with the application, rather than directing applicants to the staff-only Personnel Portal preview. The recovered link opens the public applicant status page directly and does not require a Portal account.
 - **Recruitment — Legacy Applicant Link Recovery**: Added a Command action for older applications whose original raw private token cannot be recovered, allowing an authorized replacement private applicant link to be issued without creating a second application or losing the original recruitment history.
+- **Recruitment — Interview Failed Case Closure**: Fixed Interview Failed so it now closes the recruitment case as an Archived final disposition, records the official Interview Failed closure code/reason and audit event, and keeps internal interview notes/result summaries out of the applicant-facing disposition. Previously a failed interview could display as final to the applicant while remaining internally Accepted.
 
 ## 2026-09-13
 
