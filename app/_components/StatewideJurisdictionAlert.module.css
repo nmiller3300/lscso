@@ -3,14 +3,45 @@
   z-index: 40;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  min-height: 54px;
+  min-height: 58px;
   margin-top: 137px;
   overflow: hidden;
-  border-top: 1px solid rgba(255, 255, 255, 0.24);
-  border-bottom: 2px solid #51080b;
-  background: linear-gradient(180deg, #c0181e 0%, #991116 100%);
+  border-top: 1px solid rgba(255, 221, 221, 0.22);
+  border-bottom: 1px solid rgba(226, 198, 115, 0.28);
+  background:
+    radial-gradient(circle at 12% 140%, rgba(237, 61, 72, 0.56), transparent 44%),
+    radial-gradient(circle at 82% -80%, rgba(177, 21, 31, 0.48), transparent 42%),
+    linear-gradient(180deg, rgba(113, 14, 21, 0.94), rgba(67, 10, 15, 0.94));
   color: #fff;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.32);
+  box-shadow:
+    0 12px 34px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18);
+  -webkit-backdrop-filter: blur(20px) saturate(1.18);
+  backdrop-filter: blur(20px) saturate(1.18);
+}
+
+.alert::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.8;
+  background:
+    linear-gradient(112deg, transparent 0 28%, rgba(255,255,255,.055) 40%, transparent 53%),
+    linear-gradient(90deg, transparent, rgba(229, 201, 118, 0.08), transparent);
+  content: "";
+}
+
+.alert::after {
+  position: absolute;
+  right: 8%;
+  bottom: 0;
+  left: 8%;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(238, 210, 128, 0.62), transparent);
+  box-shadow: 0 0 18px rgba(227, 196, 111, 0.18);
+  content: "";
 }
 
 .label {
@@ -19,12 +50,16 @@
   display: flex;
   align-items: center;
   gap: 11px;
-  min-height: 54px;
+  min-height: 58px;
   padding: 0 24px;
-  border-right: 1px solid rgba(255, 255, 255, 0.22);
-  background: #760b0f;
-  box-shadow: 8px 0 18px rgba(0, 0, 0, 0.18);
+  border-right: 1px solid rgba(242, 213, 213, 0.18);
+  background: linear-gradient(180deg, rgba(74, 8, 12, 0.74), rgba(45, 8, 11, 0.72));
+  box-shadow:
+    10px 0 28px rgba(0, 0, 0, 0.18),
+    inset -1px 0 0 rgba(231, 201, 114, 0.08);
   white-space: nowrap;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
 }
 
 .label strong {
@@ -32,33 +67,40 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
 }
 
 .icon {
   display: grid;
-  width: 25px;
-  height: 25px;
+  width: 26px;
+  height: 26px;
   place-items: center;
+  border: 1px solid rgba(255,255,255,.52);
   border-radius: 999px;
-  background: #fff;
-  color: #9e1116;
+  background: linear-gradient(145deg, #fff7e7, #e2c978);
+  color: #7d0c12;
+  box-shadow: 0 0 18px rgba(231, 200, 115, 0.12);
   font-size: 16px;
   font-weight: 950;
   line-height: 1;
 }
 
 .viewport {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   overflow: hidden;
   width: 100%;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
 }
 
 .track {
   display: flex;
   width: max-content;
   min-width: 200%;
-  animation: statewideJurisdictionScroll 24s linear infinite;
+  animation: statewideJurisdictionScroll 26s linear infinite;
   will-change: transform;
 }
 
@@ -67,24 +109,25 @@
   flex-shrink: 0;
   align-items: center;
   gap: 54px;
-  min-height: 54px;
+  min-height: 58px;
   padding: 0 54px 0 34px;
 }
 
 .group span {
   position: relative;
   white-space: nowrap;
-  font-size: 14px;
+  color: rgba(255,255,255,.95);
+  font-size: 13px;
   font-weight: 900;
-  letter-spacing: 0.105em;
+  letter-spacing: 0.11em;
   line-height: 1;
   text-transform: uppercase;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.34);
 }
 
 .group span::after {
   margin-left: 54px;
-  color: rgba(255, 255, 255, 0.78);
+  color: rgba(238, 209, 123, 0.88);
   content: "◆";
   font-size: 8px;
   vertical-align: 2px;
@@ -121,36 +164,46 @@
 @media (max-width: 720px) {
   .alert {
     grid-template-columns: 1fr;
-    margin-top: 103px;
+    /* Mobile header is 35px utility + 102px navigation. The old 103px offset
+       placed the PSA underneath the header and hid its text. */
+    margin-top: 137px;
+    min-height: 82px;
   }
 
   .label {
-    justify-content: center;
-    min-height: 38px;
-    padding: 0 16px;
+    justify-content: flex-start;
+    min-height: 39px;
+    padding: 0 20px;
     border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(246, 220, 220, 0.14);
+    background: linear-gradient(90deg, rgba(69, 8, 12, 0.78), rgba(69, 8, 12, 0.38));
+    box-shadow: none;
   }
 
   .label strong {
-    font-size: 11px;
+    font-size: 10px;
+    letter-spacing: 0.145em;
   }
 
   .icon {
-    width: 22px;
-    height: 22px;
-    font-size: 14px;
+    width: 21px;
+    height: 21px;
+    font-size: 13px;
+  }
+
+  .viewport {
+    min-height: 43px;
   }
 
   .group {
     gap: 38px;
-    min-height: 40px;
+    min-height: 43px;
     padding: 0 38px 0 24px;
   }
 
   .group span {
-    font-size: 11px;
-    letter-spacing: 0.09em;
+    font-size: 10px;
+    letter-spacing: 0.1em;
   }
 
   .group span::after {
@@ -167,6 +220,7 @@
 @media (prefers-reduced-motion: reduce) {
   .track {
     animation: none;
+    transform: none;
   }
 
   .group:nth-child(2) {
