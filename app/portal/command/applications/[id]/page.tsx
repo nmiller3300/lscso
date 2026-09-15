@@ -8,7 +8,9 @@ import { ApplicationReview } from "./ApplicationReview";
 import { ApplicantTrackingLinkManager } from "./ApplicantTrackingLinkManager";
 import { ApplicationClosureControl } from "./ApplicationClosureControl";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
+import { RecruitmentCaseHeader } from "./RecruitmentCaseHeader";
 import "./communications.css";
+import "./recruitment-premium.css";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
@@ -39,6 +41,8 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
       <div className="portal-page-actions">
         <Link href="/portal/command/applications" className="portal-button">Back to applications</Link>
       </div>
+
+      <RecruitmentCaseHeader application={application} latestOffer={latestOffer} />
 
       <ApplicantTrackingLinkManager
         applicationId={application.id}
