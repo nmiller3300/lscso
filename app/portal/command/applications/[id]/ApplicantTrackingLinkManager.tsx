@@ -59,24 +59,49 @@ export function ApplicantTrackingLinkManager({
       setNotice(message);
       window.setTimeout(() => setNotice(""), 2200);
     } catch {
-      setError("The applicant link could not be copied. Open the original applicant page and copy the URL manually.");
+      setError("The applicant link could not be copied. Open the applicant page and copy the URL manually.");
     }
   }
 
-  async function resendOriginalLink() {
+  async function resendApplicantLink() {
     if (!trackingUrl) return;
-    const text = `Hi ${applicantName}, here is your original private LSCSO application tracking link. This link does not require Personnel Portal access:`;
+    const text = `Hi ${applicantName}, here is your private LSCSO application tracking link. This link does not require Personnel Portal access:`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "LSCSO Application Tracking", text, url: trackingUrl });
-        setNotice("Original applicant link ready to resend.");
+        setNotice("Applicant link ready to resend.");
         window.setTimeout(() => setNotice(""), 2200);
         return;
       } catch (caught) {
         if (caught instanceof DOMException && caught.name === "AbortError") return;
       }
     }
-    await copy(`${text} ${trackingUrl}`, "Original applicant link and message copied.");
+    await copy(`${text} ${trackingUrl}`, "Applicant link and message copied.");
+  }
+
+  async function createReplacementLink() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    setNotice("");
+    try {
+      const response = await fetch(`/api/portal/applications/${applicationId}/tracking-link`, {
+        method: "POST",
+        headers: { "Cache-Control": "no-store" },
+      });
+      const data = await response.json();
+      if (!response.ok || !data.tracking_token) {
+        throw new Error(data.error || "A replacement applicant link could not be created.");
+      }
+      setToken(data.tracking_token);
+      setNotice("Replacement applicant link created. It is ready to copy, open, or resend.");
+      window.setTimeout(() => setNotice(""), 3200);
+      router.refresh();
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "A replacement applicant link could not be created.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function saveExpiration(value: string) {
@@ -104,22 +129,27 @@ export function ApplicantTrackingLinkManager({
   return (
     <section className="portal-panel" id="tracking-link">
       <div className="portal-panel-heading">
-        <div><p>Applicant access</p><h2>Original private tracking link</h2></div>
+        <div><p>Applicant access</p><h2>Private applicant tracking link</h2></div>
         <span>{expired ? "Expired" : loading ? "Loading" : token ? "Active" : "Legacy application"}</span>
       </div>
 
       {trackingUrl ? (
         <>
-          <p className="command-v2-compact-copy">This is the same private public link issued when the application was submitted. It opens the applicant status page directly and does not require a Personnel Portal account.</p>
-          <input aria-label="Original applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
+          <p className="command-v2-compact-copy">This is the private public status link currently associated with the application. It opens the applicant status page directly and does not require a Personnel Portal account.</p>
+          <input aria-label="Applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
           <div className="portal-page-actions" style={{ marginTop: 12 }}>
-            <button className="portal-button portal-button--primary" type="button" onClick={() => void resendOriginalLink()}>Resend original applicant link</button>
-            <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Original applicant link copied.")}>Copy original link</button>
-            <a className="portal-button" href={trackingUrl} target="_blank" rel="noreferrer">Open original applicant page</a>
+            <button className="portal-button portal-button--primary" type="button" onClick={() => void resendApplicantLink()}>Resend applicant link</button>
+            <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Applicant link copied.")}>Copy applicant link</button>
+            <a className="portal-button" href={trackingUrl} target="_blank" rel="noreferrer">Open applicant page</a>
           </div>
         </>
       ) : !loading ? (
-        <p className="command-v2-compact-copy">Original link unavailable for this legacy application.</p>
+        <div>
+          <p className="command-v2-compact-copy">The original private token for this legacy application was not stored in recoverable form. Create a replacement private link so the applicant can still receive their status or final disposition.</p>
+          <div className="portal-page-actions" style={{ marginTop: 12 }}>
+            <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => void createReplacementLink()}>{busy ? "Creating…" : "Create replacement applicant link"}</button>
+          </div>
+        </div>
       ) : null}
 
       <div className="recruitment-control-grid" style={{ marginTop: 18 }}>
