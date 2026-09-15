@@ -1,0 +1,272 @@
+/* Public navigation/footer continuity for the cinematic system.
+   PublicSiteFrame excludes Portal, maintenance and Archives before this shell renders. */
+
+.public-site-system .site-header {
+  isolation: isolate;
+}
+
+.public-site-system .site-header .nav-shell {
+  position: relative;
+}
+
+.public-site-system .site-header .nav-shell::before {
+  position: absolute;
+  right: 14%;
+  bottom: 0;
+  left: 14%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(235, 212, 142, .42), rgba(113, 151, 181, .16), transparent);
+  box-shadow: 0 0 22px rgba(215, 185, 96, .1);
+  content: "";
+  pointer-events: none;
+}
+
+.public-site-system .desktop-navigation > a,
+.public-site-system .division-menu > summary {
+  position: relative;
+}
+
+.public-site-system .desktop-navigation > a::before,
+.public-site-system .division-menu > summary::before {
+  position: absolute;
+  right: 50%;
+  bottom: 7px;
+  left: 50%;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(105, 144, 174, .12), rgba(231, 205, 126, .9), rgba(105, 144, 174, .12));
+  box-shadow: 0 0 14px rgba(220, 190, 101, .16);
+  opacity: 0;
+  content: "";
+  transition: right 180ms ease, left 180ms ease, opacity 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .public-site-system .desktop-navigation > a:hover::before,
+  .public-site-system .desktop-navigation > a:focus-visible::before,
+  .public-site-system .division-menu > summary:hover::before,
+  .public-site-system .division-menu > summary:focus-visible::before,
+  .public-site-system .division-menu[open] > summary::before {
+    right: 12%;
+    left: 12%;
+    opacity: 1;
+  }
+}
+
+.public-site-system .division-dropdown {
+  overflow: hidden;
+  border-color: rgba(225, 201, 128, .24) !important;
+  background:
+    linear-gradient(110deg, rgba(215, 187, 104, .055), transparent 29%),
+    radial-gradient(circle at 100% 0%, rgba(81, 119, 150, .08), transparent 35%),
+    rgba(7, 11, 13, .92) !important;
+  box-shadow:
+    0 34px 88px rgba(0, 0, 0, .5),
+    inset 0 1px rgba(255, 255, 255, .035),
+    inset 0 -1px rgba(216, 189, 106, .05) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.12) !important;
+  backdrop-filter: blur(28px) saturate(1.12) !important;
+  clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%);
+}
+
+.public-site-system .division-dropdown::before {
+  position: absolute;
+  top: 0;
+  right: 18%;
+  left: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(236, 213, 141, .64), transparent);
+  content: "";
+}
+
+.public-site-system .division-dropdown-heading {
+  background: linear-gradient(90deg, rgba(216, 189, 105, .04), transparent);
+}
+
+.public-site-system .division-dropdown > a {
+  position: relative;
+}
+
+.public-site-system .division-dropdown > a::before {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 2px;
+  background: linear-gradient(#e3c876, #7d672c);
+  opacity: 0;
+  content: "";
+  transition: opacity 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .public-site-system .division-dropdown > a:hover::before,
+  .public-site-system .division-dropdown > a:focus-visible::before {
+    opacity: 1;
+  }
+}
+
+/* Mobile navigation becomes a full smoked command drawer, not a generic menu sheet. */
+@media (max-width: 1060px) {
+  .public-site-system .mobile-navigation > summary {
+    border-radius: 50% !important;
+    border-color: rgba(226, 202, 131, .4) !important;
+    background:
+      radial-gradient(circle at 32% 24%, rgba(255, 255, 255, .065), transparent 36%),
+      linear-gradient(145deg, rgba(14, 19, 21, .82), rgba(5, 8, 10, .86)) !important;
+    box-shadow:
+      0 20px 48px rgba(0, 0, 0, .38),
+      inset 0 1px rgba(255, 255, 255, .045),
+      inset 0 -1px rgba(213, 187, 105, .12) !important;
+    -webkit-backdrop-filter: blur(22px) saturate(1.12);
+    backdrop-filter: blur(22px) saturate(1.12);
+  }
+
+  .public-site-system .mobile-navigation > nav {
+    background:
+      radial-gradient(circle at 88% 8%, rgba(211, 181, 92, .11), transparent 25%),
+      radial-gradient(circle at 4% 78%, rgba(71, 112, 145, .1), transparent 30%),
+      linear-gradient(155deg, rgba(8, 12, 14, .985), rgba(4, 7, 9, .995)) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(1.08);
+    backdrop-filter: blur(30px) saturate(1.08);
+  }
+
+  .public-site-system .mobile-navigation > nav::before {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(112deg, transparent 0 23%, rgba(226, 200, 124, .045) 31%, transparent 43%),
+      repeating-linear-gradient(90deg, transparent 0 86px, rgba(255, 255, 255, .01) 86px 87px);
+    content: "";
+    pointer-events: none;
+  }
+
+  .public-site-system .mobile-navigation > nav > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .public-site-system .mobile-navigation__intro {
+    border-left: 2px solid rgba(228, 202, 126, .48);
+    background: linear-gradient(90deg, rgba(217, 189, 106, .06), transparent 70%);
+  }
+
+  .public-site-system .mobile-navigation__primary > a,
+  .public-site-system .mobile-division-menu > div > a {
+    border-color: rgba(255, 255, 255, .075) !important;
+    background: linear-gradient(90deg, rgba(255, 255, 255, .012), transparent) !important;
+  }
+
+  .public-site-system .mobile-navigation__primary > a > span {
+    color: rgba(221, 194, 113, .66);
+  }
+
+  .public-site-system .mobile-navigation__actions > a {
+    border-radius: 2px !important;
+    clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 0 100%);
+  }
+
+  .public-site-system .mobile-navigation__join {
+    border-color: rgba(226, 202, 128, .32) !important;
+    background:
+      linear-gradient(100deg, rgba(216, 187, 98, .13), transparent 68%),
+      rgba(10, 13, 13, .72) !important;
+  }
+
+  .public-site-system .mobile-navigation__portal {
+    border-color: rgba(111, 149, 179, .27) !important;
+    background:
+      linear-gradient(100deg, rgba(77, 118, 150, .12), transparent 68%),
+      rgba(8, 12, 14, .72) !important;
+  }
+}
+
+/* Footer becomes the final architectural plane of the page. */
+.public-site-system .site-footer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-top: 1px solid rgba(226, 201, 126, .18);
+}
+
+.public-site-system .site-footer::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(112deg, transparent 0 13%, rgba(219, 190, 106, .05) 21%, transparent 31%),
+    radial-gradient(circle at 86% 100%, rgba(73, 113, 145, .08), transparent 28%),
+    repeating-linear-gradient(90deg, transparent 0 112px, rgba(255, 255, 255, .009) 112px 113px);
+  content: "";
+}
+
+.public-site-system .footer-main {
+  position: relative;
+  padding-top: clamp(52px, 7vw, 86px);
+}
+
+.public-site-system .footer-main::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: min(260px, 34vw);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(237, 213, 140, .8), rgba(112, 148, 177, .16), transparent);
+  box-shadow: 0 0 22px rgba(214, 184, 94, .12);
+  content: "";
+}
+
+.public-site-system .footer-identity img {
+  filter:
+    drop-shadow(0 22px 36px rgba(0, 0, 0, .42))
+    drop-shadow(0 0 18px rgba(216, 186, 96, .1));
+}
+
+.public-site-system .footer-navigation > div {
+  padding-left: 18px;
+  border-left: 1px solid rgba(223, 198, 124, .14);
+}
+
+.public-site-system .footer-navigation a {
+  position: relative;
+  transition: color 170ms ease, transform 170ms ease;
+}
+
+.public-site-system .footer-navigation a::before {
+  position: absolute;
+  top: 50%;
+  left: -18px;
+  width: 7px;
+  height: 1px;
+  background: #d7bb68;
+  opacity: 0;
+  content: "";
+  transition: opacity 170ms ease, width 170ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .public-site-system .footer-navigation a:hover,
+  .public-site-system .footer-navigation a:focus-visible {
+    color: #f1d98a;
+    transform: translateX(4px);
+  }
+
+  .public-site-system .footer-navigation a:hover::before,
+  .public-site-system .footer-navigation a:focus-visible::before {
+    width: 11px;
+    opacity: .8;
+  }
+}
+
+.public-site-system .footer-legal {
+  border-top-color: rgba(255, 255, 255, .07);
+  background: linear-gradient(90deg, rgba(216, 189, 106, .018), transparent 38%, rgba(81, 119, 149, .018));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site-system .desktop-navigation > a::before,
+  .public-site-system .division-menu > summary::before,
+  .public-site-system .division-dropdown > a::before,
+  .public-site-system .footer-navigation a {
+    transition: none !important;
+  }
+}
