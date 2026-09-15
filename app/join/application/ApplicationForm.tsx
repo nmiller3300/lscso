@@ -190,10 +190,11 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
         <p className="application-success__lead">Your signed application was received successfully and assigned a permanent application number.</p>
         <strong className="application-success__number">APP-{applicationNumber.padStart(4, "0")}</strong>
         <div className="application-success__timeline" aria-label="Recruitment process">
-          <article className="is-active"><span>01</span><div><strong>Command Review</strong><small>Your application is screened by Captain+ staff.</small></div></article>
-          <article><span>02</span><div><strong>Application Decision</strong><small>If accepted, the application advances to interview.</small></div></article>
-          <article><span>03</span><div><strong>Interview</strong><small>Recruitment staff will contact you on Discord to schedule it.</small></div></article>
-          <article><span>04</span><div><strong>Recruit Onboarding</strong><small>A passed interview clears you for the hiring handoff.</small></div></article>
+          <article className="is-active"><span>01</span><div><strong>Command Review</strong><small>Your application is reviewed by authorized Command staff.</small></div></article>
+          <article><span>02</span><div><strong>Application Decision</strong><small>If accepted, the application advances to the required interview.</small></div></article>
+          <article><span>03</span><div><strong>Interview</strong><small>Recruitment staff will contact you on Discord to schedule the required interview.</small></div></article>
+          <article><span>04</span><div><strong>Employment Offer</strong><small>A passed interview may advance to a formal employment offer for your review and signature.</small></div></article>
+          <article><span>05</span><div><strong>Recruit Appointment</strong><small>Accepting an offer does not itself hire you. Command must separately complete the Recruit appointment.</small></div></article>
         </div>
         <div className="application-success__notice"><strong>Private applicant status page</strong><p>Your tracking link is the key to your application status. Save or bookmark it now. Anyone with the private link can view the candidate-facing status, so do not post it publicly.</p></div>
         {trackingHref ? (
@@ -202,7 +203,7 @@ export function ApplicationForm({ questions }: { questions: RecruitmentApplicati
             <button className="button button--outline" type="button" onClick={() => void copyTrackingLink()}>{trackingCopied ? "Tracking Link Copied" : "Copy Private Tracking Link"}</button>
           </div>
         ) : null}
-        <div className="application-success__notice"><strong>What happens next?</strong><p>If Command accepts your application, LSCSO staff will contact you through Discord to arrange your interview. Application acceptance is not the same as being hired. Your private status page will show the current stage, last update, and any applicant-facing message from Recruitment.</p></div>
+        <div className="application-success__notice"><strong>What happens next?</strong><p>If Command accepts your application, LSCSO staff will contact you through Discord to arrange your interview. Application acceptance is not the same as being hired. A passed interview may advance to an employment offer, and even an accepted offer still requires a separate Command appointment action. Your private status page will show the current stage, last update, and any applicant-facing message from Recruitment.</p></div>
         <p className="application-success__keep">Keep <b>APP-{applicationNumber.padStart(4, "0")}</b> and your private tracking link for your records.</p>
       </section>
     );
