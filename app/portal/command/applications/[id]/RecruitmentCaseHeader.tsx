@@ -19,10 +19,22 @@ function currentStage(application: any, offer: any) {
   return 0;
 }
 
+function reachedBeforeDisposition(application: any, offer: any) {
+  if (offer || application.recruitment_closure_code === "Offer Terminated") return 3;
+  if (
+    application.recruitment_closure_code === "Interview No Show"
+    || application.recruitment_closure_code === "Interview Failed"
+    || ["Scheduled", "Completed", "Passed", "Failed", "No Show"].includes(application.interview_status)
+  ) return 2;
+  if (application.reviewer_profile_id || ["Under Review", "Interview", "Accepted", "Denied", "Withdrawn", "Archived"].includes(application.status)) return 1;
+  return 0;
+}
+
 export function RecruitmentCaseHeader({ application, latestOffer }: { application: any; latestOffer: any }) {
   const stage = currentStage(application, latestOffer);
   const hired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const closed = stage === 5;
+  const completedBeforeDisposition = reachedBeforeDisposition(application, latestOffer);
   const stages = [
     ["01", "Intake", "Candidate packet received"],
     ["02", "Review", "Command screening & decision"],
@@ -79,11 +91,11 @@ export function RecruitmentCaseHeader({ application, latestOffer }: { applicatio
 
       <div className="recruitment-case__rail" aria-label="Recruitment case stages">
         {stages.map(([number, title, description], index) => {
-          const complete = hired ? index <= 4 : closed ? index < 5 : index < stage;
+          const complete = hired ? index < 4 : closed ? index <= completedBeforeDisposition : index < stage;
           const current = index === stage;
           return (
             <article key={number} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`}>
-              <div className="recruitment-case__node"><span>{complete && !current ? "✓" : number}</span></div>
+              <div className="recruitment-case__node"><span>{complete ? "✓" : number}</span></div>
               <div><strong>{title}</strong><small>{description}</small></div>
             </article>
           );
