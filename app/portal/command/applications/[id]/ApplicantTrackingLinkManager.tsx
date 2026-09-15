@@ -32,7 +32,6 @@ export function ApplicantTrackingLinkManager({
   const trackingUrl = useMemo(() => token && origin
     ? `${origin}/join/application/status/${encodeURIComponent(token)}`
     : "", [origin, token]);
-  const previewUrl = `/portal/command/applications/${applicationId}/applicant-view`;
   const expired = Boolean(initialExpiresAt && new Date(initialExpiresAt).getTime() <= Date.now());
 
   useEffect(() => {
@@ -55,23 +54,29 @@ export function ApplicantTrackingLinkManager({
   }, [applicationId]);
 
   async function copy(value: string, message: string) {
-    await navigator.clipboard.writeText(value);
-    setNotice(message);
-    window.setTimeout(() => setNotice(""), 2200);
+    try {
+      await navigator.clipboard.writeText(value);
+      setNotice(message);
+      window.setTimeout(() => setNotice(""), 2200);
+    } catch {
+      setError("The applicant link could not be copied. Open the original applicant page and copy the URL manually.");
+    }
   }
 
-  async function share() {
+  async function resendOriginalLink() {
     if (!trackingUrl) return;
-    const text = `Hi ${applicantName}, here is your private LSCSO application tracking link:`;
+    const text = `Hi ${applicantName}, here is your original private LSCSO application tracking link. This link does not require Personnel Portal access:`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "LSCSO Application Tracking", text, url: trackingUrl });
+        setNotice("Original applicant link ready to resend.");
+        window.setTimeout(() => setNotice(""), 2200);
         return;
       } catch (caught) {
         if (caught instanceof DOMException && caught.name === "AbortError") return;
       }
     }
-    await copy(`${text} ${trackingUrl}`, "Applicant message copied.");
+    await copy(`${text} ${trackingUrl}`, "Original applicant link and message copied.");
   }
 
   async function saveExpiration(value: string) {
@@ -99,17 +104,18 @@ export function ApplicantTrackingLinkManager({
   return (
     <section className="portal-panel" id="tracking-link">
       <div className="portal-panel-heading">
-        <div><p>Applicant access</p><h2>Private tracking link</h2></div>
+        <div><p>Applicant access</p><h2>Original private tracking link</h2></div>
         <span>{expired ? "Expired" : loading ? "Loading" : token ? "Active" : "Legacy application"}</span>
       </div>
 
       {trackingUrl ? (
         <>
-          <input aria-label="Applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
+          <p className="command-v2-compact-copy">This is the same private public link issued when the application was submitted. It opens the applicant status page directly and does not require a Personnel Portal account.</p>
+          <input aria-label="Original applicant tracking link" readOnly value={trackingUrl} style={{ width: "100%" }} />
           <div className="portal-page-actions" style={{ marginTop: 12 }}>
-            <a className="portal-button portal-button--primary" href={trackingUrl} target="_blank" rel="noreferrer">Open applicant link</a>
-            <button className="portal-button" type="button" onClick={() => void share()}>Share to applicant</button>
-            <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Tracking link copied.")}>Copy link</button>
+            <button className="portal-button portal-button--primary" type="button" onClick={() => void resendOriginalLink()}>Resend original applicant link</button>
+            <button className="portal-button" type="button" onClick={() => void copy(trackingUrl, "Original applicant link copied.")}>Copy original link</button>
+            <a className="portal-button" href={trackingUrl} target="_blank" rel="noreferrer">Open original applicant page</a>
           </div>
         </>
       ) : !loading ? (
@@ -129,10 +135,6 @@ export function ApplicantTrackingLinkManager({
         </div>
       </div>
       {initialExpiresAt ? <p className="command-v2-compact-copy">Applicant access {expired ? "expired" : "expires"} {new Date(initialExpiresAt).toLocaleString()}.</p> : null}
-
-      <div className="portal-page-actions" style={{ marginTop: 12 }}>
-        <a className="portal-button" href={previewUrl} target="_blank" rel="noreferrer">Preview applicant tracking page</a>
-      </div>
 
       {error ? <p className="application-error" role="alert">{error}</p> : null}
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
