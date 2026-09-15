@@ -99,6 +99,7 @@ export function PublicCinematicEnvironment() {
     if (!root || !canvas) return;
 
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const coarsePointer = window.matchMedia("(pointer: coarse)").matches;
     const gl = canvas.getContext("webgl2", {
       alpha: false,
       antialias: false,
@@ -173,15 +174,20 @@ export function PublicCinematicEnvironment() {
 
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", onPointerMove, { passive: true });
-    document.documentElement.addEventListener("pointerleave", onPointerLeave);
+    if (!coarsePointer) {
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+      document.documentElement.addEventListener("pointerleave", onPointerLeave);
+    }
 
     gl.useProgram(program);
     root.dataset.renderer = "webgl";
-    const started = performance.now();
-    let frame = 0;
 
-    const render = (now: number) => {
+    const started = performance.now();
+    const frameInterval = coarsePointer ? 1000 / 30 : 1000 / 60;
+    let frame = 0;
+    let lastDraw = -Infinity;
+
+    const draw = (now: number) => {
       pointer.x += (pointer.tx - pointer.x) * 0.045;
       pointer.y += (pointer.ty - pointer.y) * 0.045;
       root.style.setProperty("--public-px", pointer.x.toFixed(4));
@@ -191,16 +197,45 @@ export function PublicCinematicEnvironment() {
       gl.uniform1f(uTime, reduced ? 7.5 : (now - started) / 1000);
       gl.uniform2f(uPointer, pointer.x, pointer.y);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
-      if (!reduced) frame = requestAnimationFrame(render);
     };
 
-    frame = requestAnimationFrame(render);
+    const loop = (now: number) => {
+      frame = requestAnimationFrame(loop);
+      if (now - lastDraw < frameInterval) return;
+      lastDraw = now;
+      draw(now);
+    };
+
+    const start = () => {
+      if (reduced) {
+        draw(performance.now());
+        return;
+      }
+      if (!frame && !document.hidden) frame = requestAnimationFrame(loop);
+    };
+
+    const stop = () => {
+      if (!frame) return;
+      cancelAnimationFrame(frame);
+      frame = 0;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) stop();
+      else start();
+    };
+
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    start();
 
     return () => {
-      cancelAnimationFrame(frame);
+      stop();
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", onPointerMove);
-      document.documentElement.removeEventListener("pointerleave", onPointerLeave);
+      if (!coarsePointer) {
+        window.removeEventListener("pointermove", onPointerMove);
+        document.documentElement.removeEventListener("pointerleave", onPointerLeave);
+      }
+      document.removeEventListener("visibilitychange", onVisibilityChange);
       gl.deleteProgram(program);
     };
   }, []);
