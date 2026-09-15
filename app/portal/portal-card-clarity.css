@@ -129,6 +129,69 @@
   display: none !important;
 }
 
+/* Mobile/tablet interaction integrity.
+ * The sticky topbar and its fixed/absolute children must remain above portal content,
+ * and the workspace must not clip the account popover or mobile navigation drawer. */
+@media (max-width: 1100px) {
+  .portal-app .portal-workspace {
+    overflow: visible !important;
+  }
+
+  .portal-app .portal-topbar {
+    position: sticky;
+    z-index: 1200 !important;
+    overflow: visible !important;
+    isolation: isolate;
+  }
+
+  .portal-app .portal-topbar-actions {
+    position: relative;
+    z-index: 1210;
+    pointer-events: auto !important;
+  }
+
+  .portal-app .portal-account-menu,
+  .portal-app .portal-account-menu > summary {
+    position: relative;
+    z-index: 1220;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .portal-app .portal-account-menu[open] {
+    z-index: 1400;
+  }
+
+  .portal-app .portal-account-menu__popover {
+    z-index: 1410 !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (max-width: 860px) {
+  .portal-app .portal-mobile-menu-host,
+  .portal-app .portal-mobile-menu-trigger {
+    position: relative;
+    z-index: 1300;
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+
+  .portal-app .portal-mobile-menu-backdrop {
+    z-index: 3000 !important;
+    pointer-events: auto !important;
+  }
+
+  .portal-app .portal-mobile-menu-drawer,
+  .portal-app .portal-mobile-menu-header,
+  .portal-app .portal-mobile-menu-close,
+  .portal-app .portal-mobile-menu-groups,
+  .portal-app .portal-mobile-menu-group a {
+    pointer-events: auto !important;
+    touch-action: manipulation;
+  }
+}
+
 @media (max-width: 430px) {
   .portal-app .command-home-quick-actions nav > a {
     grid-template-columns: minmax(0, 1fr) 28px !important;
