@@ -8,10 +8,10 @@ type Check = {
 };
 
 function currentStage(application: any, offer: any) {
-  const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at) || ["Denied", "Withdrawn"].includes(application.status);
   const hired = application.status === "Hired" || Boolean(application.hired_profile_id);
-  if (closed) return 5;
+  const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at) || ["Denied", "Withdrawn"].includes(application.status);
   if (hired) return 4;
+  if (closed) return 5;
   if (offer?.status === "Accepted") return 4;
   if (offer || application.interview_status === "Passed") return 3;
   if (application.status === "Accepted" || ["Scheduled", "Completed", "Failed", "No Show"].includes(application.interview_status)) return 2;
@@ -21,6 +21,7 @@ function currentStage(application: any, offer: any) {
 
 export function RecruitmentCaseHeader({ application, latestOffer }: { application: any; latestOffer: any }) {
   const stage = currentStage(application, latestOffer);
+  const hired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const closed = stage === 5;
   const stages = [
     ["01", "Intake", "Candidate packet received"],
@@ -55,10 +56,10 @@ export function RecruitmentCaseHeader({ application, latestOffer }: { applicatio
   ];
 
   const checksReady = checks.filter((item) => item.ready).length;
-  const status = closed ? "Final disposition" : applicationStatusLabel(application.status);
+  const status = hired ? "Recruit appointment complete" : closed ? "Final disposition" : applicationStatusLabel(application.status);
 
   return (
-    <section className={`recruitment-case ${closed ? "is-closed" : ""}`}>
+    <section className={`recruitment-case ${closed ? "is-closed" : ""} ${hired ? "is-hired" : ""}`}>
       <div className="recruitment-case__glow" aria-hidden="true" />
       <header className="recruitment-case__masthead">
         <div className="recruitment-case__identity">
@@ -70,7 +71,7 @@ export function RecruitmentCaseHeader({ application, latestOffer }: { applicatio
           </div>
         </div>
         <div className="recruitment-case__classification">
-          <span>{closed ? "Closed candidate record" : "Active candidate record"}</span>
+          <span>{hired ? "Completed recruitment record" : closed ? "Closed candidate record" : "Active candidate record"}</span>
           <strong>{applicationLabel(application.application_number)}</strong>
           <small>{application.reviewer_profile_id ? "Command reviewer assigned" : "Reviewer assignment pending"}</small>
         </div>
@@ -78,11 +79,11 @@ export function RecruitmentCaseHeader({ application, latestOffer }: { applicatio
 
       <div className="recruitment-case__rail" aria-label="Recruitment case stages">
         {stages.map(([number, title, description], index) => {
-          const complete = closed ? index < 5 : index < stage;
+          const complete = hired ? index <= 4 : closed ? index < 5 : index < stage;
           const current = index === stage;
           return (
             <article key={number} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`}>
-              <div className="recruitment-case__node"><span>{complete ? "✓" : number}</span></div>
+              <div className="recruitment-case__node"><span>{complete && !current ? "✓" : number}</span></div>
               <div><strong>{title}</strong><small>{description}</small></div>
             </article>
           );
