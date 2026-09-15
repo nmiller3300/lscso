@@ -20,12 +20,12 @@ const expectations = [
 ];
 
 const steps = [
-  ["01", "Application", "Submit the official LSCSO application while recruitment is open."],
-  ["02", "Review", "Training & Recruitment reviews your qualifications and answers."],
-  ["03", "Selection", "Qualified candidates may advance to an interview or other evaluation."],
-  ["04", "Initial Training", "Learn policy, procedures, communications, documentation, and the fundamentals of service."],
-  ["05", "Field Development", "Develop under designated trainers and supervisors while demonstrating safe, consistent performance."],
-  ["06", "Independent Service", "Transition to regular Patrol duties while remaining accountable to continuing training and supervision."],
+  ["01", "Application", "Submit and electronically sign the official LSCSO candidate packet while recruitment is open."],
+  ["02", "Command Review", "Training & Recruitment reviews the complete packet, records objective intake checks, and may request clarification before a decision."],
+  ["03", "Required Interview", "Applicants advanced by Command are scheduled for the required interview panel. Attendance and completion are part of the selection process."],
+  ["04", "Employment Offer", "A passed interview may advance to a formal employment offer. The offer must be reviewed and electronically accepted before appointment can continue."],
+  ["05", "Recruit Appointment", "Accepting an offer is not itself a hire. Command separately completes the Recruit appointment and creates the personnel record."],
+  ["06", "Training & Field Development", "Newly appointed Recruits enter structured training and supervised field development before advancing toward independent Patrol service."],
 ];
 
 export default async function JoinPage() {
@@ -67,7 +67,7 @@ export default async function JoinPage() {
         </div>
       </section>
 
-      <section className="content-section content-section--light">
+      <section className="content-section content-section--light join-service-section">
         <div className="site-shell two-column-editorial">
           <div><p className="section-kicker section-kicker--dark">Service with LSCSO</p><h2>More than putting on a uniform.</h2></div>
           <div className="reading-column">
@@ -78,7 +78,7 @@ export default async function JoinPage() {
         </div>
       </section>
 
-      <section className="content-section content-section--sand">
+      <section className="content-section content-section--sand join-expectations-section">
         <div className="site-shell">
           <div className="section-heading-row section-heading-row--dark">
             <div><p className="section-kicker section-kicker--dark">What We Expect</p><h2>The standard starts with how you carry yourself.</h2></div>
@@ -90,7 +90,7 @@ export default async function JoinPage() {
         </div>
       </section>
 
-      <section className="content-section content-section--dark join-dark-section">
+      <section className="content-section content-section--dark join-dark-section join-patrol-section">
         <div className="site-shell two-column-editorial">
           <div><p className="section-kicker">Patrol Division</p><h2>Where sworn service begins.</h2></div>
           <div className="reading-column">
@@ -101,19 +101,19 @@ export default async function JoinPage() {
         </div>
       </section>
 
-      <section className="content-section content-section--light">
+      <section className="content-section content-section--light join-process-section">
         <div className="site-shell">
           <div className="section-heading-row section-heading-row--dark">
-            <div><p className="section-kicker section-kicker--dark">Recruitment Process</p><h2>From applicant to deputy.</h2></div>
-            <p>Every applicant is reviewed through a documented, professional process.</p>
+            <div><p className="section-kicker section-kicker--dark">Recruitment Process</p><h2>From applicant to appointment.</h2></div>
+            <p>Every applicant moves through a documented selection process. Application acceptance, an employment offer, and a Recruit appointment are separate decisions.</p>
           </div>
-          <div className="quality-grid">
+          <div className="quality-grid join-process-grid">
             {steps.map(([number, title, text]) => <article key={title}><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}
           </div>
         </div>
       </section>
 
-      <section className="content-section content-section--dark join-dark-section">
+      <section className="content-section content-section--dark join-dark-section join-closing-section">
         <div className="site-shell two-column-editorial">
           <div><p className="section-kicker">Before You Apply</p><h2>Prepared to serve?</h2></div>
           <div className="reading-column">
