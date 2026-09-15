@@ -16,12 +16,12 @@ export function PublicSiteFrame({ children }: { children: ReactNode }) {
   if (portalRoute || maintenanceRoute || archiveRoute) return <>{children}</>;
 
   return (
-    <>
+    <div className="public-site-system">
       <MaintenanceNotice scope="public_site" variant="public" />
       <SiteHeader />
       <StatewideJurisdictionAlert />
       <main>{children}</main>
       <SiteFooter />
-    </>
+    </div>
   );
 }
