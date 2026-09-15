@@ -1,0 +1,567 @@
+/* Public workflow surfaces: recruitment, applicant records, dispositions, and open records.
+   Deliberately scoped to the public frame so Portal, maintenance, and Archives cannot inherit it. */
+
+.public-site-system {
+  --workflow-gold: #d8bd6d;
+  --workflow-gold-bright: #f0da8d;
+  --workflow-steel: #7190a9;
+  --workflow-ink: #080b0d;
+  --workflow-panel: rgba(12, 16, 18, .82);
+  --workflow-line: rgba(220, 195, 119, .22);
+  --workflow-line-cool: rgba(131, 164, 190, .16);
+}
+
+/* JOIN / RECRUITMENT OVERVIEW */
+.public-site-system .recruitment-status-panel {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-block: 1px solid rgba(219, 194, 116, .24);
+  background:
+    linear-gradient(106deg, rgba(216, 189, 105, .08), transparent 24%),
+    radial-gradient(circle at 88% 14%, rgba(89, 126, 155, .12), transparent 32%),
+    linear-gradient(145deg, rgba(8, 12, 14, .97), rgba(13, 17, 18, .95) 58%, rgba(7, 9, 10, .98));
+  color: #fff;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .025), inset 0 -1px rgba(0, 0, 0, .42);
+}
+
+.public-site-system .recruitment-status-panel::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(115deg, transparent 0 18%, rgba(244, 218, 139, .065) 18.1%, transparent 24%),
+    repeating-linear-gradient(90deg, transparent 0 92px, rgba(255, 255, 255, .012) 92px 93px);
+  opacity: .75;
+  content: "";
+  pointer-events: none;
+}
+
+.public-site-system .recruitment-status-panel__layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(180px, .34fr) minmax(0, 1.66fr);
+  gap: clamp(38px, 7vw, 96px);
+  align-items: center;
+}
+
+.public-site-system .recruitment-status-panel__mark {
+  position: relative;
+  min-height: 170px;
+  display: grid;
+  align-content: center;
+  padding: 26px 26px 24px 30px;
+  border-left: 2px solid rgba(231, 205, 127, .72);
+  border-block: 1px solid rgba(255, 255, 255, .07);
+  background:
+    linear-gradient(90deg, rgba(216, 189, 105, .105), rgba(255, 255, 255, .016) 60%, transparent);
+  clip-path: polygon(0 0, calc(100% - 22px) 0, 100% 22px, 100% 100%, 0 100%);
+}
+
+.public-site-system .recruitment-status-panel__mark::after {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #91d29f;
+  box-shadow: 0 0 0 6px rgba(120, 193, 137, .06), 0 0 22px rgba(120, 193, 137, .28);
+  content: "";
+}
+
+.public-site-system .recruitment-status-panel--closed .recruitment-status-panel__mark::after {
+  background: #d87777;
+  box-shadow: 0 0 0 6px rgba(216, 94, 94, .06), 0 0 22px rgba(216, 94, 94, .25);
+}
+
+.public-site-system .recruitment-status-panel__mark span {
+  color: var(--workflow-gold-bright);
+  font-size: clamp(30px, 4.5vw, 58px);
+  font-weight: 760;
+  letter-spacing: -.045em;
+  line-height: .9;
+}
+
+.public-site-system .recruitment-status-panel__mark small {
+  margin-top: 12px;
+  color: rgba(255, 255, 255, .46);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.public-site-system .recruitment-status-panel .section-kicker--dark,
+.public-site-system .recruitment-status-panel__copy p {
+  color: rgba(255, 255, 255, .66);
+}
+
+.public-site-system .recruitment-status-panel__heading h2 {
+  color: #fff;
+  text-shadow: 0 18px 44px rgba(0, 0, 0, .34);
+}
+
+.public-site-system .recruitment-status-panel .button--outline-dark {
+  border-color: rgba(222, 198, 124, .42);
+  color: #fff;
+  background: rgba(255, 255, 255, .018);
+}
+
+.public-site-system .join-patrol-section,
+.public-site-system .join-closing-section {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 12%, rgba(217, 191, 111, .09), transparent 31%),
+    radial-gradient(circle at 88% 78%, rgba(79, 117, 148, .09), transparent 34%),
+    linear-gradient(145deg, #0b0e10, #101315 58%, #080a0b);
+}
+
+.public-site-system .join-patrol-section::after,
+.public-site-system .join-closing-section::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(112deg, transparent 0 67%, rgba(221, 197, 124, .055) 67.1%, transparent 73%);
+  content: "";
+  pointer-events: none;
+}
+
+.public-site-system .join-process-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.public-site-system .join-process-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-block: 1px solid rgba(45, 48, 47, .18);
+  background: rgba(255, 255, 255, .17);
+}
+
+.public-site-system .join-process-grid article {
+  position: relative;
+  min-height: 260px;
+  padding: 34px 30px 30px;
+  border: 0;
+  border-right: 1px solid rgba(45, 48, 47, .14);
+  border-bottom: 1px solid rgba(45, 48, 47, .14);
+  border-radius: 0;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .46), rgba(229, 226, 216, .42));
+  box-shadow: none;
+}
+
+.public-site-system .join-process-grid article:nth-child(3n) { border-right: 0; }
+.public-site-system .join-process-grid article:nth-last-child(-n + 3) { border-bottom: 0; }
+
+.public-site-system .join-process-grid article::before {
+  position: absolute;
+  top: 0;
+  left: 28px;
+  width: 72px;
+  height: 2px;
+  background: linear-gradient(90deg, #9b7e35, #e2c873);
+  content: "";
+}
+
+.public-site-system .join-process-grid article > span {
+  color: #8d7439;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: .16em;
+}
+
+.public-site-system .join-process-grid article h3 {
+  margin-top: 42px;
+  font-size: clamp(24px, 2.4vw, 34px);
+  letter-spacing: -.035em;
+}
+
+/* CANDIDATE APPLICATION — move away from rounded dashboard cards */
+.public-site-system .application-page {
+  background: transparent;
+}
+
+.public-site-system .application-page__hero {
+  background:
+    radial-gradient(circle at 82% 5%, rgba(210, 183, 104, .13), transparent 25%),
+    radial-gradient(circle at 8% 28%, rgba(84, 122, 152, .11), transparent 30%),
+    linear-gradient(180deg, rgba(7, 10, 11, .82), rgba(10, 13, 14, .9));
+}
+
+.public-site-system .application-page__masthead,
+.public-site-system .application-page__seal,
+.public-site-system .application-process-strip,
+.public-site-system .application-briefing,
+.public-site-system .application-section,
+.public-site-system .application-certification,
+.public-site-system .application-ai-gate,
+.public-site-system .application-success {
+  border-radius: 3px;
+}
+
+.public-site-system .application-page__masthead {
+  border-color: rgba(222, 197, 119, .25);
+  border-left: 2px solid rgba(232, 207, 128, .55);
+  background:
+    linear-gradient(110deg, rgba(213, 185, 100, .07), transparent 22%),
+    linear-gradient(145deg, rgba(11, 15, 16, .76), rgba(5, 8, 9, .56));
+  box-shadow: 0 34px 100px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .035);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  clip-path: polygon(0 0, calc(100% - 24px) 0, 100% 24px, 100% 100%, 0 100%);
+}
+
+.public-site-system .application-page__seal {
+  border-color: rgba(134, 165, 190, .19);
+  background:
+    linear-gradient(135deg, rgba(226, 200, 122, .08), rgba(94, 127, 153, .045) 58%, rgba(255, 255, 255, .018));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .035), 0 26px 72px rgba(0, 0, 0, .24);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+}
+
+.public-site-system .application-page__seal img {
+  filter: drop-shadow(0 22px 34px rgba(0, 0, 0, .38)) drop-shadow(0 0 20px rgba(217, 191, 109, .08));
+}
+
+.public-site-system .application-page__metrics,
+.public-site-system .application-success__timeline {
+  border-radius: 0;
+}
+
+.public-site-system .application-process-strip {
+  background: rgba(7, 10, 11, .58);
+  border-block: 1px solid rgba(218, 193, 117, .19);
+  border-inline: 0;
+  box-shadow: none;
+}
+
+.public-site-system .application-section,
+.public-site-system .application-certification,
+.public-site-system .application-ai-gate {
+  border-color: rgba(219, 194, 118, .18);
+  border-left: 2px solid rgba(219, 194, 118, .38);
+  background:
+    linear-gradient(105deg, rgba(216, 189, 106, .045), transparent 20%),
+    linear-gradient(145deg, rgba(11, 15, 16, .76), rgba(6, 9, 10, .67));
+  box-shadow: 0 28px 78px rgba(0, 0, 0, .22), inset 0 1px rgba(255, 255, 255, .025);
+}
+
+.public-site-system .application-question {
+  border-radius: 2px;
+  background: rgba(2, 5, 6, .24);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .012);
+}
+
+.public-site-system .application-question input,
+.public-site-system .application-question textarea,
+.public-site-system .application-question select {
+  border-radius: 2px;
+  background: rgba(3, 7, 8, .76);
+}
+
+.public-site-system .application-success {
+  border-top: 2px solid rgba(230, 205, 127, .5);
+  background:
+    radial-gradient(circle at 50% -12%, rgba(214, 188, 106, .105), transparent 33%),
+    linear-gradient(145deg, rgba(10, 14, 15, .82), rgba(4, 7, 8, .76));
+}
+
+/* APPLICANT STATUS / OFFER — precision instrument treatment */
+.public-site-system .application-status-page {
+  background: transparent;
+}
+
+.public-site-system .application-status-hero {
+  position: relative;
+  background:
+    radial-gradient(circle at 86% 5%, rgba(216, 190, 110, .12), transparent 27%),
+    radial-gradient(circle at 9% 64%, rgba(81, 120, 150, .1), transparent 30%),
+    linear-gradient(180deg, rgba(8, 11, 12, .84), rgba(8, 11, 12, .94));
+}
+
+.public-site-system .application-status-masthead {
+  position: relative;
+  padding: 34px 0 40px;
+  border-top: 1px solid rgba(219, 194, 118, .26);
+  border-bottom: 1px solid rgba(219, 194, 118, .22);
+}
+
+.public-site-system .application-status-masthead::before {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  width: min(240px, 34%);
+  height: 2px;
+  background: linear-gradient(90deg, #d6b85e, rgba(214, 184, 94, 0));
+  content: "";
+}
+
+.public-site-system .application-status-seal {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(219, 194, 118, .22);
+  border-radius: 2px;
+  background:
+    linear-gradient(135deg, rgba(223, 197, 119, .08), rgba(83, 116, 143, .04) 55%, rgba(255, 255, 255, .015));
+  box-shadow: 0 28px 80px rgba(0, 0, 0, .28), inset 0 1px rgba(255, 255, 255, .03);
+  clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+
+.public-site-system .application-status-summary,
+.public-site-system .application-status-timeline,
+.public-site-system .application-status-offer__meta {
+  gap: 0;
+  border-color: rgba(255, 255, 255, .085);
+  background: rgba(255, 255, 255, .06);
+}
+
+.public-site-system .application-status-summary article,
+.public-site-system .application-status-offer__meta > div {
+  background:
+    linear-gradient(145deg, rgba(10, 14, 15, .88), rgba(17, 21, 21, .82));
+}
+
+.public-site-system .application-status-next-action,
+.public-site-system .application-status-privacy,
+.public-site-system .application-status-offer {
+  border-radius: 2px;
+  border-color: rgba(219, 194, 118, .23);
+  background:
+    linear-gradient(110deg, rgba(216, 189, 105, .07), transparent 26%),
+    rgba(9, 13, 14, .7);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+.public-site-system .application-status-timeline article {
+  background: rgba(6, 9, 10, .5);
+}
+
+.public-site-system .application-status-timeline article.is-current {
+  background:
+    linear-gradient(180deg, rgba(216, 189, 105, .12), rgba(216, 189, 105, .025)),
+    rgba(7, 10, 11, .78);
+}
+
+.public-site-system .application-status-offer__heading > strong,
+.public-site-system .application-status-badge {
+  border-radius: 2px;
+}
+
+.public-site-system .application-status-offer__terms,
+.public-site-system .application-status-offer__signature input[type="text"],
+.public-site-system .application-status-offer__signature input:not([type]) {
+  border-radius: 2px;
+}
+
+/* FINAL DISPOSITION — formal alloy document, not a generic panel */
+.public-site-system .application-disposition-document {
+  position: relative;
+  isolation: isolate;
+  border-color: rgba(220, 194, 116, .3);
+  border-top: 2px solid rgba(232, 205, 124, .54);
+  border-radius: 0;
+  background:
+    linear-gradient(115deg, rgba(220, 193, 113, .055), transparent 19%),
+    radial-gradient(circle at 88% 6%, rgba(92, 126, 151, .06), transparent 29%),
+    linear-gradient(180deg, rgba(12, 15, 16, .97), rgba(6, 9, 10, .99));
+  box-shadow: 0 42px 120px rgba(0, 0, 0, .42), inset 0 1px rgba(255, 255, 255, .025);
+  clip-path: polygon(0 0, calc(100% - 26px) 0, 100% 26px, 100% 100%, 0 100%);
+}
+
+.public-site-system .application-disposition-document::before {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: repeating-linear-gradient(90deg, transparent 0 108px, rgba(255, 255, 255, .009) 108px 109px);
+  opacity: .7;
+  content: "";
+  pointer-events: none;
+}
+
+.public-site-system .application-disposition-header {
+  border-bottom-color: rgba(220, 194, 116, .22);
+  background:
+    linear-gradient(90deg, rgba(218, 190, 108, .085), rgba(76, 108, 132, .025) 62%, transparent);
+}
+
+.public-site-system .application-disposition-titleblock {
+  position: relative;
+  background: linear-gradient(90deg, rgba(117, 34, 34, .09), transparent 42%);
+}
+
+.public-site-system .application-disposition-titleblock::before {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3px;
+  background: linear-gradient(#be5a5a, #6f2d2d);
+  content: "";
+}
+
+.public-site-system .application-disposition-facts article {
+  background: rgba(255, 255, 255, .008);
+}
+
+.public-site-system .application-disposition-finding,
+.public-site-system .application-disposition-communication,
+.public-site-system .application-disposition-recordline,
+.public-site-system .application-disposition-history {
+  border-radius: 0;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .012);
+}
+
+.public-site-system .application-disposition-finding {
+  border-left: 3px solid rgba(193, 83, 83, .72);
+  background:
+    linear-gradient(90deg, rgba(132, 39, 39, .13), transparent 62%),
+    rgba(255, 255, 255, .012);
+}
+
+/* OPEN RECORDS — secure public-record instrument */
+.public-site-system .open-records-workspace,
+.public-site-system .open-records-status-workspace {
+  position: relative;
+}
+
+.public-site-system .open-records-form-card,
+.public-site-system .open-records-success,
+.public-site-system .open-records-status-card {
+  border-radius: 2px;
+  border-color: rgba(218, 193, 118, .18);
+  border-left: 2px solid rgba(218, 193, 118, .34);
+  background:
+    linear-gradient(108deg, rgba(215, 188, 105, .04), transparent 22%),
+    linear-gradient(145deg, rgba(11, 14, 15, .9), rgba(6, 9, 10, .92));
+  box-shadow: 0 28px 78px rgba(0, 0, 0, .22), inset 0 1px rgba(255, 255, 255, .024);
+}
+
+.public-site-system .open-records-fields input,
+.public-site-system .open-records-fields textarea,
+.public-site-system .open-records-fields select {
+  border-radius: 2px;
+  background: rgba(5, 8, 9, .8);
+}
+
+.public-site-system .open-records-status-hero {
+  position: relative;
+  overflow: hidden;
+  border-block: 1px solid rgba(218, 193, 118, .23);
+  background:
+    linear-gradient(110deg, rgba(216, 188, 105, .075), transparent 23%),
+    radial-gradient(circle at 90% 18%, rgba(84, 120, 149, .09), transparent 30%),
+    rgba(8, 11, 12, .75);
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+}
+
+.public-site-system .open-records-status-badge {
+  border-radius: 2px;
+  border-color: rgba(219, 194, 118, .25);
+  background: rgba(5, 8, 9, .56);
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+}
+
+.public-site-system .open-records-status-grid {
+  gap: 0;
+  border-block: 1px solid rgba(255, 255, 255, .08);
+  background: rgba(255, 255, 255, .05);
+}
+
+.public-site-system .open-records-status-grid article {
+  border-radius: 0;
+  background: linear-gradient(145deg, rgba(10, 14, 15, .92), rgba(16, 20, 20, .86));
+}
+
+.public-site-system .open-records-status-notice,
+.public-site-system .open-records-status-legal,
+.public-site-system .open-records-download-list a {
+  border-radius: 2px;
+}
+
+.public-site-system .open-records-download-list a {
+  border-color: rgba(219, 194, 118, .19);
+  background:
+    linear-gradient(90deg, rgba(216, 189, 106, .055), transparent 36%),
+    rgba(4, 7, 8, .54);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .public-site-system .open-records-download-list a:hover {
+    transform: translateX(4px);
+    border-color: rgba(224, 200, 126, .42);
+    background:
+      linear-gradient(90deg, rgba(216, 189, 106, .09), transparent 42%),
+      rgba(6, 9, 10, .66);
+  }
+}
+
+@media (max-width: 980px) {
+  .public-site-system .recruitment-status-panel__layout {
+    grid-template-columns: minmax(150px, .42fr) minmax(0, 1.58fr);
+    gap: 34px;
+  }
+
+  .public-site-system .join-process-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .public-site-system .join-process-grid article:nth-child(3n) { border-right: 1px solid rgba(45, 48, 47, .14); }
+  .public-site-system .join-process-grid article:nth-child(2n) { border-right: 0; }
+  .public-site-system .join-process-grid article:nth-last-child(-n + 3) { border-bottom: 1px solid rgba(45, 48, 47, .14); }
+  .public-site-system .join-process-grid article:nth-last-child(-n + 2) { border-bottom: 0; }
+}
+
+@media (max-width: 720px) {
+  .public-site-system .recruitment-status-panel__layout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .public-site-system .recruitment-status-panel__mark {
+    min-height: 112px;
+    padding: 22px 22px 20px 24px;
+  }
+
+  .public-site-system .join-process-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .public-site-system .join-process-grid article,
+  .public-site-system .join-process-grid article:nth-child(2n),
+  .public-site-system .join-process-grid article:nth-child(3n),
+  .public-site-system .join-process-grid article:nth-last-child(-n + 2),
+  .public-site-system .join-process-grid article:nth-last-child(-n + 3) {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px solid rgba(45, 48, 47, .14);
+  }
+
+  .public-site-system .join-process-grid article:last-child { border-bottom: 0; }
+
+  .public-site-system .application-page__masthead,
+  .public-site-system .application-page__seal,
+  .public-site-system .application-disposition-document {
+    clip-path: none;
+  }
+
+  .public-site-system .application-page__masthead {
+    border-left-width: 1px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site-system .open-records-download-list a {
+    transition: none;
+  }
+}
