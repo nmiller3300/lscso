@@ -9,6 +9,11 @@ This file is the authoritative development history for the Los Santos County She
 - Historical entries from August 20 through September 11, 2026 were backfilled from the repository commit history and database migrations. Temporary implementation churn and immediately reverted experiments are summarized by the meaningful final behavior rather than copied as raw Git noise.
 - Git remains the forensic commit-level record. This changelog records the lasting system capability and behavior people actually need to understand.
 
+## 2026-09-14
+
+### Fixed
+- **Recruitment — Original Applicant Link Resend**: Reworked applicant-link recovery so Command can resend or copy the exact private public tracking link originally issued with the application, rather than directing applicants to the staff-only Personnel Portal preview. The recovered link opens the public applicant status page directly and does not require a Portal account.
+
 ## 2026-09-13
 
 ### Added
