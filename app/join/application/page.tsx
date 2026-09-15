@@ -68,9 +68,10 @@ export default async function ApplicationPage() {
 
           <div className="application-process-strip" aria-label="Recruitment process">
             <article><span>Step 01</span><strong>Submit Application</strong><small>Complete and electronically sign your candidate packet.</small></article>
-            <article><span>Step 02</span><strong>Command Review</strong><small>Command staff review the complete packet and record a decision.</small></article>
-            <article><span>Step 03</span><strong>Interview</strong><small>Accepted applicants are contacted on Discord to schedule the required panel.</small></article>
-            <article><span>Step 04</span><strong>Offer & Appointment</strong><small>A passed interview advances to a formal offer before any Recruit appointment is completed.</small></article>
+            <article><span>Step 02</span><strong>Command Review</strong><small>Command Staff reviews the complete packet and records a decision.</small></article>
+            <article><span>Step 03</span><strong>Required Interview</strong><small>Applicants selected to continue are scheduled for the required interview panel.</small></article>
+            <article><span>Step 04</span><strong>Employment Offer</strong><small>A passed interview may advance to a formal employment offer for review and signature.</small></article>
+            <article><span>Step 05</span><strong>Recruit Appointment</strong><small>Offer acceptance is not a hire. Command separately completes the Recruit appointment.</small></article>
           </div>
 
           {questions.length ? <ApplicationForm questions={questions} /> : (
@@ -78,6 +79,7 @@ export default async function ApplicationPage() {
           )}
         </div>
       </section>
+      <style>{`@media (min-width: 721px) { .application-process-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); } }`}</style>
     </main>
   );
 }
