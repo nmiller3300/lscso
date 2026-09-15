@@ -1,0 +1,427 @@
+/* Page-specific continuation of the public cinematic system. */
+
+/* About / history */
+.public-site-system .department-history-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% 8%, rgba(206,178,91,.07), transparent 24%),
+    linear-gradient(180deg, rgba(10,14,16,.88), rgba(5,8,10,.94)) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(1.04);
+  backdrop-filter: blur(9px) saturate(1.04);
+}
+
+.public-site-system .department-history-section::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(110deg, transparent 0 34%, rgba(233,210,139,.026) 46%, transparent 58%),
+    repeating-linear-gradient(90deg, transparent 0 124px, rgba(255,255,255,.007) 124px 125px);
+  content: "";
+}
+
+.public-site-system .history-entry {
+  position: relative;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.public-site-system .history-entry:hover {
+  transform: translateX(5px);
+  background: linear-gradient(90deg, rgba(211,184,101,.055), transparent 72%);
+}
+
+.public-site-system .history-entry--current {
+  background:
+    linear-gradient(90deg, rgba(211,184,101,.09), rgba(84,126,157,.025) 56%, transparent 80%) !important;
+}
+
+.public-site-system .value-grid article,
+.public-site-system .quality-grid article,
+.public-site-system .process-grid article {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(82,72,47,.19);
+  border-radius: 0;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.24), rgba(255,255,255,.06));
+  box-shadow:
+    0 26px 58px rgba(40,35,24,.075),
+    inset 0 1px rgba(255,255,255,.32);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.public-site-system .value-grid article::after,
+.public-site-system .quality-grid article::after,
+.public-site-system .process-grid article::after {
+  position: absolute;
+  top: 0;
+  right: 12%;
+  left: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(151,125,56,.46), transparent);
+  content: "";
+}
+
+/* Office of the Sheriff */
+.public-site-system .sheriff-office-intro,
+.public-site-system .command-framework-section,
+.public-site-system .executive-responsibilities-section,
+.public-site-system .executive-closing-section {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 86% 4%, rgba(211,183,95,.075), transparent 25%),
+    radial-gradient(circle at 12% 86%, rgba(76,119,153,.055), transparent 28%),
+    linear-gradient(180deg, rgba(10,14,16,.87), rgba(5,8,10,.94)) !important;
+  color: #fff;
+  -webkit-backdrop-filter: blur(9px) saturate(1.05);
+  backdrop-filter: blur(9px) saturate(1.05);
+}
+
+.public-site-system .sheriff-office-intro::before,
+.public-site-system .command-framework-section::before,
+.public-site-system .executive-responsibilities-section::before,
+.public-site-system .executive-closing-section::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .7;
+  background: linear-gradient(112deg, transparent 0 36%, rgba(234,211,142,.026) 48%, transparent 61%);
+  content: "";
+}
+
+.public-site-system .sheriff-office-intro > *,
+.public-site-system .command-framework-section > *,
+.public-site-system .executive-responsibilities-section > *,
+.public-site-system .executive-closing-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-site-system .sheriff-office-seal {
+  position: relative;
+  overflow: visible;
+  min-height: 360px;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+.public-site-system .sheriff-office-seal::before,
+.public-site-system .sheriff-office-seal::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  content: "";
+}
+
+.public-site-system .sheriff-office-seal::before {
+  width: min(330px,92%);
+  border: 1px solid rgba(230,207,140,.20);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(210,180,91,.08), transparent 56%),
+    conic-gradient(from 210deg, transparent, rgba(224,200,127,.06), transparent 34%, rgba(95,139,173,.045), transparent 68%);
+  box-shadow:
+    0 34px 90px rgba(0,0,0,.34),
+    inset 0 0 70px rgba(255,255,255,.018);
+}
+
+.public-site-system .sheriff-office-seal::after {
+  width: min(276px,76%);
+  border: 1px solid rgba(115,149,175,.12);
+  box-shadow: 0 0 60px rgba(208,176,85,.055);
+}
+
+.public-site-system .sheriff-office-seal img {
+  position: relative;
+  z-index: 1;
+  filter:
+    drop-shadow(0 28px 54px rgba(0,0,0,.56))
+    drop-shadow(0 0 34px rgba(210,177,86,.15)) !important;
+}
+
+.public-site-system .executive-administration-section {
+  position: relative;
+  background:
+    radial-gradient(circle at 86% 7%, rgba(145,115,47,.05), transparent 24%),
+    linear-gradient(180deg, #f1ede3 0%, #e7e1d3 100%) !important;
+}
+
+.public-site-system .executive-administration-section::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .24;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 8px, rgba(50,42,26,.015) 8px 9px),
+    linear-gradient(112deg, transparent 0 36%, rgba(255,255,255,.18) 48%, transparent 62%);
+  content: "";
+}
+
+.public-site-system .executive-administration-section > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-site-system .executive-leader-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(102,88,51,.24) !important;
+  border-top-width: 1px !important;
+  background:
+    linear-gradient(145deg, rgba(251,248,239,.82), rgba(221,211,190,.72)) !important;
+  box-shadow:
+    0 32px 70px rgba(52,43,24,.10),
+    inset 0 1px rgba(255,255,255,.50);
+  clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+}
+
+.public-site-system .executive-leader-card::before {
+  position: absolute;
+  top: 0;
+  right: 10%;
+  left: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(149,120,52,.76), transparent);
+  box-shadow: 0 0 18px rgba(143,111,42,.12);
+  content: "";
+}
+
+.public-site-system .executive-leader-card:last-child::before {
+  background: linear-gradient(90deg, transparent, rgba(71,101,126,.66), rgba(149,120,52,.52), transparent);
+}
+
+.public-site-system .executive-responsibility-grid article {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(227,204,134,.14) !important;
+  background:
+    linear-gradient(145deg, rgba(20,27,30,.58), rgba(5,9,11,.42)) !important;
+  box-shadow:
+    0 28px 62px rgba(0,0,0,.20),
+    inset 0 1px rgba(255,255,255,.025);
+  -webkit-backdrop-filter: blur(10px) saturate(1.06);
+  backdrop-filter: blur(10px) saturate(1.06);
+}
+
+/* Patrol + Training feature splits */
+.public-site-system .patrol-responsibilities,
+.public-site-system .training-feature {
+  position: relative;
+  overflow: hidden;
+  background: #06090b;
+}
+
+.public-site-system .patrol-responsibilities::after,
+.public-site-system .training-feature::after {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(108deg, transparent 0 44%, rgba(230,206,135,.032) 51%, transparent 60%),
+    radial-gradient(circle at 86% 12%, rgba(211,182,92,.07), transparent 24%);
+  content: "";
+}
+
+.public-site-system .patrol-photo,
+.public-site-system .training-feature-media {
+  position: relative;
+  z-index: 0;
+}
+
+.public-site-system .patrol-photo::after,
+.public-site-system .training-feature-media::after {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, transparent 55%, rgba(5,9,11,.82) 100%),
+    linear-gradient(0deg, rgba(3,6,8,.42), transparent 52%);
+  content: "";
+}
+
+.public-site-system .patrol-photo img,
+.public-site-system .training-feature-media img {
+  filter: saturate(.72) contrast(1.08) brightness(.80);
+}
+
+.public-site-system .patrol-responsibility-copy,
+.public-site-system .training-feature-copy {
+  position: relative;
+  z-index: 2;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(210,181,92,.08), transparent 28%),
+    linear-gradient(145deg, rgba(13,18,20,.94), rgba(4,8,10,.96)) !important;
+  box-shadow: -32px 0 78px rgba(0,0,0,.26);
+}
+
+.public-site-system .patrol-responsibility-copy::before,
+.public-site-system .training-feature-copy::before {
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  left: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(231,207,139,.48), transparent);
+  box-shadow: 0 0 18px rgba(208,177,88,.10);
+  content: "";
+}
+
+/* Internal Affairs */
+.public-site-system .process-section {
+  background:
+    radial-gradient(circle at 84% 6%, rgba(205,176,88,.065), transparent 24%),
+    linear-gradient(180deg, rgba(11,15,17,.88), rgba(5,8,10,.95)) !important;
+}
+
+.public-site-system .process-grid article {
+  border-color: rgba(229,205,134,.14);
+  background:
+    linear-gradient(145deg, rgba(19,26,29,.62), rgba(5,9,11,.48));
+  color: #fff;
+  box-shadow:
+    0 28px 64px rgba(0,0,0,.24),
+    inset 0 1px rgba(255,255,255,.025);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.public-site-system .process-grid article h3 {
+  color: #fff;
+}
+
+.public-site-system .process-grid article p {
+  color: rgba(255,255,255,.66);
+}
+
+/* Open Records */
+.public-site-system .open-records-workspace {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 88% 0%, rgba(211,184,96,.07), transparent 25%),
+    radial-gradient(circle at 8% 90%, rgba(74,118,153,.055), transparent 28%),
+    linear-gradient(180deg, rgba(10,14,16,.88), rgba(4,7,9,.96)) !important;
+  -webkit-backdrop-filter: blur(9px) saturate(1.05);
+  backdrop-filter: blur(9px) saturate(1.05);
+}
+
+.public-site-system .open-records-workspace::before {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(111deg, transparent 0 34%, rgba(232,208,136,.028) 47%, transparent 60%),
+    repeating-linear-gradient(90deg, transparent 0 126px, rgba(255,255,255,.006) 126px 127px);
+  content: "";
+}
+
+.public-site-system .open-records-workspace > * {
+  position: relative;
+  z-index: 1;
+}
+
+.public-site-system .open-records-form-card,
+.public-site-system .open-records-success,
+.public-site-system .open-records-status-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(229,205,135,.14) !important;
+  background:
+    linear-gradient(145deg, rgba(18,24,27,.74), rgba(5,9,11,.70)) !important;
+  box-shadow:
+    0 34px 78px rgba(0,0,0,.24),
+    inset 0 1px rgba(255,255,255,.028);
+  -webkit-backdrop-filter: blur(14px) saturate(1.08);
+  backdrop-filter: blur(14px) saturate(1.08);
+  clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+}
+
+.public-site-system .open-records-form-card::before,
+.public-site-system .open-records-success::before,
+.public-site-system .open-records-status-card::before {
+  position: absolute;
+  top: 0;
+  right: 10%;
+  left: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(234,211,143,.54), rgba(104,145,175,.16), transparent);
+  content: "";
+}
+
+.public-site-system .open-records-fields input,
+.public-site-system .open-records-fields textarea,
+.public-site-system .open-records-fields select {
+  border-color: rgba(235,215,155,.15);
+  background:
+    linear-gradient(180deg, rgba(16,22,24,.88), rgba(9,13,15,.90));
+  box-shadow: inset 0 1px rgba(255,255,255,.018);
+}
+
+.public-site-system .open-records-fields input:focus,
+.public-site-system .open-records-fields textarea:focus,
+.public-site-system .open-records-fields select:focus {
+  border-color: rgba(224,196,111,.68);
+  background: rgba(18,23,24,.96);
+  box-shadow:
+    0 0 0 1px rgba(187,164,95,.14),
+    0 0 30px rgba(209,178,87,.045);
+}
+
+.public-site-system .open-records-acknowledgement {
+  border-color: rgba(224,197,113,.30);
+  background:
+    linear-gradient(90deg, rgba(185,151,61,.075), rgba(18,24,26,.20));
+  box-shadow: inset 1px 0 rgba(240,215,140,.12);
+}
+
+@media (max-width: 850px) {
+  .public-site-system .sheriff-office-seal {
+    min-height: 290px;
+  }
+
+  .public-site-system .patrol-photo::after,
+  .public-site-system .training-feature-media::after {
+    background:
+      linear-gradient(0deg, rgba(5,9,11,.86) 0%, transparent 42%),
+      linear-gradient(90deg, rgba(3,6,8,.18), transparent 60%);
+  }
+
+  .public-site-system .patrol-responsibility-copy,
+  .public-site-system .training-feature-copy {
+    box-shadow: 0 -28px 70px rgba(0,0,0,.22);
+  }
+
+  .public-site-system .patrol-responsibility-copy::before,
+  .public-site-system .training-feature-copy::before {
+    top: 0;
+    right: 12%;
+    bottom: auto;
+    left: 12%;
+    width: auto;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(231,207,139,.48), transparent);
+  }
+}
+
+@media (max-width: 620px) {
+  .public-site-system .executive-leader-card,
+  .public-site-system .open-records-form-card,
+  .public-site-system .open-records-success,
+  .public-site-system .open-records-status-card,
+  .public-site-system .value-grid article,
+  .public-site-system .quality-grid article,
+  .public-site-system .process-grid article {
+    clip-path: polygon(9px 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%, 0 9px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-site-system .history-entry {
+    transition: none;
+  }
+}
