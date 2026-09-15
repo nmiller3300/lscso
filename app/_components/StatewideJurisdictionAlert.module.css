@@ -1,10 +1,13 @@
 .alert {
-  position: relative;
-  z-index: 40;
+  position: absolute;
+  z-index: 49;
+  top: 137px;
+  left: 0;
+  width: 100%;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   min-height: 58px;
-  margin-top: 137px;
+  margin: 0;
   overflow: hidden;
   border-top: 1px solid rgba(255, 221, 221, 0.22);
   border-bottom: 1px solid rgba(226, 198, 115, 0.28);
@@ -157,16 +160,14 @@
 
 @media (min-width: 1061px) {
   .alert {
-    margin-top: 127px;
+    top: 127px;
   }
 }
 
 @media (max-width: 720px) {
   .alert {
+    top: 103px;
     grid-template-columns: 1fr;
-    /* Mobile header is 35px utility + 102px navigation. The old 103px offset
-       placed the PSA underneath the header and hid its text. */
-    margin-top: 137px;
     min-height: 82px;
   }
 
@@ -213,7 +214,7 @@
 
 @media (min-width: 721px) and (max-width: 1060px) {
   .alert {
-    margin-top: 137px;
+    top: 137px;
   }
 }
 
