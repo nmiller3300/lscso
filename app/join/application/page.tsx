@@ -79,7 +79,10 @@ export default async function ApplicationPage() {
           )}
         </div>
       </section>
-      <style>{`@media (min-width: 721px) { .application-process-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); } }`}</style>
+      <style>{`
+        @media (min-width: 981px) { .application-process-strip { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+        @media (min-width: 721px) and (max-width: 980px) { .application-process-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+      `}</style>
     </main>
   );
 }
