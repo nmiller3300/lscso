@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { MaintenanceNotice } from "./MaintenanceNotice";
+import { PublicCinematicEnvironment } from "./PublicCinematicEnvironment";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
 import { StatewideJurisdictionAlert } from "./StatewideJurisdictionAlert";
@@ -17,6 +18,7 @@ export function PublicSiteFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="public-site-system">
+      <PublicCinematicEnvironment />
       <MaintenanceNotice scope="public_site" variant="public" />
       <SiteHeader />
       <StatewideJurisdictionAlert />
