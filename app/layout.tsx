@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { PublicSiteFrame } from "./_components/PublicSiteFrame";
 import "./globals.css";
 import "./public-premium-system.css";
+import "./public-header-glass-restore.css";
 import "./maintenance.css";
 
 const geist = localFont({
