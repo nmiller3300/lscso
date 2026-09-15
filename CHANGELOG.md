@@ -11,8 +11,19 @@ This file is the authoritative development history for the Los Santos County She
 
 ## 2026-09-14
 
+### Added
+- **Recruitment — Formal Applicant Disposition View**: Closed recruitment cases now use the applicant’s existing private tracking link as a formal disposition record, presenting the final disposition, closure finding, recorded status, relevant interview information, final applicant communication, and recruitment communication history instead of leaving the applicant on a generic status dashboard.
+- **Recruitment — Premium Case Workflow Overview**: Added an LSCSO-branded Command case header with an end-to-end Intake → Review → Interview → Offer → Appointment → Disposition rail that reflects the stages actually reached by the candidate without falsely marking skipped stages complete.
+- **Recruitment — Objective Intake Integrity Checks**: Added non-AI system checks for recorded applicant identity/contact information, electronic signature, AI-policy acknowledgment, and private applicant access. These checks identify record completeness only and do not score writing, judgment, character, or applicant suitability.
+- **Recruitment — Communication Starters & Discord Copy**: Added editable recruitment message starters for routine applicant communications plus a copy-for-Discord action, while keeping the message actually sent through the system as the permanent applicant-facing recruitment record.
+
+### Changed
+- **Recruitment — Premium Candidate Application Presentation**: Reworked the public Deputy Candidate Application with the same premium LSCSO visual language established by the Personnel Portal sign-in: charcoal depth, restrained gold/steel lighting, smoked glass, stronger hierarchy, connected process presentation, premium form surfaces, and responsive mobile/tablet treatment without changing the underlying submission or certification rules.
+- **Recruitment — Offer & Appointment Clarity**: Updated public recruitment process language so a passed interview advances to a formal employment offer before the separate Recruit appointment/hiring action, preserving the rule that application acceptance or offer acceptance is not itself a hire.
+
 ### Fixed
 - **Recruitment — Original Applicant Link Resend**: Reworked applicant-link recovery so Command can resend or copy the exact private public tracking link originally issued with the application, rather than directing applicants to the staff-only Personnel Portal preview. The recovered link opens the public applicant status page directly and does not require a Portal account.
+- **Recruitment — Legacy Applicant Link Recovery**: Added a Command action for older applications whose original raw private token cannot be recovered, allowing an authorized replacement private applicant link to be issued without creating a second application or losing the original recruitment history.
 
 ## 2026-09-13
 
@@ -305,7 +316,7 @@ This file is the authoritative development history for the Los Santos County She
 
 ### Fixed
 - **Portal — Authenticated Personnel Actions**: Corrected authenticated action handling so personnel actions execute under the intended signed-in context.
-- **Database — Session Event Safety**: Hardened session-event RPC execution and production request paths.
+- **Database — Session Event Safety**: Hardened Supabase session-event RPC execution and production request paths.
 - **Database — Supporting Indexes**: Added foreign-key and workflow indexes needed by the growing personnel, Guardian, certification, and organizational data sets.
 
 ### Security
