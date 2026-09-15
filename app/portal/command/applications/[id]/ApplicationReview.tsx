@@ -17,6 +17,7 @@ import { EmploymentOfferManager } from "./EmploymentOfferManager";
 import { RecruitHireHandoff } from "./RecruitHireHandoff";
 
 type Decision = "Accepted" | "Denied";
+type InterviewDisposition = "Failed" | "No Show";
 
 export function ApplicationReview({ application, reviewers, names, notes, history, applicantMessages }: any) {
   const router = useRouter();
@@ -29,6 +30,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const [reviewer, setReviewer] = useState(application.reviewer_profile_id ?? "");
   const [decision, setDecision] = useState<Decision | null>(null);
   const [decisionReason, setDecisionReason] = useState("");
+  const [interviewDisposition, setInterviewDisposition] = useState<InterviewDisposition | null>(null);
   const [interview, setInterview] = useState({
     status: application.interview_status ?? "Not Scheduled",
     interviewer: application.interviewer_profile_id ?? "",
@@ -56,6 +58,32 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
     } finally {
       setBusy(false);
     }
+  }
+
+  function interviewPayload() {
+    return {
+      action: "interview",
+      interviewStatus: interview.status,
+      interviewerProfileId: interview.interviewer,
+      scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "",
+      notes: interview.notes,
+      result: interview.result,
+    };
+  }
+
+  async function saveInterview() {
+    if (["Failed", "No Show"].includes(interview.status)) {
+      setError("");
+      setInterviewDisposition(interview.status as InterviewDisposition);
+      return;
+    }
+    await save(interviewPayload());
+  }
+
+  async function confirmInterviewDisposition() {
+    if (!interviewDisposition) return;
+    const ok = await save(interviewPayload());
+    if (ok) setInterviewDisposition(null);
   }
 
   async function noteSubmit(event: FormEvent) {
@@ -190,9 +218,14 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
               <div><p>Required interview</p><h2>{isHired ? "Interview completed" : "Interview scheduling & result"}</h2></div>
               <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
             </div>
+            <div className="recruitment-interview-flow" aria-label="Interview workflow">
+              <article className={interview.status !== "Not Scheduled" ? "is-complete" : "is-current"}><span>01</span><div><strong>Schedule</strong><small>Assign interviewer and record the appointment time.</small></div></article>
+              <article className={["Completed", "Passed", "Failed", "No Show"].includes(interview.status) ? "is-complete" : interview.status === "Scheduled" ? "is-current" : ""}><span>02</span><div><strong>Conduct</strong><small>Record attendance and preserve panel/interview notes.</small></div></article>
+              <article className={["Passed", "Failed", "No Show"].includes(interview.status) ? "is-current" : ""}><span>03</span><div><strong>Outcome</strong><small>Pass advances to offer; Fail or No Show creates final disposition.</small></div></article>
+            </div>
             <div className="recruitment-control-grid">
               <label>
-                Interview status
+                Interview stage / outcome
                 <select value={interview.status} onChange={(event) => setInterview({ ...interview, status: event.target.value })} disabled={isHired || Boolean(offer)}>
                   {INTERVIEW_STATUSES.map((item) => <option key={item}>{item}</option>)}
                 </select>
@@ -213,26 +246,30 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
                 <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail" disabled={isHired || Boolean(offer)} />
               </label>
             </div>
-            <label className="recruitment-wide-label">Interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired || Boolean(offer)} /></label>
+            <label className="recruitment-wide-label">Panel / interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired || Boolean(offer)} /></label>
             {!isHired && !offer ? (
               <div className="recruitment-interview-actions">
                 <button
-                  className="portal-button portal-button--primary"
+                  className={`portal-button ${["Failed", "No Show"].includes(interview.status) ? "portal-button--danger" : "portal-button--primary"}`}
                   disabled={busy || !interviewRecordReady}
-                  onClick={() => void save({ action: "interview", interviewStatus: interview.status, interviewerProfileId: interview.interviewer, scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "", notes: interview.notes, result: interview.result })}
+                  onClick={() => void saveInterview()}
                 >
-                  Save interview record
+                  {["Failed", "No Show"].includes(interview.status) ? "Review final disposition" : "Save interview record"}
                 </button>
                 <span className={interviewPassed ? "is-ready" : ""}>
                   {interview.status === "No Show"
-                    ? "No Show closes the selection process immediately."
-                    : interviewNeedsSchedule
-                      ? "Enter the interview date and time."
-                      : interviewNeedsFinalDetails
-                        ? "Pass / Fail requires interviewer and result summary."
-                        : interviewPassed
-                          ? "✓ Interview passed — issue the employment offer below."
-                          : "Recruit appointment requires a Passed interview and signed offer."}
+                    ? "No Show creates a final Interview No Show disposition and closes the selection process."
+                    : interview.status === "Failed"
+                      ? "Failed creates a final Interview Failed disposition and closes the selection process."
+                      : interviewNeedsSchedule
+                        ? "Enter the interview date and time."
+                        : interviewNeedsFinalDetails
+                          ? "Pass / Fail requires interviewer and result summary."
+                          : interviewPassed
+                            ? "✓ Interview passed — issue the employment offer below."
+                            : interview.status === "Completed"
+                              ? "Interview completed — record Pass or Fail when Command has reached the outcome."
+                              : "Recruit appointment requires a Passed interview and signed offer."}
                 </span>
               </div>
             ) : null}
@@ -269,6 +306,28 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
         <div className="portal-panel-heading"><div><p>Application history</p><h2>Audit trail</h2></div></div>
         <div className="recruitment-history">{history.map((item: any) => <article key={item.id}><strong>{item.event_type}</strong><span>{names[item.actor_profile_id] ?? "System"} · {new Date(item.created_at).toLocaleString()}</span>{Object.keys(item.details ?? {}).length ? <small>{Object.entries(item.details).map(([key, value]) => `${key.replaceAll("_", " ")}: ${String(value)}`).join(" · ")}</small> : null}</article>)}</div>
       </section>
+
+      <PortalDialog
+        open={Boolean(interviewDisposition)}
+        onClose={() => { if (!busy) setInterviewDisposition(null); }}
+        eyebrow="Final interview disposition"
+        title={interviewDisposition === "No Show" ? `Close ${application.full_name}'s case as Interview No Show?` : `Close ${application.full_name}'s case as Interview Failed?`}
+        description={interviewDisposition === "No Show"
+          ? "This will close the recruitment case and the applicant's private link will become the final Interview No Show disposition."
+          : "This will close the recruitment case and the applicant's private link will become the final Interview Failed disposition."}
+        dismissOnBackdrop={!busy}
+        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setInterviewDisposition(null)} type="button">Cancel</button><button className="portal-button portal-button--danger" disabled={busy || !interviewRecordReady} onClick={() => void confirmInterviewDisposition()} type="button">{busy ? "Recording…" : "Confirm final disposition"}</button></>}
+      >
+        <div className="recruitment-decision-review">
+          <div><span>Applicant</span><strong>{application.full_name}</strong></div>
+          <div><span>Application</span><strong>{applicationLabel(application.application_number)}</strong></div>
+          <div><span>Disposition</span><strong>{interviewDisposition === "No Show" ? "Interview No Show" : "Interview Failed"}</strong></div>
+          {interview.scheduled ? <div><span>Scheduled interview</span><strong>{new Date(interview.scheduled).toLocaleString()}</strong></div> : null}
+          {interview.interviewer ? <div><span>Interviewer</span><strong>{names[interview.interviewer] ?? "Command"}</strong></div> : null}
+          {interview.result.trim() ? <div className="recruitment-decision-review__wide"><span>Internal result summary</span><strong>{interview.result.trim()}</strong></div> : null}
+          <p className="recruitment-terminal-warning">The applicant-facing disposition uses the official closure finding. Internal interview notes and the result summary are not displayed on the applicant disposition page.</p>
+        </div>
+      </PortalDialog>
 
       <PortalDialog
         open={Boolean(decision)}
