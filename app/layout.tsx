@@ -5,6 +5,7 @@ import "./globals.css";
 import "./public-premium-system.css";
 import "./public-header-glass-restore.css";
 import "./public-cinematic-system.css";
+import "./public-cinematic-pages.css";
 import "./maintenance.css";
 
 const geist = localFont({
