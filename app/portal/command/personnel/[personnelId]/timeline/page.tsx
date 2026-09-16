@@ -11,8 +11,14 @@ type TimelinePageProps = {
   params: Promise<{ personnelId: string }>;
 };
 
+const OPEN_ENDED_RETURN = "9999-12-31";
+
 function clean(value: unknown, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function dayLabel(value: string) {
+  return new Date(`${value}T12:00:00`).toLocaleDateString();
 }
 
 export default async function PersonnelTimelinePage({ params }: TimelinePageProps) {
@@ -31,9 +37,9 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
     .maybeSingle();
   if (!member) notFound();
 
-  const [calls, divisions, certs, guardians, awards, flags, leave, training, points, requests, correspondence] = await Promise.all([
+  const [calls, assignments, certs, guardians, awards, flags, leave, training, points, requests, correspondence] = await Promise.all([
     supabase.from("call_sign_assignments").select("id,call_sign,assigned_at,released_at,release_reason").eq("profile_id", member.id),
-    supabase.from("division_assignments").select("id,division,assignment_type,effective_at,ends_at,notes").eq("profile_id", member.id),
+    supabase.from("personnel_unit_assignments").select("id,assignment_type,starts_at,ends_at,notes,organizational_units(name,unit_type)").eq("profile_id", member.id).order("starts_at", { ascending: true }),
     supabase.from("certifications").select("id,name,certificate_number,status,issued_on,expires_on,created_at,updated_at").eq("profile_id", member.id),
     supabase.from("guardian_records").select("id,guardian_number,record_type,status,title,incident_at,created_at,points_assessed").eq("subject_profile_id", member.id),
     supabase.from("personnel_awards").select("id,award_name,citation,awarded_on,created_at").eq("profile_id", member.id),
@@ -62,9 +68,12 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
     if (row.released_at) add({ id: `call-release-${row.id}`, category: "Career", title: `Call sign ${row.call_sign} released`, detail: clean(row.release_reason, "Call sign released"), occurredAt: row.released_at });
   }
 
-  for (const row of divisions.data ?? []) {
-    add({ id: `division-${row.id}`, category: "Career", title: `${row.assignment_type} assignment · ${row.division}`, detail: clean(row.notes, "Division assignment"), occurredAt: row.effective_at });
-    if (row.ends_at) add({ id: `division-end-${row.id}`, category: "Career", title: `${row.division} assignment ended`, detail: `${row.assignment_type} assignment`, occurredAt: row.ends_at });
+  for (const row of assignments.data ?? []) {
+    const unit = Array.isArray(row.organizational_units) ? row.organizational_units[0] : row.organizational_units;
+    const unitName = unit?.name ?? "Unknown unit";
+    const unitType = unit?.unit_type ? ` · ${unit.unit_type}` : "";
+    add({ id: `assignment-${row.id}`, category: "Career", title: `${row.assignment_type} assignment · ${unitName}`, detail: clean(row.notes, `Organizational assignment${unitType}`), occurredAt: row.starts_at });
+    if (row.ends_at) add({ id: `assignment-end-${row.id}`, category: "Career", title: `${unitName} assignment ended`, detail: `${row.assignment_type} assignment${unitType}`, occurredAt: row.ends_at });
   }
 
   for (const row of certs.data ?? []) {
@@ -86,7 +95,8 @@ export default async function PersonnelTimelinePage({ params }: TimelinePageProp
   }
 
   for (const row of leave.data ?? []) {
-    add({ id: `leave-${row.id}`, category: "Administrative", title: `${row.leave_type} leave request`, detail: `${new Date(`${row.starts_on}T12:00:00`).toLocaleDateString()} – ${new Date(`${row.expected_return_on}T12:00:00`).toLocaleDateString()} · RQ-${String(row.request_number).padStart(4, "0")}`, occurredAt: row.created_at, status: row.status });
+    const returnLabel = row.expected_return_on === OPEN_ENDED_RETURN ? "Open-ended" : dayLabel(row.expected_return_on);
+    add({ id: `leave-${row.id}`, category: "Administrative", title: `${row.leave_type} leave request`, detail: `${dayLabel(row.starts_on)} – ${returnLabel} · LOA-${String(row.request_number).padStart(4, "0")}`, occurredAt: row.created_at, status: row.status });
   }
 
   for (const row of training.data ?? []) {
