@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { PersonnelIdentityManager } from "./PersonnelIdentityManager";
 import { PersonnelLoaManager } from "./PersonnelLoaManager";
@@ -31,11 +32,11 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
       <section className="portal-control-banner">
         <div>
           <span>Roster personnel controls</span>
-          <strong>Manage rank, service status, and administrative LOA directly from the roster.</strong>
-          <p>Rank/status changes use the shared personnel record. Approved LOA records automatically update website and roster display status while the leave dates are active.</p>
+          <strong>Manage authorized rank corrections, service status, and administrative LOA directly from the roster.</strong>
+          <p>Promotions remain protected by Promotion Review. Rank/status corrections use the shared personnel record. Approved LOA records automatically update website and roster display status while the leave dates are active.</p>
         </div>
         <div className="portal-control-actions">
-          <button className="portal-button portal-button--primary" onClick={() => setRankOpen(true)} type="button">Promote / Change Rank</button>
+          <button className="portal-button portal-button--primary" onClick={() => setRankOpen(true)} type="button">Rank / Status Change</button>
           <button className="portal-button" onClick={() => setLoaOpen(true)} type="button">Record / End LOA</button>
         </div>
       </section>
@@ -44,8 +45,13 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setRankOpen(false); }}>
           <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="roster-rank-manager-title">
             <div className="portal-modal-heading">
-              <div><span>Roster personnel controls</span><h2 id="roster-rank-manager-title">Promote / Change Rank</h2></div>
+              <div><span>Roster personnel controls</span><h2 id="roster-rank-manager-title">Rank / Status Change</h2></div>
               <button onClick={() => setRankOpen(false)} type="button" aria-label="Close rank manager">×</button>
+            </div>
+            <div className="portal-form-protection">
+              <strong>Promotion protection</strong>
+              <span>This control is for authorized demotions, rank corrections, and service-status changes. Promotions must be completed through Promotion Review.</span>
+              <Link href="/portal/command/promotions">Open Promotion Review →</Link>
             </div>
             <label className="portal-call-sign-field">
               Personnel member
