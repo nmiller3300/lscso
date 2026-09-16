@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { PersonnelAwardManager } from "../../../../_components/PersonnelAwardManager";
 import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
@@ -47,11 +48,7 @@ export default async function PersonnelRecognitionPage({ params }: PageProps) {
             {(points.data ?? []).length ? (points.data ?? []).map((item:any) => <div key={item.id}><strong>{item.event_type} · {item.delta}</strong><span>{item.reason}</span></div>) : <p className="command-v2-compact-copy">No positive point events recorded.</p>}
           </div>
         </section>
-        <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Department recognition</p><h2>Awards management</h2></div></div>
-          <p className="command-v2-compact-copy">Recognition actions remain controlled through the existing awards workflow.</p>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href="/portal/command/awards">Open awards</Link></div>
-        </section>
+        <PersonnelAwardManager profileId={member.id} displayName={member.display_name} canIssue={["Executive", "Command"].includes(profile.access_tier)} />
       </div>
     </PortalShell>
   );
