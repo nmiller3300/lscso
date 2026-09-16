@@ -20,6 +20,12 @@ function shortDate(value: string | null | undefined) {
   return new Date(value.length === 10 ? `${value}T12:00:00` : value).toLocaleDateString();
 }
 
+function assignmentUnit(assignment: any) {
+  return Array.isArray(assignment?.organizational_units)
+    ? assignment.organizational_units[0]
+    : assignment?.organizational_units;
+}
+
 export default async function PersonnelRecordPage({ params }: PersonnelRecordPageProps) {
   const profile = await getCurrentPortalProfile();
   if (!profile) redirect("/portal/login");
@@ -96,7 +102,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const activeAssignments = assignments.data ?? [];
   const guardianHref = `/portal/command/guardians?q=${encodeURIComponent(member.personnel_id)}`;
   const primaryAssignment = activeAssignments.find((assignment:any) => assignment.assignment_type === "Primary");
-  const primaryUnitName = primaryAssignment?.organizational_units?.name ?? member.division;
+  const primaryUnitName = assignmentUnit(primaryAssignment)?.name ?? member.division;
   const activeDelegations = delegations.data ?? [];
   const leaveRow = currentLeave.data?.[0];
   const ftoQualified = Boolean(ftoCertification.data?.length);
@@ -165,12 +171,15 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
         <div className="portal-panel-heading"><div><p>Current service</p><h2>Divisions & assignments</h2></div><Link href={`/portal/command/personnel/${member.personnel_id}/administration#assignments`}>Manage assignments</Link></div>
         {activeAssignments.length ? (
           <div className="command-v2-assignment-chips">
-            {activeAssignments.map((assignment:any) => (
-              <div key={assignment.id}>
-                <strong>{assignment.organizational_units?.name ?? "Unknown unit"}</strong>
-                <span>{assignment.assignment_type}{assignment.organizational_units?.unit_type ? ` · ${assignment.organizational_units.unit_type}` : ""}{assignment.starts_at ? ` · since ${new Date(assignment.starts_at).toLocaleDateString()}` : ""}</span>
-              </div>
-            ))}
+            {activeAssignments.map((assignment:any) => {
+              const unit = assignmentUnit(assignment);
+              return (
+                <div key={assignment.id}>
+                  <strong>{unit?.name ?? "Unknown unit"}</strong>
+                  <span>{assignment.assignment_type}{unit?.unit_type ? ` · ${unit.unit_type}` : ""}{assignment.starts_at ? ` · since ${new Date(assignment.starts_at).toLocaleDateString()}` : ""}</span>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="command-v2-inline-state"><strong>No active organizational assignments are recorded.</strong><span>Personnel Operations can assign this member to one or more organizational units.</span></div>
