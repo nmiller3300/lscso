@@ -13,11 +13,46 @@ const legacyModalFiles=[];
 const forbidden=[[/window\.confirm\s*\(/,"Use the LSCSO dialog system instead of window.confirm()."],[/window\.prompt\s*\(/,"Use the LSCSO dialog system/form controls instead of window.prompt()."]];
 const imagePattern=/["'`](\/images\/[A-Za-z0-9_./-]+)["'`]/g;
 
+function routePatternFromPage(relative){
+  let route=relative.replace(/^app/,"").replace(/\/page\.(?:ts|tsx|js|jsx)$/,"");
+  route=route.replace(/\/(?:\([^/]+\)|@[^/]+)/g,"");
+  if(!route)route="/";
+  const escaped=route.split("/").map((segment)=>{
+    if(!segment)return"";
+    if(/^\[\[\.\.\..+\]\]$/.test(segment))return"(?:/.*)?";
+    if(/^\[\.\.\..+\]$/.test(segment))return"/.+";
+    if(/^\[.+\]$/.test(segment))return"/[^/]+";
+    return`/${segment.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}`;
+  }).join("");
+  return new RegExp(`^${escaped||"/"}/?$`);
+}
+
+const pageFiles=[];
+function collectPages(relative="app"){
+  const full=path.join(root,relative);if(!fs.existsSync(full))return;
+  const stat=fs.statSync(full);
+  if(stat.isFile()){if(/\/page\.(?:ts|tsx|js|jsx)$/.test(relative))pageFiles.push(relative);return;}
+  for(const entry of fs.readdirSync(full))collectPages(path.join(relative,entry));
+}
+collectPages();
+const routePatterns=pageFiles.map(routePatternFromPage);
+function routeExists(target){return routePatterns.some((pattern)=>pattern.test(target));}
+
 for(const relative of files){
   const source=fs.readFileSync(path.join(root,relative),"utf8");
   for(const[pattern,message]of forbidden){if(pattern.test(source))errors.push(`${relative}: ${message}`)}
   if(relative.endsWith(".tsx")&&/portal-modal-backdrop/.test(source))legacyModalFiles.push(relative);
   for(const match of source.matchAll(imagePattern)){const asset=path.join(root,"public",match[1].replace(/^\//,""));if(!fs.existsSync(asset))errors.push(`${relative}: missing public asset ${match[1]}`)}
+
+  if(/[.](?:ts|tsx|js|mjs)$/.test(relative)){
+    const portalTargetPattern=/["'`](\/portal(?:\/[^"'`\s]*)?)["'`]/g;
+    for(const match of source.matchAll(portalTargetPattern)){
+      const raw=match[1];
+      if(raw.includes("${"))continue;
+      const target=raw.split(/[?#]/,1)[0]||"/portal";
+      if(!routeExists(target))errors.push(`${relative}: internal Portal route does not exist: ${raw}`);
+    }
+  }
 }
 
 if(legacyModalFiles.length){
@@ -28,4 +63,4 @@ if(legacyModalFiles.length){
 }
 
 if(errors.length){console.error("Portal static audit failed:\n"+errors.map((item)=>`- ${item}`).join("\n"));process.exit(1)}
-console.log(`Portal static audit passed (${files.length} source files checked; ${legacyModalFiles.length} legacy modal surface${legacyModalFiles.length===1?"":"s"} covered by the shared bridge).`);
+console.log(`Portal static audit passed (${files.length} source files checked; ${pageFiles.length} application routes indexed; ${legacyModalFiles.length} legacy modal surface${legacyModalFiles.length===1?"":"s"} covered by the shared bridge).`);
