@@ -129,6 +129,34 @@
   display: none !important;
 }
 
+/* Keep the account popover above the workspace at every desktop width.
+ * Previously this protection only existed below 1100px, so desktop page
+ * content could paint over the left side of the open account menu. */
+.portal-app .portal-topbar {
+  z-index: 1200 !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+.portal-app .portal-topbar-actions {
+  position: relative;
+  z-index: 1210;
+}
+
+.portal-app .portal-account-menu,
+.portal-app .portal-account-menu > summary {
+  position: relative;
+  z-index: 1220;
+}
+
+.portal-app .portal-account-menu[open] {
+  z-index: 1400;
+}
+
+.portal-app .portal-account-menu__popover {
+  z-index: 1410 !important;
+}
+
 /* Mobile/tablet interaction integrity.
  * The sticky topbar and its fixed/absolute children must remain above portal content,
  * and the workspace must not clip the account popover or mobile navigation drawer. */
