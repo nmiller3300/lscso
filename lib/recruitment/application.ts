@@ -78,12 +78,20 @@ export function applicationNextAction(
   track: ApplicationTrack = "Sworn Personnel",
 ) {
   if (track === "Department Attorney") {
+    if (hired || status === "Hired") return "Department Attorney personnel record created — continue portal onboarding and access setup.";
     if (status === "Denied") return "Application closed — applicant was not selected.";
     if (status === "Withdrawn") return "Application withdrawn — no further action required.";
     if (status === "Archived") return "Selection process closed — no further recruitment action is pending.";
     if (status === "Submitted") return "Assign a Command reviewer and begin legal-counsel screening.";
     if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
-    if (status === "Accepted") return "Application accepted — coordinate Department Attorney appointment and onboarding.";
+    if (status === "Accepted") {
+      if (interviewStatus === "Passed") return "Interview passed — complete the Department Attorney appointment.";
+      if (interviewStatus === "Failed") return "Interview failed — applicant is not eligible for appointment.";
+      if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
+      if (interviewStatus === "No Show") return "Interview no-show — selection process closed.";
+      if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail.";
+      return "Contact the applicant and schedule the required Department Attorney interview.";
+    }
     return "Continue the documented Department Attorney selection workflow.";
   }
 
