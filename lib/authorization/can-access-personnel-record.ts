@@ -10,13 +10,18 @@ export type PersonnelRecordAccess = {
 /**
  * Command-facing personnel-record visibility for V2.
  * Captain+ standing authority is department-wide.
+ * Department Attorney has department-wide read access for legal counsel duties,
+ * but this does not grant operational Command authority or write privileges.
  * 1st Lieutenant and below require an active structured purview path.
  * Self-service access belongs in My Info and is intentionally not granted here.
- * Legacy division/supervisor text is never used as authorization evidence.
  */
 export async function canAccessPersonnelRecord(profile: PortalProfile, targetPersonnelId: string): Promise<PersonnelRecordAccess> {
   const normalizedTarget = targetPersonnelId.trim().toUpperCase();
   if (!normalizedTarget) return { allowed: false, reason: "denied" };
+
+  if (profile.access_tier === "Attorney" && profile.rank === "Department Attorney") {
+    return { allowed: true, reason: "department" };
+  }
 
   const purview = await loadPersonnelPurview(profile);
   if (purview.standingDepartmentAuthority) {
