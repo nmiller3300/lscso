@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import type { NotificationCategory, NotificationPriority } from "@/lib/notifications/notification-meta";
 
@@ -71,6 +71,10 @@ export function PortalNotificationCenter({
   const [category, setCategory] = useState<NotificationCategory | "All">("All");
   const [unreadOnly, setUnreadOnly] = useState(false);
   const [notice, setNotice] = useState("");
+
+  useEffect(() => {
+    setNotifications(initialNotifications);
+  }, [initialNotifications]);
 
   const filteredNotifications = useMemo(
     () =>
