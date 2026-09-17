@@ -32,7 +32,7 @@ export function PortalRealtimeRefresh() {
       if (timer !== null) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         timer = null;
-        router.refresh();
+        if (document.visibilityState === "visible") router.refresh();
       }, 180);
     };
 
@@ -44,16 +44,30 @@ export function PortalRealtimeRefresh() {
       );
     }
 
-    channel.subscribe();
+    channel.subscribe((status: string) => {
+      if (status === "SUBSCRIBED") refreshSoon();
+    });
+
+    const fallback = window.setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 30_000);
 
     const onVisibility = () => {
       if (document.visibilityState === "visible") refreshSoon();
     };
+    const onFocus = () => refreshSoon();
+    const onOnline = () => refreshSoon();
+
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("online", onOnline);
 
     return () => {
       if (timer !== null) window.clearTimeout(timer);
+      window.clearInterval(fallback);
       document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onOnline);
       void supabase.removeChannel(channel);
     };
   }, [router]);
