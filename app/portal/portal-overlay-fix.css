@@ -1,0 +1,42 @@
+/*
+ * Document-level overlay layer.
+ * Account and notification overlays are portaled directly under .portal-root so
+ * workspace/card stacking contexts cannot clip or cover them.
+ */
+
+.portal-root > .portal-account-menu__popover--overlay {
+  z-index: 2147483000 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  border-color: rgba(216, 194, 125, .22) !important;
+  background: rgba(10, 14, 19, .985) !important;
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, .58),
+    0 0 0 1px rgba(216, 194, 125, .05),
+    inset 0 1px rgba(255, 255, 255, .045) !important;
+  backdrop-filter: blur(24px) saturate(1.08);
+  -webkit-backdrop-filter: blur(24px) saturate(1.08);
+}
+
+.portal-root > .portal-notification-attention--overlay {
+  z-index: 2147483010 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+}
+
+/* The topbar triggers must remain clickable, but they no longer own the overlay. */
+.portal-app .portal-topbar,
+.portal-app .portal-topbar-actions,
+.portal-app .portal-account-menu,
+.portal-app .portal-account-menu > summary,
+.portal-app .portal-notification-button {
+  pointer-events: auto !important;
+}
+
+@media (max-width: 620px) {
+  .portal-root > .portal-account-menu__popover--overlay {
+    right: auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+}
