@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
 
@@ -14,6 +15,11 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
   const [unreadCount, setUnreadCount] = useState(0);
   const [actionCount, setActionCount] = useState(0);
   const [dismissedSignature, setDismissedSignature] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -156,6 +162,23 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
   const hasAttention = actionCount > 0 || unreadCount > 0;
   const showAttentionCard = hasAttention && dismissedSignature !== attentionSignature;
 
+  const attentionCard = showAttentionCard ? (
+    <aside
+      aria-live="polite"
+      className={`portal-notification-attention portal-notification-attention--overlay${actionCount > 0 ? " has-actions" : " has-unread"}`}
+      role="status"
+    >
+      <button aria-label="Dismiss notification alert" className="portal-notification-attention-close" onClick={dismissAttention} type="button">×</button>
+      <div className="portal-notification-attention-icon" aria-hidden="true">!</div>
+      <div className="portal-notification-attention-copy">
+        <small>{actionCount > 0 ? "LSCSO ACTION REQUIRED" : "NEW PORTAL ACTIVITY"}</small>
+        <strong>{actionCount > 0 ? `${actionCount} item${actionCount === 1 ? "" : "s"} require${actionCount === 1 ? "s" : ""} your attention.` : `${unreadCount} new notification${unreadCount === 1 ? "" : "s"} waiting.`}</strong>
+        <span>{actionCount > 0 && unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"} are also waiting.` : "Open the Notification & Action Center to review the details."}</span>
+      </div>
+      <Link className="portal-notification-attention-link" href="/portal/notifications">Review now →</Link>
+    </aside>
+  ) : null;
+
   return (
     <>
       <Link
@@ -168,18 +191,9 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
         {actionCount > 0 ? "Action required" : "Notifications"}
       </Link>
 
-      {showAttentionCard ? (
-        <aside aria-live="polite" className={`portal-notification-attention${actionCount > 0 ? " has-actions" : " has-unread"}`} role="status">
-          <button aria-label="Dismiss notification alert" className="portal-notification-attention-close" onClick={dismissAttention} type="button">×</button>
-          <div className="portal-notification-attention-icon" aria-hidden="true">!</div>
-          <div className="portal-notification-attention-copy">
-            <small>{actionCount > 0 ? "LSCSO ACTION REQUIRED" : "NEW PORTAL ACTIVITY"}</small>
-            <strong>{actionCount > 0 ? `${actionCount} item${actionCount === 1 ? "" : "s"} require${actionCount === 1 ? "s" : ""} your attention.` : `${unreadCount} new notification${unreadCount === 1 ? "" : "s"} waiting.`}</strong>
-            <span>{actionCount > 0 && unreadCount > 0 ? `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"} are also waiting.` : "Open the Notification & Action Center to review the details."}</span>
-          </div>
-          <Link className="portal-notification-attention-link" href="/portal/notifications">Review now →</Link>
-        </aside>
-      ) : null}
+      {mounted && attentionCard
+        ? createPortal(attentionCard, document.getElementById("lscso-portal-root") ?? document.body)
+        : null}
     </>
   );
 }
