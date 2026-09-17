@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicantDispositionView } from "../ApplicantDispositionView";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "../ApplicantStatusView";
+import { ApplicantStatusLiveRefresh } from "./ApplicantStatusLiveRefresh";
 import "../../application.css";
 import "./status.css";
 import "./communications.css";
@@ -27,6 +28,29 @@ function isFinalDisposition(record: ApplicantStatusRecord) {
   if (["Failed", "No Show"].includes(record.interview_status)) return true;
   if (["Expired", "Terminated"].includes(String(record.offer_status ?? ""))) return true;
   return false;
+}
+
+function buildVersion(record: ApplicantStatusRecord, messages: ApplicantMessage[]) {
+  const lastMessage = messages.length ? messages[messages.length - 1] : null;
+  return JSON.stringify({
+    updatedAt: record.updated_at ?? null,
+    status: record.status ?? null,
+    interviewStatus: record.interview_status ?? null,
+    interviewScheduledAt: record.interview_scheduled_at ?? null,
+    applicantStatusMessage: record.applicant_status_message ?? null,
+    hired: Boolean(record.hired),
+    closureCode: record.closure_code ?? null,
+    closureReason: record.closure_reason ?? null,
+    offerId: record.offer_id ?? null,
+    offerStatus: record.offer_status ?? null,
+    offerIssuedAt: record.offer_issued_at ?? null,
+    offerExpiresAt: record.offer_expires_at ?? null,
+    offerAcceptedAt: record.offer_accepted_at ?? null,
+    offerSignatureName: record.offer_signature_name ?? null,
+    messageCount: messages.length,
+    lastMessageId: lastMessage?.id ?? null,
+    lastMessageSentAt: lastMessage?.sent_at ?? null,
+  });
 }
 
 export default async function ApplicantStatusPage({ params }: { params: Promise<{ token: string }> }) {
@@ -62,10 +86,12 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
     p_tracking_token_hash: tokenHash,
   });
   const applicantMessages = (Array.isArray(messageData) ? messageData : []) as ApplicantMessage[];
+  const liveVersion = buildVersion(record, applicantMessages);
+  const liveRefresh = <ApplicantStatusLiveRefresh token={rawToken} initialVersion={liveVersion} />;
 
   if (isFinalDisposition(record)) {
-    return <ApplicantDispositionView record={record} applicantMessages={applicantMessages} />;
+    return <>{liveRefresh}<ApplicantDispositionView record={record} applicantMessages={applicantMessages} /></>;
   }
 
-  return <ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} />;
+  return <>{liveRefresh}<ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} /></>;
 }
