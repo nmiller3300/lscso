@@ -1,7 +1,12 @@
 import { createHash, randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createClient as createServerClient } from "@/lib/supabase/server";
-import { APPLICATION_AI_POLICY_TEXT, APPLICATION_CERTIFICATION_TEXT } from "@/lib/recruitment/application";
+import {
+  APPLICATION_AI_POLICY_TEXT,
+  APPLICATION_CERTIFICATION_TEXT,
+  APPLICATION_TRACKS,
+  type ApplicationTrack,
+} from "@/lib/recruitment/application";
 
 function clean(value: unknown) {
   return typeof value === "string" ? value.trim() : "";
@@ -19,7 +24,8 @@ function rpcErrorStatus(message: string) {
     normalized.includes("certification is invalid") ||
     normalized.includes("ai use policy") ||
     normalized.includes("cannot exceed") ||
-    normalized.includes("tracking token is invalid")
+    normalized.includes("tracking token is invalid") ||
+    normalized.includes("valid application role")
   ) return 400;
   return 500;
 }
@@ -29,6 +35,11 @@ export async function POST(request: Request) {
     const body = await request.json();
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "Invalid application." }, { status: 400 });
+    }
+
+    const track = clean(body.application_track || "Sworn Personnel") as ApplicationTrack;
+    if (!(APPLICATION_TRACKS as readonly string[]).includes(track)) {
+      return NextResponse.json({ error: "Select a valid application role." }, { status: 400 });
     }
 
     if (body.ai_policy_acknowledged !== true) {
@@ -63,6 +74,7 @@ export async function POST(request: Request) {
         p_tracking_token_hash: trackingTokenHash,
         p_ai_policy_acknowledged: true,
         p_tracking_token: trackingToken,
+        p_application_track: track,
       })
       .single();
 
@@ -76,6 +88,7 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       application_number: data.application_number,
+      application_track: track,
       tracking_token: trackingToken,
     });
   } catch (error) {
