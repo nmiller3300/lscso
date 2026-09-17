@@ -24,22 +24,41 @@ export type CommandOrderItem = {
   createdAt: string;
   acknowledgedCount: number;
   targetCount: number;
-  recipients: CommandOrderRecipient[];
+  recipients?: CommandOrderRecipient[];
 };
 
-const when = (value: string | null) => value
-  ? new Date(value).toLocaleString("en-US", { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" })
-  : "Not set";
+const orderDateFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Los_Angeles",
+  month: "short",
+  day: "numeric",
+  year: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+  timeZoneName: "short",
+});
+
+const when = (value: string | null) => {
+  if (!value) return "Not set";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "Not set" : orderDateFormatter.format(date);
+};
 
 const localInput = (value: string | null) => {
   if (!value) return "";
   const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
   const offset = date.getTimezoneOffset();
   return new Date(date.getTime() - offset * 60_000).toISOString().slice(0, 16);
 };
 
-const isScheduled = (item: CommandOrderItem) => item.status === "Active" && new Date(item.effectiveAt).getTime() > Date.now();
-const displayStatus = (item: CommandOrderItem) => isScheduled(item) ? "Scheduled" : item.status;
+const isScheduledAt = (item: CommandOrderItem, now: number) => {
+  if (item.status !== "Active") return false;
+  const effectiveAt = new Date(item.effectiveAt).getTime();
+  if (Number.isNaN(effectiveAt)) return false;
+  return now !== 0 && effectiveAt > now;
+};
+
+const displayStatus = (item: CommandOrderItem, now: number) => isScheduledAt(item, now) ? "Scheduled" : item.status;
 
 export function CommandOrdersManager({ initialOrders }: { initialOrders: CommandOrderItem[] }) {
   const router = useRouter();
@@ -49,16 +68,23 @@ export function CommandOrdersManager({ initialOrders }: { initialOrders: Command
   const [pending, setPending] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+  const [clock, setClock] = useState(0);
 
   useEffect(() => { setOrders(initialOrders); }, [initialOrders]);
+  useEffect(() => {
+    setClock(Date.now());
+    const timer = window.setInterval(() => setClock(Date.now()), 30_000);
+    return () => window.clearInterval(timer);
+  }, []);
 
+  const safeOrders = useMemo(() => Array.isArray(orders) ? orders.filter((item) => item && item.id) : [], [orders]);
   const metrics = useMemo(() => ({
-    active: orders.filter((item) => item.status === "Active" && !isScheduled(item)).length,
-    scheduled: orders.filter(isScheduled).length,
-    drafts: orders.filter((item) => item.status === "Draft").length,
-    awaiting: orders.filter((item) => item.status === "Active" && !isScheduled(item) && item.acknowledgmentRequired && item.acknowledgedCount < item.targetCount).length,
-    rescinded: orders.filter((item) => item.status === "Rescinded").length,
-  }), [orders]);
+    active: safeOrders.filter((item) => item.status === "Active" && !isScheduledAt(item, clock)).length,
+    scheduled: safeOrders.filter((item) => isScheduledAt(item, clock)).length,
+    drafts: safeOrders.filter((item) => item.status === "Draft").length,
+    awaiting: safeOrders.filter((item) => item.status === "Active" && !isScheduledAt(item, clock) && item.acknowledgmentRequired && (item.acknowledgedCount ?? 0) < (item.targetCount ?? 0)).length,
+    rescinded: safeOrders.filter((item) => item.status === "Rescinded").length,
+  }), [clock, safeOrders]);
 
   function beginCreate() {
     setEditing(null);
@@ -90,9 +116,15 @@ export function CommandOrdersManager({ initialOrders }: { initialOrders: Command
       return;
     }
 
-    const effectiveIso = effective ? new Date(effective).toISOString() : new Date().toISOString();
-    const dueIso = acknowledgmentRequired && due ? new Date(due).toISOString() : null;
-    if (dueIso && new Date(dueIso).getTime() < new Date(effectiveIso).getTime()) {
+    const effectiveDate = effective ? new Date(effective) : new Date();
+    const dueDate = acknowledgmentRequired && due ? new Date(due) : null;
+    if (Number.isNaN(effectiveDate.getTime()) || (dueDate && Number.isNaN(dueDate.getTime()))) {
+      setError("Enter valid order dates.");
+      return;
+    }
+    const effectiveIso = effectiveDate.toISOString();
+    const dueIso = dueDate ? dueDate.toISOString() : null;
+    if (dueIso && dueDate!.getTime() < effectiveDate.getTime()) {
       setError("Acknowledgment due date cannot be before the order becomes effective.");
       return;
     }
@@ -172,36 +204,37 @@ export function CommandOrdersManager({ initialOrders }: { initialOrders: Command
     </section>
 
     <section className="portal-panel">
-      <div className="portal-panel-heading"><div><p>Permanent archive</p><h2>Order ledger</h2></div><span>{orders.length} total</span></div>
+      <div className="portal-panel-heading"><div><p>Permanent archive</p><h2>Order ledger</h2></div><span>{safeOrders.length} total</span></div>
       <div className="deputy-request-history">
-        {orders.map((item) => {
-          const outstanding = item.recipients.filter((recipient) => !recipient.acknowledgedAt);
+        {safeOrders.map((item) => {
+          const recipients = Array.isArray(item.recipients) ? item.recipients : [];
+          const outstanding = recipients.filter((recipient) => !recipient.acknowledgedAt);
           return <article key={item.id}>
             <span>CO</span>
             <div>
-              <strong>CO-{String(item.orderNumber).padStart(4, "0")} · {item.title}</strong>
-              <small>{displayStatus(item)} · {item.targetAudience} · Effective {when(item.effectiveAt)} · Issued by {item.issuer}</small>
-              <p>{item.body}</p>
+              <strong>CO-{String(item.orderNumber).padStart(4, "0")} · {item.title || "Untitled Command Order"}</strong>
+              <small>{displayStatus(item, clock)} · {item.targetAudience || "Assigned personnel"} · Effective {when(item.effectiveAt)} · Issued by {item.issuer || "Command"}</small>
+              <p>{item.body || "No directive text was provided."}</p>
               {item.acknowledgmentRequired ? <>
-                <small>Acknowledged {item.acknowledgedCount}/{item.targetCount}{item.acknowledgmentDueAt ? ` · Due ${when(item.acknowledgmentDueAt)}` : ""}</small>
+                <small>Acknowledged {item.acknowledgedCount ?? 0}/{item.targetCount ?? recipients.length}{item.acknowledgmentDueAt ? ` · Due ${when(item.acknowledgmentDueAt)}` : ""}</small>
                 <details style={{ marginTop: 8 }}>
                   <summary style={{ cursor: "pointer" }}>Acknowledgment roster · {outstanding.length} outstanding</summary>
                   <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
-                    {item.recipients.map((recipient) => <small key={recipient.profileId}>{recipient.name} — {recipient.acknowledgedAt ? `Acknowledged ${when(recipient.acknowledgedAt)}` : "Outstanding"}</small>)}
-                    {!item.recipients.length ? <small>No eligible personnel are currently assigned to this audience.</small> : null}
+                    {recipients.map((recipient) => <small key={recipient.profileId}>{recipient.name || "Personnel member"} — {recipient.acknowledgedAt ? `Acknowledged ${when(recipient.acknowledgedAt)}` : "Outstanding"}</small>)}
+                    {!recipients.length ? <small>No eligible personnel are currently assigned to this audience.</small> : null}
                   </div>
                 </details>
               </> : null}
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <b>{displayStatus(item)}</b>
+              <b>{displayStatus(item, clock)}</b>
               {item.status === "Draft" ? <button className="portal-button portal-button--secondary" disabled={pending} onClick={() => beginEdit(item)} type="button">Edit</button> : null}
               {item.status === "Draft" ? <button className="portal-button portal-button--secondary" disabled={pending} onClick={() => action(item, "publish")} type="button">Publish</button> : null}
               {item.status !== "Rescinded" ? <button className="portal-button portal-button--danger" disabled={pending} onClick={() => action(item, "rescind")} type="button">Rescind</button> : null}
             </div>
           </article>;
         })}
-        {!orders.length ? <div className="portal-empty-state"><strong>No Command Orders have been created.</strong></div> : null}
+        {!safeOrders.length ? <div className="portal-empty-state"><strong>No Command Orders have been created.</strong></div> : null}
       </div>
     </section>
 
