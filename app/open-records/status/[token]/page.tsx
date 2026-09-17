@@ -25,7 +25,7 @@ export default async function OpenRecordsStatusPage({ params }: { params: Promis
   return (
     <main className="open-records-status-page">
       <div className="site-shell">
-        <OpenRecordsStatusClient request={data as any} />
+        <OpenRecordsStatusClient request={data as any} trackingTokenHash={tokenHash} />
       </div>
     </main>
   );
