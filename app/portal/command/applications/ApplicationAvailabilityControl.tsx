@@ -4,72 +4,90 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GlassBlobToggle } from "../../_components/GlassBlobToggle";
+import type { ApplicationTrack } from "@/lib/recruitment/application";
 
 type Props = {
-  initialIsOpen: boolean;
+  initialSwornOpen: boolean;
+  initialAttorneyOpen: boolean;
   initialUpdatedAt: string | null;
   initialUpdatedBy: string | null;
 };
 
 export function ApplicationAvailabilityControl({
-  initialIsOpen,
+  initialSwornOpen,
+  initialAttorneyOpen,
   initialUpdatedAt,
   initialUpdatedBy,
 }: Props) {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(initialIsOpen);
-  const [savedIsOpen, setSavedIsOpen] = useState(initialIsOpen);
+  const [swornOpen, setSwornOpen] = useState(initialSwornOpen);
+  const [attorneyOpen, setAttorneyOpen] = useState(initialAttorneyOpen);
+  const [savedSwornOpen, setSavedSwornOpen] = useState(initialSwornOpen);
+  const [savedAttorneyOpen, setSavedAttorneyOpen] = useState(initialAttorneyOpen);
   const [updatedAt, setUpdatedAt] = useState(initialUpdatedAt);
   const [updatedBy, setUpdatedBy] = useState(initialUpdatedBy);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  async function updateTrack(track: ApplicationTrack, isOpen: boolean) {
+    const response = await fetch("/api/portal/application-status", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ track, isOpen }),
+    });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error || "Application availability could not be updated.");
+    return body;
+  }
+
   async function save() {
-    if (pending || isOpen === savedIsOpen) return;
+    if (pending) return;
+    const swornChanged = swornOpen !== savedSwornOpen;
+    const attorneyChanged = attorneyOpen !== savedAttorneyOpen;
+    if (!swornChanged && !attorneyChanged) return;
+
     setPending(true);
     setError("");
     setNotice("");
-
     try {
-      const response = await fetch("/api/portal/application-status", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isOpen }),
-      });
-      const body = await response.json();
-      if (!response.ok) throw new Error(body.error || "Application availability could not be updated.");
-
-      setSavedIsOpen(body.isOpen);
-      setIsOpen(body.isOpen);
-      setUpdatedAt(body.updatedAt);
-      setUpdatedBy(body.updatedBy);
-      setNotice(body.isOpen ? "Applications are now open to the public." : "Applications are now closed to the public.");
+      let latest: any = null;
+      if (swornChanged) latest = await updateTrack("Sworn Personnel", swornOpen);
+      if (attorneyChanged) latest = await updateTrack("Department Attorney", attorneyOpen);
+      setSavedSwornOpen(swornOpen);
+      setSavedAttorneyOpen(attorneyOpen);
+      if (latest) {
+        setUpdatedAt(latest.updatedAt);
+        setUpdatedBy(latest.updatedBy);
+      }
+      setNotice("Public application availability has been updated for both career tracks.");
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Application availability could not be updated.");
-      setIsOpen(savedIsOpen);
+      setSwornOpen(savedSwornOpen);
+      setAttorneyOpen(savedAttorneyOpen);
     } finally {
       setPending(false);
     }
   }
 
-  const hasChanges = isOpen !== savedIsOpen;
+  const hasChanges = swornOpen !== savedSwornOpen || attorneyOpen !== savedAttorneyOpen;
+  const openCount = Number(savedSwornOpen) + Number(savedAttorneyOpen);
 
   return (
-    <section className={`portal-panel recruitment-availability recruitment-availability--${savedIsOpen ? "open" : "closed"}`}>
+    <section className={`portal-panel recruitment-availability recruitment-availability--${openCount ? "open" : "closed"}`}>
       <div className="portal-panel-heading">
         <div><p>Public recruitment control</p><h2>Application availability</h2></div>
-        <b className={`recruitment-availability__badge recruitment-availability__badge--${savedIsOpen ? "open" : "closed"}`}>
-          {savedIsOpen ? "Applications open" : "Applications closed"}
+        <b className={`recruitment-availability__badge recruitment-availability__badge--${openCount ? "open" : "closed"}`}>
+          {openCount === 2 ? "2 tracks open" : openCount === 1 ? "1 track open" : "Applications closed"}
         </b>
       </div>
 
       <div className="recruitment-availability__layout">
         <div>
-          <strong>{savedIsOpen ? "The public application is accepting submissions." : "The public application is unavailable."}</strong>
+          <strong>Control each public application independently.</strong>
           <p>
-            This setting controls the recruitment status shown on <Link href="/join" target="_blank">/join</Link>, access to the application form, and whether the submission endpoint accepts new applications.
+            These settings control the career choices shown on <Link href="/join/application" target="_blank">/join/application</Link> and whether the submission system accepts each role.
           </p>
           <small>
             Last updated {updatedAt ? new Date(updatedAt).toLocaleString() : "when the system was created"}
@@ -79,19 +97,15 @@ export function ApplicationAvailabilityControl({
 
         <div className="recruitment-availability__controls">
           <div className="portal-glass-setting-row portal-glass-setting-row--compact">
-            <div>
-              <strong>Accept new applications</strong>
-              <small>Turning this off immediately blocks the form and all new submissions after you save.</small>
-            </div>
-            <GlassBlobToggle
-              checked={isOpen}
-              disabled={pending}
-              label="Accept new applications"
-              onChange={setIsOpen}
-            />
+            <div><strong>Sworn Personnel applications</strong><small>Deputy candidate application, interview, employment offer, and appointment workflow.</small></div>
+            <GlassBlobToggle checked={swornOpen} disabled={pending} label="Accept Sworn Personnel applications" onChange={setSwornOpen} />
+          </div>
+          <div className="portal-glass-setting-row portal-glass-setting-row--compact">
+            <div><strong>Department Attorney applications</strong><small>Legal-counsel application and Command selection workflow. This track is independent from sworn recruitment.</small></div>
+            <GlassBlobToggle checked={attorneyOpen} disabled={pending} label="Accept Department Attorney applications" onChange={setAttorneyOpen} />
           </div>
           <button className="portal-button portal-button--primary" disabled={pending || !hasChanges} onClick={save} type="button">
-            {pending ? "Updating…" : hasChanges ? (isOpen ? "Open applications" : "Close applications") : "Status saved"}
+            {pending ? "Updating…" : hasChanges ? "Save application availability" : "Status saved"}
           </button>
         </div>
       </div>
