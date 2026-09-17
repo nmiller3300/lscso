@@ -5,10 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
 import { ApplicationReview } from "./ApplicationReview";
+import { DepartmentAttorneyReview } from "./DepartmentAttorneyReview";
 import { ApplicantTrackingLinkManager } from "./ApplicantTrackingLinkManager";
 import { ApplicationClosureControl } from "./ApplicationClosureControl";
 import { DeleteApplicationButton } from "./DeleteApplicationButton";
 import { RecruitmentCaseHeader } from "./RecruitmentCaseHeader";
+import { DepartmentAttorneyCaseHeader } from "./DepartmentAttorneyCaseHeader";
 import "./communications.css";
 import "./recruitment-premium.css";
 
@@ -29,20 +31,28 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
 
   const reviewerList = (people ?? []).map((person: any) => ({ id: person.id, name: person.display_name }));
   const names = Object.fromEntries(reviewerList.map((person: any) => [person.id, person.name]));
+  const attorney = application.application_track === "Department Attorney";
   const canDeleteApplication = ["Sheriff", "Undersheriff"].includes(profile.rank) && !application.hired_profile_id && application.status !== "Hired";
   const label = applicationLabel(application.application_number);
   const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const alreadyFinalWithoutClosure = ["Denied", "Withdrawn"].includes(application.status);
-  const latestOffer = offers?.[0] ?? null;
+  const latestOffer = attorney ? null : offers?.[0] ?? null;
 
   return (
-    <PortalShell active="applications" eyebrow="Personnel · Recruitment" title={label} description="Application review and recruitment workflow.">
+    <PortalShell
+      active="applications"
+      eyebrow="Personnel · Recruitment"
+      title={label}
+      description={attorney ? "Department Attorney application review and selection workflow." : "Sworn application review and recruitment workflow."}
+    >
       <div className="portal-page-actions">
         <Link href="/portal/command/applications" className="portal-button">Back to applications</Link>
       </div>
 
-      <RecruitmentCaseHeader application={application} latestOffer={latestOffer} />
+      {attorney
+        ? <DepartmentAttorneyCaseHeader application={application} />
+        : <RecruitmentCaseHeader application={application} latestOffer={latestOffer} />}
 
       <ApplicantTrackingLinkManager
         applicationId={application.id}
@@ -70,14 +80,25 @@ export default async function ApplicationPage({ params }: { params: Promise<{ id
         </section>
       ) : null}
 
-      <ApplicationReview
-        application={{ ...application, latest_offer: latestOffer }}
-        reviewers={reviewerList}
-        names={names}
-        notes={notes ?? []}
-        history={history ?? []}
-        applicantMessages={applicantMessages ?? []}
-      />
+      {attorney ? (
+        <DepartmentAttorneyReview
+          application={application}
+          reviewers={reviewerList}
+          names={names}
+          notes={notes ?? []}
+          history={history ?? []}
+          applicantMessages={applicantMessages ?? []}
+        />
+      ) : (
+        <ApplicationReview
+          application={{ ...application, latest_offer: latestOffer }}
+          reviewers={reviewerList}
+          names={names}
+          notes={notes ?? []}
+          history={history ?? []}
+          applicantMessages={applicantMessages ?? []}
+        />
+      )}
     </PortalShell>
   );
 }
