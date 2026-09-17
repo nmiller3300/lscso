@@ -6,7 +6,7 @@ import { PortalProfileProvider } from "../_components/PortalProfileProvider";
 export default async function CommandPortalLayout({ children }: Readonly<{ children: ReactNode }>) {
   const profile = await getCurrentPortalProfile();
   if (!profile) redirect("/portal");
-  if (!["Executive", "Command", "Supervisor", "Preliminary"].includes(profile.access_tier)) {
+  if (!["Executive", "Command", "Supervisor", "Preliminary", "Attorney"].includes(profile.access_tier)) {
     redirect(getPortalHome(profile));
   }
 
