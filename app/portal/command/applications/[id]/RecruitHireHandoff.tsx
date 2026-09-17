@@ -15,7 +15,7 @@ export function RecruitHireHandoff({
   applicantName: string;
   eligible: boolean;
   hired: boolean;
-  offerRank: string;
+  offerRank?: string;
 }) {
   const router = useRouter();
   const [confirmOpen, setConfirmOpen] = useState(false);
