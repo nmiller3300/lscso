@@ -19,6 +19,7 @@ function toInternalEmail(username: string) {
 }
 
 function homeFor(accessTier: string) {
+  if (accessTier === "Attorney") return "/portal/command/personnel";
   if (accessTier === "Deputy") return "/portal/personnel";
   if (["Supervisor", "Preliminary"].includes(accessTier)) {
     return "/portal/command/guardians";
@@ -148,25 +149,11 @@ export function PortalLogin() {
           <small>Active secure session detected</small>
           <strong>{activeProfile.display_name}</strong>
           <p>You already have an authenticated LSCSO session on this device.</p>
-          <button
-            className="portal-auth__submit"
-            onClick={() => router.push(destinationFor(activeProfile))}
-            type="button"
-          >
-            <span>
-              {activeProfile.mustChangePassword
-                ? "Finish account setup"
-                : "Continue to Personnel Portal"}
-            </span>
+          <button className="portal-auth__submit" onClick={() => router.push(destinationFor(activeProfile))} type="button">
+            <span>{activeProfile.mustChangePassword ? "Finish account setup" : "Continue to Personnel Portal"}</span>
             <b aria-hidden="true">→</b>
           </button>
-          <button
-            className="portal-auth__switch"
-            onClick={() => setUseAnother(true)}
-            type="button"
-          >
-            Use another account
-          </button>
+          <button className="portal-auth__switch" onClick={() => setUseAnother(true)} type="button">Use another account</button>
         </div>
       </div>
     );
@@ -174,71 +161,30 @@ export function PortalLogin() {
 
   return (
     <div className="portal-auth" id="account-login">
-      <form
-        className="portal-auth__form"
-        onSubmit={handleSubmit}
-        aria-label="LSCSO account sign-in"
-      >
+      <form className="portal-auth__form" onSubmit={handleSubmit} aria-label="LSCSO account sign-in">
         <label className="portal-auth__field">
           <span className="portal-auth__field-label">Assigned username</span>
           <div className="portal-auth__input-shell">
             <span className="portal-auth__input-icon" aria-hidden="true">ID</span>
-            <input
-              autoCapitalize="none"
-              autoComplete="username"
-              name="username"
-              onChange={(event) => setUsername(event.target.value)}
-              placeholder="first.last"
-              required
-              spellCheck={false}
-              value={username}
-            />
+            <input autoCapitalize="none" autoComplete="username" name="username" onChange={(event) => setUsername(event.target.value)} placeholder="first.last" required spellCheck={false} value={username} />
           </div>
         </label>
         <label className="portal-auth__field">
           <span className="portal-auth__field-label">Password</span>
           <div className="portal-auth__input-shell portal-auth__input-shell--password">
             <span className="portal-auth__input-icon" aria-hidden="true">KY</span>
-            <input
-              autoComplete="current-password"
-              name="password"
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter secure password"
-              required
-              type={showPassword ? "text" : "password"}
-              value={password}
-            />
-            <button
-              className="portal-auth__password-toggle"
-              type="button"
-              aria-label={showPassword ? "Hide password" : "Show password"}
-              aria-pressed={showPassword}
-              onClick={() => setShowPassword((current) => !current)}
-            >
+            <input autoComplete="current-password" name="password" onChange={(event) => setPassword(event.target.value)} placeholder="Enter secure password" required type={showPassword ? "text" : "password"} value={password} />
+            <button className="portal-auth__password-toggle" type="button" aria-label={showPassword ? "Hide password" : "Show password"} aria-pressed={showPassword} onClick={() => setShowPassword((current) => !current)}>
               <PasswordEyes open={showPassword} />
               <span className="portal-auth__toggle-label">{showPassword ? "Hide password" : "Show password"}</span>
             </button>
           </div>
         </label>
-        {error ? (
-          <div className="portal-auth__error" role="alert">
-            <span aria-hidden="true">!</span>
-            <p>{error}</p>
-          </div>
-        ) : null}
+        {error ? <div className="portal-auth__error" role="alert"><span aria-hidden="true">!</span><p>{error}</p></div> : null}
         <button className="portal-auth__submit" disabled={pending} type="submit">
-          <span>{pending ? "Authenticating secure session…" : "Enter Personnel Portal"}</span>
-          <b aria-hidden="true">→</b>
+          <span>{pending ? "Authenticating secure session…" : "Enter Personnel Portal"}</span><b aria-hidden="true">→</b>
         </button>
-        {activeProfile ? (
-          <button
-            className="portal-auth__switch"
-            onClick={() => setUseAnother(false)}
-            type="button"
-          >
-            Return to current session
-          </button>
-        ) : null}
+        {activeProfile ? <button className="portal-auth__switch" onClick={() => setUseAnother(false)} type="button">Return to current session</button> : null}
       </form>
       <div className="portal-auth__trust-row" aria-label="Authentication protections">
         <span><i /> Encrypted authentication</span>
