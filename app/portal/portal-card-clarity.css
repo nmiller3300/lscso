@@ -129,6 +129,65 @@
   display: none !important;
 }
 
+/* Keep account/profile menus above the page on desktop too. */
+.portal-app .portal-workspace {
+  overflow: visible !important;
+}
+
+.portal-app .portal-topbar {
+  position: sticky;
+  z-index: 2200 !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
+.portal-app .portal-topbar-actions {
+  position: relative;
+  z-index: 2210;
+  overflow: visible !important;
+}
+
+.portal-app .portal-account-menu,
+.portal-app .portal-account-menu > summary {
+  position: relative;
+  z-index: 2220;
+}
+
+.portal-app .portal-account-menu[open] {
+  z-index: 3000 !important;
+}
+
+.portal-app .portal-account-menu__popover {
+  z-index: 3010 !important;
+  pointer-events: auto !important;
+}
+
+/* Personnel record tabs and the first administration card must remain in normal flow. */
+.portal-app .personnel-record-shell {
+  position: relative !important;
+  z-index: 1;
+  margin-bottom: 22px !important;
+  overflow: hidden !important;
+}
+
+.portal-app .personnel-record-shell .command-v2-record-tabs {
+  position: relative !important;
+  z-index: 2;
+  margin: 0 !important;
+  transform: none !important;
+}
+
+.portal-app .personnel-record-shell + .portal-panel,
+.portal-app .personnel-record-shell + .personnel-admin-control,
+.portal-app .personnel-admin-control {
+  position: relative !important;
+  z-index: 0 !important;
+  top: auto !important;
+  margin-top: 0 !important;
+  transform: none !important;
+  clear: both;
+}
+
 /* Mobile/tablet interaction integrity.
  * The sticky topbar and its fixed/absolute children must remain above portal content,
  * and the workspace must not clip the account popover or mobile navigation drawer. */
@@ -139,31 +198,31 @@
 
   .portal-app .portal-topbar {
     position: sticky;
-    z-index: 1200 !important;
+    z-index: 2200 !important;
     overflow: visible !important;
     isolation: isolate;
   }
 
   .portal-app .portal-topbar-actions {
     position: relative;
-    z-index: 1210;
+    z-index: 2210;
     pointer-events: auto !important;
   }
 
   .portal-app .portal-account-menu,
   .portal-app .portal-account-menu > summary {
     position: relative;
-    z-index: 1220;
+    z-index: 2220;
     pointer-events: auto !important;
     touch-action: manipulation;
   }
 
   .portal-app .portal-account-menu[open] {
-    z-index: 1400;
+    z-index: 3000;
   }
 
   .portal-app .portal-account-menu__popover {
-    z-index: 1410 !important;
+    z-index: 3010 !important;
     pointer-events: auto !important;
   }
 }
@@ -172,13 +231,13 @@
   .portal-app .portal-mobile-menu-host,
   .portal-app .portal-mobile-menu-trigger {
     position: relative;
-    z-index: 1300;
+    z-index: 3200;
     pointer-events: auto !important;
     touch-action: manipulation;
   }
 
   .portal-app .portal-mobile-menu-backdrop {
-    z-index: 3000 !important;
+    z-index: 4000 !important;
     pointer-events: auto !important;
   }
 
