@@ -1,4 +1,4 @@
-export type AccessTier = "Executive" | "Command" | "Supervisor" | "Preliminary" | "Deputy";
+export type AccessTier = "Executive" | "Command" | "Supervisor" | "Preliminary" | "Deputy" | "Attorney";
 
 export type PersonnelStatus = "Active" | "Acting" | "Suspended" | "Deactivated";
 
@@ -51,5 +51,10 @@ export const rankAccess = [
     tier: "Deputy",
     ranks: ["Master Deputy", "Deputy III", "Deputy II", "Deputy", "Recruit"],
     scope: "Access to own record, certifications, assignments, and requests.",
+  },
+  {
+    tier: "Attorney",
+    ranks: ["Department Attorney"],
+    scope: "Non-sworn legal counsel access to department personnel records, roster information, and records-custodian work without operational command authority.",
   },
 ] as const;
