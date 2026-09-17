@@ -7,6 +7,7 @@ import { usePortalProfile } from "./PortalProfileProvider";
 
 const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 const DISMISS_KEY = "lscso.portal.notification-attention:v2";
+const LIVE_COUNT_TABLES = ["notifications", "personnel_requests", "guardian_records", "leave_requests", "certifications"] as const;
 
 export function PortalNotificationLink({ audience }: { audience: "command" | "deputy" }) {
   const profile = usePortalProfile();
@@ -16,9 +17,11 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
 
   useEffect(() => {
     let cancelled = false;
+    let refreshTimer: number | null = null;
+    const supabase = createClient() as any;
 
     async function refreshCounts() {
-      const supabase = createClient() as any;
+      if (cancelled) return;
       const fullCommandAccess = ["Executive", "Command"].includes(profile.access_tier);
 
       let notificationQuery = supabase.from("notifications")
@@ -81,14 +84,44 @@ export function PortalNotificationLink({ audience }: { audience: "command" | "de
       }
     }
 
+    function refreshSoon() {
+      if (refreshTimer !== null) window.clearTimeout(refreshTimer);
+      refreshTimer = window.setTimeout(() => {
+        refreshTimer = null;
+        void refreshCounts();
+      }, 120);
+    }
+
     void refreshCounts();
-    const interval = window.setInterval(refreshCounts, 15_000);
+
+    const channel = supabase.channel(`portal-notification-counts-${profile.id}-${Math.random().toString(36).slice(2)}`);
+    for (const table of LIVE_COUNT_TABLES) {
+      channel.on("postgres_changes", { event: "*", schema: "public", table }, refreshSoon);
+    }
+    channel.subscribe((status: string) => {
+      if (status === "SUBSCRIBED") refreshSoon();
+    });
+
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === "visible") void refreshCounts();
+    }, 15_000);
     const onFocus = () => void refreshCounts();
+    const onOnline = () => void refreshCounts();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void refreshCounts();
+    };
     window.addEventListener("focus", onFocus);
+    window.addEventListener("online", onOnline);
+    document.addEventListener("visibilitychange", onVisibility);
+
     return () => {
       cancelled = true;
+      if (refreshTimer !== null) window.clearTimeout(refreshTimer);
       window.clearInterval(interval);
       window.removeEventListener("focus", onFocus);
+      window.removeEventListener("online", onOnline);
+      document.removeEventListener("visibilitychange", onVisibility);
+      void supabase.removeChannel(channel);
     };
   }, [audience, profile.access_tier, profile.id, profile.rank]);
 
