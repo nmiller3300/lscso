@@ -1,6 +1,6 @@
 /*
  * Document-level overlay layer.
- * Account and notification overlays are portaled directly under .portal-root so
+ * Interactive overlays are portaled directly under .portal-root so
  * workspace/card stacking contexts cannot clip or cover them.
  */
 
@@ -24,6 +24,24 @@
   isolation: isolate;
 }
 
+.portal-root > .portal-dialog-backdrop--overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  z-index: 2147483020 !important;
+  pointer-events: auto !important;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.portal-root > .portal-dialog-backdrop--overlay > .portal-dialog {
+  position: relative;
+  z-index: 1;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
 /* The topbar triggers must remain clickable, but they no longer own the overlay. */
 .portal-app .portal-topbar,
 .portal-app .portal-topbar-actions,
@@ -38,5 +56,20 @@
     right: auto !important;
     width: auto !important;
     max-width: none !important;
+  }
+
+  .portal-root > .portal-dialog-backdrop--overlay {
+    display: flex !important;
+    align-items: flex-end !important;
+    justify-content: center !important;
+    padding: max(8px, env(safe-area-inset-top)) 0 0 !important;
+  }
+
+  .portal-root > .portal-dialog-backdrop--overlay > .portal-dialog {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: calc(100dvh - max(8px, env(safe-area-inset-top))) !important;
+    margin: 0 !important;
+    border-radius: 22px 22px 0 0 !important;
   }
 }
