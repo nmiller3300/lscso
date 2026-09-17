@@ -8,7 +8,8 @@ import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
 export default async function CommandPersonnelPage() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
+  const attorney = profile?.access_tier === "Attorney" && profile.rank === "Department Attorney";
+  if (!profile || (!["Executive", "Command"].includes(profile.access_tier) && !attorney)) {
     redirect("/portal/command/supervision");
   }
 
@@ -39,13 +40,15 @@ export default async function CommandPersonnelPage() {
   return (
     <PortalShell
       active="personnel"
-      eyebrow="Personnel"
+      eyebrow={attorney ? "Legal Counsel · Personnel" : "Personnel"}
       title="Personnel Directory"
-      description="Find a member first, then work inside their personnel record. Department-wide roster actions remain one click away."
+      description={attorney
+        ? "Department-wide personnel and roster access for legal counsel review. Personnel administration remains restricted to authorized Command Staff."
+        : "Find a member first, then work inside their personnel record. Department-wide roster actions remain one click away."}
       actions={
         <>
-          <Link className="portal-button portal-button--primary" href="/portal/command/personnel/roster">Roster & Personnel Actions</Link>
-          <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link>
+          <Link className="portal-button portal-button--primary" href="/portal/command/personnel/roster">{attorney ? "Department Roster" : "Roster & Personnel Actions"}</Link>
+          {!attorney ? <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link> : null}
         </>
       }
     >
