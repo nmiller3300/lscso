@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   APPLICATION_CERTIFICATION_TEXT,
   APPLICATION_REVIEW_STATUSES,
+  INTERVIEW_STATUSES,
   applicationLabel,
   applicationNextAction,
   applicationStatusLabel,
@@ -14,6 +15,7 @@ import { ApplicationDynamicAnswers } from "./ApplicationDynamicAnswers";
 import { ApplicantStatusMessage } from "./ApplicantStatusMessage";
 
 type Decision = "Accepted" | "Denied";
+type InterviewDisposition = "Failed" | "No Show";
 
 export function DepartmentAttorneyReview({ application, reviewers, names, notes, history, applicantMessages }: any) {
   const router = useRouter();
@@ -26,6 +28,15 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
   const [reviewer, setReviewer] = useState(application.reviewer_profile_id ?? "");
   const [decision, setDecision] = useState<Decision | null>(null);
   const [decisionReason, setDecisionReason] = useState("");
+  const [interviewDisposition, setInterviewDisposition] = useState<InterviewDisposition | null>(null);
+  const [appointmentOpen, setAppointmentOpen] = useState(false);
+  const [interview, setInterview] = useState({
+    status: application.interview_status ?? "Not Scheduled",
+    interviewer: application.interviewer_profile_id ?? "",
+    scheduled: application.interview_scheduled_at ? application.interview_scheduled_at.slice(0, 16) : "",
+    notes: application.interview_notes ?? "",
+    result: application.interview_result ?? "",
+  });
 
   async function save(payload: any) {
     setBusy(true);
@@ -46,6 +57,32 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
     } finally {
       setBusy(false);
     }
+  }
+
+  function interviewPayload() {
+    return {
+      action: "interview",
+      interviewStatus: interview.status,
+      interviewerProfileId: interview.interviewer,
+      scheduledAt: interview.scheduled ? new Date(interview.scheduled).toISOString() : "",
+      notes: interview.notes,
+      result: interview.result,
+    };
+  }
+
+  async function saveInterview() {
+    if (["Failed", "No Show"].includes(interview.status)) {
+      setError("");
+      setInterviewDisposition(interview.status as InterviewDisposition);
+      return;
+    }
+    await save(interviewPayload());
+  }
+
+  async function confirmInterviewDisposition() {
+    if (!interviewDisposition) return;
+    const ok = await save(interviewPayload());
+    if (ok) setInterviewDisposition(null);
   }
 
   async function noteSubmit(event: FormEvent) {
@@ -70,15 +107,30 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
     }
   }
 
+  async function confirmAppointment() {
+    const ok = await save({ action: "appoint" });
+    if (ok) setAppointmentOpen(false);
+  }
+
   const certificationText = application.applicant_certification_text || APPLICATION_CERTIFICATION_TEXT;
   const signed = Boolean(application.applicant_signature_name && application.applicant_signed_at);
   const isReviewing = APPLICATION_REVIEW_STATUSES.includes(application.status);
   const isAccepted = application.status === "Accepted";
   const isDenied = application.status === "Denied";
+  const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const isClosed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
+  const interviewPassed = application.interview_status === "Passed";
+  const interviewNeedsSchedule = interview.status === "Scheduled" && !interview.scheduled;
+  const interviewNeedsFinalDetails = ["Passed", "Failed"].includes(interview.status)
+    && (!interview.interviewer || interview.result.trim().length < 3);
+  const interviewRecordReady = !interviewNeedsSchedule && !interviewNeedsFinalDetails;
   const nextAction = isClosed
     ? "Selection process closed."
-    : applicationNextAction(application.status, null, false, "Department Attorney");
+    : isHired
+      ? "Department Attorney appointment complete."
+      : isAccepted && interviewPassed
+        ? "Interview passed — complete Department Attorney appointment."
+        : applicationNextAction(application.status, application.interview_status, isHired, "Department Attorney");
 
   return (
     <div className="recruitment-review recruitment-review--workflow">
@@ -96,12 +148,13 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
           <div><dt>Timezone</dt><dd>{application.timezone || "Not recorded"}</dd></div>
           <div><dt>Application</dt><dd><b className={`recruitment-status recruitment-status--${application.status.toLowerCase().replaceAll(" ", "-")}`}>{isClosed ? "Closed" : applicationStatusLabel(application.status)}</b></dd></div>
           <div><dt>Assigned reviewer</dt><dd>{names[application.reviewer_profile_id] ?? "Unassigned"}</dd></div>
-          <div><dt>Selection</dt><dd>{isAccepted ? "Selected" : isDenied ? "Not selected" : "Pending"}</dd></div>
+          <div><dt>Interview</dt><dd>{application.interview_status ?? "Not Scheduled"}</dd></div>
+          <div><dt>Appointment</dt><dd>{isHired ? "Completed" : "Not completed"}</dd></div>
         </dl>
       </section>
 
-      <section className={`portal-panel recruitment-next-action ${isDenied || isClosed ? "is-denied" : isAccepted ? "is-complete" : "is-review"}`}>
-        <div className="recruitment-next-action__marker" aria-hidden="true">{isDenied || isClosed ? "×" : isAccepted ? "✓" : "02"}</div>
+      <section className={`portal-panel recruitment-next-action ${isDenied || isClosed ? "is-denied" : isHired ? "is-complete" : isAccepted ? "is-interview" : "is-review"}`}>
+        <div className="recruitment-next-action__marker" aria-hidden="true">{isDenied || isClosed ? "×" : isHired ? "✓" : isAccepted ? "03" : "02"}</div>
         <div><p>Required next action</p><h2>{nextAction}</h2></div>
       </section>
 
@@ -139,9 +192,9 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
               <button className="portal-button" disabled={busy || status === application.status} onClick={() => void save({ action: "status", status })}>Update stage</button>
             </label>
             <div className="recruitment-final-decision recruitment-final-decision--application">
-              <span>Selection decision</span>
+              <span>Application decision</span>
               <div>
-                <button className="portal-button portal-button--primary" disabled={busy} onClick={() => { setError(""); setDecision("Accepted"); }}>Select Department Attorney</button>
+                <button className="portal-button portal-button--primary" disabled={busy} onClick={() => { setError(""); setDecision("Accepted"); }}>Accept Application</button>
                 <button className="portal-button portal-button--danger" disabled={busy} onClick={() => { setError(""); setDecision("Denied"); }}>Deny with reason</button>
               </div>
             </div>
@@ -149,13 +202,88 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
         </section>
       ) : null}
 
-      {isAccepted && !isClosed ? (
+      {(isAccepted || isHired) && !isClosed ? (
+        <section className="portal-panel recruitment-interview-panel">
+          <div className="portal-panel-heading">
+            <div><p>Required interview</p><h2>{isHired ? "Interview completed" : "Department Attorney interview"}</h2></div>
+            <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
+          </div>
+          <div className="recruitment-interview-flow" aria-label="Department Attorney interview workflow">
+            <article className={interview.status !== "Not Scheduled" ? "is-complete" : "is-current"}><span>01</span><div><strong>Schedule</strong><small>Assign an interviewer and record the appointment time.</small></div></article>
+            <article className={["Completed", "Passed", "Failed", "No Show"].includes(interview.status) ? "is-complete" : interview.status === "Scheduled" ? "is-current" : ""}><span>02</span><div><strong>Conduct</strong><small>Record attendance and preserve interview notes.</small></div></article>
+            <article className={["Passed", "Failed", "No Show"].includes(interview.status) ? "is-current" : ""}><span>03</span><div><strong>Outcome</strong><small>Pass unlocks appointment. Fail or No Show closes the selection process.</small></div></article>
+          </div>
+          <div className="recruitment-control-grid">
+            <label>
+              Interview stage / outcome
+              <select value={interview.status} onChange={(event) => setInterview({ ...interview, status: event.target.value })} disabled={isHired}>
+                {INTERVIEW_STATUSES.map((item) => <option key={item}>{item}</option>)}
+              </select>
+            </label>
+            <label>
+              Interviewer
+              <select value={interview.interviewer} onChange={(event) => setInterview({ ...interview, interviewer: event.target.value })} disabled={isHired}>
+                <option value="">Not assigned</option>
+                {reviewers.map((person: any) => <option key={person.id} value={person.id}>{person.name}</option>)}
+              </select>
+            </label>
+            <label>
+              Scheduled date & time
+              <input type="datetime-local" value={interview.scheduled} onChange={(event) => setInterview({ ...interview, scheduled: event.target.value })} disabled={isHired} />
+            </label>
+            <label>
+              Result summary
+              <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail" disabled={isHired} />
+            </label>
+          </div>
+          <label className="recruitment-wide-label">Interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired} /></label>
+          {!isHired ? (
+            <div className="recruitment-interview-actions">
+              <button
+                className={`portal-button ${["Failed", "No Show"].includes(interview.status) ? "portal-button--danger" : "portal-button--primary"}`}
+                disabled={busy || !interviewRecordReady}
+                onClick={() => void saveInterview()}
+              >
+                {["Failed", "No Show"].includes(interview.status) ? "Review final disposition" : "Save interview record"}
+              </button>
+              <span className={interviewPassed ? "is-ready" : ""}>
+                {interview.status === "No Show"
+                  ? "No Show closes the Department Attorney selection process."
+                  : interview.status === "Failed"
+                    ? "Failed closes the Department Attorney selection process."
+                    : interviewNeedsSchedule
+                      ? "Enter the interview date and time."
+                      : interviewNeedsFinalDetails
+                        ? "Pass / Fail requires an interviewer and result summary."
+                        : interviewPassed
+                          ? "✓ Interview passed — Department Attorney appointment is unlocked below."
+                          : interview.status === "Completed"
+                            ? "Interview completed — record Pass or Fail when Command reaches the outcome."
+                            : "Department Attorney appointment requires a Passed interview."}
+              </span>
+            </div>
+          ) : null}
+        </section>
+      ) : null}
+
+      {isAccepted && interviewPassed && !isHired && !isClosed ? (
+        <section className="portal-panel recruitment-next-action is-complete">
+          <div className="recruitment-next-action__marker" aria-hidden="true">04</div>
+          <div>
+            <p>Final appointment</p>
+            <h2>Interview passed. Create the Department Attorney personnel record when Command is ready to appoint.</h2>
+            <p className="command-v2-compact-copy">This creates the LS-### employee record, assigns the Department Attorney role and Attorney access tier, and does not assign a call sign.</p>
+            <div className="command-v2-action-row" style={{ marginTop: 12 }}>
+              <button className="portal-button portal-button--primary" disabled={busy} onClick={() => setAppointmentOpen(true)} type="button">Appoint Department Attorney</button>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {isHired ? (
         <section className="portal-panel recruitment-next-action is-complete">
           <div className="recruitment-next-action__marker" aria-hidden="true">✓</div>
-          <div>
-            <p>Department Attorney selected</p>
-            <h2>Application workflow complete — coordinate appointment and portal onboarding outside the sworn Recruit workflow.</h2>
-          </div>
+          <div><p>Appointment complete</p><h2>Department Attorney personnel record created. Continue account access and onboarding through Personnel Administration.</h2></div>
         </section>
       ) : null}
 
@@ -194,20 +322,49 @@ export function DepartmentAttorneyReview({ application, reviewers, names, notes,
       <PortalDialog
         open={Boolean(decision)}
         onClose={() => { if (!busy) { setDecision(null); setDecisionReason(""); } }}
-        eyebrow="Department Attorney decision"
-        title={decision === "Denied" ? `Deny ${application.full_name}'s application?` : `Select ${application.full_name} as Department Attorney?`}
+        eyebrow="Department Attorney application decision"
+        title={decision === "Denied" ? `Deny ${application.full_name}'s application?` : `Accept ${application.full_name}'s application?`}
         description={decision === "Denied"
           ? "A documented reason is required."
-          : "This records the applicant as selected for Department Attorney appointment and onboarding. It does not place them into the sworn Recruit workflow."}
+          : "Acceptance advances the applicant to the required Department Attorney interview. It does not hire or appoint them."}
         dismissOnBackdrop={!busy}
-        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => { setDecision(null); setDecisionReason(""); }} type="button">Cancel</button><button className={`portal-button ${decision === "Denied" ? "portal-button--danger" : "portal-button--primary"}`} disabled={busy || (decision === "Denied" && decisionReason.trim().length < 4)} onClick={() => void confirmDecision()} type="button">{busy ? "Recording…" : decision === "Denied" ? "Confirm denial" : "Confirm selection"}</button></>}
+        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => { setDecision(null); setDecisionReason(""); }} type="button">Cancel</button><button className={`portal-button ${decision === "Denied" ? "portal-button--danger" : "portal-button--primary"}`} disabled={busy || (decision === "Denied" && decisionReason.trim().length < 4)} onClick={() => void confirmDecision()} type="button">{busy ? "Recording…" : decision === "Denied" ? "Confirm denial" : "Accept & move to interview"}</button></>}
       >
         <div className="recruitment-decision-review">
           <div><span>Applicant</span><strong>{application.full_name}</strong></div>
           <div><span>Application</span><strong>{applicationLabel(application.application_number)}</strong></div>
           <div><span>Role</span><strong>Department Attorney</strong></div>
-          <div><span>Decision</span><strong>{decision === "Denied" ? "Application Denied" : "Selected for Department Attorney"}</strong></div>
+          <div><span>Decision</span><strong>{decision === "Denied" ? "Application Denied" : "Application Accepted · Interview Required"}</strong></div>
           {decision === "Denied" ? <label>Denial reason <em>Required</em><textarea required rows={5} value={decisionReason} onChange={(event) => setDecisionReason(event.target.value)} /><small>{decisionReason.trim().length} characters · minimum 4</small></label> : null}
+        </div>
+      </PortalDialog>
+
+      <PortalDialog
+        open={Boolean(interviewDisposition)}
+        onClose={() => { if (!busy) setInterviewDisposition(null); }}
+        eyebrow="Department Attorney interview disposition"
+        title={interviewDisposition === "No Show" ? "Close as interview no-show?" : "Record failed interview?"}
+        description="This is a final recruitment disposition and closes the Department Attorney selection process for this application."
+        dismissOnBackdrop={!busy}
+        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setInterviewDisposition(null)} type="button">Cancel</button><button className="portal-button portal-button--danger" disabled={busy} onClick={() => void confirmInterviewDisposition()} type="button">{busy ? "Recording…" : "Confirm final disposition"}</button></>}
+      >
+        <div className="portal-form-protection"><strong>{application.full_name}</strong><span>{interviewDisposition === "No Show" ? "Interview No Show" : "Interview Failed"} · the application will be closed.</span></div>
+      </PortalDialog>
+
+      <PortalDialog
+        open={appointmentOpen}
+        onClose={() => { if (!busy) setAppointmentOpen(false); }}
+        eyebrow="Final Department Attorney appointment"
+        title={`Appoint ${application.full_name}?`}
+        description="This is the actual hire/appointment step. It creates the employee personnel record only after the passed interview."
+        dismissOnBackdrop={!busy}
+        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setAppointmentOpen(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={busy} onClick={() => void confirmAppointment()} type="button">{busy ? "Appointing…" : "Confirm appointment"}</button></>}
+      >
+        <div className="recruitment-decision-review">
+          <div><span>Applicant</span><strong>{application.full_name}</strong></div>
+          <div><span>Role</span><strong>Department Attorney</strong></div>
+          <div><span>Interview</span><strong>Passed</strong></div>
+          <div><span>Personnel record</span><strong>New LS-### employee number · No call sign</strong></div>
         </div>
       </PortalDialog>
     </div>
