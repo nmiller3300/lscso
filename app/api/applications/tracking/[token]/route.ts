@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 function buildVersion(record: any, messages: any[]) {
   const lastMessage = messages.length ? messages[messages.length - 1] : null;
   return JSON.stringify({
+    applicationTrack: record?.application_track ?? null,
     updatedAt: record?.updated_at ?? null,
     status: record?.status ?? null,
     interviewStatus: record?.interview_status ?? null,
