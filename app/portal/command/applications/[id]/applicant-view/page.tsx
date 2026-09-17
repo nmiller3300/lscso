@@ -2,10 +2,12 @@ import { notFound, redirect } from "next/navigation";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "@/app/join/application/status/ApplicantStatusView";
+import { DepartmentAttorneyStatusView } from "@/app/join/application/status/DepartmentAttorneyStatusView";
 import "../../../../../join/application/application.css";
 import "../../../../../join/application/status/[token]/status.css";
 import "../../../../../join/application/status/[token]/communications.css";
 import "../../../../../join/application/status/[token]/offer.css";
+import "../../../../../join/application/status/[token]/attorney-status.css";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -18,7 +20,7 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
   const supabase = await createClient() as any;
   const [{ data: application }, { data: messages }, { data: offers }] = await Promise.all([
     supabase.from("recruitment_applications")
-      .select("application_number,full_name,status,interview_status,submitted_at,updated_at,interview_scheduled_at,applicant_status_message,hired_profile_id,recruitment_closure_code,recruitment_closure_reason")
+      .select("application_number,application_track,full_name,status,interview_status,submitted_at,updated_at,interview_scheduled_at,applicant_status_message,hired_profile_id,recruitment_closure_code,recruitment_closure_reason")
       .eq("id", id)
       .maybeSingle(),
     supabase.from("recruitment_applicant_messages")
@@ -33,7 +35,8 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
   ]);
 
   if (!application) notFound();
-  const offer = offers?.[0] ?? null;
+  const attorney = application.application_track === "Department Attorney";
+  const offer = attorney ? null : offers?.[0] ?? null;
   const effectiveOfferStatus = offer?.status === "Pending" && offer?.expires_at && new Date(offer.expires_at).getTime() <= Date.now()
     ? "Expired"
     : offer?.status ?? null;
@@ -66,5 +69,7 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
     sent_at: item.created_at,
   }));
 
-  return <ApplicantStatusView record={record} applicantMessages={applicantMessages} />;
+  return attorney
+    ? <DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} />
+    : <ApplicantStatusView record={record} applicantMessages={applicantMessages} />;
 }
