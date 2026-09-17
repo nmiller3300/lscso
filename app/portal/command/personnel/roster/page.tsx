@@ -140,6 +140,8 @@ export default async function FullRosterPage() {
         displayName: member.display_name,
         rank: member.rank,
         status: member.status,
+        callSign: member.call_sign ?? "",
+        isTestAccount: Boolean(member.is_test_account),
         activeLeave: leaveRow ? {
           id: leaveRow.id,
           leaveType: leaveRow.leave_type,
