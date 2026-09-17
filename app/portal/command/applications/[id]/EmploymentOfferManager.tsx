@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { PortalDialog } from "../../../_components/PortalDialog";
 
 export type RecruitmentOffer = {
@@ -18,14 +18,20 @@ export type RecruitmentOffer = {
   termination_reason: string | null;
 };
 
-const DEFAULT_TERMS = `The Los Santos County Sheriff's Office offers you appointment as a Recruit, contingent upon completion of the department's onboarding and training requirements. By accepting this offer, you confirm your intent to serve in accordance with LSCSO policies, standards, and lawful orders.`;
+const OFFER_RANKS = [
+  "Recruit",
+  "Deputy Sheriff",
+  "Senior Deputy Sheriff",
+  "Corporal",
+  "Sergeant",
+  "Lieutenant",
+  "Captain",
+  "Undersheriff",
+  "Sheriff",
+] as const;
 
-function toLocalInput(value: string | null) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+function defaultTerms(rank: string) {
+  return `The Los Santos County Sheriff's Office offers you appointment as ${rank === "Sheriff" || rank === "Undersheriff" ? rank : `a ${rank}`}, contingent upon completion of any department onboarding, training, certification, and administrative requirements applicable to the appointment. By accepting this offer, you confirm your intent to serve in accordance with LSCSO policies, standards, and lawful orders.`;
 }
 
 export function EmploymentOfferManager({
@@ -44,10 +50,12 @@ export function EmploymentOfferManager({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [terms, setTerms] = useState(DEFAULT_TERMS);
+  const [rank, setRank] = useState<(typeof OFFER_RANKS)[number]>("Recruit");
+  const [terms, setTerms] = useState(() => defaultTerms("Recruit"));
   const [expiresAt, setExpiresAt] = useState("");
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
+  const generatedTerms = useMemo(() => defaultTerms(rank), [rank]);
 
   if ((!interviewPassed && !offer) || hired) return null;
 
@@ -73,11 +81,17 @@ export function EmploymentOfferManager({
     }
   }
 
+  function changeRank(nextRank: (typeof OFFER_RANKS)[number]) {
+    const previousGenerated = generatedTerms;
+    setRank(nextRank);
+    setTerms((current) => current === previousGenerated ? defaultTerms(nextRank) : current);
+  }
+
   async function issueOffer() {
     await action({
       action: "issue_offer",
       title: "Offer of Employment",
-      rank: "Recruit",
+      rank,
       terms: terms.trim(),
       expiresAt: expiresAt ? new Date(expiresAt).toISOString() : "",
     });
@@ -96,17 +110,22 @@ export function EmploymentOfferManager({
     return (
       <section className="portal-panel recruitment-offer-panel">
         <div className="portal-panel-heading">
-          <div><p>Employment offer</p><h2>Issue Recruit offer</h2></div>
+          <div><p>Employment offer</p><h2>Issue employment offer</h2></div>
           <span>Interview passed</span>
         </div>
         <div className="recruitment-control-grid">
-          <label>Position<input value="Recruit" readOnly /></label>
+          <label>
+            Offered rank
+            <select value={rank} onChange={(event) => changeRank(event.target.value as (typeof OFFER_RANKS)[number])}>
+              {OFFER_RANKS.map((item) => <option key={item} value={item}>{item}</option>)}
+            </select>
+          </label>
           <label>Offer expiration <em>Optional</em><input type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} /></label>
         </div>
         <label className="recruitment-wide-label">Offer terms<textarea rows={6} value={terms} onChange={(event) => setTerms(event.target.value)} /></label>
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         <button className="portal-button portal-button--primary" type="button" disabled={busy || terms.trim().length < 10} onClick={() => void issueOffer()}>
-          {busy ? "Issuing…" : "Issue Employment Offer"}
+          {busy ? "Issuing…" : `Issue ${rank} Offer`}
         </button>
       </section>
     );
@@ -130,7 +149,7 @@ export function EmploymentOfferManager({
           <div><dt>Accepted</dt><dd>{offer.accepted_at ? new Date(offer.accepted_at).toLocaleString() : "Not accepted"}</dd></div>
         </dl>
         <div className="recruitment-offer-terms"><span>Offer terms</span><p>{offer.terms}</p></div>
-        {offer.status === "Accepted" ? <p className="recruitment-offer-success">✓ Applicant signed and accepted the employment offer. Recruit appointment is unlocked below.</p> : null}
+        {offer.status === "Accepted" ? <p className="recruitment-offer-success">✓ Applicant signed and accepted the employment offer. Appointment is unlocked below.</p> : null}
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         {offer.status === "Pending" || offer.status === "Accepted" ? (
           <button className="portal-button portal-button--danger" type="button" disabled={busy} onClick={() => { setError(""); setTerminateOpen(true); }}>
