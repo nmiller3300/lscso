@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -14,6 +14,8 @@ export function CommandOrdersManager({initialOrders}:{initialOrders:CommandOrder
   const [pending,setPending]=useState(false);
   const [notice,setNotice]=useState("");
   const [error,setError]=useState("");
+
+  useEffect(()=>{setOrders(initialOrders)},[initialOrders]);
 
   async function create(event:FormEvent<HTMLFormElement>){
     event.preventDefault();if(pending)return;
