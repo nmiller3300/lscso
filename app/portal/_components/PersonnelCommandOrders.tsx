@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export type PersonnelOrderItem = {
@@ -25,6 +25,10 @@ export function PersonnelCommandOrders({ initialOrders }: { initialOrders: Perso
   const [pendingId, setPendingId] = useState("");
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    setOrders(initialOrders);
+  }, [initialOrders]);
 
   async function acknowledge(item: PersonnelOrderItem) {
     if (pendingId) return;
