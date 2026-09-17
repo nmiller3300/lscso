@@ -1,6 +1,8 @@
 export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Denied", "Hired", "Withdrawn", "Archived"] as const;
 export const APPLICATION_REVIEW_STATUSES = ["Submitted", "Under Review"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;
+export const APPLICATION_TRACKS = ["Sworn Personnel", "Department Attorney"] as const;
+export type ApplicationTrack = typeof APPLICATION_TRACKS[number];
 
 export const APPLICATION_QUESTION_TYPES = ["short_text", "long_text", "multiple_choice", "yes_no"] as const;
 export type ApplicationQuestionType = typeof APPLICATION_QUESTION_TYPES[number];
@@ -8,6 +10,7 @@ export type ApplicationQuestionType = typeof APPLICATION_QUESTION_TYPES[number];
 export type RecruitmentApplicationQuestion = {
   id: string;
   questionKey: string;
+  applicationTrack: ApplicationTrack;
   sectionTitle: string;
   sectionShortTitle: string;
   sectionEyebrow: string;
@@ -51,6 +54,10 @@ export const applicationQuestions: Array<[string, string, string]> = [
   ["Scenarios", "scenario_supervisor_order", "A supervisor orders you to do something you believe violates department policy. How do you handle it?"],
 ];
 
+export function isDepartmentAttorneyTrack(track?: string | null) {
+  return track === "Department Attorney";
+}
+
 export function applicationLabel(applicationNumber: number | string) {
   return `APP-${String(applicationNumber).padStart(4, "0")}`;
 }
@@ -64,7 +71,22 @@ export function applicationStatusLabel(status: string) {
   }
 }
 
-export function applicationNextAction(status: string, interviewStatus?: string | null, hired = false) {
+export function applicationNextAction(
+  status: string,
+  interviewStatus?: string | null,
+  hired = false,
+  track: ApplicationTrack = "Sworn Personnel",
+) {
+  if (track === "Department Attorney") {
+    if (status === "Denied") return "Application closed — applicant was not selected.";
+    if (status === "Withdrawn") return "Application withdrawn — no further action required.";
+    if (status === "Archived") return "Selection process closed — no further recruitment action is pending.";
+    if (status === "Submitted") return "Assign a Command reviewer and begin legal-counsel screening.";
+    if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
+    if (status === "Accepted") return "Application accepted — coordinate Department Attorney appointment and onboarding.";
+    return "Continue the documented Department Attorney selection workflow.";
+  }
+
   if (hired || status === "Hired") return "Recruit personnel record created — continue onboarding and training.";
   if (status === "Denied") return "Application closed — no interview will be scheduled.";
   if (status === "Withdrawn") return "Application withdrawn — no further action required.";
