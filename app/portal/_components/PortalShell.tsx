@@ -12,6 +12,7 @@ import { PortalInteriorBackdrop } from "./PortalInteriorBackdrop";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
 import { PortalPolicyDirectory } from "./PortalPolicyDirectory";
+import { PortalRealtimeRefresh } from "./PortalRealtimeRefresh";
 import { PortalSidebarController } from "./PortalSidebarController";
 import { PromotionSelfReviewCenter } from "./PromotionSelfReviewCenter";
 
@@ -30,6 +31,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
     <div className="portal-app" data-portal-active={active} data-portal-audience={audience}>
       <PortalInteriorBackdrop />
       <LegacyPortalModalBridge />
+      <PortalRealtimeRefresh />
 
       <aside className="portal-sidebar">
         <div className="portal-sidebar-head">
