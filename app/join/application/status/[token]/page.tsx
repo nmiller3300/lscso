@@ -5,12 +5,14 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ApplicantDispositionView } from "../ApplicantDispositionView";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "../ApplicantStatusView";
+import { DepartmentAttorneyStatusView } from "../DepartmentAttorneyStatusView";
 import { ApplicantStatusLiveRefresh } from "./ApplicantStatusLiveRefresh";
 import "../../application.css";
 import "./status.css";
 import "./communications.css";
 import "./offer.css";
 import "./disposition.css";
+import "./attorney-status.css";
 
 export const metadata: Metadata = {
   title: "Application Status & Disposition",
@@ -21,6 +23,8 @@ export const metadata: Metadata = {
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
+type TrackedApplication = ApplicantStatusRecord & { application_track?: string | null };
+
 function isFinalDisposition(record: ApplicantStatusRecord) {
   if (record.hired || record.status === "Hired") return false;
   if (String(record.closure_code ?? "").trim()) return true;
@@ -30,9 +34,10 @@ function isFinalDisposition(record: ApplicantStatusRecord) {
   return false;
 }
 
-function buildVersion(record: ApplicantStatusRecord, messages: ApplicantMessage[]) {
+function buildVersion(record: TrackedApplication, messages: ApplicantMessage[]) {
   const lastMessage = messages.length ? messages[messages.length - 1] : null;
   return JSON.stringify({
+    applicationTrack: record.application_track ?? null,
     updatedAt: record.updated_at ?? null,
     status: record.status ?? null,
     interviewStatus: record.interview_status ?? null,
@@ -65,7 +70,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
     ? await supabase.rpc("get_recruitment_application_status", { p_tracking_token_hash: tokenHash }).maybeSingle()
     : { data: null, error: null };
 
-  const record = !error && data ? data as ApplicantStatusRecord : null;
+  const record = !error && data ? data as TrackedApplication : null;
   if (!record) {
     return (
       <main className="application-status-page">
@@ -88,6 +93,10 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
   const applicantMessages = (Array.isArray(messageData) ? messageData : []) as ApplicantMessage[];
   const liveVersion = buildVersion(record, applicantMessages);
   const liveRefresh = <ApplicantStatusLiveRefresh token={rawToken} initialVersion={liveVersion} />;
+
+  if (record.application_track === "Department Attorney") {
+    return <>{liveRefresh}<DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} /></>;
+  }
 
   if (isFinalDisposition(record)) {
     return <>{liveRefresh}<ApplicantDispositionView record={record} applicantMessages={applicantMessages} /></>;
