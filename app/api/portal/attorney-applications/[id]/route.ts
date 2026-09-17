@@ -19,7 +19,8 @@ function actionErrorStatus(message: string) {
     normalized.includes("enter ") ||
     normalized.includes("required") ||
     normalized.includes("only ") ||
-    normalized.includes("cannot exceed")
+    normalized.includes("cannot exceed") ||
+    normalized.includes("must be")
   ) return 400;
   return 500;
 }
@@ -43,12 +44,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const supabase = await createClient() as any;
-    const { data, error } = await supabase.rpc("command_department_attorney_application_action", {
-      p_application_id: id,
-      p_action: action,
-      p_payload: body,
-    });
+    const result = action === "appoint"
+      ? await supabase.rpc("record_department_attorney_hire_website_only", { p_application_id: id })
+      : await supabase.rpc("command_department_attorney_application_action", {
+          p_application_id: id,
+          p_action: action,
+          p_payload: body,
+        });
 
+    const { data, error } = result;
     if (error) {
       const message = typeof error.message === "string" && error.message.trim()
         ? error.message
@@ -61,7 +65,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       );
     }
 
-    return NextResponse.json({ success: true, changed: data?.changed !== false });
+    return NextResponse.json({ success: true, changed: data?.changed !== false, result: data ?? null });
   } catch (error) {
     console.error("[Department Attorney Application Update]", error);
     return NextResponse.json({ error: "The Department Attorney application could not be updated. Please try again." }, { status: 500 });
