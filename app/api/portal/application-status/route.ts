@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 import { RECRUITMENT_STATUS_ID } from "@/lib/recruitment/status";
+import { APPLICATION_TRACKS, type ApplicationTrack } from "@/lib/recruitment/application";
 
 const allowedTiers = new Set(["Executive", "Command"]);
+const allowedTracks = new Set<string>(APPLICATION_TRACKS);
 
 export async function PATCH(request: Request) {
   const profile = await getCurrentPortalProfile();
@@ -13,15 +15,23 @@ export async function PATCH(request: Request) {
 
   try {
     const body = await request.json();
+    const track = typeof body?.track === "string" ? body.track.trim() as ApplicationTrack : "Sworn Personnel";
+    if (!allowedTracks.has(track)) {
+      return NextResponse.json({ error: "Choose a valid application role." }, { status: 400 });
+    }
     if (typeof body?.isOpen !== "boolean") {
       return NextResponse.json({ error: "Choose whether applications should be open or closed." }, { status: 400 });
     }
 
     const supabase = await createClient() as any;
     const updatedAt = new Date().toISOString();
+    const availability = track === "Department Attorney"
+      ? { department_attorney_applications_open: body.isOpen }
+      : { applications_open: body.isOpen };
+
     const { error } = await supabase.from("recruitment_settings").upsert({
       id: RECRUITMENT_STATUS_ID,
-      applications_open: body.isOpen,
+      ...availability,
       updated_by_profile_id: profile.id,
       updated_at: updatedAt,
     }, { onConflict: "id" });
@@ -30,6 +40,7 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json({
       success: true,
+      track,
       isOpen: body.isOpen,
       updatedAt,
       updatedBy: `${profile.rank} ${profile.display_name}`,
