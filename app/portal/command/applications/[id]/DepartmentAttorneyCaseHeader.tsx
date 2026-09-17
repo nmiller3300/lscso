@@ -8,21 +8,27 @@ type Check = {
 };
 
 function currentStage(application: any) {
-  if (application.status === "Archived" || application.recruitment_closed_at || ["Denied", "Withdrawn"].includes(application.status)) return 3;
-  if (application.status === "Accepted") return 2;
+  if (application.status === "Hired" || application.hired_profile_id) return 4;
+  if (application.status === "Archived" || application.recruitment_closed_at || ["Denied", "Withdrawn"].includes(application.status)) return 4;
+  if (application.status === "Accepted") {
+    if (application.interview_status === "Passed") return 4;
+    return 3;
+  }
   if (application.status === "Under Review" || application.reviewer_profile_id) return 1;
   return 0;
 }
 
 export function DepartmentAttorneyCaseHeader({ application }: { application: any }) {
   const stage = currentStage(application);
-  const closed = stage === 3;
-  const selected = application.status === "Accepted" && !closed;
+  const closed = application.status === "Archived" || Boolean(application.recruitment_closed_at) || ["Denied", "Withdrawn"].includes(application.status);
+  const hired = application.status === "Hired" || Boolean(application.hired_profile_id);
+  const accepted = application.status === "Accepted" && !closed;
   const stages = [
     ["01", "Intake", "Department Attorney packet received"],
     ["02", "Review", "Command legal-counsel screening"],
-    ["03", "Selection", "Acceptance or documented denial"],
-    ["04", "Disposition", "Appointment follow-up or closed record"],
+    ["03", "Decision", "Application accepted or denied"],
+    ["04", "Interview", "Required Department Attorney interview"],
+    ["05", "Appointment", "Final personnel appointment or disposition"],
   ];
 
   const checks: Check[] = [
@@ -49,10 +55,18 @@ export function DepartmentAttorneyCaseHeader({ application }: { application: any
   ];
 
   const checksReady = checks.filter((item) => item.ready).length;
-  const status = closed ? "Final disposition" : selected ? "Department Attorney selected" : applicationStatusLabel(application.status);
+  const status = closed
+    ? "Final disposition"
+    : hired
+      ? "Appointed · Department Attorney"
+      : accepted && application.interview_status === "Passed"
+        ? "Interview passed · appointment pending"
+        : accepted
+          ? `Application accepted · ${application.interview_status ?? "Interview required"}`
+          : applicationStatusLabel(application.status);
 
   return (
-    <section className={`recruitment-case ${closed ? "is-closed" : ""} ${selected ? "is-hired" : ""}`}>
+    <section className={`recruitment-case ${closed ? "is-closed" : ""} ${hired ? "is-hired" : ""}`}>
       <div className="recruitment-case__glow" aria-hidden="true" />
       <header className="recruitment-case__masthead">
         <div className="recruitment-case__identity">
@@ -64,7 +78,7 @@ export function DepartmentAttorneyCaseHeader({ application }: { application: any
           </div>
         </div>
         <div className="recruitment-case__classification">
-          <span>{closed ? "Closed legal-counsel candidate record" : selected ? "Selected legal-counsel candidate" : "Active legal-counsel candidate"}</span>
+          <span>{closed ? "Closed legal-counsel candidate record" : hired ? "Appointed Department Attorney" : "Active legal-counsel candidate"}</span>
           <strong>{applicationLabel(application.application_number)}</strong>
           <small>{application.reviewer_profile_id ? "Command reviewer assigned" : "Reviewer assignment pending"}</small>
         </div>
@@ -72,8 +86,8 @@ export function DepartmentAttorneyCaseHeader({ application }: { application: any
 
       <div className="recruitment-case__rail" aria-label="Department Attorney application stages">
         {stages.map(([number, title, description], index) => {
-          const complete = closed ? index < 3 : index < stage;
-          const current = index === stage;
+          const complete = hired ? index <= 4 : closed ? index < stage : index < stage;
+          const current = !hired && index === stage;
           return (
             <article key={number} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`}>
               <div className="recruitment-case__node"><span>{complete ? "✓" : number}</span></div>
@@ -88,7 +102,7 @@ export function DepartmentAttorneyCaseHeader({ application }: { application: any
           <div><span>Objective intake screening</span><h3>System integrity checks</h3></div>
           <strong>{checksReady} / {checks.length} clear</strong>
         </div>
-        <p className="recruitment-case__screening-copy">These checks confirm the application record is complete. Legal judgment, ethics, writing, and suitability remain Command decisions.</p>
+        <p className="recruitment-case__screening-copy">These checks confirm the application record is complete. Legal judgment, ethics, writing, interview performance, and suitability remain Command decisions.</p>
         <div className="recruitment-case__checks">
           {checks.map((check) => (
             <article key={check.label} className={check.ready ? "is-ready" : "is-attention"}>
