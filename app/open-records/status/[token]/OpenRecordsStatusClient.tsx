@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const OPEN_RECORDS_ACT_URL = "https://lscso-gov.notion.site/San-Andreas-Open-Records-Act-OCSA-50-18-70-Series-3d9305c9558581be90f9e0059e76d13c";
 
@@ -64,8 +65,38 @@ function countdown(expiresAt?: string | null, now = Date.now()) {
   return `${hours}h ${minutes}m ${seconds}s remaining`;
 }
 
-export function OpenRecordsStatusClient({ request }: { request: RequestStatus }) {
+export function OpenRecordsStatusClient({ request: initialRequest, trackingTokenHash }: { request: RequestStatus; trackingTokenHash: string }) {
+  const [request, setRequest] = useState(initialRequest);
   const [now, setNow] = useState(() => Date.now());
+  const [syncing, setSyncing] = useState(false);
+
+  const refreshStatus = useCallback(async () => {
+    if (document.visibilityState === "hidden") return;
+    setSyncing(true);
+    try {
+      const supabase = createClient() as any;
+      const { data, error } = await supabase.rpc("get_open_records_request_status", { p_tracking_token_hash: trackingTokenHash });
+      if (!error && data && typeof data === "object") setRequest(data as RequestStatus);
+    } finally {
+      setSyncing(false);
+    }
+  }, [trackingTokenHash]);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => void refreshStatus(), 5000);
+    const onFocus = () => void refreshStatus();
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void refreshStatus();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [refreshStatus]);
+
   useEffect(() => {
     if (!request.release_expires_at) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -85,7 +116,7 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
           <h1>ORR-{String(request.request_number).padStart(5, "0")}</h1>
           <p>{request.requester_name} · Discord: {request.requester_discord}</p>
         </div>
-        <div className="open-records-status-badge"><span>Status</span><strong>{request.status}</strong><small>{request.disposition}</small></div>
+        <div className="open-records-status-badge"><span>{syncing ? "Syncing" : "Status"}</span><strong>{request.status}</strong><small>{request.disposition}</small></div>
       </section>
 
       <div className="open-records-status-grid">
@@ -112,7 +143,7 @@ export function OpenRecordsStatusClient({ request }: { request: RequestStatus })
       {request.release_available_at ? <section className="open-records-status-card open-records-status-release">
         <div className="open-records-form-heading"><p className="section-kicker">Electronic Release</p><h2>{releaseCountdown === "Expired" ? "Release window expired" : "Your released records"}</h2></div>
         <p>Released {formatDate(request.release_available_at)}. Temporary release copies remain available for 48 hours and are then removed from active release storage.</p>
-        {activeFiles.length ? <div className="open-records-download-list">{activeFiles.map((file) => <a href={file.download_url!} key={file.id} target="_blank" rel="noreferrer"><span><strong>{file.file_name}</strong><small>{[file.mime_type, formatBytes(file.size_bytes)].filter(Boolean).join(" · ")}</small></span><b>Download</b></a>)}</div> : <div className="open-records-status-notice"><strong>{releaseCountdown === "Expired" ? "Files are no longer available." : "No downloadable release files are currently available."}</strong><p>{releaseCountdown === "Expired" ? "The 48-hour release window has ended. The permanent request history remains on file, but temporary release copies are removed from active storage." : "If LSCSO has marked this request released, refresh this page after the files finish publishing."}</p></div>}
+        {activeFiles.length ? <div className="open-records-download-list">{activeFiles.map((file) => <a href={file.download_url!} key={file.id} target="_blank" rel="noreferrer"><span><strong>{file.file_name}</strong><small>{[file.mime_type, formatBytes(file.size_bytes)].filter(Boolean).join(" · ")}</small></span><b>Download</b></a>)}</div> : <div className="open-records-status-notice"><strong>{releaseCountdown === "Expired" ? "Files are no longer available." : "Release files are publishing."}</strong><p>{releaseCountdown === "Expired" ? "The 48-hour release window has ended. The permanent request history remains on file, but temporary release copies are removed from active storage." : "This page checks for published release files automatically. No manual refresh is required."}</p></div>}
       </section> : null}
 
       <div className="open-records-status-actions">
