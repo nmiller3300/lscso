@@ -10,7 +10,7 @@ export type ApplicationQuestionType = typeof APPLICATION_QUESTION_TYPES[number];
 export type RecruitmentApplicationQuestion = {
   id: string;
   questionKey: string;
-  applicationTrack: ApplicationTrack;
+  applicationTrack?: ApplicationTrack;
   sectionTitle: string;
   sectionShortTitle: string;
   sectionEyebrow: string;
