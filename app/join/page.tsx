@@ -30,6 +30,13 @@ const steps = [
 
 export default async function JoinPage() {
   const recruitment = await getRecruitmentStatus();
+  const availabilitySummary = recruitment.swornApplicationsOpen && recruitment.departmentAttorneyApplicationsOpen
+    ? "Sworn Personnel and Department Attorney applications are both open. Choose the role you are applying for before beginning the correct candidate packet."
+    : recruitment.swornApplicationsOpen
+      ? "Sworn Personnel applications are open. Department Attorney applications are currently closed."
+      : recruitment.departmentAttorneyApplicationsOpen
+        ? "Department Attorney applications are open. Sworn Personnel applications are currently closed."
+        : "LSCSO is not accepting new applications at this time. You may still review our standards, divisions, and selection process while recruitment remains closed.";
 
   return (
     <>
@@ -52,15 +59,11 @@ export default async function JoinPage() {
             <p className="section-kicker section-kicker--dark">Current Recruitment Status</p>
             <div className="recruitment-status-panel__heading">
               <span className="status-dot" />
-              <h2 id="recruitment-status-title">Applications are currently {recruitment.isOpen ? "open" : "closed"}.</h2>
+              <h2 id="recruitment-status-title">Career applications are currently {recruitment.isOpen ? "open" : "closed"}.</h2>
             </div>
-            <p>
-              {recruitment.isOpen
-                ? "LSCSO is accepting applications for entry into the Patrol Division. Review the expectations and recruitment process below, then submit the official application when you are ready."
-                : "LSCSO is not accepting new applications at this time. You may still review our standards, Patrol Division, and selection process while recruitment remains closed."}
-            </p>
+            <p>{availabilitySummary}</p>
             <div className="button-row">
-              {recruitment.isOpen ? <Link className="button" href="/join/application">Begin Application</Link> : <span className="recruitment-status-panel__unavailable">Application form unavailable</span>}
+              {recruitment.isOpen ? <Link className="button" href="/join/application">Choose a Role & Apply</Link> : <span className="recruitment-status-panel__unavailable">Application form unavailable</span>}
               <Link className="button button--outline-dark" href="/patrol">Explore Patrol Division</Link>
             </div>
           </div>
@@ -71,7 +74,7 @@ export default async function JoinPage() {
         <div className="site-shell two-column-editorial">
           <div><p className="section-kicker section-kicker--dark">Service with LSCSO</p><h2>More than putting on a uniform.</h2></div>
           <div className="reading-column">
-            <p className="intro-serif">LSCSO is built around people who can be trusted with responsibility, authority, and the expectations that come with wearing the badge.</p>
+            <p className="intro-serif">LSCSO is built around people who can be trusted with responsibility, authority, and the expectations that come with serving the Office.</p>
             <p>Patrol is the foundation of sworn service. Deputies answer calls, conduct proactive patrol, investigate incidents, document actions, work with supervisors and specialty personnel, and make decisions that affect other people.</p>
             <p>We are not looking for perfection on day one. We are looking for maturity, willingness to learn, good communication, sound judgment, and people who can take both initiative and direction.</p>
           </div>
@@ -104,8 +107,8 @@ export default async function JoinPage() {
       <section className="content-section content-section--light">
         <div className="site-shell">
           <div className="section-heading-row section-heading-row--dark">
-            <div><p className="section-kicker section-kicker--dark">Recruitment Process</p><h2>From applicant to deputy.</h2></div>
-            <p>Every applicant is reviewed through a documented, professional process.</p>
+            <div><p className="section-kicker section-kicker--dark">Recruitment Process</p><h2>From applicant to service.</h2></div>
+            <p>Every applicant is reviewed through a documented, professional process appropriate to the role they selected.</p>
           </div>
           <div className="quality-grid">
             {steps.map(([number, title, text]) => <article key={title}><span>{number}</span><h3>{title}</h3><p>{text}</p></article>)}
@@ -117,10 +120,10 @@ export default async function JoinPage() {
         <div className="site-shell two-column-editorial">
           <div><p className="section-kicker">Before You Apply</p><h2>Prepared to serve?</h2></div>
           <div className="reading-column">
-            <p>Applicants should be prepared for a structured department with policies, supervision, documentation, training standards, and accountability.</p>
-            <p className="intro-serif">Application access follows the current recruitment status shown at the top of this page.</p>
+            <p>Applicants should be prepared for a structured department with policies, supervision, documentation, professional standards, and accountability.</p>
+            <p className="intro-serif">Application access follows the current role-specific recruitment status shown at the top of this page.</p>
             <div className="button-row">
-              {recruitment.isOpen ? <Link className="button" href="/join/application">Begin Application</Link> : null}
+              {recruitment.isOpen ? <Link className="button" href="/join/application">Choose a Role & Apply</Link> : null}
               <Link className="button button--outline" href="/training-recruitment">Training & Recruitment</Link>
             </div>
           </div>
