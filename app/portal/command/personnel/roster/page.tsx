@@ -16,7 +16,8 @@ const ACTIVE_TRAINING_STATUSES = new Set(["Not Started", "In Progress", "Needs I
 
 export default async function FullRosterPage() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) {
+  const attorney = profile?.access_tier === "Attorney" && profile.rank === "Department Attorney";
+  if (!profile || (!["Executive", "Command"].includes(profile.access_tier) && !attorney)) {
     redirect("/portal/command/supervision");
   }
 
@@ -31,6 +32,7 @@ export default async function FullRosterPage() {
     { data: delegations },
     { data: leave },
     { data: careerEvents },
+    { data: organizationalUnits },
   ] = await Promise.all([
     supabase.from("personnel_profiles").select("*").order("personnel_id"),
     supabase.from("call_sign_assignments").select("profile_id,call_sign,assigned_at,released_at").order("assigned_at", { ascending: false }),
@@ -58,6 +60,13 @@ export default async function FullRosterPage() {
       .from("personnel_career_events")
       .select("profile_id,event_type,title,effective_at")
       .order("effective_at", { ascending: false }),
+    supabase
+      .from("organizational_units")
+      .select("name,unit_type,active,sort_order")
+      .eq("active", true)
+      .eq("unit_type", "Division")
+      .order("sort_order")
+      .order("name"),
   ]);
 
   const primaryAssignment = new Map<string, string>();
@@ -114,8 +123,8 @@ export default async function FullRosterPage() {
     id: member.personnel_id,
     displayName: member.display_name,
     username: member.username,
-    callSign: member.call_sign ?? "",
-    callSignHistory: (callSigns ?? [])
+    callSign: member.rank === "Department Attorney" ? "" : member.call_sign ?? "",
+    callSignHistory: member.rank === "Department Attorney" ? [] : (callSigns ?? [])
       .filter((assignment:any) => assignment.profile_id === member.id && assignment.released_at)
       .map((assignment:any) => assignment.call_sign),
     rank: member.rank,
@@ -140,7 +149,7 @@ export default async function FullRosterPage() {
         displayName: member.display_name,
         rank: member.rank,
         status: member.status,
-        callSign: member.call_sign ?? "",
+        callSign: member.rank === "Department Attorney" ? "" : member.call_sign ?? "",
         isTestAccount: Boolean(member.is_test_account),
         activeLeave: leaveRow ? {
           id: leaveRow.id,
@@ -163,29 +172,58 @@ export default async function FullRosterPage() {
     }));
 
   const operationalPersonnel = (profiles ?? []).filter((member:any) => member.status !== "Deactivated" && !member.is_test_account);
+  const activeDivisions = (organizationalUnits ?? []).filter((unit:any) => unit.name !== "Department Attorney" || true);
+
+  const divisionCount = (divisionName: string) => operationalPersonnel.filter((member:any) =>
+    (primaryAssignment.get(member.id) ?? member.division ?? "Unassigned") === divisionName,
+  ).length;
 
   return (
     <PortalShell
       active="personnel"
-      eyebrow="Personnel"
-      title="Roster & Personnel Actions"
-      description="Make department-wide personnel changes first, then review the roster below. Individual records remain the home for member-specific work."
+      eyebrow={attorney ? "Legal Counsel · Personnel" : "Personnel"}
+      title={attorney ? "Department Roster" : "Roster & Personnel Actions"}
+      description={attorney
+        ? "Read-only department roster and personnel record access for LSCSO legal counsel. Operational personnel administration remains restricted to Command Staff."
+        : "Make department-wide personnel changes first, then review the roster below. Individual records remain the home for member-specific work."}
       actions={
         <>
           <Link className="portal-button portal-button--primary" href="/portal/command/personnel">Personnel Directory</Link>
-          <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link>
+          {!attorney ? <Link className="portal-button portal-button--secondary" href="/portal/command/service-records">Service Records</Link> : null}
         </>
       }
     >
-      {PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
-      {EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
+      {!attorney && PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
+      {!attorney && EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
+
+      <section className="portal-panel" style={{ marginBottom: 16 }}>
+        <div className="portal-panel-heading">
+          <div><p>Department structure</p><h2>Divisions</h2></div>
+          <span>{activeDivisions.length} active divisions</span>
+        </div>
+        <p className="command-v2-compact-copy">Current LSCSO organizational divisions are shown even when no personnel are presently assigned.</p>
+        <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
+          {activeDivisions.map((unit:any) => (
+            <div key={unit.name}>
+              <div>
+                <strong>{unit.name}</strong>
+                <span>{divisionCount(unit.name)} assigned personnel</span>
+              </div>
+              <div>
+                <strong>{unit.name === "Department Attorney" ? "Non-sworn legal counsel" : "Operational division"}</strong>
+                <span>{unit.name === "Department Attorney" ? "LS employee number · No call sign" : "Department roster unit"}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
 
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
           <div><p>Department roster</p><h2>Personnel overview</h2></div>
           <span>{operationalPersonnel.length} active records</span>
         </div>
-        <p className="command-v2-compact-copy">Select a member to open the full personnel record. Rank, status, LOA, assignments, training, certifications, delegated authority, and career history all resolve from the shared personnel system.</p>
+        <p className="command-v2-compact-copy">Select a member to open the full personnel record. Department Attorneys are listed by LS employee number and never display an operational call sign.</p>
         <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
           {operationalPersonnel.map((member:any) => {
             const memberCerts = (certifications ?? []).filter((item:any) => item.profile_id === member.id && item.status === "Current");
@@ -196,15 +234,16 @@ export default async function FullRosterPage() {
             const career = latestCareer.get(member.id);
             const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
             const probation = getPersonnelProbationState(member.probation_ends_at, now);
+            const rosterIdentifier = member.rank === "Department Attorney" ? member.personnel_id : member.call_sign || member.personnel_id;
             return (
               <Link href={`/portal/command/personnel/${member.personnel_id}`} key={member.id}>
                 <div>
-                  <strong>{member.call_sign || member.personnel_id} · {member.rank} {member.display_name}{probation.active ? <span className="personnel-record-status" style={{ marginLeft: 8 }}>PROBATION · {probation.daysRemaining}D</span> : null}</strong>
+                  <strong>{rosterIdentifier} · {member.rank} {member.display_name}{probation.active ? <span className="personnel-record-status" style={{ marginLeft: 8 }}>PROBATION · {probation.daysRemaining}D</span> : null}</strong>
                   <span>{primaryAssignment.get(member.id) ?? member.division ?? "Unassigned"} · {displayStatus} · {memberCerts.length} certifications · {assignmentCount.get(member.id) ?? 0} assignments</span>
                 </div>
                 <div>
-                  <strong>{trainingRow ? `${trainingRow.phase} · ${trainingRow.progress_percent}%` : ftoQualified ? "FTO Qualified" : "No active training"}</strong>
-                  <span>{probation.active ? `Probation ends ${new Date(probation.endsAt!).toLocaleDateString()} · ` : ""}{trainingRow && trainer?.display_name ? `Trainer: ${trainer.display_name}` : `${activeDelegations.get(member.id) ?? 0} delegated roles`}{career ? ` · Latest: ${career.event_type}` : ""}</span>
+                  <strong>{member.rank === "Department Attorney" ? "Legal counsel" : trainingRow ? `${trainingRow.phase} · ${trainingRow.progress_percent}%` : ftoQualified ? "FTO Qualified" : "No active training"}</strong>
+                  <span>{member.rank === "Department Attorney" ? "Non-sworn · No operational call sign" : <>{probation.active ? `Probation ends ${new Date(probation.endsAt!).toLocaleDateString()} · ` : ""}{trainingRow && trainer?.display_name ? `Trainer: ${trainer.display_name}` : `${activeDelegations.get(member.id) ?? 0} delegated roles`}{career ? ` · Latest: ${career.event_type}` : ""}</>}</span>
                 </div>
               </Link>
             );
@@ -212,10 +251,14 @@ export default async function FullRosterPage() {
         </div>
       </section>
 
-      <RosterRowInteraction />
-      <div className="command-roster-account-create-hidden">
-        <RosterWorkspace personnel={personnel} />
-      </div>
+      {!attorney ? (
+        <>
+          <RosterRowInteraction />
+          <div className="command-roster-account-create-hidden">
+            <RosterWorkspace personnel={personnel} />
+          </div>
+        </>
+      ) : null}
     </PortalShell>
   );
 }
