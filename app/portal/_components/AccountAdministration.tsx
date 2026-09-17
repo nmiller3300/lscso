@@ -24,6 +24,7 @@ type AccountAdministrationProps = {
 
 const STANDARD_CALL_SIGN = /^S-4[0-9]{2}$/;
 const TEST_CALL_SIGN = /^TA-[0-9]{1,3}$/;
+const ACCOUNT_SECURITY_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
 
 const ranks = [
   "Sheriff",
@@ -53,6 +54,18 @@ function getNextPersonnelId(personnel: ExistingAccount[], isTestAccount: boolean
   return next <= 999 ? `${prefix}-${String(next).padStart(3, "0")}` : null;
 }
 
+function suggestedUsername(displayName: string) {
+  const parts = displayName
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9\s.-]/g, "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+  const base = parts.join(".").replace(/\.{2,}/g, ".").slice(0, 32);
+  return /^[a-z0-9][a-z0-9._-]{2,31}$/.test(base) ? base : "";
+}
+
 export function AccountAdministration({ personnel, divisionOptions }: AccountAdministrationProps) {
   const router = useRouter();
   const profile = usePortalProfile();
@@ -61,10 +74,67 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
   const [notice, setNotice] = useState("");
   const [testAccount, setTestAccount] = useState(false);
   const executive = profile.rank === "Sheriff" || profile.rank === "Undersheriff";
+  const canAssignCredentials = ACCOUNT_SECURITY_RANKS.has(profile.rank);
 
   const activeAccounts = useMemo(() => personnel.filter((member) => member.status !== "Deactivated"), [personnel]);
   const credentialedAccounts = useMemo(() => activeAccounts.filter((member) => member.username), [activeAccounts]);
+  const uncredentialedAccounts = useMemo(() => activeAccounts.filter((member) => !member.username), [activeAccounts]);
   const nextPersonnelId = useMemo(() => getNextPersonnelId(personnel, testAccount), [personnel, testAccount]);
+
+  const firstUncredentialed = uncredentialedAccounts[0] ?? null;
+  const [credentialProfileId, setCredentialProfileId] = useState(firstUncredentialed?.profileId ?? "");
+  const [credentialUsername, setCredentialUsername] = useState(firstUncredentialed ? suggestedUsername(firstUncredentialed.displayName) : "");
+  const [credentialPending, setCredentialPending] = useState(false);
+  const [credentialError, setCredentialError] = useState("");
+  const [credentialNotice, setCredentialNotice] = useState("");
+
+  const selectedCredentialAccount = uncredentialedAccounts.find((member) => member.profileId === credentialProfileId) ?? null;
+
+  function selectCredentialProfile(profileId: string) {
+    const member = uncredentialedAccounts.find((item) => item.profileId === profileId) ?? null;
+    setCredentialProfileId(profileId);
+    setCredentialUsername(member ? suggestedUsername(member.displayName) : "");
+    setCredentialError("");
+    setCredentialNotice("");
+  }
+
+  async function assignCredentials(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (credentialPending || !selectedCredentialAccount) return;
+
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const username = credentialUsername.trim().toLowerCase();
+    const password = String(form.get("credentialPassword") ?? "");
+
+    setCredentialError("");
+    setCredentialNotice("");
+
+    if (!/^[a-z0-9][a-z0-9._-]{2,31}$/.test(username)) {
+      return setCredentialError("Username must contain 3–32 lowercase letters, numbers, dots, underscores, or hyphens.");
+    }
+    if (!isStrongPassword(password)) return setCredentialError(PASSWORD_REQUIREMENT);
+    if (personnel.some((member) => member.username === username)) return setCredentialError(`@${username} is already assigned.`);
+
+    setCredentialPending(true);
+    try {
+      await invokePersonnelAdmin({
+        operation: "assign_credentials",
+        profile_id: selectedCredentialAccount.profileId,
+        username,
+        password,
+      });
+      setCredentialNotice(`${selectedCredentialAccount.personnelId} · ${selectedCredentialAccount.displayName} can now sign in as @${username}.`);
+      setCredentialProfileId("");
+      setCredentialUsername("");
+      formElement.reset();
+      router.refresh();
+    } catch (reason) {
+      setCredentialError(reason instanceof Error ? reason.message : "The portal credentials could not be assigned.");
+    } finally {
+      setCredentialPending(false);
+    }
+  }
 
   async function createAccount(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -121,6 +191,64 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
 
   return (
     <div className="portal-account-admin">
+      {canAssignCredentials ? (
+        <section className="portal-panel" style={{ gridColumn: "1 / -1" }}>
+          <div className="portal-panel-heading">
+            <div><p>Existing personnel record</p><h2>Finish portal access</h2></div>
+            <span>{uncredentialedAccounts.length} waiting</span>
+          </div>
+          <p className="portal-account-admin__intro">Use this for personnel created through Applications, Rehire, or another workflow that already created the personnel record. This adds the username and temporary password without creating a duplicate member.</p>
+
+          {uncredentialedAccounts.length ? (
+            <form onSubmit={assignCredentials}>
+              <div className="portal-form-grid">
+                <label>
+                  Personnel member
+                  <select value={credentialProfileId} onChange={(event) => selectCredentialProfile(event.target.value)} required>
+                    <option value="">Select personnel</option>
+                    {uncredentialedAccounts.map((member) => (
+                      <option key={member.profileId} value={member.profileId}>{member.personnelId} · {member.displayName} · {member.rank}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Username
+                  <input
+                    value={credentialUsername}
+                    onChange={(event) => setCredentialUsername(event.target.value.toLowerCase())}
+                    required
+                    autoComplete="off"
+                    placeholder="first.last"
+                  />
+                </label>
+                <label>
+                  Temporary password
+                  <input name="credentialPassword" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" />
+                </label>
+                <label>
+                  Personnel record
+                  <input aria-readonly="true" readOnly tabIndex={-1} value={selectedCredentialAccount ? `${selectedCredentialAccount.personnelId} · ${selectedCredentialAccount.rank}` : "Select personnel"} />
+                </label>
+              </div>
+
+              <div className="portal-form-protection" style={{ marginTop: 14 }}>
+                <strong>Password change required on first sign-in</strong>
+                <span>The personnel record, rank, and permanent ID stay exactly as they are. Only portal login credentials are added.</span>
+              </div>
+
+              {credentialError ? <div className="portal-form-error" role="alert">{credentialError}</div> : null}
+              {credentialNotice ? <div className="portal-form-success" role="status"><strong>Portal access created</strong><span>{credentialNotice}</span></div> : null}
+
+              <div className="command-v2-action-row portal-account-create__actions">
+                <button className="portal-button portal-button--primary" disabled={credentialPending || !selectedCredentialAccount} type="submit">{credentialPending ? "Creating login…" : "Create username & temporary password"}</button>
+              </div>
+            </form>
+          ) : (
+            <div className="portal-empty-state"><strong>All active personnel currently have portal login credentials.</strong></div>
+          )}
+        </section>
+      ) : null}
+
       <section className="portal-panel portal-account-create">
         <div className="portal-panel-heading">
           <div><p>Personnel accounts</p><h2>Create account</h2></div>
@@ -171,7 +299,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
             <div key={member.profileId}>
               <span className="portal-account-list__avatar">{member.displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span>
               <div><strong>{member.displayName}</strong><small>{member.callSign || member.personnelId} · {member.rank}</small></div>
-              <b>{member.username ? `@${member.username}` : "No login"}</b>
+              <b>{member.username ? `@${member.username}` : "Needs login"}</b>
             </div>
           ))}
         </div>
