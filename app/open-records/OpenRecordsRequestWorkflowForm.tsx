@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 type SubmitResult = { request_number: number | string; tracking_token: string };
@@ -9,12 +9,19 @@ function value(form: FormData, name: string) {
   return String(form.get(name) ?? "").trim();
 }
 
+function createSubmissionToken() {
+  const bytes = new Uint8Array(32);
+  window.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
 export function OpenRecordsRequestWorkflowForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [result, setResult] = useState<SubmitResult | null>(null);
   const [trackingCopied, setTrackingCopied] = useState(false);
   const [acknowledged, setAcknowledged] = useState(false);
+  const submissionTokenRef = useRef("");
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,10 +38,13 @@ export function OpenRecordsRequestWorkflowForm() {
       return;
     }
 
+    if (!submissionTokenRef.current) submissionTokenRef.current = createSubmissionToken();
+    const submissionToken = submissionTokenRef.current;
+
     setSubmitting(true);
     try {
       const supabase = createClient() as any;
-      const { data, error: submitError } = await supabase.rpc("submit_open_records_request", {
+      const { data, error: submitError } = await supabase.rpc("submit_open_records_request_resilient", {
         p_first_name: value(form, "first_name"),
         p_last_name: value(form, "last_name"),
         p_email: value(form, "email"),
@@ -46,13 +56,14 @@ export function OpenRecordsRequestWorkflowForm() {
         p_records_description: value(form, "records_description"),
         p_preferred_delivery: "Electronic",
         p_legal_acknowledgement: true,
+        p_tracking_token: submissionToken,
       }).single();
 
       if (submitError || !data) throw new Error(submitError?.message || "The request could not be submitted.");
-      setResult({ request_number: data.request_number, tracking_token: String(data.tracking_token) });
+      setResult({ request_number: data.request_number, tracking_token: String(data.tracking_token || submissionToken) });
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "The request could not be submitted.");
+      setError(caught instanceof Error ? caught.message : "The request could not be submitted. You can safely try again without creating a duplicate request.");
     } finally {
       setSubmitting(false);
     }
