@@ -19,6 +19,8 @@ export type RecruitmentOffer = {
 };
 
 const OFFER_RANKS = [
+  "Sheriff",
+  "Undersheriff",
   "Major",
   "Captain",
   "1st Lieutenant",
