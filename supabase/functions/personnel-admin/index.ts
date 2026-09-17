@@ -22,6 +22,7 @@ const rankAccess: Record<string, string> = {
   "Deputy II": "Deputy",
   Deputy: "Deputy",
   Recruit: "Deputy",
+  "Department Attorney": "Attorney",
 };
 
 const rankRole: Record<string, string> = {
@@ -38,6 +39,7 @@ const rankRole: Record<string, string> = {
   "Deputy II": "deputy",
   Deputy: "deputy",
   Recruit: "deputy",
+  "Department Attorney": "department_attorney",
 };
 
 const rankLevel: Record<string, number> = {
@@ -53,6 +55,7 @@ const rankLevel: Record<string, number> = {
   "Deputy III": 40,
   "Deputy II": 30,
   Deputy: 20,
+  "Department Attorney": 15,
   Recruit: 10,
 };
 
@@ -286,14 +289,21 @@ Deno.serve(async (request) => {
     const rank = typeof body?.rank === "string" ? body.rank : "";
     const division = typeof body?.division === "string" ? body.division.trim() : "Unassigned";
     const isTestAccount = body?.is_test_account === true;
+    const isAttorney = rank === "Department Attorney";
+
+    if (isAttorney && isTestAccount) {
+      return json({ error: "Department Attorney is an official personnel role and cannot be created as a test account." }, 400);
+    }
 
     if (
       !validUsername(username) || !validPassword(password) || displayName.length < 2 ||
-      !validPersonnelId(personnelId, isTestAccount) || !validCallSign(callSign, isTestAccount) || !rankAccess[rank]
+      !validPersonnelId(personnelId, isTestAccount) || (!isAttorney && !validCallSign(callSign, isTestAccount)) || !rankAccess[rank]
     ) {
       return json({ error: isTestAccount
         ? "Test accounts require a TA-000 personnel ID and TA-# call sign."
-        : "Personnel and credential fields are incomplete or invalid." }, 400);
+        : isAttorney
+          ? "Department Attorney accounts require an LS-### personnel ID and valid portal credentials. No call sign is assigned."
+          : "Personnel and credential fields are incomplete or invalid." }, 400);
     }
     if (!canCreateRank(rank)) return json({ error: "You cannot create a personnel account at that rank." }, 403);
 
@@ -306,8 +316,8 @@ Deno.serve(async (request) => {
         rank,
         access_tier: rankAccess[rank],
         call_sign: null,
-        division,
-        supervisor_label: "Pending command assignment",
+        division: isAttorney ? "Department Attorney" : division,
+        supervisor_label: isAttorney ? "Office of the Sheriff" : "Pending command assignment",
         status: "Active",
         is_test_account: isTestAccount,
       })
@@ -331,7 +341,7 @@ Deno.serve(async (request) => {
         display_name: displayName,
         greeting_name: displayName,
         rank,
-        call_sign: callSign,
+        call_sign: isAttorney ? null : callSign,
         personnel_id: personnelId,
         must_change_password: true,
       },
@@ -352,18 +362,53 @@ Deno.serve(async (request) => {
       return json({ error: linkError.message }, 500);
     }
 
-    const { error: assignmentError } = await admin.rpc("admin_assign_call_sign", {
-      target_profile_id: profile.id,
-      new_call_sign: callSign,
-      actor_profile_id: caller.id,
-      assignment_reason: "Initial command assignment",
-    });
-    if (assignmentError) {
-      await admin.auth.admin.deleteUser(created.user.id, false);
-      await admin.from("personnel_profiles").delete().eq("id", profile.id);
-      return json({ error: assignmentError.message ?? "Personnel account could not be finalized." }, 500);
+    if (isAttorney) {
+      const { data: attorneyUnit } = await admin
+        .from("organizational_units")
+        .select("id")
+        .eq("name", "Department Attorney")
+        .eq("active", true)
+        .maybeSingle();
+      if (attorneyUnit?.id) {
+        await admin.from("personnel_unit_assignments").insert({
+          profile_id: profile.id,
+          organizational_unit_id: attorneyUnit.id,
+          assignment_type: "Primary",
+          starts_at: new Date().toISOString(),
+          notes: "Department Attorney appointment",
+          created_by: caller.id,
+        });
+      }
+      await admin.from("personnel_career_events").insert({
+        profile_id: profile.id,
+        event_type: "Appointment",
+        effective_at: new Date().toISOString(),
+        from_rank: null,
+        to_rank: "Department Attorney",
+        title: "Appointed as LSCSO Department Attorney",
+        notes: "Created through Personnel Accounts. Department Attorneys receive an LS employee number and no operational call sign.",
+        recorded_by: caller.id,
+      });
+    } else {
+      const { error: assignmentError } = await admin.rpc("admin_assign_call_sign", {
+        target_profile_id: profile.id,
+        new_call_sign: callSign,
+        actor_profile_id: caller.id,
+        assignment_reason: "Initial command assignment",
+      });
+      if (assignmentError) {
+        await admin.auth.admin.deleteUser(created.user.id, false);
+        await admin.from("personnel_profiles").delete().eq("id", profile.id);
+        return json({ error: assignmentError.message ?? "Personnel account could not be finalized." }, 500);
+      }
     }
-    await writeAudit("PERSONNEL_ACCOUNT_CREATED", profile.id, { username, personnel_id: personnelId, rank });
+
+    await writeAudit("PERSONNEL_ACCOUNT_CREATED", profile.id, {
+      username,
+      personnel_id: personnelId,
+      rank,
+      call_sign: isAttorney ? null : callSign,
+    });
     return json({ success: true, profile_id: profile.id, username });
   }
 
@@ -449,6 +494,9 @@ Deno.serve(async (request) => {
   }
 
   if (operation === "assign_call_sign") {
+    if (target.rank === "Department Attorney" || target.access_tier === "Attorney") {
+      return json({ error: "Department Attorneys use their LS employee number and do not receive operational call signs." }, 409);
+    }
     const callSign = typeof body?.call_sign === "string" ? body.call_sign.trim().toUpperCase() : "";
     const reason = auditReason(body?.reason);
     if (profileId === caller.id) return json({ error: "Personnel administrators cannot reassign their own call sign." }, 400);
