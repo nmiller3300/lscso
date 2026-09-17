@@ -19,19 +19,23 @@ export type RecruitmentOffer = {
 };
 
 const OFFER_RANKS = [
-  "Recruit",
-  "Deputy Sheriff",
-  "Senior Deputy Sheriff",
-  "Corporal",
-  "Sergeant",
-  "Lieutenant",
+  "Major",
   "Captain",
-  "Undersheriff",
-  "Sheriff",
+  "1st Lieutenant",
+  "Lieutenant",
+  "Sergeant",
+  "Corporal",
+  "Master Deputy",
+  "Deputy III",
+  "Deputy II",
+  "Deputy",
+  "Recruit",
 ] as const;
 
+type OfferRank = (typeof OFFER_RANKS)[number];
+
 function defaultTerms(rank: string) {
-  return `The Los Santos County Sheriff's Office offers you appointment as ${rank === "Sheriff" || rank === "Undersheriff" ? rank : `a ${rank}`}, contingent upon completion of any department onboarding, training, certification, and administrative requirements applicable to the appointment. By accepting this offer, you confirm your intent to serve in accordance with LSCSO policies, standards, and lawful orders.`;
+  return `The Los Santos County Sheriff's Office offers you appointment at the rank of ${rank}, contingent upon completion of any department onboarding, training, certification, and administrative requirements applicable to the appointment. By accepting this offer, you confirm your intent to serve in accordance with LSCSO policies, standards, and lawful orders.`;
 }
 
 export function EmploymentOfferManager({
@@ -50,7 +54,7 @@ export function EmploymentOfferManager({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [rank, setRank] = useState<(typeof OFFER_RANKS)[number]>("Recruit");
+  const [rank, setRank] = useState<OfferRank>("Recruit");
   const [terms, setTerms] = useState(() => defaultTerms("Recruit"));
   const [expiresAt, setExpiresAt] = useState("");
   const [terminateOpen, setTerminateOpen] = useState(false);
@@ -81,7 +85,7 @@ export function EmploymentOfferManager({
     }
   }
 
-  function changeRank(nextRank: (typeof OFFER_RANKS)[number]) {
+  function changeRank(nextRank: OfferRank) {
     const previousGenerated = generatedTerms;
     setRank(nextRank);
     setTerms((current) => current === previousGenerated ? defaultTerms(nextRank) : current);
@@ -116,7 +120,7 @@ export function EmploymentOfferManager({
         <div className="recruitment-control-grid">
           <label>
             Offered rank
-            <select value={rank} onChange={(event) => changeRank(event.target.value as (typeof OFFER_RANKS)[number])}>
+            <select value={rank} onChange={(event) => changeRank(event.target.value as OfferRank)}>
               {OFFER_RANKS.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
