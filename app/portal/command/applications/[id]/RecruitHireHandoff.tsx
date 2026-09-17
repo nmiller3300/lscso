@@ -22,7 +22,7 @@ export function RecruitHireHandoff({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [createdPersonnelId, setCreatedPersonnelId] = useState("");
-  const appointmentRank = offerRank || "Recruit";
+  const appointmentRank = offerRank?.trim() || "";
 
   if (!eligible && !hired) return null;
 
@@ -52,7 +52,7 @@ export function RecruitHireHandoff({
     return (
       <section className="portal-panel recruitment-hire-handoff recruitment-hire-handoff--complete">
         <div className="portal-panel-heading">
-          <div><p>Personnel appointment</p><h2>{appointmentRank} personnel record created</h2></div>
+          <div><p>Personnel appointment</p><h2>{appointmentRank ? `${appointmentRank} personnel record created` : "Personnel record created"}</h2></div>
           <span>Complete</span>
         </div>
         {createdPersonnelId ? <p><strong>Personnel ID:</strong> {createdPersonnelId}</p> : null}
@@ -69,7 +69,7 @@ export function RecruitHireHandoff({
         </div>
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => { setError(""); setConfirmOpen(true); }}>
-          Create {appointmentRank} Personnel Record
+          {appointmentRank ? `Create ${appointmentRank} Personnel Record` : "Create Personnel Record"}
         </button>
       </section>
 
@@ -77,21 +77,21 @@ export function RecruitHireHandoff({
         open={confirmOpen}
         onClose={() => { if (!busy) setConfirmOpen(false); }}
         eyebrow="Final hiring action"
-        title={`Appoint ${applicantName} as LSCSO ${appointmentRank}?`}
+        title={appointmentRank ? `Appoint ${applicantName} as LSCSO ${appointmentRank}?` : `Complete ${applicantName}'s LSCSO appointment?`}
         description="Creates the LSCSO personnel record at the rank accepted in the employment offer. FiveM/computer integration remains disabled."
         dismissOnBackdrop={!busy}
         footer={
           <>
             <button className="portal-button portal-button--secondary" type="button" disabled={busy} onClick={() => setConfirmOpen(false)}>Cancel</button>
             <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => void createAppointment()}>
-              {busy ? "Creating…" : `Confirm ${appointmentRank} Appointment`}
+              {busy ? "Creating…" : appointmentRank ? `Confirm ${appointmentRank} Appointment` : "Confirm Appointment"}
             </button>
           </>
         }
       >
         <div className="recruitment-decision-review">
           <div><span>Applicant</span><strong>{applicantName}</strong></div>
-          <div><span>Portal rank</span><strong>{appointmentRank}</strong></div>
+          {appointmentRank ? <div><span>Portal rank</span><strong>{appointmentRank}</strong></div> : null}
           <div><span>Employment offer</span><strong>Signed & accepted</strong></div>
           <div><span>FiveM / computer action</span><strong>None</strong></div>
           {error ? <p className="application-error" role="alert">{error}</p> : null}
