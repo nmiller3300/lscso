@@ -1,0 +1,185 @@
+/* Recruitment interview editor — shared Sworn + Department Attorney polish. */
+
+.recruitment-interview-panel {
+  overflow: hidden;
+}
+
+.recruitment-interview-panel .recruitment-control-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.recruitment-interview-panel .recruitment-control-grid > label,
+.recruitment-interview-panel .recruitment-wide-label {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  color: var(--portal-muted, #959ca5);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .065em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.recruitment-interview-panel .recruitment-control-grid > label > small,
+.recruitment-interview-panel .recruitment-wide-label > small {
+  color: var(--portal-muted, #7f8790);
+  font-size: .68rem;
+  font-weight: 560;
+  letter-spacing: 0;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+.recruitment-interview-panel select,
+.recruitment-interview-panel input,
+.recruitment-interview-panel textarea {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.recruitment-interview-panel .recruitment-control-grid > label:nth-child(5) {
+  grid-column: 1 / -1;
+}
+
+.recruitment-interview-time-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 5px 14px;
+  align-items: center;
+  margin: 20px 0;
+  padding: 15px 16px;
+  border: 1px solid rgba(212, 190, 121, .18);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(212, 190, 121, .055), transparent 54%),
+    rgba(255, 255, 255, .018);
+}
+
+.recruitment-interview-time-summary > span {
+  grid-row: 1 / span 2;
+  align-self: center;
+  padding: 7px 9px;
+  border: 1px solid rgba(212, 190, 121, .16);
+  border-radius: 999px;
+  color: #cdbb7e;
+  font-size: .58rem;
+  font-weight: 850;
+  letter-spacing: .10em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.recruitment-interview-time-summary > strong,
+.recruitment-interview-time-summary > small {
+  display: block;
+  min-width: 0;
+}
+
+.recruitment-interview-time-summary > strong {
+  color: var(--portal-text, #f2f0eb);
+  font-size: .95rem;
+  font-weight: 760;
+  letter-spacing: -.015em;
+  line-height: 1.35;
+}
+
+.recruitment-interview-time-summary > small {
+  color: var(--portal-muted, #858d96);
+  font-size: .7rem;
+  line-height: 1.45;
+}
+
+.recruitment-interview-actions {
+  display: grid;
+  grid-template-columns: minmax(190px, auto) minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--portal-line, rgba(255,255,255,.08));
+}
+
+.recruitment-interview-actions > span {
+  min-width: 0;
+  color: var(--portal-muted, #8c949c);
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
+.recruitment-interview-actions > span.is-ready {
+  color: #9ec7a8;
+}
+
+@media (max-width: 760px) {
+  .recruitment-interview-panel {
+    padding-bottom: max(30px, env(safe-area-inset-bottom));
+  }
+
+  .recruitment-interview-panel .portal-panel-heading {
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .recruitment-interview-panel .recruitment-control-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .recruitment-interview-panel .recruitment-control-grid > label:nth-child(5) {
+    grid-column: auto;
+  }
+
+  .recruitment-interview-panel select,
+  .recruitment-interview-panel input {
+    min-height: 48px;
+    font-size: 16px;
+  }
+
+  .recruitment-interview-panel textarea {
+    min-height: 150px;
+    font-size: 16px;
+  }
+
+  .recruitment-interview-time-summary {
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin: 18px 0 22px;
+    padding: 15px;
+  }
+
+  .recruitment-interview-time-summary > span {
+    grid-row: auto;
+    justify-self: start;
+    margin-bottom: 2px;
+  }
+
+  .recruitment-interview-time-summary > strong {
+    font-size: .92rem;
+    line-height: 1.42;
+  }
+
+  .recruitment-interview-time-summary > small {
+    font-size: .68rem;
+  }
+
+  .recruitment-interview-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+
+  .recruitment-interview-actions .portal-button {
+    width: 100%;
+    min-height: 50px;
+  }
+
+  .recruitment-interview-actions > span {
+    padding: 0 2px;
+    font-size: .72rem;
+  }
+}
