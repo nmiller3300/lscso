@@ -1,0 +1,334 @@
+/* LSCSO Candidate Experience — shared intake, application, transmission and tracking language */
+
+.candidate-intake-page,
+.candidate-record-portal {
+  --candidate-gold: #d7bd72;
+  --candidate-gold-bright: #f0dc99;
+  --candidate-steel: #7293ad;
+  --candidate-olive: #646854;
+  --candidate-ink: #070a0d;
+  --candidate-surface: rgba(12,16,20,.76);
+  --candidate-line: rgba(255,255,255,.085);
+}
+
+.candidate-intake-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding-top: 124px;
+  padding-bottom: 110px;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(216,189,114,.13), transparent 25rem),
+    radial-gradient(circle at 88% 30%, rgba(83,126,160,.10), transparent 30rem),
+    linear-gradient(145deg,#111821 0%,#090e13 52%,#06090d 100%) !important;
+}
+
+.candidate-intake-hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -5;
+  background:
+    linear-gradient(rgba(255,255,255,.012) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.012) 1px,transparent 1px);
+  background-size: 52px 52px;
+  mask-image: radial-gradient(circle at 50% 44%,#000 0%,transparent 82%);
+  content: "";
+}
+
+.candidate-intake-hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 0 43%, rgba(0,0,0,.13) 72%, rgba(0,0,0,.50) 100%);
+  content: "";
+}
+
+.candidate-intake-ambient { position:absolute; inset:0; z-index:-4; overflow:hidden; pointer-events:none; }
+.candidate-intake-ambient span { position:absolute; border:1px solid rgba(255,255,255,.035); border-radius:50%; }
+.candidate-intake-ambient span:nth-child(1) { width:860px; height:860px; right:-280px; top:-260px; border-radius:43% 57% 61% 39% / 48% 42% 58% 52%; box-shadow:0 0 0 80px rgba(215,189,114,.011),0 0 0 160px rgba(255,255,255,.004); animation:candidateOrbitOne 30s linear infinite; }
+.candidate-intake-ambient span:nth-child(2) { width:560px; height:560px; left:-230px; bottom:-230px; border-color:rgba(104,145,177,.045); border-radius:58% 42% 36% 64% / 45% 58% 42% 55%; animation:candidateOrbitTwo 37s linear infinite reverse; }
+.candidate-intake-ambient span:nth-child(3) { width:300px; height:300px; left:9%; top:42%; border:0; background:#a58232; opacity:.11; filter:blur(110px); animation:candidateHalo 12s ease-in-out infinite alternate; }
+
+.candidate-intake-watermark { position:absolute; z-index:-2; top:50%; right:clamp(-350px,-17vw,-140px); width:min(60vw,780px); height:auto; transform:translateY(-50%) rotate(4deg); opacity:.06; filter:saturate(.7) contrast(1.08) drop-shadow(0 44px 100px rgba(0,0,0,.5)); pointer-events:none; user-select:none; }
+
+.candidate-intake-masthead {
+  position: relative;
+  display:grid !important;
+  grid-template-columns:minmax(0,1.35fr) minmax(340px,.65fr) !important;
+  gap:clamp(34px,5vw,78px) !important;
+  align-items:center;
+  min-height:520px;
+  padding:38px 40px !important;
+  overflow:hidden;
+  border:1px solid rgba(255,255,255,.12) !important;
+  border-radius:34px !important;
+  background:
+    radial-gradient(circle at 20% 0%,rgba(255,255,255,.07),transparent 24rem),
+    linear-gradient(145deg,rgba(18,24,30,.66),rgba(7,10,13,.60)) !important;
+  box-shadow:0 46px 120px rgba(0,0,0,.42),inset 0 1px 1px rgba(255,255,255,.08),0 0 75px rgba(215,189,114,.04) !important;
+  backdrop-filter:blur(28px) saturate(1.05);
+  -webkit-backdrop-filter:blur(28px) saturate(1.05);
+}
+
+.candidate-intake-masthead::before { left:7% !important; right:48% !important; background:linear-gradient(90deg,transparent,rgba(240,220,153,.72),transparent) !important; }
+.candidate-intake-masthead::after { position:absolute; width:430px; height:430px; right:-120px; bottom:-190px; border:1px solid rgba(215,189,114,.06); border-radius:50%; box-shadow:0 0 0 60px rgba(215,189,114,.011),0 0 0 120px rgba(255,255,255,.004); content:""; pointer-events:none; }
+.candidate-intake-masthead__copy { position:relative; z-index:2; max-width:820px; }
+.candidate-intake-signal { display:inline-flex; align-items:center; gap:9px; margin-bottom:19px; color:#c9bc95; font-size:.58rem; font-weight:850; letter-spacing:.16em; text-transform:uppercase; }
+.candidate-intake-signal i, .candidate-intake-seal__status i { width:6px; height:6px; border-radius:50%; background:#78c793; box-shadow:0 0 0 4px rgba(120,199,147,.08),0 0 14px rgba(120,199,147,.24); }
+.candidate-intake-masthead .section-kicker { margin-bottom:8px; color:#8e99a3; font-size:.58rem; }
+.candidate-intake-masthead .application-page__badge { display:inline-flex; margin-bottom:16px; padding:7px 10px; border:1px solid rgba(215,189,114,.13); border-radius:999px; background:rgba(215,189,114,.035); color:#d2bf80; font-size:.53rem; font-weight:800; letter-spacing:.11em; text-transform:uppercase; }
+.candidate-intake-masthead h1 { max-width:900px; margin:0 !important; color:#f6f3ec !important; font-size:clamp(3.45rem,6.2vw,7rem) !important; font-weight:650 !important; letter-spacing:-.071em !important; line-height:.91 !important; text-shadow:0 22px 52px rgba(0,0,0,.34); text-wrap:balance; }
+.candidate-intake-masthead .intro-serif { max-width:760px; margin:25px 0 0 !important; color:#9ba5ae !important; font-family:inherit !important; font-size:clamp(.92rem,1.18vw,1.04rem) !important; line-height:1.72 !important; }
+.candidate-intake-masthead .application-page__metrics { width:min(620px,100%); margin-top:29px; border:1px solid rgba(255,255,255,.075) !important; border-radius:17px !important; background:rgba(0,0,0,.16) !important; box-shadow:inset 0 1px rgba(255,255,255,.025) !important; }
+.candidate-intake-masthead .application-page__metrics article { min-height:72px; background:transparent !important; }
+.candidate-intake-masthead .application-page__metrics article + article { border-left:1px solid rgba(255,255,255,.07); }
+.candidate-intake-masthead .application-page__metrics strong { color:#eee8d6; font-size:1.05rem; }
+.candidate-intake-masthead .application-page__metrics span { color:#727d86; font-size:.52rem; letter-spacing:.08em; text-transform:uppercase; }
+
+.candidate-intake-seal { position:relative; z-index:2; display:grid !important; justify-items:center; gap:13px; padding:24px !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:50% !important; aspect-ratio:1; align-content:center; overflow:hidden; background:radial-gradient(circle at 32% 24%,rgba(255,255,255,.10),rgba(255,255,255,.032) 50%,rgba(0,0,0,.24) 100%),rgba(8,12,16,.44) !important; box-shadow:0 38px 90px rgba(0,0,0,.46),0 0 60px rgba(215,189,114,.07),inset 0 1px 2px rgba(255,255,255,.16) !important; backdrop-filter:blur(30px); -webkit-backdrop-filter:blur(30px); animation:candidateSealBreath 6.4s ease-in-out infinite; }
+.candidate-intake-seal::before { position:absolute; inset:8px; border-radius:50%; padding:5px; background:conic-gradient(from 0deg,rgba(244,225,164,.92),rgba(148,119,52,.55),rgba(91,96,81,.58),rgba(226,216,177,.32),rgba(177,145,68,.75),rgba(244,225,164,.92)); -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; content:""; animation:candidateSealRing 8s linear infinite; pointer-events:none; }
+.candidate-intake-seal > * { position:relative; z-index:2; }
+.candidate-intake-seal__status { display:inline-flex; align-items:center; gap:7px; color:#91a09b; font-size:.48rem; font-weight:800; letter-spacing:.10em; text-transform:uppercase; }
+.candidate-intake-seal img { width:132px !important; height:132px !important; filter:drop-shadow(0 16px 28px rgba(0,0,0,.38)); }
+.candidate-intake-seal > div:not(.candidate-intake-seal__status) { text-align:center; }
+.candidate-intake-seal > div:not(.candidate-intake-seal__status) span { display:block; color:#d2bd7c; font-size:.5rem; font-weight:850; letter-spacing:.13em; text-transform:uppercase; }
+.candidate-intake-seal > div:not(.candidate-intake-seal__status) strong { display:block; margin-top:6px; color:#f1eee7; font-size:1.02rem; }
+.candidate-intake-seal > div:not(.candidate-intake-seal__status) small { display:block; margin-top:4px; color:#727d86; font-size:.6rem; }
+.candidate-intake-seal footer { display:flex; gap:8px; }
+.candidate-intake-seal footer span { padding:5px 7px; border:1px solid rgba(255,255,255,.07); border-radius:999px; color:#69747d; font-size:.42rem; font-weight:760; letter-spacing:.06em; text-transform:uppercase; }
+
+.candidate-role-select { position:relative; overflow:hidden; margin-top:30px !important; padding:30px !important; border:1px solid rgba(255,255,255,.10) !important; border-radius:30px; background:linear-gradient(145deg,rgba(15,20,25,.72),rgba(7,10,13,.70)) !important; box-shadow:0 38px 90px rgba(0,0,0,.31),inset 0 1px rgba(255,255,255,.04) !important; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.candidate-role-select::before { position:absolute; top:0; left:8%; right:8%; height:1px; background:linear-gradient(90deg,transparent,rgba(231,211,148,.48),transparent); content:""; }
+.candidate-role-select .application-role-select__heading { max-width:850px; margin-bottom:27px; }
+.candidate-role-select .application-role-select__heading p { color:#cdb879; font-size:.57rem; letter-spacing:.16em; }
+.candidate-role-select .application-role-select__heading h2 { color:#f4f1e9; font-size:clamp(2.25rem,4.4vw,4.6rem); font-weight:650; letter-spacing:-.055em; line-height:.98; }
+.candidate-role-select .application-role-select__heading span { display:block; max-width:720px; color:#89949e; }
+.candidate-role-select .application-role-select__grid { gap:16px; }
+.candidate-role-select .application-role-card { position:relative; isolation:isolate; min-height:350px; grid-template-rows:auto 1fr auto; gap:0; padding:25px; overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:25px; background:linear-gradient(145deg,rgba(19,25,31,.78),rgba(6,9,12,.84)); box-shadow:0 24px 62px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.025); }
+.candidate-role-select .application-role-card::before { position:absolute; inset:0; z-index:-1; content:""; pointer-events:none; }
+.candidate-role-select .application-role-card--sworn::before { background:radial-gradient(circle at 84% 20%,rgba(211,179,88,.13),transparent 20rem),linear-gradient(130deg,transparent 44%,rgba(77,111,137,.055)); }
+.candidate-role-select .application-role-card--attorney::before { background:radial-gradient(circle at 84% 20%,rgba(229,210,148,.10),transparent 20rem),linear-gradient(130deg,transparent 44%,rgba(105,108,87,.07)); }
+.candidate-role-select .application-role-card:hover,.candidate-role-select .application-role-card:focus-visible { transform:translateY(-4px); border-color:rgba(215,189,114,.31); background:linear-gradient(145deg,rgba(23,29,34,.84),rgba(8,11,14,.88)); box-shadow:0 34px 80px rgba(0,0,0,.31),0 0 42px rgba(215,189,114,.035); }
+.candidate-role-select .application-role-card__top { position:relative; z-index:3; }
+.candidate-role-select .application-role-card__top span:first-child { color:#a8a08b; font-size:.55rem; }
+.candidate-role-select .application-role-card__status { border-color:rgba(121,197,146,.16); border-radius:999px; background:rgba(121,197,146,.035); color:#8fc69b; font-size:.48rem; }
+.candidate-role-select .application-role-card__mark { position:absolute; z-index:-1; top:55px; right:-2px; width:190px; height:190px; display:grid; place-items:center; border:1px solid rgba(215,189,114,.07); border-radius:50%; box-shadow:0 0 0 32px rgba(215,189,114,.01); color:rgba(230,211,154,.045); font-size:8rem; font-weight:720; line-height:1; }
+.candidate-role-select .application-role-card > div:nth-of-type(3) { align-self:center; padding:65px 0 28px; }
+.candidate-role-select .application-role-card small { color:#c7b374; font-size:.54rem; font-weight:850; letter-spacing:.14em; text-transform:uppercase; }
+.candidate-role-select .application-role-card h3 { margin:9px 0 12px; color:#f1eee7; font-size:clamp(2.1rem,3.6vw,3.55rem); font-weight:650; letter-spacing:-.05em; line-height:.98; }
+.candidate-role-select .application-role-card p { max-width:540px; color:#89949e; line-height:1.66; }
+.candidate-role-select .application-role-card > strong { padding-top:17px; border-top:1px solid rgba(255,255,255,.07); color:#dec984; font-size:.58rem; letter-spacing:.075em; }
+
+.candidate-process-strip { display:grid !important; grid-template-columns:repeat(5,minmax(0,1fr)) !important; margin-top:24px !important; overflow:visible !important; border:0 !important; border-radius:0 !important; background:transparent !important; box-shadow:none !important; backdrop-filter:none !important; }
+.candidate-process-strip::before { top:19px !important; left:4% !important; right:4% !important; height:1px !important; background:linear-gradient(90deg,rgba(215,189,114,.18),rgba(215,189,114,.42),rgba(111,147,176,.25)) !important; }
+.candidate-process-strip article { position:relative; min-width:0; padding:0 12px !important; background:transparent !important; }
+.candidate-process-strip article:not(:last-child)::after { display:none !important; }
+.candidate-process-strip article > span { position:relative; z-index:2; width:39px; height:39px; display:grid; place-items:center; margin-bottom:15px; border:1px solid rgba(215,189,114,.25); border-radius:50%; background:#0b1015; color:#d7bd72; font-size:.52rem; font-weight:850; box-shadow:0 0 0 7px #0b1015; }
+.candidate-process-strip strong { display:block; color:#e9e6df; font-size:.76rem; }
+.candidate-process-strip small { display:block; margin-top:6px; color:#727d86; font-size:.61rem; line-height:1.45; }
+.candidate-intake-switch { display:flex; justify-content:space-between; gap:18px; align-items:center; margin:23px 0 17px; padding:11px 0; border-top:1px solid rgba(255,255,255,.065); border-bottom:1px solid rgba(255,255,255,.065); }
+.candidate-intake-switch a,.candidate-intake-switch span { color:#8a949d; font-size:.56rem; font-weight:800; letter-spacing:.09em; text-decoration:none; text-transform:uppercase; }
+.candidate-intake-switch a:hover { color:#d7bd72; }
+
+/* Long-form candidate dossier */
+.candidate-intake-page .application-workspace { position:relative; grid-template-columns:minmax(270px,.38fr) minmax(0,1fr) !important; gap:30px !important; align-items:start; }
+.candidate-intake-page .application-briefing { position:sticky !important; top:92px; overflow:hidden; border:1px solid rgba(255,255,255,.09) !important; border-radius:25px !important; background:linear-gradient(180deg,rgba(15,20,25,.82),rgba(7,10,13,.77)) !important; box-shadow:0 28px 72px rgba(0,0,0,.27),inset 0 1px rgba(255,255,255,.035) !important; backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.candidate-intake-page .application-briefing::before { position:absolute; top:0; left:12%; right:12%; height:1px; background:linear-gradient(90deg,transparent,rgba(229,208,144,.42),transparent); content:""; }
+.candidate-intake-page .application-briefing__identity { padding:17px !important; border-bottom:1px solid rgba(255,255,255,.07); background:linear-gradient(90deg,rgba(215,189,114,.055),rgba(85,118,144,.025)) !important; }
+.candidate-intake-page .application-briefing__identity img { filter:drop-shadow(0 8px 14px rgba(0,0,0,.35)); }
+.candidate-intake-page .application-briefing__identity span { color:#b9a86f; font-size:.48rem; letter-spacing:.12em; }
+.candidate-intake-page .application-briefing__identity strong { color:#eeeae1; font-size:.76rem; }
+.candidate-intake-page .application-briefing__current { padding:20px 18px 18px; }
+.candidate-intake-page .application-briefing__current > span,.candidate-intake-page .application-briefing__note span { color:#ad9d6c; font-size:.49rem; letter-spacing:.12em; }
+.candidate-intake-page .application-briefing__current strong { margin-top:6px; color:#f0ede5; font-size:1.1rem; letter-spacing:-.02em; }
+.candidate-intake-page .application-briefing__current p,.candidate-intake-page .application-briefing__note p { color:#78838c; font-size:.65rem; line-height:1.55; }
+.candidate-intake-page .application-briefing__steps { margin:0; padding:3px 0; }
+.candidate-intake-page .application-briefing__steps li { border-top:1px solid rgba(255,255,255,.055); }
+.candidate-intake-page .application-briefing__steps button { min-height:56px; padding:8px 17px; background:transparent; }
+.candidate-intake-page .application-briefing__steps li.is-current button { background:linear-gradient(90deg,rgba(215,189,114,.10),rgba(80,112,137,.02),transparent) !important; }
+.candidate-intake-page .application-briefing__steps button > span { width:30px; height:30px; border:1px solid rgba(255,255,255,.09); border-radius:50%; display:grid; place-items:center; color:#77828b; font-size:.49rem; }
+.candidate-intake-page .application-briefing__steps li.is-current button > span { border-color:rgba(215,189,114,.35); color:#d7bd72; }
+.candidate-intake-page .application-briefing__steps li.is-complete button > span { border-color:rgba(120,199,147,.18); color:#8cc499; }
+.candidate-intake-page .application-briefing__steps strong { color:#d8d8d4; font-size:.69rem; }
+.candidate-intake-page .application-briefing__steps small { color:#66717a; font-size:.52rem; }
+.candidate-intake-page .application-briefing__note { margin:14px; padding:14px; border:1px solid rgba(215,189,114,.09); border-radius:15px; background:rgba(215,189,114,.025); }
+
+.candidate-intake-page .application-form { min-width:0; }
+.candidate-intake-page .application-progress { margin-bottom:13px; overflow:hidden; border:1px solid rgba(255,255,255,.075) !important; border-radius:16px !important; background:rgba(6,9,12,.46) !important; box-shadow:inset 0 1px rgba(255,255,255,.02) !important; backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); }
+.candidate-intake-page .application-progress__top { min-height:59px; padding:11px 16px; }
+.candidate-intake-page .application-progress__top span { color:#877c60; font-size:.49rem; }
+.candidate-intake-page .application-progress__top strong { color:#eeeae2; font-size:.76rem; }
+.candidate-intake-page .application-progress__top b { color:#b6aa84; font-size:.62rem; }
+.candidate-intake-page .application-progress__bar { height:3px !important; background:rgba(255,255,255,.035) !important; }
+.candidate-intake-page .application-progress__bar span { background:linear-gradient(90deg,#6f5a2d,#c1a75f 58%,#efd98d) !important; box-shadow:0 0 20px rgba(216,193,120,.16); }
+
+.candidate-intake-page .application-section,.candidate-intake-page .application-certification { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.10) !important; border-radius:29px !important; background:linear-gradient(145deg,rgba(15,20,25,.76),rgba(6,9,12,.72)) !important; box-shadow:0 38px 95px rgba(0,0,0,.31),inset 0 1px rgba(255,255,255,.035) !important; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.candidate-intake-page .application-section::before,.candidate-intake-page .application-certification::before { left:8% !important; right:8% !important; background:linear-gradient(90deg,transparent,rgba(232,211,147,.46),transparent) !important; }
+.candidate-intake-page .application-section__header { padding:29px 30px 26px !important; border-bottom:1px solid rgba(255,255,255,.065); }
+.candidate-intake-page .application-section__number { width:50px; height:50px; border:1px solid rgba(215,189,114,.16); border-radius:50% !important; background:rgba(215,189,114,.035) !important; color:#d7bd72; box-shadow:none !important; }
+.candidate-intake-page .application-section__header p { color:#b3a372; font-size:.52rem; letter-spacing:.14em; }
+.candidate-intake-page .application-section__header h2 { margin:5px 0 8px; color:#f2efe7; font-size:clamp(1.8rem,3.2vw,3rem); font-weight:650; letter-spacing:-.04em; }
+.candidate-intake-page .application-section__header span { color:#7f8a93; line-height:1.6; }
+.candidate-intake-page .application-question-grid { padding:8px 22px 22px; gap:10px; }
+.candidate-intake-page .application-question { position:relative; padding:22px !important; border:1px solid rgba(255,255,255,.065) !important; border-radius:19px !important; background:linear-gradient(145deg,rgba(3,5,7,.30),rgba(255,255,255,.008)) !important; box-shadow:inset 0 1px rgba(255,255,255,.012) !important; transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease; }
+.candidate-intake-page .application-question:focus-within { transform:translateY(-1px); border-color:rgba(215,189,114,.30) !important; background:linear-gradient(145deg,rgba(215,189,114,.035),rgba(63,91,113,.018)) !important; box-shadow:0 18px 44px rgba(0,0,0,.15),inset 0 1px rgba(255,255,255,.02) !important; }
+.candidate-intake-page .application-question__number { color:#8d815f; font-size:.49rem; }
+.candidate-intake-page .application-question__heading label { color:#e4e2dd; font-size:.9rem; line-height:1.55; }
+.candidate-intake-page .application-question__heading small { color:#727d86; }
+.candidate-intake-page .application-question__heading b { color:#c5af6c; font-size:.48rem; }
+.candidate-intake-page .application-required { color:#bba96f; }
+.candidate-intake-page .application-question input,.candidate-intake-page .application-question textarea,.candidate-intake-page .application-question select { border:1px solid rgba(255,255,255,.095) !important; border-radius:13px !important; background:rgba(2,4,6,.43) !important; color:#f0eee8 !important; box-shadow:inset 0 1px rgba(255,255,255,.012) !important; }
+.candidate-intake-page .application-question input:focus,.candidate-intake-page .application-question textarea:focus,.candidate-intake-page .application-question select:focus { border-color:rgba(215,189,114,.38) !important; box-shadow:0 0 0 3px rgba(215,189,114,.045) !important; }
+.candidate-intake-page .application-choice { border:1px solid rgba(255,255,255,.08) !important; border-radius:13px !important; background:rgba(0,0,0,.15) !important; color:#b9c0c6; }
+.candidate-intake-page .application-choice.is-selected { border-color:rgba(215,189,114,.34) !important; background:rgba(215,189,114,.055) !important; color:#f0e9d2; }
+.candidate-intake-page .application-question__count { color:#657079; font-size:.49rem; }
+
+.candidate-intake-page .application-navigation { padding:19px 29px 25px !important; border-top:1px solid rgba(255,255,255,.06); }
+.candidate-intake-page .application-navigation small { color:#69747d; font-size:.5rem; letter-spacing:.08em; text-transform:uppercase; }
+.candidate-intake-page .application-navigation .button { border-radius:999px !important; min-height:47px; }
+.candidate-intake-page .application-navigation__back { border:1px solid rgba(255,255,255,.09) !important; background:rgba(255,255,255,.02) !important; color:#9da6ad !important; }
+.candidate-intake-page .application-navigation__next,.candidate-intake-page .application-navigation__submit { border:1px solid rgba(236,216,153,.42) !important; background:linear-gradient(90deg,#d5bd74,#b09244 55%,#6d7059) !important; color:#11120f !important; box-shadow:0 12px 30px rgba(158,130,58,.18),inset 0 1px rgba(255,255,255,.25) !important; }
+
+/* Integrity gate + final execution */
+.candidate-intake-page .application-ai-gate { position:relative; overflow:hidden; border:1px solid rgba(255,255,255,.10) !important; border-radius:30px !important; background:radial-gradient(circle at 82% 0%,rgba(215,189,114,.08),transparent 24rem),linear-gradient(145deg,rgba(15,20,25,.78),rgba(6,9,12,.74)) !important; box-shadow:0 42px 100px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.04) !important; }
+.candidate-intake-page .application-ai-gate::before { position:absolute; top:0; left:10%; right:10%; height:1px; background:linear-gradient(90deg,transparent,rgba(236,215,151,.48),transparent); content:""; }
+.candidate-intake-page .application-ai-gate__seal { border-radius:23px; background:rgba(215,189,114,.03); box-shadow:0 16px 35px rgba(0,0,0,.2); }
+.candidate-intake-page .application-ai-gate__header h2 { color:#f1eee7; font-size:clamp(2rem,4vw,3.8rem); font-weight:650; letter-spacing:-.05em; }
+.candidate-intake-page .application-ai-gate__warning,.candidate-intake-page .application-ai-gate__acknowledgement,.candidate-intake-page .application-ai-gate__rules article { border-radius:16px; }
+.candidate-intake-page .application-ai-gate__acknowledgement.is-accepted { border-color:rgba(120,199,147,.22); background:rgba(120,199,147,.035); }
+.candidate-intake-page .application-certification__statement,.candidate-intake-page .application-ai-reminder,.candidate-intake-page .application-screening-notice,.candidate-intake-page .application-signature { border-radius:17px !important; }
+.candidate-intake-page .application-signature.is-signed { border-color:rgba(120,199,147,.20) !important; background:linear-gradient(145deg,rgba(120,199,147,.045),rgba(255,255,255,.008)) !important; }
+.candidate-intake-page .application-signature__script { color:#ead994 !important; }
+
+/* Secure transmission result */
+.candidate-intake-page .application-success { position:relative; overflow:hidden; max-width:1040px; margin:20px auto 0; border:1px solid rgba(255,255,255,.10) !important; border-radius:32px !important; background:radial-gradient(circle at 50% -12%,rgba(215,189,114,.12),transparent 30rem),linear-gradient(145deg,rgba(16,21,26,.82),rgba(6,9,12,.80)) !important; box-shadow:0 48px 115px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.04) !important; }
+.candidate-intake-page .application-success::after { position:absolute; width:420px; height:420px; right:-180px; top:-150px; border:1px solid rgba(215,189,114,.055); border-radius:50%; box-shadow:0 0 0 60px rgba(215,189,114,.01),0 0 0 120px rgba(255,255,255,.004); content:""; pointer-events:none; }
+.candidate-intake-page .application-success__eyebrow { color:#8fc69c !important; letter-spacing:.14em; }
+.candidate-intake-page .application-success h2 { color:#f4f1e9; font-size:clamp(2.4rem,5vw,4.8rem); font-weight:650; letter-spacing:-.06em; line-height:.98; }
+.candidate-intake-page .application-success__lead { color:#8f9aa4; }
+.candidate-intake-page .application-success__number { position:relative; z-index:2; min-height:62px !important; border-color:rgba(215,189,114,.25) !important; border-radius:999px !important; background:linear-gradient(145deg,rgba(215,189,114,.065),rgba(255,255,255,.01)) !important; color:#e8d797; box-shadow:0 16px 38px rgba(0,0,0,.18) !important; }
+.candidate-intake-page .application-success__timeline { border-radius:21px !important; background:rgba(0,0,0,.15) !important; }
+.candidate-intake-page .application-success__timeline article { border-color:rgba(255,255,255,.06) !important; }
+.candidate-intake-page .application-success__timeline article.is-active { background:rgba(120,199,147,.035); }
+.candidate-intake-page .application-success__notice { border-radius:16px !important; border-color:rgba(215,189,114,.11) !important; background:rgba(215,189,114,.025) !important; }
+
+/* Candidate tracking portal — same universe, priority shifts to the current stage */
+.candidate-record-portal,.attorney-status-page { min-height:100svh !important; background:#06090d !important; color:#eef1f3; }
+.candidate-record-portal .attorney-candidate-shell,.attorney-status-page .attorney-candidate-shell { position:relative; isolation:isolate; min-height:100svh; padding:46px 20px 86px !important; overflow:hidden; background:radial-gradient(circle at 14% 0%,rgba(215,189,114,.10),transparent 26rem),radial-gradient(circle at 91% 32%,rgba(82,123,157,.08),transparent 28rem),linear-gradient(145deg,#0d1319,#06090d 62%,#05070a) !important; }
+.candidate-record-portal .attorney-candidate-shell::before,.attorney-status-page .attorney-candidate-shell::before { position:absolute; inset:0; z-index:-4; background:linear-gradient(rgba(255,255,255,.010) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.010) 1px,transparent 1px); background-size:52px 52px; mask-image:radial-gradient(circle at 50% 30%,#000 0%,transparent 78%); content:""; }
+.candidate-record-portal .attorney-candidate-shell::after,.attorney-status-page .attorney-candidate-shell::after { position:absolute; z-index:-3; top:-220px; right:-250px; width:700px; height:700px; background:url('/images/lscso-patch-subdued.png') center/contain no-repeat; opacity:.035; transform:rotate(7deg); filter:drop-shadow(0 40px 100px rgba(0,0,0,.5)); content:""; pointer-events:none; }
+.candidate-record-portal .attorney-candidate-card,.attorney-status-page .attorney-candidate-card { position:relative; width:min(1180px,100%); margin:0 auto; overflow:visible; border:0 !important; background:transparent !important; box-shadow:none !important; }
+.candidate-record-portal .attorney-candidate-header,.attorney-status-page .attorney-candidate-header { padding:17px 0 23px !important; border-bottom:1px solid rgba(255,255,255,.07) !important; }
+.candidate-record-portal .attorney-candidate-agency img,.attorney-status-page .attorney-candidate-agency img { width:70px; height:70px; filter:drop-shadow(0 12px 22px rgba(0,0,0,.36)); }
+.candidate-record-portal .attorney-candidate-agency p,.attorney-status-page .attorney-candidate-agency p { color:#c8b477; font-size:.55rem; letter-spacing:.16em; }
+.candidate-record-portal .attorney-candidate-agency strong,.attorney-status-page .attorney-candidate-agency strong { color:#f1eee7; font-size:1rem; }
+.candidate-record-portal .attorney-candidate-agency div > span,.attorney-status-page .attorney-candidate-agency div > span { color:#727d86; font-size:.67rem; }
+.candidate-record-portal .attorney-candidate-number,.attorney-status-page .attorney-candidate-number { padding:9px 13px; border:1px solid rgba(255,255,255,.08); border-radius:14px; background:rgba(0,0,0,.18); }
+.candidate-record-portal .attorney-candidate-number span,.attorney-status-page .attorney-candidate-number span { color:#7f8992; font-size:.48rem; }
+.candidate-record-portal .attorney-candidate-number strong,.attorney-status-page .attorney-candidate-number strong { margin-top:3px; color:#e6d490; font-size:1.05rem; }
+
+.candidate-record-portal .attorney-candidate-overview,.attorney-status-page .attorney-candidate-overview { position:relative; grid-template-columns:minmax(0,1.5fr) minmax(300px,.5fr) !important; gap:38px !important; padding:56px 0 45px !important; }
+.candidate-record-portal .attorney-candidate-overview__copy h1,.attorney-status-page .attorney-candidate-overview__copy h1 { max-width:850px; margin:10px 0 17px; color:#f6f3ec; font-size:clamp(3rem,6vw,6.6rem); font-weight:650; letter-spacing:-.07em; line-height:.91; text-wrap:balance; }
+.candidate-record-portal .attorney-candidate-overview__copy p,.attorney-status-page .attorney-candidate-overview__copy p { max-width:760px; color:#98a2ab; font-size:1rem; line-height:1.74; }
+.candidate-record-portal .attorney-candidate-kicker,.attorney-status-page .attorney-candidate-kicker { color:#c9b579; font-size:.58rem; letter-spacing:.16em; }
+.candidate-record-portal .attorney-candidate-action,.attorney-status-page .attorney-candidate-action { position:relative; overflow:hidden; align-self:center; padding:22px !important; border:1px solid rgba(215,189,114,.16) !important; border-radius:23px; background:radial-gradient(circle at 25% 0%,rgba(255,255,255,.06),transparent 15rem),linear-gradient(145deg,rgba(17,23,28,.7),rgba(6,9,12,.66)) !important; box-shadow:0 25px 70px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.03); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); }
+.candidate-record-portal .attorney-candidate-action::before,.attorney-status-page .attorney-candidate-action::before { position:absolute; top:0; left:12%; right:12%; height:1px; background:linear-gradient(90deg,transparent,rgba(231,211,149,.55),transparent); content:""; }
+.candidate-record-portal .attorney-candidate-action > span,.attorney-status-page .attorney-candidate-action > span { color:#9e916b; font-size:.48rem; }
+.candidate-record-portal .attorney-candidate-action strong,.attorney-status-page .attorney-candidate-action strong { color:#f0ece2; font-size:1.22rem; letter-spacing:-.02em; }
+.candidate-record-portal .attorney-candidate-action p,.attorney-status-page .attorney-candidate-action p { color:#828d96; font-size:.78rem; line-height:1.58; }
+
+.candidate-record-portal .attorney-candidate-progress,.attorney-status-page .attorney-candidate-progress { position:relative; display:grid; gap:0 !important; padding:0 0 48px !important; }
+.candidate-record-portal .attorney-candidate-progress::before,.attorney-status-page .attorney-candidate-progress::before { position:absolute; left:4%; right:4%; top:19px; height:1px; background:linear-gradient(90deg,rgba(215,189,114,.16),rgba(215,189,114,.38),rgba(102,139,169,.24)); content:""; }
+.candidate-record-portal .attorney-candidate-progress article,.attorney-status-page .attorney-candidate-progress article { position:relative; z-index:1; padding:0 11px !important; border:0 !important; background:transparent !important; }
+.candidate-record-portal .attorney-candidate-progress article > span,.attorney-status-page .attorney-candidate-progress article > span { width:39px; height:39px; margin-bottom:13px; border:1px solid rgba(255,255,255,.11); background:#0a0f14; color:#75808a; box-shadow:0 0 0 7px #0a0f14; }
+.candidate-record-portal .attorney-candidate-progress article.is-current > span,.attorney-status-page .attorney-candidate-progress article.is-current > span { border-color:rgba(215,189,114,.48); color:#e2cf8c; box-shadow:0 0 0 7px #0a0f14,0 0 25px rgba(215,189,114,.11); }
+.candidate-record-portal .attorney-candidate-progress article.is-complete > span,.attorney-status-page .attorney-candidate-progress article.is-complete > span { border-color:rgba(120,199,147,.17); background:#bdaa6d; color:#0b0f12; box-shadow:0 0 0 7px #0a0f14; }
+.candidate-record-portal .attorney-candidate-progress strong,.attorney-status-page .attorney-candidate-progress strong { color:#dcdad5; font-size:.72rem; }
+.candidate-record-portal .attorney-candidate-progress small,.attorney-status-page .attorney-candidate-progress small { color:#657079; font-size:.57rem; line-height:1.4; }
+
+.candidate-record-portal .attorney-interview-card,.candidate-record-portal .attorney-candidate-details,.candidate-record-portal .attorney-candidate-messages,.attorney-status-page .attorney-interview-card,.attorney-status-page .attorney-candidate-details,.attorney-status-page .attorney-candidate-messages { margin:0 0 20px !important; overflow:hidden; border:1px solid rgba(255,255,255,.075) !important; border-radius:24px; background:linear-gradient(145deg,rgba(14,19,24,.67),rgba(6,9,12,.60)) !important; box-shadow:0 24px 70px rgba(0,0,0,.18),inset 0 1px rgba(255,255,255,.02); }
+.candidate-record-portal .attorney-interview-card,.attorney-status-page .attorney-interview-card { border-color:rgba(215,189,114,.16) !important; }
+.candidate-record-portal .attorney-section-heading,.attorney-status-page .attorney-section-heading { padding:19px 21px !important; border-bottom:1px solid rgba(255,255,255,.06) !important; }
+.candidate-record-portal .attorney-section-heading span,.attorney-status-page .attorney-section-heading span { color:#a49466; font-size:.48rem; letter-spacing:.13em; }
+.candidate-record-portal .attorney-section-heading h2,.attorney-status-page .attorney-section-heading h2 { color:#ece9e2; font-size:1.02rem; }
+.candidate-record-portal .attorney-section-heading b,.attorney-status-page .attorney-section-heading b { border-color:rgba(215,189,114,.17); border-radius:999px; background:rgba(215,189,114,.025); color:#d8c582; font-size:.58rem; }
+.candidate-record-portal .attorney-interview-grid article,.attorney-status-page .attorney-interview-grid article { padding:21px; }
+.candidate-record-portal .attorney-interview-grid span,.candidate-record-portal .attorney-detail-grid span,.attorney-status-page .attorney-interview-grid span,.attorney-status-page .attorney-detail-grid span { color:#887d5e; font-size:.46rem; letter-spacing:.11em; }
+.candidate-record-portal .attorney-interview-grid strong,.candidate-record-portal .attorney-detail-grid strong,.attorney-status-page .attorney-interview-grid strong,.attorney-status-page .attorney-detail-grid strong { color:#e4e2dc; }
+.candidate-record-portal .attorney-interview-grid small,.attorney-status-page .attorney-interview-grid small { color:#707b84; font-size:.65rem; }
+.candidate-record-portal .attorney-detail-grid article,.attorney-status-page .attorney-detail-grid article { padding:17px 20px; }
+
+.candidate-record-portal .attorney-candidate-message,.attorney-status-page .attorney-candidate-message { margin:0 0 20px !important; padding:20px 21px; border:1px solid rgba(215,189,114,.13) !important; border-radius:20px; background:linear-gradient(145deg,rgba(215,189,114,.038),rgba(255,255,255,.008)) !important; }
+.candidate-record-portal .attorney-candidate-message > span,.attorney-status-page .attorney-candidate-message > span { color:#a69563; font-size:.49rem; }
+.candidate-record-portal .attorney-candidate-message p,.attorney-status-page .attorney-candidate-message p { color:#d5d8da; }
+.candidate-record-portal .candidate-offer-wrap,.attorney-status-page .candidate-offer-wrap { margin:0 0 20px !important; }
+.candidate-record-portal .attorney-candidate-footer,.attorney-status-page .attorney-candidate-footer { padding:19px 0 0 !important; border-top:1px solid rgba(255,255,255,.065); }
+.candidate-record-portal .attorney-candidate-footer p,.attorney-status-page .attorney-candidate-footer p { color:#69747d; font-size:.67rem; }
+
+/* Tone is communicated through the current-state object, not a giant colored frame. */
+.candidate-record-portal .attorney-candidate-card--closed .attorney-candidate-action,.attorney-status-page .attorney-candidate-card--closed .attorney-candidate-action { border-color:rgba(185,108,108,.17) !important; background:linear-gradient(145deg,rgba(83,35,35,.10),rgba(6,9,12,.66)) !important; }
+.candidate-record-portal .attorney-candidate-card--accepted .attorney-candidate-action,.candidate-record-portal .attorney-candidate-card--complete .attorney-candidate-action,.attorney-status-page .attorney-candidate-card--accepted .attorney-candidate-action,.attorney-status-page .attorney-candidate-card--complete .attorney-candidate-action { border-color:rgba(120,199,147,.16) !important; background:linear-gradient(145deg,rgba(49,89,61,.09),rgba(6,9,12,.66)) !important; }
+
+@keyframes candidateOrbitOne { to { transform:rotate(360deg); } }
+@keyframes candidateOrbitTwo { to { transform:rotate(360deg); } }
+@keyframes candidateHalo { from { transform:translate3d(-20px,25px,0) scale(.9); opacity:.08; } to { transform:translate3d(55px,-35px,0) scale(1.12); opacity:.16; } }
+@keyframes candidateSealBreath { 0%,100% { transform:translateY(0) scale(1); box-shadow:0 38px 90px rgba(0,0,0,.46),0 0 48px rgba(215,189,114,.05),inset 0 1px 2px rgba(255,255,255,.16); } 50% { transform:translateY(-3px) scale(1.002); box-shadow:0 44px 100px rgba(0,0,0,.49),0 0 76px rgba(215,189,114,.09),inset 0 1px 2px rgba(255,255,255,.18); } }
+@keyframes candidateSealRing { to { transform:rotate(360deg); } }
+
+@media (max-width:1080px) {
+  .candidate-intake-masthead { grid-template-columns:1fr !important; min-height:0; }
+  .candidate-intake-seal { width:min(390px,100%); justify-self:start; }
+  .candidate-process-strip { grid-template-columns:repeat(3,minmax(0,1fr)) !important; gap:26px 0; }
+  .candidate-process-strip::before { display:none; }
+  .candidate-process-strip article > span { box-shadow:none; }
+  .candidate-intake-page .application-workspace { grid-template-columns:1fr !important; }
+  .candidate-intake-page .application-briefing { position:relative !important; top:auto; }
+  .candidate-intake-page .application-briefing__steps { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .candidate-record-portal .attorney-candidate-overview,.attorney-status-page .attorney-candidate-overview { grid-template-columns:1fr !important; }
+  .candidate-record-portal .attorney-candidate-action,.attorney-status-page .attorney-candidate-action { width:min(520px,100%); }
+}
+
+@media (max-width:760px) {
+  .candidate-intake-hero { padding-top:102px; padding-bottom:76px; }
+  .candidate-intake-watermark { top:18%; right:-145px; width:410px; opacity:.05; }
+  .candidate-intake-masthead { padding:24px !important; border-radius:25px !important; }
+  .candidate-intake-masthead h1 { font-size:clamp(3rem,13vw,5.2rem) !important; }
+  .candidate-intake-seal { width:min(330px,100%); }
+  .candidate-role-select { padding:21px 17px !important; border-radius:23px; }
+  .candidate-role-select .application-role-select__grid { grid-template-columns:1fr; }
+  .candidate-role-select .application-role-card { min-height:320px; border-radius:21px; }
+  .candidate-process-strip { grid-template-columns:1fr 1fr !important; }
+  .candidate-intake-switch { align-items:flex-start; flex-direction:column; gap:7px; }
+  .candidate-intake-page .application-briefing__steps { grid-template-columns:1fr; }
+  .candidate-intake-page .application-section,.candidate-intake-page .application-certification,.candidate-intake-page .application-ai-gate,.candidate-intake-page .application-success { border-radius:23px !important; }
+  .candidate-intake-page .application-section__header { padding:23px 20px 21px !important; }
+  .candidate-intake-page .application-question-grid { padding:7px 13px 14px; }
+  .candidate-intake-page .application-question { padding:18px !important; border-radius:16px !important; }
+  .candidate-intake-page .application-navigation { padding:16px 18px 19px !important; }
+  .candidate-record-portal .attorney-candidate-shell,.attorney-status-page .attorney-candidate-shell { padding:24px 14px 62px !important; }
+  .candidate-record-portal .attorney-candidate-header,.attorney-status-page .attorney-candidate-header { align-items:flex-start; flex-direction:column; gap:16px; }
+  .candidate-record-portal .attorney-candidate-number,.attorney-status-page .attorney-candidate-number { width:auto; text-align:left; }
+  .candidate-record-portal .attorney-candidate-overview,.attorney-status-page .attorney-candidate-overview { padding:40px 0 32px !important; }
+  .candidate-record-portal .attorney-candidate-overview__copy h1,.attorney-status-page .attorney-candidate-overview__copy h1 { font-size:clamp(2.9rem,13vw,5.1rem); }
+  .candidate-record-portal .attorney-candidate-progress,.candidate-status-page .attorney-candidate-progress,.attorney-status-page .attorney-candidate-progress { grid-template-columns:1fr !important; padding:0 0 35px !important; border-top:1px solid rgba(255,255,255,.06); }
+  .candidate-record-portal .attorney-candidate-progress::before,.attorney-status-page .attorney-candidate-progress::before { display:none; }
+  .candidate-record-portal .attorney-candidate-progress article,.attorney-status-page .attorney-candidate-progress article { display:grid; grid-template-columns:42px 1fr; gap:12px; align-items:center; padding:15px 0 !important; border-bottom:1px solid rgba(255,255,255,.055) !important; }
+  .candidate-record-portal .attorney-candidate-progress article > span,.attorney-status-page .attorney-candidate-progress article > span { margin:0; box-shadow:none; }
+  .candidate-record-portal .attorney-interview-card,.candidate-record-portal .attorney-candidate-details,.candidate-record-portal .attorney-candidate-messages,.candidate-record-portal .attorney-candidate-message,.candidate-record-portal .candidate-offer-wrap,.attorney-status-page .attorney-interview-card,.attorney-status-page .attorney-candidate-details,.attorney-status-page .attorney-candidate-messages,.attorney-status-page .attorney-candidate-message,.attorney-status-page .candidate-offer-wrap { margin-left:0 !important; margin-right:0 !important; }
+  .candidate-record-portal .attorney-candidate-footer,.attorney-status-page .attorney-candidate-footer { align-items:stretch; flex-direction:column; }
+}
+
+@media (max-width:430px) {
+  .candidate-process-strip { grid-template-columns:1fr !important; border-top:1px solid rgba(255,255,255,.06) !important; }
+  .candidate-process-strip article { display:grid; grid-template-columns:42px 1fr; column-gap:10px; padding:14px 0 !important; border-bottom:1px solid rgba(255,255,255,.055); }
+  .candidate-process-strip article > span { grid-row:1 / span 2; margin:0; }
+  .candidate-intake-seal { width:100%; border-radius:28px !important; aspect-ratio:auto; padding:25px 20px !important; }
+  .candidate-intake-seal::before { display:none; }
+}
+
+@media (prefers-reduced-motion:reduce) {
+  .candidate-intake-ambient span,
+  .candidate-intake-seal,
+  .candidate-intake-seal::before { animation:none !important; }
+}
