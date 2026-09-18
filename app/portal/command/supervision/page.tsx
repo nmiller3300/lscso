@@ -16,6 +16,13 @@ const SUPERVISORY_RANKS = new Set([
   "Corporal",
 ]);
 
+const DIVISION_DRIVEN_SUPERVISORS = new Set([
+  "1st Lieutenant",
+  "Lieutenant",
+  "Sergeant",
+  "Corporal",
+]);
+
 export default async function SupervisionWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) return null;
@@ -23,6 +30,7 @@ export default async function SupervisionWorkspacePage() {
   const purview = await loadPersonnelPurview(profile);
   const supabase = await createClient() as any;
   const canManagePurview = ["Executive", "Command"].includes(profile.access_tier);
+  const divisionDrivenSupervisor = DIVISION_DRIVEN_SUPERVISORS.has(profile.rank);
 
   let guardianQuery = supabase
     .from("guardian_records")
@@ -69,9 +77,10 @@ export default async function SupervisionWorkspacePage() {
       status: row.status,
       paths: [],
     };
+    const authorityLabel = row.authorityType === "Unit" ? "Division scope" : row.authorityType;
     const path = purview.standingDepartmentAuthority
       ? ([row.unitName, row.assignmentType].filter(Boolean).join(" · ") || "Department personnel")
-      : ([row.unitName, row.authorityType].filter(Boolean).join(" · ") || row.scope);
+      : ([row.unitName, authorityLabel].filter(Boolean).join(" · ") || row.scope);
     if (!existing.paths.includes(path)) existing.paths.push(path);
     grouped.set(row.profileId, existing);
   }
@@ -144,7 +153,7 @@ export default async function SupervisionWorkspacePage() {
       active="supervision"
       eyebrow="Supervision"
       title="Supervision"
-      description="Personnel oversight, supervisory purview, Guardians, and follow-up."
+      description="Division-driven personnel oversight, exception authority, Guardians, and follow-up."
     >
       {canManagePurview ? (
         <SupervisoryPurviewManager members={managementMembers} supervisors={managementSupervisors} />
@@ -152,8 +161,9 @@ export default async function SupervisionWorkspacePage() {
 
       <div className="command-v2-supervision-layout">
         <section className="portal-panel command-v2-purview-panel">
-          <div className="portal-panel-heading"><div><p>My scope</p><h2>Personnel under my purview</h2></div>{purview.standingDepartmentAuthority ? <span>Department-wide authority</span> : null}</div>
+          <div className="portal-panel-heading"><div><p>My scope</p><h2>Personnel under my purview</h2></div>{purview.standingDepartmentAuthority ? <span>Department-wide authority</span> : divisionDrivenSupervisor ? <span>Division-driven</span> : null}</div>
           {purview.standingDepartmentAuthority ? <p className="command-v2-compact-copy">Your rank carries standing department-wide supervisory access. Individual rows below show personnel assignment context, not separate command grants.</p> : null}
+          {divisionDrivenSupervisor ? <p className="command-v2-compact-copy">Your active Primary division assignment is the default source of supervisory purview. Lower-ranked personnel assigned to that division appear here automatically; documented individual exceptions can add direct scope when needed.</p> : null}
 
           {purview.structuredAuthorityAvailable && people.length ? (
             <div className="command-v2-purview-list">
@@ -171,10 +181,10 @@ export default async function SupervisionWorkspacePage() {
           ) : null}
 
           {!purview.structuredAuthorityAvailable && !purview.standingDepartmentAuthority ? (
-            <div className="command-v2-inline-state"><strong>No personnel are assigned to your purview yet.</strong><span>Command Staff can assign personnel to you through Supervisor / Purview. Once assigned, they appear here automatically.</span></div>
+            <div className="command-v2-inline-state"><strong>No active supervisory scope is available.</strong><span>For Corporal through 1st Lieutenant, verify the member has an active Primary division assignment. Individual exception authority can be added by Command when needed.</span></div>
           ) : null}
 
-          {purview.structuredAuthorityAvailable && !people.length ? <div className="portal-empty-state"><strong>No personnel are currently assigned within your purview.</strong><span>Command Staff can assign personnel through Supervisor / Purview.</span></div> : null}
+          {purview.structuredAuthorityAvailable && !people.length ? <div className="portal-empty-state"><strong>No lower-ranked personnel are currently within your division-based purview.</strong><span>Your Primary division assignment drives the normal scope automatically. Command can add a documented individual exception when necessary.</span></div> : null}
         </section>
 
         <div className="command-v2-supervision-side">
