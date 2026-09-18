@@ -10,10 +10,11 @@ import "./application-dynamic.css";
 import "./application-closed.css";
 import "./application-premium.css";
 import "./application-role.css";
+import "./candidate-experience.css";
 
 export const metadata: Metadata = {
-  title: "LSCSO Career Application",
-  description: "Apply for sworn service or Department Attorney with the Los Santos County Sheriff’s Office.",
+  title: "LSCSO Candidate Intake",
+  description: "Begin a Sworn Personnel or Department Attorney candidate record with the Los Santos County Sheriff’s Office.",
 };
 
 export const revalidate = 0;
@@ -22,27 +23,35 @@ type RoleKey = "sworn" | "attorney";
 
 function RoleSelection({ swornOpen, attorneyOpen, selectedClosed }: { swornOpen: boolean; attorneyOpen: boolean; selectedClosed?: string | null }) {
   return (
-    <section className="application-role-select" aria-labelledby="application-role-heading">
+    <section className="application-role-select candidate-role-select" aria-labelledby="application-role-heading">
       <div className="application-role-select__heading">
-        <p>Career track</p>
-        <h2 id="application-role-heading">What role are you applying for?</h2>
-        <span>Select the position you want to pursue. Each role has its own application packet and can be opened or closed independently by Command.</span>
+        <p>Candidate pathway</p>
+        <h2 id="application-role-heading">Choose the record you intend to build.</h2>
+        <span>Your selection determines the questions, review path, interview process, and appointment workflow used for this candidate record.</span>
       </div>
       <div className="application-role-select__grid">
-        <Link className={`application-role-card ${swornOpen ? "" : "is-closed"}`} href="/join/application?role=sworn" aria-disabled={!swornOpen}>
-          <div className="application-role-card__top"><span>01</span><span className="application-role-card__status">{swornOpen ? "Open" : "Closed"}</span></div>
-          <h3>Sworn Personnel</h3>
-          <p>Apply for sworn service through the Deputy candidate selection, interview, offer, and appointment process.</p>
-          <strong>{swornOpen ? "Open Sworn application →" : "Applications closed"}</strong>
+        <Link className={`application-role-card application-role-card--sworn ${swornOpen ? "" : "is-closed"}`} href="/join/application?role=sworn" aria-disabled={!swornOpen}>
+          <div className="application-role-card__top"><span>01 / SWORN</span><span className="application-role-card__status">{swornOpen ? "Intake Open" : "Intake Closed"}</span></div>
+          <div className="application-role-card__mark" aria-hidden="true">S</div>
+          <div>
+            <small>Operational Service</small>
+            <h3>Sworn Personnel</h3>
+            <p>Build a Deputy candidate record for Command review, interview, employment offer, appointment, and field development.</p>
+          </div>
+          <strong>{swornOpen ? "Enter Sworn candidate intake →" : "Candidate intake unavailable"}</strong>
         </Link>
-        <Link className={`application-role-card ${attorneyOpen ? "" : "is-closed"}`} href="/join/application?role=attorney" aria-disabled={!attorneyOpen}>
-          <div className="application-role-card__top"><span>02</span><span className="application-role-card__status">{attorneyOpen ? "Open" : "Closed"}</span></div>
-          <h3>Department Attorney</h3>
-          <p>Apply to provide legal counsel, policy review, records guidance, and legal support to the Sheriff&apos;s Office.</p>
-          <strong>{attorneyOpen ? "Open Attorney application →" : "Applications closed"}</strong>
+        <Link className={`application-role-card application-role-card--attorney ${attorneyOpen ? "" : "is-closed"}`} href="/join/application?role=attorney" aria-disabled={!attorneyOpen}>
+          <div className="application-role-card__top"><span>02 / COUNSEL</span><span className="application-role-card__status">{attorneyOpen ? "Intake Open" : "Intake Closed"}</span></div>
+          <div className="application-role-card__mark" aria-hidden="true">A</div>
+          <div>
+            <small>Department Counsel</small>
+            <h3>Department Attorney</h3>
+            <p>Build a legal-counsel candidate record for Command screening, interview, selection decision, and final appointment.</p>
+          </div>
+          <strong>{attorneyOpen ? "Enter Attorney candidate intake →" : "Candidate intake unavailable"}</strong>
         </Link>
       </div>
-      {selectedClosed ? <div className="application-role-select__notice">{selectedClosed} applications are currently closed. Choose another open role or check back later.</div> : null}
+      {selectedClosed ? <div className="application-role-select__notice">{selectedClosed} candidate intake is currently closed. Choose another open pathway or return when Command reopens the track.</div> : null}
     </section>
   );
 }
@@ -54,17 +63,18 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
 
   if (!recruitment.isOpen) {
     return (
-      <main className="application-page">
+      <main className="application-page candidate-intake-page">
         <section className="application-page__hero application-page__hero--closed">
-          <div className="site-shell application-closed">
-            <p className="section-kicker">Careers & Recruitment</p>
-            <span className="application-closed__status"><i /> Applications closed</span>
-            <h1>Applications are not being accepted.</h1>
-            <p className="intro-serif">LSCSO is not currently accepting applications for Sworn Personnel or Department Attorney.</p>
-            <p>You can still review the Office, its standards, and available divisions before the next application period.</p>
+          <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
+          <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={760} height={760} aria-hidden="true" priority />
+          <div className="site-shell application-closed candidate-intake-closed">
+            <p className="section-kicker">LSCSO Candidate Selection</p>
+            <span className="application-closed__status"><i /> Candidate intake standby</span>
+            <h1>No candidate records are being accepted right now.</h1>
+            <p className="intro-serif">The selection system remains available for information, but Command has paused new Sworn Personnel and Department Attorney submissions.</p>
             <div className="button-row">
               <Link className="button" href="/join">Return to Join LSCSO</Link>
-              <Link className="button button--outline" href="/about">About the Office</Link>
+              <Link className="button button--outline" href="/training-recruitment">Training & Recruitment</Link>
             </div>
           </div>
         </section>
@@ -83,26 +93,50 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
     ? await getRecruitmentApplicationQuestions(false, selectedTrack)
     : [];
   const sectionCount = new Set(questions.map((question) => question.sectionTitle)).size + 1;
+  const trackCode = selectedTrack === "Department Attorney" ? "COUNSEL" : selectedTrack === "Sworn Personnel" ? "SWORN" : "SELECT";
+
+  const process = selectedTrack === "Department Attorney"
+    ? [
+        ["01", "Candidate Record", "Complete and sign the Department Attorney candidate packet."],
+        ["02", "Command Review", "Command screens the complete legal-counsel record."],
+        ["03", "Interview", "Selected candidates advance to a scheduled Department Attorney interview."],
+        ["04", "Decision", "Command records the interview selection decision."],
+        ["05", "Appointment", "A selected candidate receives final personnel appointment and onboarding."],
+      ]
+    : [
+        ["01", "Candidate Record", "Complete and sign the Sworn Personnel candidate packet."],
+        ["02", "Command Review", "Command screens the complete written application."],
+        ["03", "Interview", "Selected candidates advance to the required LSCSO interview."],
+        ["04", "Employment Offer", "A passed interview may advance to a formal offer."],
+        ["05", "Appointment", "Command records the personnel appointment and onboarding begins."],
+      ];
 
   return (
-    <main className="application-page">
-      <section className="application-page__hero">
+    <main className={`application-page candidate-intake-page candidate-intake-page--${requestedRole ?? "select"}`}>
+      <section className="application-page__hero candidate-intake-hero">
+        <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
+        <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={840} height={840} aria-hidden="true" priority />
         <div className="site-shell">
-          <div className="application-page__masthead">
-            <div>
+          <div className="application-page__masthead candidate-intake-masthead">
+            <div className="candidate-intake-masthead__copy">
+              <div className="candidate-intake-signal"><i /> LSCSO Candidate Intake / {trackCode}</div>
               <p className="section-kicker">Careers & Recruitment</p>
-              <span className="application-page__badge">Career Candidate Selection</span>
-              <h1>Apply to serve the Sheriff&apos;s Office.</h1>
-              <p className="intro-serif">Choose the role you are seeking, complete the correct candidate packet in your own words, and give Command a clear picture of your judgment, integrity, experience, and professional standards.</p>
-              <div className="application-page__metrics" aria-label="Application overview">
-                <article><strong>02</strong><span>Career Tracks</span></article>
-                <article><strong>{selectedTrack ? String(questions.length).padStart(2, "0") : "—"}</strong><span>Application Questions</span></article>
+              <span className="application-page__badge">Private Candidate Record</span>
+              <h1>{selectedTrack ? `Build your ${selectedTrack} candidate record.` : "Choose the record you want to put your name on."}</h1>
+              <p className="intro-serif">{selectedTrack
+                ? "This is not a quick signup. It is the first permanent record in your LSCSO selection process — take your time, answer in your own words, and make the record worth reading."
+                : "Select the role you actually intend to serve in. Each pathway has its own questions, interview process, and final appointment logic."}</p>
+              <div className="application-page__metrics" aria-label="Candidate intake overview">
+                <article><strong>{selectedTrack ? trackCode : "02"}</strong><span>{selectedTrack ? "Candidate Track" : "Career Tracks"}</span></article>
+                <article><strong>{selectedTrack ? String(questions.length).padStart(2, "0") : "—"}</strong><span>Record Questions</span></article>
                 <article><strong>{selectedTrack ? String(sectionCount).padStart(2, "0") : "—"}</strong><span>Guided Sections</span></article>
               </div>
             </div>
-            <aside className="application-page__seal" aria-label="Official recruitment packet">
+            <aside className="application-page__seal candidate-intake-seal" aria-label="Official LSCSO candidate record">
+              <div className="candidate-intake-seal__status"><i /> Intake authenticated</div>
               <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={180} height={180} priority />
-              <div><span>Official Candidate Packet</span><strong>Los Santos County Sheriff&apos;s Office</strong><small>{selectedTrack ?? "Select a career track below"}</small></div>
+              <div><span>Los Santos County Sheriff&apos;s Office</span><strong>Candidate Selection System</strong><small>{selectedTrack ?? "Awaiting pathway selection"}</small></div>
+              <footer><span>Secure submission</span><span>Private tracking</span></footer>
             </aside>
           </div>
 
@@ -114,19 +148,18 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
             />
           ) : (
             <>
-              <div className="application-process-strip" aria-label="Selection process">
-                <article><span>Step 01</span><strong>Submit Application</strong><small>Complete and electronically sign the correct candidate packet.</small></article>
-                <article><span>Step 02</span><strong>Command Review</strong><small>Authorized Command staff review the full submission.</small></article>
-                <article><span>Step 03</span><strong>Decision</strong><small>Command records a documented acceptance or denial.</small></article>
-                <article><span>Step 04</span><strong>Next Stage</strong><small>{selectedTrack === "Department Attorney" ? "Selected Attorney candidates receive appointment and onboarding follow-up." : "Accepted sworn candidates continue through interview, offer, and appointment."}</small></article>
+              <div className="application-process-strip candidate-process-strip" aria-label={`${selectedTrack} selection process`}>
+                {process.map(([number, title, description]) => (
+                  <article key={number}><span>{number}</span><strong>{title}</strong><small>{description}</small></article>
+                ))}
               </div>
-              <div className="button-row" style={{ marginBlock: "18px" }}><Link className="button button--outline" href="/join/application">Change Role</Link></div>
+              <div className="candidate-intake-switch"><Link href="/join/application">← Change candidate pathway</Link><span>{selectedTrack} / candidate record</span></div>
               {questions.length ? (
                 selectedTrack === "Department Attorney"
                   ? <DepartmentAttorneyApplicationForm questions={questions} />
                   : <ApplicationForm questions={questions} />
               ) : (
-                <section className="application-success"><p className="application-success__eyebrow">Recruitment configuration</p><h2>This application is temporarily unavailable.</h2><p className="application-success__lead">Command has not published an active form for this role. Please check back later.</p></section>
+                <section className="application-success"><p className="application-success__eyebrow">Candidate intake configuration</p><h2>This pathway is temporarily unavailable.</h2><p className="application-success__lead">Command has not published an active candidate packet for this role. Please check back later.</p></section>
               )}
             </>
           )}
