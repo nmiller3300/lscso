@@ -1,0 +1,390 @@
+/* Candidate tracking — same visual world as Candidate Intake, different focal object. */
+.candidate-status-experience {
+  position: relative;
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  --candidate-gold: #d7bd72;
+  --candidate-gold-bright: #f0dc99;
+  --candidate-steel: #7293ad;
+  --candidate-ink: #070a0d;
+  background:
+    radial-gradient(circle at 16% 12%, rgba(216,189,114,.13), transparent 25rem),
+    radial-gradient(circle at 88% 30%, rgba(83,126,160,.10), transparent 30rem),
+    linear-gradient(145deg,#111821 0%,#090e13 52%,#06090d 100%);
+}
+
+.candidate-status-experience > .portal-responsive-cinematic-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -7;
+  pointer-events: none;
+}
+
+.candidate-status-experience > .candidate-intake-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: -5;
+}
+
+.candidate-status-experience > .candidate-status-watermark {
+  position: fixed;
+  z-index: -3;
+  top: 49%;
+  right: clamp(-360px,-18vw,-150px);
+  width: min(62vw,820px);
+  height: auto;
+  transform: translateY(-50%) rotate(4deg);
+  opacity: .055;
+  filter: saturate(.72) contrast(1.08) drop-shadow(0 44px 100px rgba(0,0,0,.5));
+  pointer-events: none;
+  user-select: none;
+}
+
+.candidate-status-experience::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 0 38%, rgba(0,0,0,.12) 70%, rgba(0,0,0,.50) 100%);
+  content: "";
+}
+
+.candidate-status-experience > .application-status-page,
+.candidate-status-experience > .attorney-status-page {
+  position: relative;
+  z-index: 2;
+  min-height: 100svh !important;
+  background: transparent !important;
+}
+
+.candidate-status-experience .attorney-candidate-shell {
+  min-height: 100svh !important;
+  padding: 112px 20px 92px !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+.candidate-status-experience .attorney-candidate-shell::before,
+.candidate-status-experience .attorney-candidate-shell::after {
+  display: none !important;
+}
+
+.candidate-status-experience .attorney-candidate-card {
+  width: min(1180px,100%);
+}
+
+/* Application-style record masthead */
+.candidate-status-experience .attorney-candidate-header {
+  position: relative;
+  overflow: hidden;
+  padding: 27px 31px 23px !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
+  border-bottom: 0 !important;
+  border-radius: 32px 32px 0 0;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(255,255,255,.075),transparent 22rem),
+    linear-gradient(145deg,rgba(18,24,30,.75),rgba(7,10,13,.67)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.055);
+  backdrop-filter: blur(28px) saturate(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.05);
+}
+
+.candidate-status-experience .attorney-candidate-header::before {
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 46%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(240,220,153,.70),transparent);
+  content: "";
+}
+
+.candidate-status-experience .attorney-candidate-agency img {
+  width: 76px !important;
+  height: 76px !important;
+  filter: drop-shadow(0 16px 30px rgba(0,0,0,.4));
+}
+
+.candidate-status-experience .attorney-candidate-agency p {
+  color: #c9bc95 !important;
+  font-size: .56rem !important;
+  letter-spacing: .16em !important;
+}
+
+.candidate-status-experience .attorney-candidate-agency strong {
+  margin-top: 5px;
+  color: #f4f1e9 !important;
+  font-size: 1.12rem !important;
+}
+
+.candidate-status-experience .attorney-candidate-agency div > span {
+  color: #818c95 !important;
+}
+
+.candidate-status-experience .attorney-candidate-number {
+  padding: 10px 14px !important;
+  border: 1px solid rgba(215,189,114,.14) !important;
+  border-radius: 14px !important;
+  background: rgba(0,0,0,.18) !important;
+}
+
+.candidate-status-experience .attorney-candidate-overview {
+  position: relative;
+  margin: 0 0 31px;
+  padding: 45px 31px 36px !important;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.12);
+  border-top: 1px solid rgba(255,255,255,.055);
+  border-radius: 0 0 32px 32px;
+  background:
+    radial-gradient(circle at 77% 22%,rgba(215,189,114,.055),transparent 22rem),
+    linear-gradient(145deg,rgba(18,24,30,.75),rgba(7,10,13,.67)) !important;
+  box-shadow: 0 45px 110px rgba(0,0,0,.37),0 0 72px rgba(215,189,114,.035),inset 0 1px rgba(255,255,255,.025);
+  backdrop-filter: blur(28px) saturate(1.05);
+  -webkit-backdrop-filter: blur(28px) saturate(1.05);
+}
+
+.candidate-status-experience .attorney-candidate-overview::after {
+  position: absolute;
+  right: -165px;
+  bottom: -250px;
+  width: 470px;
+  height: 470px;
+  border: 1px solid rgba(215,189,114,.055);
+  border-radius: 50%;
+  box-shadow: 0 0 0 65px rgba(215,189,114,.009),0 0 0 130px rgba(255,255,255,.003);
+  content: "";
+  pointer-events: none;
+}
+
+.candidate-status-experience .attorney-candidate-overview__copy,
+.candidate-status-experience .attorney-candidate-action {
+  position: relative;
+  z-index: 2;
+}
+
+.candidate-status-experience .attorney-candidate-overview__copy h1 {
+  max-width: 840px;
+  margin: 11px 0 18px !important;
+  color: #f6f3ec !important;
+  font-size: clamp(3.2rem,6.2vw,6.7rem) !important;
+  font-weight: 650 !important;
+  letter-spacing: -.071em !important;
+  line-height: .91 !important;
+  text-wrap: balance;
+  text-shadow: 0 22px 52px rgba(0,0,0,.34);
+}
+
+.candidate-status-experience .attorney-candidate-overview__copy p {
+  max-width: 760px;
+  color: #9ba5ae !important;
+  font-size: .98rem !important;
+  line-height: 1.72 !important;
+}
+
+.candidate-status-experience .attorney-candidate-action {
+  padding: 21px !important;
+  border: 1px solid rgba(215,189,114,.16) !important;
+  border-radius: 21px !important;
+  background: linear-gradient(145deg,rgba(12,17,21,.70),rgba(4,7,10,.63)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.025),0 24px 62px rgba(0,0,0,.22);
+}
+
+/* Process strip mirrors Candidate Intake rather than a generic dashboard. */
+.candidate-status-experience .attorney-candidate-progress,
+.candidate-status-experience .attorney-candidate-progress.candidate-progress--six {
+  position: relative;
+  display: grid;
+  gap: 0 !important;
+  margin-bottom: 30px;
+  padding: 22px 16px 24px !important;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.085);
+  border-radius: 24px;
+  background: linear-gradient(145deg,rgba(14,19,24,.62),rgba(6,9,12,.61));
+  box-shadow: 0 28px 72px rgba(0,0,0,.23),inset 0 1px rgba(255,255,255,.025);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.candidate-status-experience .attorney-candidate-progress::before {
+  left: 6% !important;
+  right: 6% !important;
+  top: 41px !important;
+}
+
+.candidate-status-experience .attorney-candidate-progress article {
+  padding: 0 13px !important;
+}
+
+.candidate-status-experience .attorney-candidate-progress article > span {
+  background: #0b1015 !important;
+  box-shadow: 0 0 0 8px #0b1015 !important;
+}
+
+/* Content surfaces use the exact restrained material language of the intake form. */
+.candidate-status-experience .attorney-interview-card,
+.candidate-status-experience .attorney-candidate-details,
+.candidate-status-experience .attorney-candidate-messages,
+.candidate-status-experience .candidate-offer-wrap .application-status-offer {
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 18% 0%,rgba(255,255,255,.035),transparent 18rem),
+    linear-gradient(145deg,rgba(14,19,24,.69),rgba(6,9,12,.63)) !important;
+  box-shadow: 0 27px 74px rgba(0,0,0,.20),inset 0 1px rgba(255,255,255,.025) !important;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.candidate-status-experience .attorney-candidate-message {
+  border-radius: 20px !important;
+}
+
+/* Applicant-facing no-show recovery message. */
+.candidate-no-show-notice {
+  position: relative;
+  z-index: 6;
+  width: min(1180px,calc(100% - 40px));
+  margin: 0 auto -78px;
+  transform: translateY(88px);
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 18px;
+  padding: 17px 19px;
+  overflow: hidden;
+  border: 1px solid rgba(215,189,114,.24);
+  border-radius: 19px;
+  background:
+    radial-gradient(circle at 0 0,rgba(215,189,114,.11),transparent 19rem),
+    linear-gradient(145deg,rgba(18,24,30,.88),rgba(7,10,13,.86));
+  box-shadow: 0 28px 78px rgba(0,0,0,.32),inset 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(24px) saturate(1.06);
+  -webkit-backdrop-filter: blur(24px) saturate(1.06);
+}
+
+.candidate-no-show-notice::before {
+  position: absolute;
+  top: 0;
+  left: 9%;
+  right: 50%;
+  height: 1px;
+  background: linear-gradient(90deg,transparent,rgba(240,220,153,.70),transparent);
+  content: "";
+}
+
+.candidate-no-show-notice__mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(215,189,114,.26);
+  border-radius: 50%;
+  color: #e7d38e;
+  font-size: 1rem;
+  font-weight: 850;
+  box-shadow: inset 0 0 24px rgba(215,189,114,.035),0 0 26px rgba(215,189,114,.045);
+}
+
+.candidate-no-show-notice p,
+.candidate-no-show-notice strong,
+.candidate-no-show-notice span { display: block; margin: 0; }
+.candidate-no-show-notice p { color: #c9b579; font-size: .55rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+.candidate-no-show-notice strong { margin-top: 4px; color: #f2efe8; font-size: .98rem; }
+.candidate-no-show-notice span { margin-top: 4px; color: #919ca5; font-size: .72rem; line-height: 1.5; }
+.candidate-no-show-notice em { color: #b4bdc5; font-size: .67rem; font-style: normal; line-height: 1.45; text-align: right; }
+
+@media (max-width: 760px) {
+  .candidate-status-experience > .candidate-status-watermark {
+    top: 18%;
+    right: -155px;
+    width: 420px;
+    opacity: .045;
+  }
+
+  .candidate-status-experience .attorney-candidate-shell {
+    padding: 106px 12px 66px !important;
+  }
+
+  .candidate-status-experience .attorney-candidate-header {
+    gap: 16px !important;
+    padding: 21px 20px 19px !important;
+    border-radius: 24px 24px 0 0;
+  }
+
+  .candidate-status-experience .attorney-candidate-agency {
+    gap: 13px;
+  }
+
+  .candidate-status-experience .attorney-candidate-agency img {
+    width: 62px !important;
+    height: 62px !important;
+  }
+
+  .candidate-status-experience .attorney-candidate-number {
+    width: 100% !important;
+  }
+
+  .candidate-status-experience .attorney-candidate-overview {
+    margin-bottom: 20px;
+    padding: 31px 20px 25px !important;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .candidate-status-experience .attorney-candidate-overview__copy h1 {
+    font-size: clamp(2.75rem,13vw,4.8rem) !important;
+  }
+
+  .candidate-status-experience .attorney-candidate-action {
+    width: 100% !important;
+    margin-top: 2px;
+  }
+
+  .candidate-status-experience .attorney-candidate-progress,
+  .candidate-status-experience .attorney-candidate-progress.candidate-progress--six {
+    grid-template-columns: 1fr !important;
+    padding: 5px 17px !important;
+    border-radius: 21px;
+  }
+
+  .candidate-status-experience .attorney-candidate-progress::before { display: none !important; }
+  .candidate-status-experience .attorney-candidate-progress article {
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 15px 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,.055) !important;
+  }
+  .candidate-status-experience .attorney-candidate-progress article:last-child { border-bottom: 0 !important; }
+  .candidate-status-experience .attorney-candidate-progress article > span { margin: 0; box-shadow: none !important; }
+
+  .candidate-no-show-notice {
+    width: calc(100% - 24px);
+    margin-bottom: -72px;
+    transform: translateY(82px);
+    grid-template-columns: 42px minmax(0,1fr);
+    gap: 12px;
+    padding: 15px;
+    border-radius: 17px;
+  }
+  .candidate-no-show-notice__mark { width: 42px; height: 42px; }
+  .candidate-no-show-notice em { grid-column: 1 / -1; padding-top: 10px; border-top: 1px solid rgba(255,255,255,.06); text-align: left; }
+}
+
+@media (max-width: 430px) {
+  .candidate-status-experience .attorney-candidate-shell { padding-left: 9px !important; padding-right: 9px !important; }
+  .candidate-status-experience .attorney-candidate-header { padding: 19px 16px 17px !important; }
+  .candidate-status-experience .attorney-candidate-overview { padding: 28px 16px 22px !important; }
+  .candidate-status-experience .attorney-candidate-overview__copy h1 { font-size: clamp(2.5rem,12.8vw,4rem) !important; }
+  .candidate-status-experience .attorney-interview-card,
+  .candidate-status-experience .attorney-candidate-details,
+  .candidate-status-experience .attorney-candidate-messages,
+  .candidate-status-experience .attorney-candidate-message,
+  .candidate-status-experience .candidate-offer-wrap { margin-left: 0 !important; margin-right: 0 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candidate-status-experience * { scroll-behavior: auto !important; }
+}
