@@ -20,7 +20,7 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
   const supabase = await createClient() as any;
   const [{ data: application }, { data: messages }, { data: offers }] = await Promise.all([
     supabase.from("recruitment_applications")
-      .select("application_number,application_track,full_name,status,interview_status,submitted_at,updated_at,interview_scheduled_at,applicant_status_message,hired_profile_id,recruitment_closure_code,recruitment_closure_reason")
+      .select("application_number,application_track,full_name,timezone,status,interview_status,submitted_at,updated_at,interview_scheduled_at,interview_timezone,applicant_status_message,hired_profile_id,recruitment_closure_code,recruitment_closure_reason")
       .eq("id", id)
       .maybeSingle(),
     supabase.from("recruitment_applicant_messages")
@@ -41,7 +41,7 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
     ? "Expired"
     : offer?.status ?? null;
 
-  const record: ApplicantStatusRecord = {
+  const record: ApplicantStatusRecord & { applicant_timezone?: string | null; interview_timezone?: string | null } = {
     application_number: application.application_number,
     applicant_name: application.full_name,
     status: application.status,
@@ -49,6 +49,8 @@ export default async function CommandApplicantPreviewPage({ params }: { params: 
     submitted_at: application.submitted_at,
     updated_at: offer?.updated_at && new Date(offer.updated_at) > new Date(application.updated_at) ? offer.updated_at : application.updated_at,
     interview_scheduled_at: application.interview_scheduled_at,
+    applicant_timezone: application.timezone,
+    interview_timezone: application.interview_timezone,
     applicant_status_message: application.applicant_status_message,
     hired: application.status === "Hired" || Boolean(application.hired_profile_id),
     closure_code: application.recruitment_closure_code,
