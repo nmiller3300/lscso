@@ -1,0 +1,207 @@
+/* Shared portal cinematic pieces inside public Candidate Intake. */
+
+.candidate-intake-hero > .portal-responsive-backdrop {
+  display: none;
+}
+
+.candidate-intake-orb-shell {
+  min-width: 0;
+  width: min(100%, 390px);
+  display: grid;
+  place-items: center;
+  justify-self: end;
+}
+
+.candidate-intake-orb.portal-glow-login__card {
+  width: min(100%, 390px);
+  max-width: 390px;
+}
+
+.candidate-intake-orb__content.portal-glow-login__content {
+  width: min(270px, 72%);
+  justify-items: center;
+  text-align: center;
+}
+
+.candidate-intake-orb__status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #9ba9a1;
+  font-size: .46rem;
+  font-weight: 820;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.candidate-intake-orb__status i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #78c793;
+  box-shadow: 0 0 0 4px rgba(120,199,147,.08), 0 0 14px rgba(120,199,147,.24);
+}
+
+.candidate-intake-orb__mark.portal-glow-login__mark {
+  margin-bottom: 10px;
+}
+
+.candidate-intake-orb__heading.portal-glow-login__heading {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.candidate-intake-orb__heading.portal-glow-login__heading > span {
+  font-size: .46rem;
+}
+
+.candidate-intake-orb__heading.portal-glow-login__heading h2 {
+  margin: 7px 0 6px;
+  font-size: clamp(1.55rem, 2.7vw, 2.1rem);
+}
+
+.candidate-intake-orb__heading.portal-glow-login__heading p {
+  max-width: 240px;
+  margin-inline: auto;
+  color: #7f8a93;
+  font-size: .62rem;
+  line-height: 1.45;
+}
+
+.candidate-intake-orb__trust {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+
+.candidate-intake-orb__trust span {
+  padding: 6px 8px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 999px;
+  background: rgba(0,0,0,.08);
+  color: #76818a;
+  font-size: .43rem;
+  font-weight: 760;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 1080px) {
+  .candidate-intake-orb-shell {
+    justify-self: start;
+    width: min(100%, 380px);
+  }
+
+  .candidate-intake-orb.portal-glow-login__card {
+    width: min(100%, 380px);
+  }
+}
+
+@media (max-width: 980px) {
+  .candidate-intake-hero {
+    isolation: isolate;
+  }
+
+  .candidate-intake-hero > .portal-responsive-backdrop {
+    display: block;
+    z-index: 0;
+  }
+
+  .candidate-intake-hero > .candidate-intake-ambient,
+  .candidate-intake-hero > .candidate-intake-watermark {
+    display: none;
+  }
+
+  .candidate-intake-hero::before {
+    z-index: 1;
+    opacity: .22;
+  }
+
+  .candidate-intake-hero::after {
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 0 42%, rgba(0,0,0,.10) 70%, rgba(0,0,0,.40) 100%);
+  }
+
+  .candidate-intake-hero > .site-shell,
+  .candidate-intake-hero > .application-closed {
+    position: relative;
+    z-index: 3;
+  }
+
+  .candidate-intake-masthead {
+    background: linear-gradient(145deg, rgba(14,20,26,.54), rgba(5,9,13,.48)) !important;
+    backdrop-filter: blur(22px) saturate(1.05);
+    -webkit-backdrop-filter: blur(22px) saturate(1.05);
+  }
+
+  .candidate-intake-orb-shell {
+    width: 100%;
+    justify-self: center;
+  }
+
+  .candidate-intake-orb.portal-glow-login__card {
+    width: min(82vw, 380px);
+  }
+}
+
+@media (max-width: 600px) {
+  .candidate-intake-masthead {
+    padding: 22px 18px !important;
+  }
+
+  .candidate-intake-orb.portal-glow-login__card {
+    width: min(84vw, 360px);
+  }
+
+  .candidate-intake-orb__content.portal-glow-login__content {
+    width: 76%;
+  }
+
+  .candidate-intake-orb__heading.portal-glow-login__heading h2 {
+    font-size: clamp(1.45rem, 7vw, 1.85rem);
+  }
+
+  .candidate-process-strip {
+    grid-template-columns: 1fr !important;
+    border-top: 1px solid rgba(255,255,255,.06) !important;
+  }
+
+  .candidate-process-strip article {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    column-gap: 11px;
+    align-items: center;
+    padding: 15px 0 !important;
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,.055);
+  }
+
+  .candidate-process-strip article > span {
+    grid-row: 1 / span 2;
+    margin: 0;
+  }
+
+  .candidate-process-strip article:last-child {
+    border-bottom: 0;
+  }
+}
+
+@media (max-width: 430px) {
+  .candidate-intake-orb.portal-glow-login__card {
+    width: min(88vw, 350px);
+  }
+
+  .candidate-intake-orb__trust {
+    gap: 5px;
+  }
+
+  .candidate-intake-orb__trust span {
+    padding-inline: 7px;
+    font-size: .40rem;
+  }
+}
