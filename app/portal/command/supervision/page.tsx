@@ -1,8 +1,20 @@
 import Link from "next/link";
 import { PortalShell } from "../../_components/PortalShell";
+import { SupervisoryPurviewManager } from "../../_components/SupervisoryPurviewManager";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { loadPersonnelPurview } from "@/lib/authorization/load-personnel-purview";
+
+const SUPERVISORY_RANKS = new Set([
+  "Sheriff",
+  "Undersheriff",
+  "Major",
+  "Captain",
+  "1st Lieutenant",
+  "Lieutenant",
+  "Sergeant",
+  "Corporal",
+]);
 
 export default async function SupervisionWorkspacePage() {
   const profile = await getCurrentPortalProfile();
@@ -10,6 +22,8 @@ export default async function SupervisionWorkspacePage() {
 
   const purview = await loadPersonnelPurview(profile);
   const supabase = await createClient() as any;
+  const canManagePurview = ["Executive", "Command"].includes(profile.access_tier);
+
   let guardianQuery = supabase
     .from("guardian_records")
     .select("id,guardian_number,subject_profile_id,title,status,follow_up_due_at,created_at")
@@ -24,7 +38,25 @@ export default async function SupervisionWorkspacePage() {
     }
   }
 
-  const { data: guardianDataRaw } = await guardianQuery;
+  const [{ data: guardianDataRaw }, managementData] = await Promise.all([
+    guardianQuery,
+    canManagePurview
+      ? Promise.all([
+          supabase
+            .from("personnel_profiles")
+            .select("id,personnel_id,display_name,rank,call_sign,status,is_test_account")
+            .neq("status", "Deactivated")
+            .order("display_name"),
+          supabase
+            .from("supervisory_authorities")
+            .select("id,supervisor_profile_id,subject_profile_id,authority_type,starts_at")
+            .eq("authority_type", "Primary")
+            .is("ends_at", null)
+            .order("starts_at", { ascending: false }),
+        ])
+      : Promise.resolve(null),
+  ]);
+
   const guardianData = guardianDataRaw ?? [];
 
   const grouped = new Map<string, { personnelId:string; displayName:string; rank:string; callSign:string|null; status:string; paths:string[] }>();
@@ -51,13 +83,73 @@ export default async function SupervisionWorkspacePage() {
     .slice(0, 5);
   const recentGuardians = guardianData.slice(0, 5);
 
+  let managementMembers: Array<{
+    profileId: string;
+    personnelId: string;
+    displayName: string;
+    rank: string;
+    callSign: string;
+    currentSupervisorId: string | null;
+    currentSupervisorLabel: string | null;
+  }> = [];
+  let managementSupervisors: Array<{
+    profileId: string;
+    personnelId: string;
+    displayName: string;
+    rank: string;
+    callSign: string;
+  }> = [];
+
+  if (managementData) {
+    const [{ data: profilesRaw }, { data: primaryAuthoritiesRaw }] = managementData as any;
+    const profiles = profilesRaw ?? [];
+    const primaryAuthorities = primaryAuthoritiesRaw ?? [];
+    const profileById = new Map(profiles.map((member:any) => [member.id, member]));
+    const primaryBySubject = new Map<string, any>();
+
+    for (const authority of primaryAuthorities) {
+      if (!authority.subject_profile_id || primaryBySubject.has(authority.subject_profile_id)) continue;
+      primaryBySubject.set(authority.subject_profile_id, authority);
+    }
+
+    managementSupervisors = profiles
+      .filter((member:any) => SUPERVISORY_RANKS.has(member.rank) && ["Active", "Acting"].includes(member.status))
+      .map((member:any) => ({
+        profileId: member.id,
+        personnelId: member.personnel_id,
+        displayName: member.display_name,
+        rank: member.rank,
+        callSign: member.call_sign ?? "",
+      }));
+
+    managementMembers = profiles
+      .filter((member:any) => member.rank !== "Department Attorney" && member.rank !== "Sheriff")
+      .map((member:any) => {
+        const activePrimary = primaryBySubject.get(member.id);
+        const supervisor = activePrimary ? profileById.get(activePrimary.supervisor_profile_id) as any : null;
+        return {
+          profileId: member.id,
+          personnelId: member.personnel_id,
+          displayName: member.display_name,
+          rank: member.rank,
+          callSign: member.call_sign ?? "",
+          currentSupervisorId: activePrimary?.supervisor_profile_id ?? null,
+          currentSupervisorLabel: supervisor ? `${supervisor.rank} ${supervisor.display_name}` : null,
+        };
+      });
+  }
+
   return (
     <PortalShell
       active="supervision"
       eyebrow="Supervision"
       title="Supervision"
-      description="Personnel oversight, Guardians, and follow-up."
+      description="Personnel oversight, supervisory purview, Guardians, and follow-up."
     >
+      {canManagePurview ? (
+        <SupervisoryPurviewManager members={managementMembers} supervisors={managementSupervisors} />
+      ) : null}
+
       <div className="command-v2-supervision-layout">
         <section className="portal-panel command-v2-purview-panel">
           <div className="portal-panel-heading"><div><p>My scope</p><h2>Personnel under my purview</h2></div>{purview.standingDepartmentAuthority ? <span>Department-wide authority</span> : null}</div>
@@ -79,10 +171,10 @@ export default async function SupervisionWorkspacePage() {
           ) : null}
 
           {!purview.structuredAuthorityAvailable && !purview.standingDepartmentAuthority ? (
-            <div className="command-v2-inline-state"><strong>No structured purview is active yet.</strong><span>No personnel or Guardian activity is inferred from legacy supervisor text.</span></div>
+            <div className="command-v2-inline-state"><strong>No personnel are assigned to your purview yet.</strong><span>Command Staff can assign personnel to you through Supervisor / Purview. Once assigned, they appear here automatically.</span></div>
           ) : null}
 
-          {purview.structuredAuthorityAvailable && !people.length ? <div className="portal-empty-state"><strong>No personnel are currently assigned within your purview.</strong></div> : null}
+          {purview.structuredAuthorityAvailable && !people.length ? <div className="portal-empty-state"><strong>No personnel are currently assigned within your purview.</strong><span>Command Staff can assign personnel through Supervisor / Purview.</span></div> : null}
         </section>
 
         <div className="command-v2-supervision-side">
