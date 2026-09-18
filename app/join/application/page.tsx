@@ -1,16 +1,22 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { CinematicOrb } from "../../_components/CinematicOrb";
+import { PortalResponsiveCinematicBackdrop } from "../../portal/_components/PortalResponsiveCinematicBackdrop";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import { getRecruitmentApplicationQuestions } from "@/lib/recruitment/questions.server";
 import { ApplicationForm } from "./ApplicationForm";
 import { DepartmentAttorneyApplicationForm } from "./DepartmentAttorneyApplicationForm";
+import "../../portal/portal-glow-login.css";
+import "../../portal/portal-glow-login-polish.css";
+import "../../portal/portal-login-responsive-cinematic.css";
 import "./application.css";
 import "./application-dynamic.css";
 import "./application-closed.css";
 import "./application-premium.css";
 import "./application-role.css";
 import "./candidate-experience.css";
+import "./candidate-portal-bridge.css";
 
 export const metadata: Metadata = {
   title: "LSCSO Candidate Intake",
@@ -56,6 +62,37 @@ function RoleSelection({ swornOpen, attorneyOpen, selectedClosed }: { swornOpen:
   );
 }
 
+function CandidateIntakeOrb({ selectedTrack }: { selectedTrack: string | null }) {
+  return (
+    <aside className="candidate-intake-orb-shell" aria-label="Official LSCSO candidate record">
+      <CinematicOrb
+        className="portal-glow-login__card candidate-intake-orb"
+        contentClassName="portal-glow-login__content candidate-intake-orb__content"
+      >
+        <div className="candidate-intake-orb__status"><i /> Intake authenticated</div>
+        <div className="portal-glow-login__mark candidate-intake-orb__mark">
+          <Image
+            src="/images/lscso-patch-color.png"
+            alt="Los Santos County Sheriff’s Office patch"
+            width={76}
+            height={76}
+            priority
+          />
+        </div>
+        <header className="portal-glow-login__heading candidate-intake-orb__heading">
+          <span>Los Santos County Sheriff&apos;s Office</span>
+          <h2>Candidate Selection</h2>
+          <p>{selectedTrack ?? "Choose a pathway to begin your candidate record."}</p>
+        </header>
+        <div className="candidate-intake-orb__trust" aria-label="Candidate record protections">
+          <span>Secure submission</span>
+          <span>Private tracking</span>
+        </div>
+      </CinematicOrb>
+    </aside>
+  );
+}
+
 export default async function ApplicationPage({ searchParams }: { searchParams: Promise<{ role?: string }> }) {
   const params = await searchParams;
   const requestedRole: RoleKey | null = params.role === "sworn" ? "sworn" : params.role === "attorney" ? "attorney" : null;
@@ -64,7 +101,8 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
   if (!recruitment.isOpen) {
     return (
       <main className="application-page candidate-intake-page">
-        <section className="application-page__hero application-page__hero--closed">
+        <section className="application-page__hero application-page__hero--closed candidate-intake-hero">
+          <PortalResponsiveCinematicBackdrop />
           <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
           <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={760} height={760} aria-hidden="true" priority />
           <div className="site-shell application-closed candidate-intake-closed">
@@ -114,6 +152,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
   return (
     <main className={`application-page candidate-intake-page candidate-intake-page--${requestedRole ?? "select"}`}>
       <section className="application-page__hero candidate-intake-hero">
+        <PortalResponsiveCinematicBackdrop />
         <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
         <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={840} height={840} aria-hidden="true" priority />
         <div className="site-shell">
@@ -132,12 +171,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
                 <article><strong>{selectedTrack ? String(sectionCount).padStart(2, "0") : "—"}</strong><span>Guided Sections</span></article>
               </div>
             </div>
-            <aside className="application-page__seal candidate-intake-seal" aria-label="Official LSCSO candidate record">
-              <div className="candidate-intake-seal__status"><i /> Intake authenticated</div>
-              <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={180} height={180} priority />
-              <div><span>Los Santos County Sheriff&apos;s Office</span><strong>Candidate Selection System</strong><small>{selectedTrack ?? "Awaiting pathway selection"}</small></div>
-              <footer><span>Secure submission</span><span>Private tracking</span></footer>
-            </aside>
+            <CandidateIntakeOrb selectedTrack={selectedTrack} />
           </div>
 
           {!selectedTrack || !selectedOpen ? (
