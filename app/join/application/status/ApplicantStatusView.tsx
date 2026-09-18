@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import {
+  DEFAULT_RECRUITMENT_TIME_ZONE,
   formatRecruitmentDateTime,
   normalizeRecruitmentTimeZone,
   recruitmentTimeZoneLabel,
@@ -92,11 +93,11 @@ function viewFor(record: ApplicantStatusRecord): CandidateView {
     };
   }
 
-  if (closureCode === "Interview No Show" || record.interview_status === "No Show") {
+  if (closureCode === "Interview No Show" || (record.status === "Archived" && record.interview_status === "No Show")) {
     return {
       eyebrow: "Interview disposition",
       title: "Interview Not Attended — Process Closed",
-      message: reason || "The required scheduled interview was not attended, so this selection process was closed.",
+      message: reason || "The scheduled interview was not attended and LSCSO closed this selection process.",
       next: "No further action is available on this application unless LSCSO contacts you.",
       stage: 3,
       tone: "closed",
@@ -201,6 +202,18 @@ function viewFor(record: ApplicantStatusRecord): CandidateView {
       };
     }
 
+    if (record.interview_status === "No Show") {
+      return {
+        eyebrow: "Interview attendance",
+        title: "Interview Not Attended — Awaiting LSCSO Direction",
+        message: "The scheduled interview was not attended. Your application remains in the interview stage while LSCSO determines whether another interview will be scheduled or the process will be closed.",
+        next: "No action is required unless LSCSO contacts you. Continue monitoring this page and Discord for updated interview instructions.",
+        stage: 3,
+        tone: "review",
+        actionLabel: "Await direction",
+      };
+    }
+
     if (record.interview_status === "Completed") {
       return {
         eyebrow: "Interview complete",
@@ -270,7 +283,7 @@ export function ApplicantStatusView({
 }) {
   const view = viewFor(record);
   const communication = String(record.applicant_status_message ?? "").trim();
-  const interviewTimeZone = normalizeRecruitmentTimeZone(record.interview_timezone || record.applicant_timezone);
+  const interviewTimeZone = normalizeRecruitmentTimeZone(record.interview_timezone, DEFAULT_RECRUITMENT_TIME_ZONE);
   const interviewTime = record.interview_scheduled_at
     ? formatRecruitmentDateTime(record.interview_scheduled_at, interviewTimeZone)
     : null;
@@ -356,7 +369,9 @@ export function ApplicantStatusView({
                   <small>{record.interview_status === "Failed"
                     ? "The interview was completed. This status means the applicant was not selected to advance after the interview assessment."
                     : record.interview_status === "No Show"
-                      ? "This status means the scheduled interview was not attended."
+                      ? record.status === "Archived" || Boolean(record.closure_code)
+                        ? "The scheduled interview was not attended and the selection process was closed."
+                        : "The scheduled interview was not attended. The application remains open unless LSCSO separately closes it."
                       : record.interview_status === "Passed"
                         ? "The interview decision allows the applicant to advance to the employment-offer stage."
                         : record.interview_status === "Completed"
