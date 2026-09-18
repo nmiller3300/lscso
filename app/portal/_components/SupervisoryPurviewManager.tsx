@@ -2,6 +2,7 @@
 
 import { useMemo, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import { PortalDialog } from "./PortalDialog";
 
 type PurviewMember = {
   profileId: string;
@@ -19,6 +20,22 @@ type SupervisorOption = {
   displayName: string;
   rank: string;
   callSign: string;
+};
+
+const rankLevel: Record<string, number> = {
+  Sheriff: 130,
+  Undersheriff: 120,
+  Major: 110,
+  Captain: 100,
+  "1st Lieutenant": 90,
+  Lieutenant: 80,
+  Sergeant: 70,
+  Corporal: 60,
+  "Master Deputy": 50,
+  "Deputy III": 40,
+  "Deputy II": 30,
+  Deputy: 20,
+  Recruit: 10,
 };
 
 export function SupervisoryPurviewManager({
@@ -41,6 +58,15 @@ export function SupervisoryPurviewManager({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
+  const eligibleSupervisors = useMemo(() => {
+    if (!selectedMember) return [];
+    const subjectLevel = rankLevel[selectedMember.rank] ?? 0;
+    return supervisors.filter((supervisor) =>
+      supervisor.profileId !== selectedMember.profileId &&
+      (rankLevel[supervisor.rank] ?? 0) > subjectLevel,
+    );
+  }, [selectedMember, supervisors]);
+
   if (!members.length || !supervisors.length) return null;
 
   function chooseMember(nextId: string) {
@@ -50,6 +76,14 @@ export function SupervisoryPurviewManager({
     setReason("");
     setError("");
     setNotice("");
+  }
+
+  function close() {
+    if (busy) return;
+    setOpen(false);
+    setError("");
+    setNotice("");
+    setReason("");
   }
 
   async function save(action: "assign" | "remove") {
@@ -112,74 +146,79 @@ export function SupervisoryPurviewManager({
         </div>
       </section>
 
-      {open && selectedMember ? (
-        <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target && !busy) setOpen(false); }}>
-          <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="purview-manager-title">
-            <div className="portal-modal-heading">
-              <div><span>Personnel authority</span><h2 id="purview-manager-title">Supervisor / Purview</h2></div>
-              <button disabled={busy} onClick={() => setOpen(false)} type="button" aria-label="Close supervisory purview manager">×</button>
+      <PortalDialog
+        open={open && Boolean(selectedMember)}
+        onClose={close}
+        eyebrow="Personnel authority"
+        title="Supervisor / Purview"
+        description="Assign one primary supervisor to a personnel member. The relationship is immediately reflected in the supervisor's workspace and personnel-record access."
+        dismissOnBackdrop={!busy}
+        footer={
+          <>
+            {selectedMember?.currentSupervisorId ? (
+              <button className="portal-button portal-button--danger" disabled={busy || reason.trim().length < 4} onClick={() => void save("remove")} type="button">
+                {busy ? "Updating…" : "Remove primary supervisor"}
+              </button>
+            ) : null}
+            <button className="portal-button portal-button--secondary" disabled={busy} onClick={close} type="button">Close</button>
+            <button className="portal-button portal-button--primary" disabled={busy || !supervisorId || !eligibleSupervisors.some((item) => item.profileId === supervisorId)} form="supervisory-purview-form" type="submit">
+              {busy ? "Updating…" : "Assign to purview"}
+            </button>
+          </>
+        }
+      >
+        {selectedMember ? (
+          <form id="supervisory-purview-form" onSubmit={submit}>
+            <label className="portal-call-sign-field">
+              Personnel member
+              <select value={selectedMember.profileId} onChange={(event) => chooseMember(event.target.value)}>
+                {members.map((member) => (
+                  <option key={member.profileId} value={member.profileId}>
+                    {member.personnelId} · {member.rank} {member.displayName}{member.callSign ? ` · ${member.callSign}` : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <div className="portal-call-sign-note" style={{ marginBottom: 14 }}>
+              <strong style={{ display: "block", marginBottom: 4 }}>Current primary supervisor</strong>
+              {selectedMember.currentSupervisorLabel || "No primary supervisor assigned"}
             </div>
 
-            <form onSubmit={submit}>
-              <label className="portal-call-sign-field">
-                Personnel member
-                <select value={selectedMember.profileId} onChange={(event) => chooseMember(event.target.value)}>
-                  {members.map((member) => (
-                    <option key={member.profileId} value={member.profileId}>
-                      {member.personnelId} · {member.rank} {member.displayName}{member.callSign ? ` · ${member.callSign}` : ""}
-                    </option>
-                  ))}
-                </select>
-              </label>
+            <label className="portal-call-sign-field">
+              Primary supervisor
+              <select value={supervisorId} onChange={(event) => setSupervisorId(event.target.value)} required>
+                <option value="">Select supervisor</option>
+                {eligibleSupervisors.map((supervisor) => (
+                  <option key={supervisor.profileId} value={supervisor.profileId}>
+                    {supervisor.rank} {supervisor.displayName} · {supervisor.callSign || supervisor.personnelId}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-              <div className="portal-call-sign-note" style={{ marginBottom: 14 }}>
-                <strong style={{ display: "block", marginBottom: 4 }}>Current primary supervisor</strong>
-                {selectedMember.currentSupervisorLabel || "No primary supervisor assigned"}
-              </div>
+            {!eligibleSupervisors.length ? (
+              <div className="portal-form-error" role="status">No active supervisor currently outranks this member.</div>
+            ) : null}
 
-              <label className="portal-call-sign-field">
-                Primary supervisor
-                <select value={supervisorId} onChange={(event) => setSupervisorId(event.target.value)} required>
-                  <option value="">Select supervisor</option>
-                  {supervisors
-                    .filter((supervisor) => supervisor.profileId !== selectedMember.profileId)
-                    .map((supervisor) => (
-                      <option key={supervisor.profileId} value={supervisor.profileId}>
-                        {supervisor.rank} {supervisor.displayName} · {supervisor.callSign || supervisor.personnelId}
-                      </option>
-                    ))}
-                </select>
-              </label>
+            <label className="portal-call-sign-field">
+              Assignment reason
+              <textarea
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+                placeholder="Patrol supervisory assignment, command reassignment, shift change, etc."
+                rows={3}
+                required
+              />
+            </label>
 
-              <label className="portal-call-sign-field">
-                Assignment reason
-                <textarea
-                  value={reason}
-                  onChange={(event) => setReason(event.target.value)}
-                  placeholder="Patrol supervisory assignment, command reassignment, shift change, etc."
-                  rows={3}
-                  required
-                />
-              </label>
+            <p className="portal-call-sign-note">A member can have one active primary supervisor at a time. Reassigning them automatically ends the previous primary relationship while retaining the prior relationship in the audit history.</p>
 
-              <p className="portal-call-sign-note">A member can have one active primary supervisor at a time. Reassigning them automatically ends the previous primary relationship but keeps the prior record in the audit history.</p>
-
-              {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
-              {notice ? <div className="portal-form-success" role="status"><strong>Purview updated</strong><span>{notice}</span></div> : null}
-
-              <div className="portal-modal-actions">
-                {selectedMember.currentSupervisorId ? (
-                  <button className="portal-button portal-button--danger" disabled={busy || reason.trim().length < 4} onClick={() => void save("remove")} type="button">
-                    {busy ? "Updating…" : "Remove primary supervisor"}
-                  </button>
-                ) : null}
-                <button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setOpen(false)} type="button">Close</button>
-                <button className="portal-button portal-button--primary" disabled={busy || !supervisorId} type="submit">{busy ? "Updating…" : "Assign to purview"}</button>
-              </div>
-            </form>
-          </section>
-        </div>
-      ) : null}
+            {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
+            {notice ? <div className="portal-form-success" role="status"><strong>Purview updated</strong><span>{notice}</span></div> : null}
+          </form>
+        ) : null}
+      </PortalDialog>
     </>
   );
 }
