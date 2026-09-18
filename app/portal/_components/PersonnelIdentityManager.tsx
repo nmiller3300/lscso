@@ -18,7 +18,7 @@ const ranks = [
 ];
 const statuses = ["Active","Acting","Suspended"];
 const tierForRank: Record<string,string> = {
-  Sheriff:"Executive",Undersheriff:"Executive",Major:"Command",Captain:"Command","1st Lieutenant":"Command",Lieutenant:"Supervisor",Sergeant:"Supervisor",Corporal:"Preliminary","Master Deputy":"Deputy","Deputy III":"Deputy","Deputy II":"Deputy",Deputy:"Deputy",Recruit:"Deputy",
+  Sheriff:"Executive",Undersheriff:"Executive",Major:"Command",Captain:"Command","1st Lieutenant":"Command",Lieutenant:"Supervisor",Sergeant:"Supervisor",Corporal:"Supervisor","Master Deputy":"Deputy","Deputy III":"Deputy","Deputy II":"Deputy",Deputy:"Deputy",Recruit:"Deputy",
 };
 
 export function PersonnelIdentityManager({ profileId, personnelId, displayName, currentRank, currentStatus }: Props) {
