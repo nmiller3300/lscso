@@ -88,7 +88,7 @@ export function applicationNextAction(
       if (interviewStatus === "Passed") return "Interview completed — applicant was selected to advance to Department Attorney appointment.";
       if (interviewStatus === "Failed") return "Interview completed — applicant was not selected to advance to Department Attorney appointment.";
       if (interviewStatus === "Scheduled") return "Interview scheduled — complete the interview and record the selection decision.";
-      if (interviewStatus === "No Show") return "Interview was not attended — selection process closed.";
+      if (interviewStatus === "No Show") return "Interview no-show recorded — reschedule the interview or close the selection process separately.";
       if (interviewStatus === "Completed") return "Interview completed — record the selection decision.";
       return "Contact the applicant and schedule the required Department Attorney interview.";
     }
@@ -105,7 +105,7 @@ export function applicationNextAction(
     if (interviewStatus === "Passed") return "Interview completed — applicant was selected to advance to the employment-offer stage.";
     if (interviewStatus === "Failed") return "Interview completed — applicant was not selected to advance to the employment-offer stage.";
     if (interviewStatus === "Scheduled") return "Interview scheduled — complete the interview and record the selection decision.";
-    if (interviewStatus === "No Show") return "Interview was not attended — close the selection process.";
+    if (interviewStatus === "No Show") return "Interview no-show recorded — reschedule the interview or close the selection process separately.";
     if (interviewStatus === "Completed") return "Interview completed — record the selection decision.";
     return "Contact the applicant on Discord and schedule the required interview.";
   }
