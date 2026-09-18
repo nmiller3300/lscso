@@ -1,3 +1,5 @@
+export const DEFAULT_RECRUITMENT_TIME_ZONE = "America/New_York";
+
 export const RECRUITMENT_TIMEZONES = [
   { value: "America/New_York", label: "Eastern Time" },
   { value: "America/Chicago", label: "Central Time" },
@@ -38,7 +40,7 @@ const TIMEZONE_ALIASES: Record<string, string> = {
   GMT: "UTC",
 };
 
-export function normalizeRecruitmentTimeZone(value?: string | null, fallback = "America/New_York") {
+export function normalizeRecruitmentTimeZone(value?: string | null, fallback = DEFAULT_RECRUITMENT_TIME_ZONE) {
   const clean = String(value ?? "").trim();
   if (!clean) return fallback;
   const alias = TIMEZONE_ALIASES[clean.toUpperCase()];
