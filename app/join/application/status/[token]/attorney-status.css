@@ -22,6 +22,7 @@
 .attorney-candidate-action p { margin: 10px 0 0; color: #aeb7c0; line-height: 1.55; }
 
 .attorney-candidate-progress { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 0 30px 34px; }
+.attorney-candidate-progress.candidate-progress--six { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .attorney-candidate-progress article { min-width: 0; padding: 16px; border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.018); }
 .attorney-candidate-progress article > span { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 12px; border: 1px solid rgba(205,187,128,.34); border-radius: 50%; color: #d8c785; font-size: .8rem; font-weight: 800; }
 .attorney-candidate-progress strong, .attorney-candidate-progress small { display: block; }
@@ -55,6 +56,9 @@
 .attorney-message-list header { display: flex; justify-content: space-between; gap: 14px; color: #9aa4ae; font-size: .82rem; }
 .attorney-message-list p { margin: 10px 0 0; line-height: 1.65; white-space: pre-wrap; }
 
+.candidate-offer-wrap { margin: 0 30px 30px; }
+.candidate-offer-wrap .application-status-offer { margin: 0; }
+
 .attorney-candidate-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 0 30px 32px; }
 .attorney-candidate-footer p { margin: 0; color: #89949f; }
 
@@ -64,9 +68,14 @@
 .recruitment-interview-time-summary strong { margin-top: 7px; }
 .recruitment-interview-time-summary small { margin-top: 5px; color: #8f9aa4; }
 
+@media (max-width: 1050px) {
+  .attorney-candidate-progress.candidate-progress--six { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 @media (max-width: 900px) {
   .attorney-candidate-overview { grid-template-columns: 1fr; }
   .attorney-candidate-progress { grid-template-columns: 1fr 1fr; }
+  .attorney-candidate-progress.candidate-progress--six { grid-template-columns: 1fr 1fr; }
   .attorney-interview-grid { grid-template-columns: 1fr; }
   .attorney-interview-grid article + article { border-left: 0; border-top: 1px solid rgba(255,255,255,.07); }
   .attorney-detail-grid { grid-template-columns: 1fr 1fr; }
@@ -82,10 +91,10 @@
   .attorney-candidate-number { width: 100%; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07); text-align: left; }
   .attorney-candidate-overview { padding: 28px 20px 22px; }
   .attorney-candidate-overview__copy h1 { font-size: clamp(2rem, 11vw, 3rem); }
-  .attorney-candidate-progress { grid-template-columns: 1fr; padding: 0 20px 26px; }
+  .attorney-candidate-progress, .attorney-candidate-progress.candidate-progress--six { grid-template-columns: 1fr; padding: 0 20px 26px; }
   .attorney-candidate-progress article { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; }
   .attorney-candidate-progress article > span { margin: 0; }
-  .attorney-interview-card, .attorney-candidate-details, .attorney-candidate-messages, .attorney-candidate-message { margin-left: 20px; margin-right: 20px; }
+  .attorney-interview-card, .attorney-candidate-details, .attorney-candidate-messages, .attorney-candidate-message, .candidate-offer-wrap { margin-left: 20px; margin-right: 20px; }
   .attorney-section-heading { flex-direction: column; }
   .attorney-detail-grid { grid-template-columns: 1fr; }
   .attorney-detail-grid article:nth-child(even) { border-left: 0; }
