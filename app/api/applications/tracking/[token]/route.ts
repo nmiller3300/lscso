@@ -10,6 +10,8 @@ function buildVersion(record: any, messages: any[]) {
     status: record?.status ?? null,
     interviewStatus: record?.interview_status ?? null,
     interviewScheduledAt: record?.interview_scheduled_at ?? null,
+    applicantTimeZone: record?.applicant_timezone ?? null,
+    interviewTimeZone: record?.interview_timezone ?? null,
     applicantStatusMessage: record?.applicant_status_message ?? null,
     hired: Boolean(record?.hired),
     closureCode: record?.closure_code ?? null,
