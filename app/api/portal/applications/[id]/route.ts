@@ -22,7 +22,8 @@ function actionErrorStatus(message: string) {
     normalized.includes("cannot be terminated") ||
     normalized.includes("offer has") ||
     normalized.includes("offer is") ||
-    normalized.includes("no longer")
+    normalized.includes("no longer") ||
+    normalized.includes("only a case closed")
   ) return 409;
   if (
     normalized.includes("invalid") ||
@@ -60,11 +61,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           p_application_id: id,
           p_payload: body,
         })
-      : supabase.rpc("command_recruitment_application_action", {
-          p_application_id: id,
-          p_action: action,
-          p_payload: body,
-        });
+      : action === "reopen_no_show"
+        ? supabase.rpc("command_reopen_recruitment_no_show", { p_application_id: id })
+        : supabase.rpc("command_recruitment_application_action", {
+            p_application_id: id,
+            p_action: action,
+            p_payload: body,
+          });
     const { data, error } = await rpcRequest;
 
     if (error) {
