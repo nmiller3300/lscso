@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { ApplicantDispositionView } from "../ApplicantDispositionView";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "../ApplicantStatusView";
 import { DepartmentAttorneyStatusView } from "../DepartmentAttorneyStatusView";
 import { ApplicantStatusLiveRefresh } from "./ApplicantStatusLiveRefresh";
@@ -11,12 +10,11 @@ import "../../application.css";
 import "./status.css";
 import "./communications.css";
 import "./offer.css";
-import "./disposition.css";
 import "./attorney-status.css";
 
 export const metadata: Metadata = {
-  title: "Application Status & Disposition",
-  description: "Private LSCSO recruitment application status and disposition record.",
+  title: "Application Status",
+  description: "Private LSCSO recruitment candidate status portal.",
   robots: { index: false, follow: false },
 };
 
@@ -24,15 +22,6 @@ export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
 type TrackedApplication = ApplicantStatusRecord & { application_track?: string | null };
-
-function isFinalDisposition(record: ApplicantStatusRecord) {
-  if (record.hired || record.status === "Hired") return false;
-  if (String(record.closure_code ?? "").trim()) return true;
-  if (["Denied", "Withdrawn", "Archived"].includes(record.status)) return true;
-  if (["Failed", "No Show"].includes(record.interview_status)) return true;
-  if (["Expired", "Terminated"].includes(String(record.offer_status ?? ""))) return true;
-  return false;
-}
 
 function buildVersion(record: TrackedApplication, messages: ApplicantMessage[]) {
   const lastMessage = messages.length ? messages[messages.length - 1] : null;
@@ -42,6 +31,8 @@ function buildVersion(record: TrackedApplication, messages: ApplicantMessage[]) 
     status: record.status ?? null,
     interviewStatus: record.interview_status ?? null,
     interviewScheduledAt: record.interview_scheduled_at ?? null,
+    applicantTimeZone: record.applicant_timezone ?? null,
+    interviewTimeZone: record.interview_timezone ?? null,
     applicantStatusMessage: record.applicant_status_message ?? null,
     hired: Boolean(record.hired),
     closureCode: record.closure_code ?? null,
@@ -94,13 +85,7 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
   const liveVersion = buildVersion(record, applicantMessages);
   const liveRefresh = <ApplicantStatusLiveRefresh token={rawToken} initialVersion={liveVersion} />;
 
-  if (record.application_track === "Department Attorney") {
-    return <>{liveRefresh}<DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} /></>;
-  }
-
-  if (isFinalDisposition(record)) {
-    return <>{liveRefresh}<ApplicantDispositionView record={record} applicantMessages={applicantMessages} /></>;
-  }
-
-  return <>{liveRefresh}<ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} /></>;
+  return record.application_track === "Department Attorney"
+    ? <>{liveRefresh}<DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} /></>
+    : <>{liveRefresh}<ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} /></>;
 }
