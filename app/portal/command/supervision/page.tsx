@@ -77,7 +77,11 @@ export default async function SupervisionWorkspacePage() {
       status: row.status,
       paths: [],
     };
-    const authorityLabel = row.authorityType === "Unit" ? "Division scope" : row.authorityType;
+    const authorityLabel = row.authorityType === "Unit"
+      ? "Division scope"
+      : row.authorityType === "Primary"
+        ? "Individual exception"
+        : row.authorityType;
     const path = purview.standingDepartmentAuthority
       ? ([row.unitName, row.assignmentType].filter(Boolean).join(" · ") || "Department personnel")
       : ([row.unitName, authorityLabel].filter(Boolean).join(" · ") || row.scope);
