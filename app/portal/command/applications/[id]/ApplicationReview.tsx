@@ -11,6 +11,7 @@ import {
   applicationStatusLabel,
 } from "@/lib/recruitment/application";
 import {
+  DEFAULT_RECRUITMENT_TIME_ZONE,
   RECRUITMENT_TIMEZONES,
   formatRecruitmentDateTime,
   normalizeRecruitmentTimeZone,
@@ -38,7 +39,10 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const [decision, setDecision] = useState<Decision | null>(null);
   const [decisionReason, setDecisionReason] = useState("");
   const [interviewDisposition, setInterviewDisposition] = useState<InterviewDisposition | null>(null);
-  const initialInterviewTimeZone = normalizeRecruitmentTimeZone(application.interview_timezone || application.timezone);
+  const initialInterviewTimeZone = normalizeRecruitmentTimeZone(
+    application.interview_timezone,
+    DEFAULT_RECRUITMENT_TIME_ZONE,
+  );
   const [interview, setInterview] = useState({
     status: application.interview_status ?? "Not Scheduled",
     interviewer: application.interviewer_profile_id ?? "",
@@ -96,6 +100,17 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
     if (ok) setInterviewDisposition(null);
   }
 
+  function prepareAnotherInterview() {
+    setError("");
+    setInterview({
+      ...interview,
+      status: "Scheduled",
+      scheduled: "",
+      timeZone: DEFAULT_RECRUITMENT_TIME_ZONE,
+      result: "",
+    });
+  }
+
   async function noteSubmit(event: FormEvent) {
     event.preventDefault();
     if (await save({ action: "note", content: note })) setNote("");
@@ -125,6 +140,9 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
   const isDenied = application.status === "Denied";
   const isHired = application.status === "Hired" || Boolean(application.hired_profile_id);
   const isClosed = application.status === "Archived" || Boolean(application.recruitment_closed_at);
+  const legacyNoShowClosed = isClosed
+    && application.interview_status === "No Show"
+    && application.recruitment_closure_code === "Interview No Show";
   const offer = application.latest_offer ?? null;
   const offerExpired = Boolean(offer?.status === "Pending" && offer?.expires_at && new Date(offer.expires_at).getTime() <= Date.now());
   const offerStatus = offerExpired ? "Expired" : offer?.status ?? null;
@@ -221,6 +239,19 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
         </section>
       ) : null}
 
+      {legacyNoShowClosed ? (
+        <section className="portal-panel recruitment-no-show-recovery recruitment-no-show-recovery--legacy">
+          <div>
+            <p>Interview no-show · legacy closed case</p>
+            <h2>This no-show was closed under the previous workflow.</h2>
+            <span>Reopen the selection process if Command wants to offer another interview. The prior no-show remains preserved in the audit history.</span>
+          </div>
+          <button className="portal-button portal-button--primary" disabled={busy} onClick={() => void save({ action: "reopen_no_show" })} type="button">
+            {busy ? "Reopening…" : "Reopen for another interview"}
+          </button>
+        </section>
+      ) : null}
+
       {isAccepted || isHired ? (
         <>
           <section className="portal-panel recruitment-interview-panel">
@@ -229,10 +260,22 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
               <b className={`recruitment-status recruitment-status--${String(application.interview_status ?? "not-scheduled").toLowerCase().replaceAll(" ", "-")}`}>{application.interview_status ?? "Not Scheduled"}</b>
             </div>
             <div className="recruitment-interview-flow" aria-label="Interview workflow">
-              <article className={interview.status !== "Not Scheduled" ? "is-complete" : "is-current"}><span>01</span><div><strong>Schedule</strong><small>Set the interview in the timezone the applicant is expected to use.</small></div></article>
+              <article className={interview.status !== "Not Scheduled" ? "is-complete" : "is-current"}><span>01</span><div><strong>Schedule</strong><small>Eastern Time is the default. Change it only when Command intentionally schedules in another timezone.</small></div></article>
               <article className={["Completed", "Passed", "Failed", "No Show"].includes(interview.status) ? "is-complete" : interview.status === "Scheduled" ? "is-current" : ""}><span>02</span><div><strong>Conduct</strong><small>Record attendance and preserve panel/interview notes.</small></div></article>
-              <article className={["Passed", "Failed", "No Show"].includes(interview.status) ? "is-current" : ""}><span>03</span><div><strong>Decision</strong><small>Pass advances to an offer. Fail means the completed interview did not meet the selection standard.</small></div></article>
+              <article className={["Passed", "Failed", "No Show"].includes(interview.status) ? "is-current" : ""}><span>03</span><div><strong>Decision</strong><small>Pass advances to an offer. A no-show records attendance without automatically closing the case.</small></div></article>
             </div>
+
+            {application.interview_status === "No Show" && interview.status === "No Show" ? (
+              <div className="recruitment-no-show-recovery">
+                <div>
+                  <p>No-show recorded</p>
+                  <strong>The selection process is still open.</strong>
+                  <span>Offer another interview, or use the separate closure control if Command decides to end the process.</span>
+                </div>
+                <button className="portal-button portal-button--primary" onClick={prepareAnotherInterview} type="button">Prepare another interview</button>
+              </div>
+            ) : null}
+
             <div className="recruitment-control-grid">
               <label>
                 Interview stage / outcome
@@ -252,7 +295,7 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
                 <select value={interview.timeZone} onChange={(event) => setInterview({ ...interview, timeZone: event.target.value })} disabled={isHired || Boolean(offer)}>
                   {RECRUITMENT_TIMEZONES.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}
                 </select>
-                <small>The applicant portal will use this timezone instead of the viewer&apos;s device timezone.</small>
+                <small>Eastern Time is the LSCSO default. The applicant portal uses the timezone saved here.</small>
               </label>
               <label>
                 Scheduled date & time
@@ -261,29 +304,29 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
               </label>
               <label>
                 Result summary
-                <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail" disabled={isHired || Boolean(offer)} />
+                <input value={interview.result} onChange={(event) => setInterview({ ...interview, result: event.target.value })} placeholder="Required for Pass / Fail only" disabled={isHired || Boolean(offer)} />
               </label>
             </div>
             {application.interview_scheduled_at ? (
               <div className="recruitment-interview-time-summary">
                 <span>Saved interview time</span>
-                <strong>{formatRecruitmentDateTime(application.interview_scheduled_at, application.interview_timezone || interview.timeZone)}</strong>
-                <small>{recruitmentTimeZoneLabel(application.interview_timezone || interview.timeZone)} · stored as one absolute instant so the time stays consistent between devices.</small>
+                <strong>{formatRecruitmentDateTime(application.interview_scheduled_at, application.interview_timezone || DEFAULT_RECRUITMENT_TIME_ZONE)}</strong>
+                <small>{recruitmentTimeZoneLabel(application.interview_timezone || DEFAULT_RECRUITMENT_TIME_ZONE)} · saved as one absolute instant so the appointment stays consistent between devices.</small>
               </div>
             ) : null}
             <label className="recruitment-wide-label">Panel / interview notes<textarea rows={5} value={interview.notes} onChange={(event) => setInterview({ ...interview, notes: event.target.value })} disabled={isHired || Boolean(offer)} /></label>
             {!isHired && !offer ? (
               <div className="recruitment-interview-actions">
                 <button
-                  className={`portal-button ${["Failed", "No Show"].includes(interview.status) ? "portal-button--danger" : "portal-button--primary"}`}
+                  className={`portal-button ${interview.status === "Failed" ? "portal-button--danger" : "portal-button--primary"}`}
                   disabled={busy || !interviewRecordReady}
                   onClick={() => void saveInterview()}
                 >
-                  {["Failed", "No Show"].includes(interview.status) ? "Review final disposition" : "Save interview record"}
+                  {interview.status === "No Show" ? "Review no-show record" : interview.status === "Failed" ? "Review final disposition" : "Save interview record"}
                 </button>
                 <span className={interviewPassed ? "is-ready" : ""}>
                   {interview.status === "No Show"
-                    ? "No Show means the applicant did not attend the scheduled interview and closes the selection process."
+                    ? "No Show records that the scheduled interview was missed. The application stays open so Command can reschedule or close it separately."
                     : interview.status === "Failed"
                       ? "Failed means the interview was completed but the applicant was not selected to advance."
                       : interviewNeedsSchedule
@@ -335,22 +378,26 @@ export function ApplicationReview({ application, reviewers, names, notes, histor
       <PortalDialog
         open={Boolean(interviewDisposition)}
         onClose={() => { if (!busy) setInterviewDisposition(null); }}
-        eyebrow="Final interview disposition"
-        title={interviewDisposition === "No Show" ? `Close ${application.full_name}'s case as Interview No Show?` : `Record ${application.full_name} as not selected after interview?`}
+        eyebrow={interviewDisposition === "No Show" ? "Interview attendance" : "Final interview disposition"}
+        title={interviewDisposition === "No Show" ? `Record ${application.full_name} as an interview no-show?` : `Record ${application.full_name} as not selected after interview?`}
         description={interviewDisposition === "No Show"
-          ? "This records that the scheduled interview was not attended and closes the recruitment case."
+          ? "This records that the scheduled interview was not attended. The recruitment case remains open so Command can offer another interview or close it separately."
           : "This records that the interview was completed but the applicant was not selected to advance. It does not mean the applicant failed to attend or complete the interview."}
         dismissOnBackdrop={!busy}
-        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setInterviewDisposition(null)} type="button">Cancel</button><button className="portal-button portal-button--danger" disabled={busy || !interviewRecordReady} onClick={() => void confirmInterviewDisposition()} type="button">{busy ? "Recording…" : "Confirm final disposition"}</button></>}
+        footer={<><button className="portal-button portal-button--secondary" disabled={busy} onClick={() => setInterviewDisposition(null)} type="button">Cancel</button><button className={`portal-button ${interviewDisposition === "No Show" ? "portal-button--primary" : "portal-button--danger"}`} disabled={busy || !interviewRecordReady} onClick={() => void confirmInterviewDisposition()} type="button">{busy ? "Recording…" : interviewDisposition === "No Show" ? "Record no show" : "Confirm final disposition"}</button></>}
       >
         <div className="recruitment-decision-review">
           <div><span>Applicant</span><strong>{application.full_name}</strong></div>
           <div><span>Application</span><strong>{applicationLabel(application.application_number)}</strong></div>
-          <div><span>Disposition</span><strong>{interviewDisposition === "No Show" ? "Interview No Show" : "Interview Completed · Not Selected"}</strong></div>
+          <div><span>Disposition</span><strong>{interviewDisposition === "No Show" ? "Interview No Show · Process Open" : "Interview Completed · Not Selected"}</strong></div>
           {interview.scheduled ? <div><span>Scheduled interview</span><strong>{interview.scheduled.replace("T", " ")} · {recruitmentTimeZoneLabel(interview.timeZone)}</strong></div> : null}
           {interview.interviewer ? <div><span>Interviewer</span><strong>{names[interview.interviewer] ?? "Command"}</strong></div> : null}
           {interview.result.trim() ? <div className="recruitment-decision-review__wide"><span>Internal result summary</span><strong>{interview.result.trim()}</strong></div> : null}
-          <p className="recruitment-terminal-warning">Internal interview notes and the result summary remain internal. The applicant-facing page receives the official disposition language.</p>
+          <p className={interviewDisposition === "No Show" ? "recruitment-open-warning" : "recruitment-terminal-warning"}>
+            {interviewDisposition === "No Show"
+              ? "The no-show remains in the audit history. It does not close the application; Command may schedule another interview or use the separate closure control."
+              : "Internal interview notes and the result summary remain internal. The applicant-facing page receives the official disposition language."}
+          </p>
         </div>
       </PortalDialog>
 
