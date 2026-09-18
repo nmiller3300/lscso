@@ -55,7 +55,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     }
 
     const supabase = await createClient() as any;
-    const request = action === "interview"
+    const rpcRequest = action === "interview"
       ? supabase.rpc("command_recruitment_interview_action", {
           p_application_id: id,
           p_payload: body,
@@ -65,7 +65,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
           p_action: action,
           p_payload: body,
         });
-    const { data, error } = await request;
+    const { data, error } = await rpcRequest;
 
     if (error) {
       const message = typeof error.message === "string" && error.message.trim()
