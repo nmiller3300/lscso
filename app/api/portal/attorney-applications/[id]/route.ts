@@ -12,7 +12,7 @@ function actionErrorStatus(message: string) {
   const normalized = message.toLowerCase();
   if (normalized.includes("permission")) return 403;
   if (normalized.includes("unable to load") || normalized.includes("not found")) return 404;
-  if (normalized.includes("already") || normalized.includes("finalized")) return 409;
+  if (normalized.includes("already") || normalized.includes("finalized") || normalized.includes("only a case closed")) return 409;
   if (
     normalized.includes("invalid") ||
     normalized.includes("select ") ||
@@ -46,11 +46,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const supabase = await createClient() as any;
     const result = action === "appoint"
       ? await supabase.rpc("record_department_attorney_hire_website_only", { p_application_id: id })
-      : await supabase.rpc("command_department_attorney_application_action", {
-          p_application_id: id,
-          p_action: action,
-          p_payload: body,
-        });
+      : action === "reopen_no_show"
+        ? await supabase.rpc("command_reopen_recruitment_no_show", { p_application_id: id })
+        : await supabase.rpc("command_department_attorney_application_action", {
+            p_application_id: id,
+            p_action: action,
+            p_payload: body,
+          });
 
     const { data, error } = result;
     if (error) {
