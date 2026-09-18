@@ -183,23 +183,25 @@ export function DepartmentAttorneyApplicationForm({ questions }: { questions: Re
         <div className="application-success__seal">
           <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={160} height={160} />
         </div>
-        <p className="application-success__eyebrow">Department Attorney application transmitted</p>
-        <h2>Your legal-counsel candidate packet is in Command&apos;s queue.</h2>
-        <p className="application-success__lead">Your signed application was received successfully and assigned a permanent application number.</p>
+        <p className="application-success__eyebrow">Candidate record received · transmission verified</p>
+        <h2>Your Department Attorney record is now in Command review.</h2>
+        <p className="application-success__lead">Your signed candidate packet has been accepted by the LSCSO intake system and assigned a permanent application number.</p>
         <strong className="application-success__number">APP-{applicationNumber.padStart(4, "0")}</strong>
         <div className="application-success__timeline" aria-label="Department Attorney selection process">
-          <article className="is-active"><span>01</span><div><strong>Command Review</strong><small>Authorized Command staff review your complete application packet.</small></div></article>
-          <article><span>02</span><div><strong>Application Decision</strong><small>Command records an acceptance or denial after screening the packet.</small></div></article>
-          <article><span>03</span><div><strong>Follow-Up</strong><small>If selected, LSCSO will contact you on Discord regarding appointment and onboarding.</small></div></article>
+          <article className="is-active"><span>01</span><div><strong>Command Review</strong><small>Command reviews the complete legal-counsel candidate record.</small></div></article>
+          <article><span>02</span><div><strong>Application Decision</strong><small>An accepted written application advances to the required interview.</small></div></article>
+          <article><span>03</span><div><strong>Interview</strong><small>LSCSO records an official date, time, timezone, and interview outcome.</small></div></article>
+          <article><span>04</span><div><strong>Selection Decision</strong><small>A completed interview is reviewed and a final advancement decision is recorded.</small></div></article>
+          <article><span>05</span><div><strong>Appointment</strong><small>If selected, Command completes the Department Attorney personnel appointment and onboarding.</small></div></article>
         </div>
-        <div className="application-success__notice"><strong>Private applicant status page</strong><p>Save your private tracking link. Anyone with the link can view the applicant-facing status, so do not post it publicly.</p></div>
+        <div className="application-success__notice"><strong>Your private candidate portal</strong><p>Your tracking link becomes the live record of this process. Save it now. Anyone with the link can view the candidate-facing status, so do not post it publicly.</p></div>
         {trackingHref ? (
           <div className="button-row">
-            <a className="button button--dark" href={trackingHref}>Track My Application</a>
-            <button className="button button--outline" type="button" onClick={() => void copyTrackingLink()}>{trackingCopied ? "Tracking Link Copied" : "Copy Private Tracking Link"}</button>
+            <a className="button button--dark" href={trackingHref}>Open My Candidate Record</a>
+            <button className="button button--outline" type="button" onClick={() => void copyTrackingLink()}>{trackingCopied ? "Private Link Copied" : "Copy Private Tracking Link"}</button>
           </div>
         ) : null}
-        <div className="application-success__notice"><strong>What happens next?</strong><p>Command will review your legal experience, professional judgment, ethics, and scenario responses. Your private status page will show the current stage and any applicant-facing message from LSCSO.</p></div>
+        <div className="application-success__notice"><strong>What happens next?</strong><p>Command will review the record you submitted. If the written application is accepted, the next stage is a scheduled Department Attorney interview — not an automatic appointment. Your private candidate portal will update as each decision is recorded.</p></div>
         <p className="application-success__keep">Keep <b>APP-{applicationNumber.padStart(4, "0")}</b> and your private tracking link for your records.</p>
       </section>
     );
