@@ -11,6 +11,7 @@ import "./status.css";
 import "./communications.css";
 import "./offer.css";
 import "./attorney-status.css";
+import "../../candidate-experience.css";
 
 export const metadata: Metadata = {
   title: "Application Status",
