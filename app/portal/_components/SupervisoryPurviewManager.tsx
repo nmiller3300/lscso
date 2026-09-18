@@ -92,7 +92,7 @@ export function SupervisoryPurviewManager({
     setNotice("");
 
     if (action === "assign" && !supervisorId) {
-      setError("Select the supervisor who will hold primary purview over this member.");
+      setError("Select the supervisor who will hold direct purview over this member.");
       return;
     }
     if (reason.trim().length < 4) {
@@ -117,8 +117,8 @@ export function SupervisoryPurviewManager({
 
       const supervisor = supervisors.find((item) => item.profileId === supervisorId);
       setNotice(action === "assign"
-        ? `${selectedMember.displayName} is now in ${supervisor?.rank ?? "the selected supervisor"} ${supervisor?.displayName ?? ""}'s primary purview.`
-        : `${selectedMember.displayName} no longer has a primary supervisor assigned.`);
+        ? `${selectedMember.displayName} now has direct individual purview assigned to ${supervisor?.rank ?? "the selected supervisor"} ${supervisor?.displayName ?? ""}.`
+        : `${selectedMember.displayName} no longer has an individual purview exception assigned.`);
       setReason("");
       router.refresh();
     } catch (caught) {
@@ -137,32 +137,32 @@ export function SupervisoryPurviewManager({
     <>
       <section className="portal-control-banner" style={{ marginBottom: 16 }}>
         <div>
-          <span>Supervisor chain</span>
-          <strong>Assign personnel to a supervisor&apos;s primary purview.</strong>
-          <p>Primary purview controls who appears in a supervisor&apos;s My Personnel &amp; Supervision workspace and which personnel records they can access through their supervisory authority.</p>
+          <span>Exception authority</span>
+          <strong>Assign direct individual purview when division-based supervision is not enough.</strong>
+          <p>Normal supervisor scope follows the supervisor&apos;s active Primary division assignment. Use this tool only for a specific individual exception, special detail, temporary arrangement, probation oversight, or other documented need.</p>
         </div>
         <div className="portal-control-actions">
-          <button className="portal-button portal-button--primary" onClick={() => setOpen(true)} type="button">Supervisor / Purview</button>
+          <button className="portal-button portal-button--primary" onClick={() => setOpen(true)} type="button">Individual Purview Exception</button>
         </div>
       </section>
 
       <PortalDialog
         open={open && Boolean(selectedMember)}
         onClose={close}
-        eyebrow="Personnel authority"
-        title="Supervisor / Purview"
-        description="Assign one primary supervisor to a personnel member. The relationship is immediately reflected in the supervisor's workspace and personnel-record access."
+        eyebrow="Exception authority"
+        title="Individual Purview Exception"
+        description="Create a direct person-to-person supervisory relationship outside the normal division-driven scope. Division assignments remain the default source of supervisory purview."
         dismissOnBackdrop={!busy}
         footer={
           <>
             {selectedMember?.currentSupervisorId ? (
               <button className="portal-button portal-button--danger" disabled={busy || reason.trim().length < 4} onClick={() => void save("remove")} type="button">
-                {busy ? "Updating…" : "Remove primary supervisor"}
+                {busy ? "Updating…" : "Remove individual exception"}
               </button>
             ) : null}
             <button className="portal-button portal-button--secondary" disabled={busy} onClick={close} type="button">Close</button>
             <button className="portal-button portal-button--primary" disabled={busy || !supervisorId || !eligibleSupervisors.some((item) => item.profileId === supervisorId)} form="supervisory-purview-form" type="submit">
-              {busy ? "Updating…" : "Assign to purview"}
+              {busy ? "Updating…" : "Assign individual purview"}
             </button>
           </>
         }
@@ -181,12 +181,12 @@ export function SupervisoryPurviewManager({
             </label>
 
             <div className="portal-call-sign-note" style={{ marginBottom: 14 }}>
-              <strong style={{ display: "block", marginBottom: 4 }}>Current primary supervisor</strong>
-              {selectedMember.currentSupervisorLabel || "No primary supervisor assigned"}
+              <strong style={{ display: "block", marginBottom: 4 }}>Current individual supervisor exception</strong>
+              {selectedMember.currentSupervisorLabel || "No individual exception assigned"}
             </div>
 
             <label className="portal-call-sign-field">
-              Primary supervisor
+              Direct supervisor
               <select value={supervisorId} onChange={(event) => setSupervisorId(event.target.value)} required>
                 <option value="">Select supervisor</option>
                 {eligibleSupervisors.map((supervisor) => (
@@ -202,17 +202,17 @@ export function SupervisoryPurviewManager({
             ) : null}
 
             <label className="portal-call-sign-field">
-              Assignment reason
+              Exception reason
               <textarea
                 value={reason}
                 onChange={(event) => setReason(event.target.value)}
-                placeholder="Patrol supervisory assignment, command reassignment, shift change, etc."
+                placeholder="Probation oversight, special detail, temporary command arrangement, conflict reassignment, etc."
                 rows={3}
                 required
               />
             </label>
 
-            <p className="portal-call-sign-note">A member can have one active primary supervisor at a time. Reassigning them automatically ends the previous primary relationship while retaining the prior relationship in the audit history.</p>
+            <p className="portal-call-sign-note">Division assignment remains the normal supervisory chain. This creates one direct individual relationship and retains previous relationships in the audit history when reassigned or removed.</p>
 
             {error ? <div className="portal-form-error" role="alert">{error}</div> : null}
             {notice ? <div className="portal-form-success" role="status"><strong>Purview updated</strong><span>{notice}</span></div> : null}
