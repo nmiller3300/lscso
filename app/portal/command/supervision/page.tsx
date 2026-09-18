@@ -37,7 +37,9 @@ export default async function SupervisionWorkspacePage() {
       status: row.status,
       paths: [],
     };
-    const path = [row.unitName, row.authorityType].filter(Boolean).join(" · ") || row.scope;
+    const path = purview.standingDepartmentAuthority
+      ? ([row.unitName, row.assignmentType].filter(Boolean).join(" · ") || "Department personnel")
+      : ([row.unitName, row.authorityType].filter(Boolean).join(" · ") || row.scope);
     if (!existing.paths.includes(path)) existing.paths.push(path);
     grouped.set(row.profileId, existing);
   }
@@ -58,7 +60,8 @@ export default async function SupervisionWorkspacePage() {
     >
       <div className="command-v2-supervision-layout">
         <section className="portal-panel command-v2-purview-panel">
-          <div className="portal-panel-heading"><div><p>My scope</p><h2>Personnel under my purview</h2></div>{purview.standingDepartmentAuthority ? <span>Department authority</span> : null}</div>
+          <div className="portal-panel-heading"><div><p>My scope</p><h2>Personnel under my purview</h2></div>{purview.standingDepartmentAuthority ? <span>Department-wide authority</span> : null}</div>
+          {purview.standingDepartmentAuthority ? <p className="command-v2-compact-copy">Your rank carries standing department-wide supervisory access. Individual rows below show personnel assignment context, not separate command grants.</p> : null}
 
           {purview.structuredAuthorityAvailable && people.length ? (
             <div className="command-v2-purview-list">
