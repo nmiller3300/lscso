@@ -85,30 +85,30 @@ export function applicationNextAction(
     if (status === "Submitted") return "Assign a Command reviewer and begin legal-counsel screening.";
     if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
     if (status === "Accepted") {
-      if (interviewStatus === "Passed") return "Interview passed — complete the Department Attorney appointment.";
-      if (interviewStatus === "Failed") return "Interview failed — applicant is not eligible for appointment.";
-      if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
-      if (interviewStatus === "No Show") return "Interview no-show — selection process closed.";
-      if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail.";
+      if (interviewStatus === "Passed") return "Interview completed — applicant was selected to advance to Department Attorney appointment.";
+      if (interviewStatus === "Failed") return "Interview completed — applicant was not selected to advance to Department Attorney appointment.";
+      if (interviewStatus === "Scheduled") return "Interview scheduled — complete the interview and record the selection decision.";
+      if (interviewStatus === "No Show") return "Interview was not attended — selection process closed.";
+      if (interviewStatus === "Completed") return "Interview completed — record the selection decision.";
       return "Contact the applicant and schedule the required Department Attorney interview.";
     }
     return "Continue the documented Department Attorney selection workflow.";
   }
 
-  if (hired || status === "Hired") return "Recruit personnel record created — continue onboarding and training.";
+  if (hired || status === "Hired") return "Personnel record created — continue onboarding and training.";
   if (status === "Denied") return "Application closed — no interview will be scheduled.";
   if (status === "Withdrawn") return "Application withdrawn — no further action required.";
   if (status === "Archived") return "Selection process closed — no further recruitment action is pending.";
   if (status === "Submitted") return "Assign a Captain+ reviewer and begin Command screening.";
   if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
   if (status === "Accepted") {
-    if (interviewStatus === "Passed") return "Interview passed — complete the employment-offer stage before Recruit appointment.";
-    if (interviewStatus === "Failed") return "Interview failed — applicant is not eligible for a Recruit appointment.";
-    if (interviewStatus === "Scheduled") return "Interview scheduled — complete and record the interview outcome.";
-    if (interviewStatus === "No Show") return "Interview no-show — close the selection process.";
-    if (interviewStatus === "Completed") return "Interview completed — record Pass or Fail.";
+    if (interviewStatus === "Passed") return "Interview completed — applicant was selected to advance to the employment-offer stage.";
+    if (interviewStatus === "Failed") return "Interview completed — applicant was not selected to advance to the employment-offer stage.";
+    if (interviewStatus === "Scheduled") return "Interview scheduled — complete the interview and record the selection decision.";
+    if (interviewStatus === "No Show") return "Interview was not attended — close the selection process.";
+    if (interviewStatus === "Completed") return "Interview completed — record the selection decision.";
     return "Contact the applicant on Discord and schedule the required interview.";
   }
-  if (status === "Interview") return "Legacy record — complete the interview record before any Recruit appointment.";
+  if (status === "Interview") return "Legacy record — complete the interview record before any appointment.";
   return "Continue the documented recruitment workflow.";
 }
