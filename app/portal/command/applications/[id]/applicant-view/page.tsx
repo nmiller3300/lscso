@@ -8,6 +8,7 @@ import "../../../../../join/application/status/[token]/status.css";
 import "../../../../../join/application/status/[token]/communications.css";
 import "../../../../../join/application/status/[token]/offer.css";
 import "../../../../../join/application/status/[token]/attorney-status.css";
+import "../../../../../join/application/candidate-experience.css";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
