@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { CinematicOrb } from "../_components/CinematicOrb";
 import { PortalCinematicBackdrop } from "./_components/PortalCinematicBackdrop";
 import { PortalResponsiveCinematicBackdrop } from "./_components/PortalResponsiveCinematicBackdrop";
 import { PortalLogin } from "./_components/PortalLogin";
@@ -95,27 +96,28 @@ export default function PortalEntryPage() {
             Personnel Restricted
           </div>
 
-          <div className="portal-glow-login__card">
-            <div className="portal-glow-login__content">
-              <div className="portal-glow-login__mark">
-                <Image
-                  src="/images/lscso-patch-color.png"
-                  alt="Los Santos County Sheriff’s Office patch"
-                  width={76}
-                  height={76}
-                  priority
-                />
-              </div>
-
-              <header className="portal-glow-login__heading">
-                <span>LSCSO Personnel Operations</span>
-                <h2>Secure Sign In</h2>
-                <p>Authenticate with the credentials assigned to your personnel account.</p>
-              </header>
-
-              <PortalLogin />
+          <CinematicOrb
+            className="portal-glow-login__card"
+            contentClassName="portal-glow-login__content"
+          >
+            <div className="portal-glow-login__mark">
+              <Image
+                src="/images/lscso-patch-color.png"
+                alt="Los Santos County Sheriff’s Office patch"
+                width={76}
+                height={76}
+                priority
+              />
             </div>
-          </div>
+
+            <header className="portal-glow-login__heading">
+              <span>LSCSO Personnel Operations</span>
+              <h2>Secure Sign In</h2>
+              <p>Authenticate with the credentials assigned to your personnel account.</p>
+            </header>
+
+            <PortalLogin />
+          </CinematicOrb>
 
           <div className="portal-glow-login__below">
             <div className="portal-glow-login__security">
