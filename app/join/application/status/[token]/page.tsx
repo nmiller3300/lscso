@@ -3,15 +3,18 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { PortalResponsiveCinematicBackdrop } from "../../../../portal/_components/PortalResponsiveCinematicBackdrop";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "../ApplicantStatusView";
 import { DepartmentAttorneyStatusView } from "../DepartmentAttorneyStatusView";
 import { ApplicantStatusLiveRefresh } from "./ApplicantStatusLiveRefresh";
+import "../../../../portal/portal-login-responsive-cinematic.css";
 import "../../application.css";
 import "./status.css";
 import "./communications.css";
 import "./offer.css";
 import "./attorney-status.css";
 import "../../candidate-experience.css";
+import "./candidate-status-experience.css";
 
 export const metadata: Metadata = {
   title: "Application Status",
@@ -85,8 +88,41 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
   const applicantMessages = (Array.isArray(messageData) ? messageData : []) as ApplicantMessage[];
   const liveVersion = buildVersion(record, applicantMessages);
   const liveRefresh = <ApplicantStatusLiveRefresh token={rawToken} initialVersion={liveVersion} />;
+  const openNoShow = record.status === "Accepted"
+    && record.interview_status === "No Show"
+    && !String(record.closure_code ?? "").trim();
+  const candidateView = record.application_track === "Department Attorney"
+    ? <DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} />
+    : <ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} />;
 
-  return record.application_track === "Department Attorney"
-    ? <>{liveRefresh}<DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} /></>
-    : <>{liveRefresh}<ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} /></>;
+  return (
+    <>
+      {liveRefresh}
+      <div className="candidate-record-portal candidate-status-experience">
+        <PortalResponsiveCinematicBackdrop />
+        <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
+        <Image
+          className="candidate-status-watermark"
+          src="/images/lscso-patch-color.png"
+          alt=""
+          width={840}
+          height={840}
+          aria-hidden="true"
+          priority
+        />
+        {openNoShow ? (
+          <aside className="candidate-no-show-notice" aria-label="Interview no-show next steps">
+            <div className="candidate-no-show-notice__mark" aria-hidden="true">↻</div>
+            <div>
+              <p>Interview attendance · candidate record remains open</p>
+              <strong>You may still be considered for another interview.</strong>
+              <span>If you want another opportunity to interview, contact LSCSO Recruitment or Command through Discord. They can review the circumstances and may offer another interview.</span>
+            </div>
+            <em>A second interview is not automatic or guaranteed. Continue monitoring this private record for any new scheduled time.</em>
+          </aside>
+        ) : null}
+        {candidateView}
+      </div>
+    </>
+  );
 }
