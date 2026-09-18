@@ -1,36 +1,95 @@
-.attorney-status-hero { min-height: 100vh; padding: 72px 0 96px; background: radial-gradient(circle at 18% 10%, rgba(180, 154, 84, .12), transparent 34%), #0a0e13; }
-.attorney-status-card { max-width: 1060px; margin: 0 auto; border: 1px solid rgba(215, 194, 128, .18); background: rgba(14, 19, 26, .97); box-shadow: 0 30px 90px rgba(0,0,0,.42); color: #edf0f2; }
-.attorney-status-header { display: flex; justify-content: space-between; gap: 28px; align-items: center; padding: 30px 34px; border-bottom: 1px solid rgba(255,255,255,.08); }
-.attorney-status-agency { display: flex; gap: 20px; align-items: center; }
-.attorney-status-agency p, .attorney-status-title p, .attorney-status-next span, .attorney-status-message span, .attorney-status-messages > div > span, .attorney-status-number span, .attorney-status-facts span { margin: 0; text-transform: uppercase; letter-spacing: .13em; font-size: .72rem; color: #cdbb80; }
-.attorney-status-agency strong { display: block; margin-top: 4px; font-size: 1.15rem; }
-.attorney-status-agency span { display: block; margin-top: 5px; color: #aeb7c0; font-size: .86rem; }
-.attorney-status-number { text-align: right; }
-.attorney-status-number strong { display: block; margin-top: 6px; font-size: 1.2rem; }
-.attorney-status-title { padding: 42px 34px 30px; max-width: 820px; }
-.attorney-status-title h1 { margin: 8px 0 12px; font-size: clamp(2rem, 5vw, 3.7rem); line-height: 1.02; }
-.attorney-status-title > span { color: #bac2ca; font-size: 1.03rem; line-height: 1.7; }
-.attorney-status-timeline { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 0 34px 34px; }
-.attorney-status-timeline article { display: flex; gap: 14px; padding: 18px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.025); }
-.attorney-status-timeline article > span { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%; border: 1px solid rgba(205,187,128,.38); color: #d8c785; font-weight: 700; }
-.attorney-status-timeline strong, .attorney-status-timeline small { display: block; }
-.attorney-status-timeline small { margin-top: 4px; color: #9fa9b3; line-height: 1.4; }
-.attorney-status-timeline .is-current { border-color: rgba(205,187,128,.48); background: rgba(205,187,128,.07); }
-.attorney-status-timeline .is-complete > span { background: #cdbb80; color: #11161b; }
-.attorney-status-facts { display: grid; grid-template-columns: repeat(5, 1fr); border-top: 1px solid rgba(255,255,255,.08); border-bottom: 1px solid rgba(255,255,255,.08); }
-.attorney-status-facts article { padding: 20px 18px; min-width: 0; }
-.attorney-status-facts article + article { border-left: 1px solid rgba(255,255,255,.07); }
-.attorney-status-facts strong { display: block; margin-top: 7px; overflow-wrap: anywhere; }
-.attorney-status-next, .attorney-status-message, .attorney-status-messages { margin: 30px 34px; padding: 24px; border: 1px solid rgba(205,187,128,.18); background: rgba(205,187,128,.045); }
-.attorney-status-next h2 { margin: 7px 0 0; font-size: 1.2rem; line-height: 1.55; }
-.attorney-status-message p { margin: 10px 0 0; color: #d9dee2; line-height: 1.65; white-space: pre-wrap; }
-.attorney-status-messages > div h2 { margin: 6px 0 18px; }
-.attorney-status-messages article { padding: 16px 0; border-top: 1px solid rgba(255,255,255,.08); }
-.attorney-status-messages article header { display: flex; justify-content: space-between; gap: 16px; color: #aeb7c0; font-size: .82rem; }
-.attorney-status-messages article p { margin: 10px 0 0; line-height: 1.6; white-space: pre-wrap; }
-.attorney-status-footer { display: flex; justify-content: space-between; gap: 20px; align-items: center; padding: 26px 34px 34px; }
-.attorney-status-footer p { margin: 0; color: #909ba6; }
-.attorney-status-card--accepted { border-color: rgba(127, 190, 143, .32); }
-.attorney-status-card--closed { border-color: rgba(188, 102, 102, .30); }
-@media (max-width: 800px) { .attorney-status-header, .attorney-status-footer { align-items: flex-start; flex-direction: column; } .attorney-status-number { text-align: left; } .attorney-status-timeline { grid-template-columns: 1fr; } .attorney-status-facts { grid-template-columns: 1fr 1fr; } .attorney-status-facts article + article { border-left: 0; } }
-@media (max-width: 520px) { .attorney-status-hero { padding: 28px 0 60px; } .attorney-status-header, .attorney-status-title, .attorney-status-timeline, .attorney-status-footer { padding-left: 20px; padding-right: 20px; } .attorney-status-next, .attorney-status-message, .attorney-status-messages { margin-left: 20px; margin-right: 20px; } .attorney-status-agency img { width: 82px; height: 82px; } .attorney-status-facts { grid-template-columns: 1fr; } }
+.attorney-status-page { min-height: 100vh; background: #080c11; color: #eef1f4; }
+.attorney-candidate-shell { min-height: 100vh; padding: 42px 20px 72px; background: radial-gradient(circle at 14% 0%, rgba(202, 174, 94, .12), transparent 30%), radial-gradient(circle at 88% 18%, rgba(81, 112, 137, .08), transparent 28%), #080c11; }
+.attorney-candidate-card { width: min(1120px, 100%); margin: 0 auto; border: 1px solid rgba(215, 194, 128, .2); background: rgba(13, 18, 24, .98); box-shadow: 0 30px 90px rgba(0,0,0,.42); }
+.attorney-candidate-card--closed { border-color: rgba(188, 102, 102, .34); }
+.attorney-candidate-card--accepted, .attorney-candidate-card--complete { border-color: rgba(127, 190, 143, .34); }
+
+.attorney-candidate-header { display: flex; align-items: center; justify-content: space-between; gap: 26px; padding: 26px 30px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.attorney-candidate-agency { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.attorney-candidate-agency img { flex: 0 0 auto; }
+.attorney-candidate-agency p, .attorney-candidate-number span, .attorney-candidate-kicker, .attorney-candidate-action > span, .attorney-section-heading span, .attorney-interview-grid span, .attorney-detail-grid span, .attorney-candidate-message > span { margin: 0; color: #cdbb80; font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; }
+.attorney-candidate-agency strong { display: block; margin-top: 4px; font-size: 1.15rem; }
+.attorney-candidate-agency div > span { display: block; margin-top: 4px; color: #939da7; font-size: .85rem; }
+.attorney-candidate-number { text-align: right; }
+.attorney-candidate-number strong { display: block; margin-top: 6px; font-size: 1.25rem; letter-spacing: .04em; }
+
+.attorney-candidate-overview { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(280px, .75fr); gap: 24px; padding: 38px 30px 30px; }
+.attorney-candidate-overview__copy { min-width: 0; }
+.attorney-candidate-overview__copy h1 { margin: 9px 0 14px; max-width: 760px; font-size: clamp(2rem, 5vw, 4rem); line-height: 1.02; letter-spacing: -.035em; }
+.attorney-candidate-overview__copy p { margin: 0; max-width: 760px; color: #b7c0c8; font-size: 1.03rem; line-height: 1.7; }
+.attorney-candidate-action { align-self: start; padding: 20px; border: 1px solid rgba(205,187,128,.22); background: rgba(205,187,128,.055); }
+.attorney-candidate-action strong { display: block; margin-top: 7px; font-size: 1.12rem; }
+.attorney-candidate-action p { margin: 10px 0 0; color: #aeb7c0; line-height: 1.55; }
+
+.attorney-candidate-progress { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; padding: 0 30px 34px; }
+.attorney-candidate-progress article { min-width: 0; padding: 16px; border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.018); }
+.attorney-candidate-progress article > span { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 12px; border: 1px solid rgba(205,187,128,.34); border-radius: 50%; color: #d8c785; font-size: .8rem; font-weight: 800; }
+.attorney-candidate-progress strong, .attorney-candidate-progress small { display: block; }
+.attorney-candidate-progress strong { font-size: .95rem; }
+.attorney-candidate-progress small { margin-top: 6px; color: #89949f; line-height: 1.4; }
+.attorney-candidate-progress .is-current { border-color: rgba(205,187,128,.5); background: rgba(205,187,128,.07); }
+.attorney-candidate-progress .is-complete { border-color: rgba(127,190,143,.24); background: rgba(127,190,143,.035); }
+.attorney-candidate-progress .is-complete > span { border-color: transparent; background: #cdbb80; color: #10151a; }
+
+.attorney-interview-card, .attorney-candidate-details, .attorney-candidate-messages { margin: 0 30px 30px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.018); }
+.attorney-interview-card { border-color: rgba(205,187,128,.22); }
+.attorney-section-heading { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 20px 22px; border-bottom: 1px solid rgba(255,255,255,.07); }
+.attorney-section-heading h2 { margin: 5px 0 0; font-size: 1.18rem; }
+.attorney-section-heading b { padding: 7px 10px; border: 1px solid rgba(205,187,128,.26); color: #e3d290; font-size: .78rem; font-weight: 700; }
+.attorney-interview-grid { display: grid; grid-template-columns: 1.2fr 1fr 1.2fr; }
+.attorney-interview-grid article { min-width: 0; padding: 22px; }
+.attorney-interview-grid article + article { border-left: 1px solid rgba(255,255,255,.07); }
+.attorney-interview-grid strong { display: block; margin-top: 8px; font-size: 1rem; line-height: 1.45; }
+.attorney-interview-grid small { display: block; margin-top: 9px; color: #909aa4; line-height: 1.5; }
+
+.attorney-detail-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.attorney-detail-grid article { min-width: 0; padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.attorney-detail-grid article:not(:nth-child(3n + 1)) { border-left: 1px solid rgba(255,255,255,.06); }
+.attorney-detail-grid strong { display: block; margin-top: 7px; overflow-wrap: anywhere; }
+
+.attorney-candidate-message { margin: 0 30px 30px; padding: 22px; border: 1px solid rgba(205,187,128,.2); background: rgba(205,187,128,.045); }
+.attorney-candidate-message p { margin: 10px 0 0; color: #d8dde2; line-height: 1.65; white-space: pre-wrap; }
+.attorney-message-list { padding: 0 22px 8px; }
+.attorney-message-list article { padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,.07); }
+.attorney-message-list article:last-child { border-bottom: 0; }
+.attorney-message-list header { display: flex; justify-content: space-between; gap: 14px; color: #9aa4ae; font-size: .82rem; }
+.attorney-message-list p { margin: 10px 0 0; line-height: 1.65; white-space: pre-wrap; }
+
+.attorney-candidate-footer { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 0 30px 32px; }
+.attorney-candidate-footer p { margin: 0; color: #89949f; }
+
+.recruitment-interview-time-summary { margin: 18px 0; padding: 16px 18px; border: 1px solid rgba(205,187,128,.2); background: rgba(205,187,128,.045); }
+.recruitment-interview-time-summary span, .recruitment-interview-time-summary strong, .recruitment-interview-time-summary small { display: block; }
+.recruitment-interview-time-summary span { color: #cdbb80; font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+.recruitment-interview-time-summary strong { margin-top: 7px; }
+.recruitment-interview-time-summary small { margin-top: 5px; color: #8f9aa4; }
+
+@media (max-width: 900px) {
+  .attorney-candidate-overview { grid-template-columns: 1fr; }
+  .attorney-candidate-progress { grid-template-columns: 1fr 1fr; }
+  .attorney-interview-grid { grid-template-columns: 1fr; }
+  .attorney-interview-grid article + article { border-left: 0; border-top: 1px solid rgba(255,255,255,.07); }
+  .attorney-detail-grid { grid-template-columns: 1fr 1fr; }
+  .attorney-detail-grid article:not(:nth-child(3n + 1)) { border-left: 0; }
+  .attorney-detail-grid article:nth-child(even) { border-left: 1px solid rgba(255,255,255,.06); }
+}
+
+@media (max-width: 620px) {
+  .attorney-candidate-shell { padding: 18px 10px 46px; }
+  .attorney-candidate-header { align-items: flex-start; flex-direction: column; padding: 20px; }
+  .attorney-candidate-agency { align-items: flex-start; gap: 14px; }
+  .attorney-candidate-agency img { width: 68px; height: 68px; }
+  .attorney-candidate-number { width: 100%; padding-top: 14px; border-top: 1px solid rgba(255,255,255,.07); text-align: left; }
+  .attorney-candidate-overview { padding: 28px 20px 22px; }
+  .attorney-candidate-overview__copy h1 { font-size: clamp(2rem, 11vw, 3rem); }
+  .attorney-candidate-progress { grid-template-columns: 1fr; padding: 0 20px 26px; }
+  .attorney-candidate-progress article { display: grid; grid-template-columns: 42px 1fr; gap: 12px; align-items: center; }
+  .attorney-candidate-progress article > span { margin: 0; }
+  .attorney-interview-card, .attorney-candidate-details, .attorney-candidate-messages, .attorney-candidate-message { margin-left: 20px; margin-right: 20px; }
+  .attorney-section-heading { flex-direction: column; }
+  .attorney-detail-grid { grid-template-columns: 1fr; }
+  .attorney-detail-grid article:nth-child(even) { border-left: 0; }
+  .attorney-message-list header { flex-direction: column; gap: 4px; }
+  .attorney-candidate-footer { align-items: stretch; flex-direction: column; padding: 0 20px 24px; }
+  .attorney-candidate-footer .button { width: 100%; text-align: center; }
+}
