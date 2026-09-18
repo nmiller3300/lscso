@@ -1,5 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
+import {
+  formatRecruitmentDateTime,
+  normalizeRecruitmentTimeZone,
+  recruitmentTimeZoneLabel,
+} from "@/lib/recruitment/timezones";
 import { EmploymentOfferAcceptance } from "./EmploymentOfferAcceptance";
 import { LocalDateTime } from "./[token]/LocalDateTime";
 
@@ -11,6 +16,8 @@ export type ApplicantStatusRecord = {
   submitted_at: string;
   updated_at: string;
   interview_scheduled_at: string | null;
+  applicant_timezone?: string | null;
+  interview_timezone?: string | null;
   applicant_status_message: string | null;
   hired: boolean;
   closure_code?: string | null;
@@ -33,364 +40,223 @@ export type ApplicantMessage = {
 };
 
 type CandidateView = {
-  title: string;
   eyebrow: string;
-  message: string;
-  nextAction: string;
-  currentStep: number;
-  currentComplete?: boolean;
-  terminal?: boolean;
-  tone: "review" | "accepted" | "closed" | "complete";
-};
-
-type TimelineStep = {
-  number: string;
   title: string;
-  description: string;
+  message: string;
+  next: string;
+  stage: number;
+  tone: "review" | "accepted" | "closed" | "complete";
+  actionLabel: string;
 };
 
-function closureStep(record: ApplicantStatusRecord) {
-  if (record.closure_code === "Offer Terminated" || record.offer_id) return 4;
-  if (
-    record.closure_code === "Interview No Show"
-    || record.closure_code === "Interview Failed"
-    || ["Scheduled", "Completed", "Passed", "Failed", "No Show"].includes(record.interview_status)
-  ) return 3;
-  return 2;
+function applicationLabel(number: number | string) {
+  return `APP-${String(number).padStart(4, "0")}`;
 }
 
-function shortReason(reason?: string | null) {
-  const clean = String(reason ?? "").trim();
-  if (!clean) return "";
-  return clean.length > 180 ? `${clean.slice(0, 177)}…` : clean;
+function publicInterviewStatus(status?: string | null) {
+  switch (status) {
+    case "Scheduled": return "Scheduled";
+    case "Completed": return "Completed · Decision Pending";
+    case "Passed": return "Completed · Selected to Advance";
+    case "Failed": return "Completed · Not Selected";
+    case "No Show": return "Not Attended";
+    default: return "Not Scheduled";
+  }
 }
 
-function candidateView(record: ApplicantStatusRecord): CandidateView {
+function viewFor(record: ApplicantStatusRecord): CandidateView {
+  const closureCode = String(record.closure_code ?? "").trim();
+  const reason = String(record.closure_reason ?? "").trim();
+
   if (record.hired || record.status === "Hired") {
     return {
-      title: "Hired — Recruit Appointment Complete",
-      eyebrow: "Selected and appointed",
-      message: "You were selected and have been appointed as an LSCSO Recruit.",
-      nextAction: "Follow the onboarding and training instructions provided by LSCSO personnel.",
-      currentStep: 5,
-      currentComplete: true,
+      eyebrow: "Appointment complete",
+      title: "Appointed to the Los Santos County Sheriff’s Office",
+      message: "Your selection process is complete and your LSCSO personnel appointment has been recorded.",
+      next: "Follow the portal-access, onboarding, and training instructions provided by LSCSO personnel.",
+      stage: 6,
       tone: "complete",
-    };
-  }
-
-  const reason = String(record.closure_reason ?? "").trim();
-  const closureCode = String(record.closure_code ?? "").trim();
-
-  if (closureCode === "Application Denied" || record.status === "Denied") {
-    return {
-      title: "Not Selected",
-      eyebrow: "Application denied",
-      message: reason
-        ? `You were not selected to continue in the LSCSO recruitment process. Reason: ${reason}`
-        : "You were not selected to continue in the LSCSO recruitment process. A specific denial reason is not available on this record.",
-      nextAction: "This application is closed. No further action is available on this application.",
-      currentStep: 2,
-      terminal: true,
-      tone: "closed",
+      actionLabel: "Onboarding",
     };
   }
 
   if (closureCode === "Interview Failed" || record.interview_status === "Failed") {
     return {
-      title: "Not Selected — Interview Failed",
-      eyebrow: "Interview failed",
-      message: reason
-        ? `You were not selected because you did not pass the required interview. Reason: ${reason}`
-        : "You were not selected because you did not pass the required interview.",
-      nextAction: "This application is closed. You will not advance to an employment offer or Recruit appointment.",
-      currentStep: 3,
-      terminal: true,
+      eyebrow: "Interview decision",
+      title: "Interview Completed — Not Selected",
+      message: reason || "You completed the required interview. After review, LSCSO determined the interview did not meet the standard required to advance in the selection process.",
+      next: "No further action is required on this application. This disposition means the interview was completed and a selection decision was made; it does not mean you failed to attend or finish the interview.",
+      stage: 4,
       tone: "closed",
+      actionLabel: "Final disposition",
     };
   }
 
   if (closureCode === "Interview No Show" || record.interview_status === "No Show") {
     return {
-      title: "Not Selected — Interview No Show",
-      eyebrow: "No show · process closed",
-      message: reason || "You were not selected because you did not attend the required scheduled interview.",
-      nextAction: "This application is closed. No second interview will be scheduled for this application.",
-      currentStep: 3,
-      terminal: true,
+      eyebrow: "Interview disposition",
+      title: "Interview Not Attended — Process Closed",
+      message: reason || "The required scheduled interview was not attended, so this selection process was closed.",
+      next: "No further action is available on this application unless LSCSO contacts you.",
+      stage: 3,
       tone: "closed",
+      actionLabel: "Final disposition",
     };
   }
 
-  if (closureCode === "Offer Terminated") {
+  if (closureCode === "Offer Terminated" || record.offer_status === "Terminated") {
     return {
-      title: "Not Selected — Employment Offer Terminated",
-      eyebrow: "Offer terminated · process closed",
-      message: reason
-        ? `Your employment offer was terminated and you were not selected for appointment. Reason: ${reason}`
-        : "Your employment offer was terminated and you were not selected for appointment.",
-      nextAction: "This application is closed. The terminated offer can no longer be accepted.",
-      currentStep: 4,
-      terminal: true,
+      eyebrow: "Employment offer closed",
+      title: "Employment Offer Terminated — Process Closed",
+      message: reason || "Your employment offer was terminated and this recruitment process has been closed.",
+      next: "No further action is available on this application unless LSCSO Recruitment contacts you.",
+      stage: 5,
       tone: "closed",
+      actionLabel: "Final disposition",
     };
   }
 
-  if (closureCode === "Command Closure" || (record.status === "Archived" && reason)) {
+  if (record.offer_status === "Expired") {
     return {
-      title: "Selection Process Closed — Not Selected",
-      eyebrow: "Closed by LSCSO Recruitment",
-      message: reason ? `You were not selected. Reason: ${reason}` : "Your selection process was closed by LSCSO Recruitment.",
-      nextAction: "This application is closed. No further action is available on this application.",
-      currentStep: closureStep(record),
-      terminal: true,
+      eyebrow: "Employment offer expired",
+      title: "Employment Offer Expired",
+      message: "The employment offer deadline passed before the offer was accepted.",
+      next: "No action is available on the expired offer unless LSCSO Recruitment issues a new offer or contacts you with additional instructions.",
+      stage: 5,
       tone: "closed",
+      actionLabel: "Offer expired",
     };
   }
 
-  if (record.status === "Withdrawn" || closureCode === "Application Withdrawn") {
+  if (record.status === "Denied" || closureCode === "Application Denied") {
     return {
+      eyebrow: "Application decision",
+      title: "Application Not Selected",
+      message: reason || "Your written application was reviewed and was not selected to advance to interview.",
+      next: "This application is closed. No further action is required unless LSCSO contacts you.",
+      stage: 2,
+      tone: "closed",
+      actionLabel: "Final disposition",
+    };
+  }
+
+  if (record.status === "Withdrawn") {
+    return {
+      eyebrow: "Application withdrawn",
       title: "Application Withdrawn",
-      eyebrow: "Application closed",
-      message: "Your application was withdrawn and is no longer active in the LSCSO recruitment process.",
-      nextAction: "No further action is available on this application.",
-      currentStep: 2,
-      terminal: true,
+      message: "This application was withdrawn and is no longer active in the LSCSO selection process.",
+      next: "No further action is available on this application.",
+      stage: 2,
       tone: "closed",
+      actionLabel: "Closed",
     };
   }
 
-  if (record.status === "Archived") {
+  if (record.status === "Archived" || closureCode) {
+    const interviewReached = record.interview_status && record.interview_status !== "Not Scheduled";
+    const offerReached = Boolean(record.offer_id || record.offer_status);
     return {
-      title: "Selection Process Closed",
-      eyebrow: "Application closed",
-      message: reason || "Your application is no longer active in the LSCSO recruitment process.",
-      nextAction: "No further action is available on this application.",
-      currentStep: closureStep(record),
-      terminal: true,
+      eyebrow: "Selection process closed",
+      title: "Recruitment Process Closed",
+      message: reason || "This LSCSO recruitment process has been closed.",
+      next: "No further action is available on this application unless LSCSO contacts you.",
+      stage: offerReached ? 5 : interviewReached ? 4 : 2,
       tone: "closed",
+      actionLabel: "Closed",
     };
   }
 
   if (record.status === "Accepted") {
-    if (record.interview_status === "Scheduled") {
-      return {
-        title: "Application Accepted — Interview Scheduled",
-        eyebrow: "Selected to continue",
-        message: "Your written application was accepted. You have been selected to continue to the required interview.",
-        nextAction: "Attend the scheduled interview. Be available in Discord before the scheduled time.",
-        currentStep: 3,
-        tone: "accepted",
-      };
-    }
-
     if (record.interview_status === "Passed") {
       if (record.offer_status === "Accepted") {
         return {
-          title: "Employment Offer Accepted",
-          eyebrow: "Offer signed and accepted",
-          message: "You signed and accepted the LSCSO employment offer. Command Staff must now complete your Recruit appointment.",
-          nextAction: "No further action is required from you unless LSCSO contacts you.",
-          currentStep: 4,
-          currentComplete: true,
+          eyebrow: "Employment offer accepted",
+          title: "Offer Accepted — Appointment Pending",
+          message: "Your interview was completed successfully and your employment offer has been signed and accepted.",
+          next: "No further action is required unless LSCSO contacts you. Command must complete the final personnel appointment.",
+          stage: 6,
           tone: "accepted",
+          actionLabel: "Await appointment",
         };
       }
       if (record.offer_status === "Pending") {
         return {
-          title: "Employment Offer Issued — Signature Required",
           eyebrow: "Action required",
-          message: "You passed the required interview and LSCSO issued you an employment offer for the Recruit position.",
-          nextAction: "Review the employment offer below, then sign and accept it before the listed deadline.",
-          currentStep: 4,
+          title: "Employment Offer Issued — Signature Required",
+          message: "You were selected to advance after the interview and LSCSO has issued an employment offer.",
+          next: "Review the employment offer below and sign it before the listed deadline if you wish to accept the appointment.",
+          stage: 5,
           tone: "accepted",
-        };
-      }
-      if (record.offer_status === "Expired") {
-        return {
-          title: "Not Selected — Employment Offer Expired",
-          eyebrow: "Offer expired",
-          message: "Your employment offer expired before you accepted it. The expired offer can no longer be signed.",
-          nextAction: "No further action is available on this offer unless LSCSO Recruitment issues a new offer.",
-          currentStep: 4,
-          terminal: true,
-          tone: "closed",
-        };
-      }
-      if (record.offer_status === "Terminated") {
-        return {
-          title: "Not Selected — Employment Offer Terminated",
-          eyebrow: "Offer terminated",
-          message: reason || "Your employment offer was terminated by LSCSO Recruitment.",
-          nextAction: "This application is closed. The terminated offer can no longer be accepted.",
-          currentStep: 4,
-          terminal: true,
-          tone: "closed",
+          actionLabel: "Review & sign offer",
         };
       }
       return {
-        title: "Interview Passed — Employment Offer Pending",
-        eyebrow: "Interview passed",
-        message: "You passed the required interview. LSCSO Command Staff has not yet issued your employment offer.",
-        nextAction: "No action is required until an employment offer is issued.",
-        currentStep: 3,
-        currentComplete: true,
-        tone: "review",
+        eyebrow: "Interview decision",
+        title: "Selected to Advance — Employment Offer Pending",
+        message: "Your interview was completed and you were selected to advance to the employment-offer stage.",
+        next: "No action is required until LSCSO issues the employment offer. Continue monitoring this page and Discord.",
+        stage: 5,
+        tone: "accepted",
+        actionLabel: "Await offer",
       };
     }
 
     if (record.interview_status === "Completed") {
       return {
-        title: "Interview Completed — Result Pending",
-        eyebrow: "Interview completed",
-        message: "Your required interview is complete. Command Staff has not yet recorded a Pass or Fail result.",
-        nextAction: "No action is required while the interview result is pending.",
-        currentStep: 3,
+        eyebrow: "Interview complete",
+        title: "Interview Completed — Decision Pending",
+        message: "Your required interview has been completed. Command has not yet recorded the final selection decision.",
+        next: "No action is required while the interview decision is pending. Continue monitoring this page and Discord.",
+        stage: 4,
         tone: "review",
+        actionLabel: "Await decision",
+      };
+    }
+
+    if (record.interview_status === "Scheduled") {
+      return {
+        eyebrow: "Interview scheduled",
+        title: "Your LSCSO Interview Is Scheduled",
+        message: "Your written application was accepted and you have advanced to the required interview stage.",
+        next: "Attend the interview at the official scheduled time shown below and be available in Discord shortly beforehand.",
+        stage: 3,
+        tone: "accepted",
+        actionLabel: "Attend interview",
       };
     }
 
     return {
-      title: "Application Accepted — Interview Required",
-      eyebrow: "Selected to continue",
-      message: "Your written application was accepted. You have been selected to continue to the required interview stage.",
-      nextAction: "Wait for LSCSO Recruitment to contact you on Discord with interview scheduling information.",
-      currentStep: 2,
-      currentComplete: true,
+      eyebrow: "Advanced to interview",
+      title: "Application Accepted — Interview Pending",
+      message: "Your written application was accepted. You have advanced to the required interview stage.",
+      next: "Wait for LSCSO to schedule your interview. The confirmed date, time, and timezone will appear here once recorded.",
+      stage: 3,
       tone: "accepted",
+      actionLabel: "Await scheduling",
     };
   }
 
   if (record.status === "Under Review" || record.status === "Interview") {
     return {
-      title: "Application Under Command Review",
-      eyebrow: "Decision pending",
-      message: "LSCSO Command Staff is reviewing your written application. No selection decision has been made yet.",
-      nextAction: "No action is required unless Recruitment contacts you for clarification.",
-      currentStep: 1,
+      eyebrow: "Command review",
+      title: "Application Under Review",
+      message: "Authorized LSCSO personnel are reviewing your written application and submitted responses.",
+      next: "No action is required unless LSCSO contacts you for clarification.",
+      stage: 2,
       tone: "review",
+      actionLabel: "Await review",
     };
   }
 
   return {
-    title: "Application Received — Review Pending",
-    eyebrow: "Application submitted",
-    message: "LSCSO received your Deputy Candidate Application. Command Staff has not reviewed it yet.",
-    nextAction: "No action is required while your application waits for Command review.",
-    currentStep: 0,
+    eyebrow: "Application received",
+    title: "Sworn Personnel Application Received",
+    message: "Your signed application has been received and entered into the LSCSO recruitment process.",
+    next: "Keep this private tracking link and monitor Discord for any follow-up from LSCSO Recruitment.",
+    stage: 1,
     tone: "review",
+    actionLabel: "Await review",
   };
-}
-
-function timelineSteps(record: ApplicantStatusRecord, view: CandidateView): TimelineStep[] {
-  const reason = shortReason(record.closure_reason);
-  const acceptedDecision = record.status === "Accepted" || record.status === "Hired" || Boolean(record.hired)
-    || ["Scheduled", "Completed", "No Show", "Passed", "Failed"].includes(record.interview_status)
-    || Boolean(record.offer_id);
-
-  const decisionTitle = record.status === "Denied" || record.closure_code === "Application Denied"
-    ? "Not Selected"
-    : acceptedDecision
-      ? "Application Accepted"
-      : "Application Decision Pending";
-  const decisionDescription = record.status === "Denied" || record.closure_code === "Application Denied"
-    ? reason ? `Reason: ${reason}` : "Application denied by LSCSO Command Staff"
-    : acceptedDecision
-      ? "Selected to continue to the required interview"
-      : "Command Staff has not made a selection decision";
-
-  let interviewTitle = "Interview — Locked";
-  let interviewDescription = "Available only after the written application is accepted";
-  switch (record.interview_status) {
-    case "Scheduled":
-      interviewTitle = "Interview Scheduled";
-      interviewDescription = "Required interview date and time recorded";
-      break;
-    case "Completed":
-      interviewTitle = "Interview Completed — Result Pending";
-      interviewDescription = "Command Staff has not recorded Pass or Fail yet";
-      break;
-    case "Passed":
-      interviewTitle = "Interview Passed";
-      interviewDescription = "Cleared to move to the employment-offer stage";
-      break;
-    case "Failed":
-      interviewTitle = "Interview Failed — Not Selected";
-      interviewDescription = reason ? `Reason: ${reason}` : "Required interview was not passed";
-      break;
-    case "No Show":
-      interviewTitle = "No Show — Process Closed";
-      interviewDescription = reason || "Required scheduled interview was not attended";
-      break;
-    default:
-      if (record.status === "Accepted") {
-        interviewTitle = "Interview Required — Not Yet Scheduled";
-        interviewDescription = "Written application accepted; interview still required";
-      }
-      break;
-  }
-
-  let offerTitle = "Employment Offer — Locked";
-  let offerDescription = "Available only after the required interview is passed";
-  if (record.interview_status === "Passed" && !record.offer_status) {
-    offerTitle = "Employment Offer — Not Yet Issued";
-    offerDescription = "Interview passed; waiting on LSCSO Command Staff";
-  }
-  if (record.offer_status === "Pending") {
-    offerTitle = "Employment Offer Issued — Signature Required";
-    offerDescription = "Applicant must review, sign, and accept the offer";
-  }
-  if (record.offer_status === "Accepted") {
-    offerTitle = "Employment Offer Signed & Accepted";
-    offerDescription = "Applicant acceptance received by LSCSO";
-  }
-  if (record.offer_status === "Expired") {
-    offerTitle = "Employment Offer Expired — Not Accepted";
-    offerDescription = "Offer deadline passed before applicant acceptance";
-  }
-  if (record.offer_status === "Terminated" || record.closure_code === "Offer Terminated") {
-    offerTitle = "Employment Offer Terminated — Process Closed";
-    offerDescription = reason ? `Reason: ${reason}` : "Offer terminated by LSCSO Recruitment";
-  }
-
-  let appointmentTitle = "Recruit Appointment — Locked";
-  let appointmentDescription = "Requires a passed interview and accepted employment offer";
-  if (record.offer_status === "Accepted" && !record.hired && record.status !== "Hired") {
-    appointmentTitle = "Recruit Appointment — Pending Command Completion";
-    appointmentDescription = "Employment offer accepted; final appointment not yet recorded";
-  }
-  if (record.hired || record.status === "Hired") {
-    appointmentTitle = "Appointed as LSCSO Recruit";
-    appointmentDescription = "Recruitment process completed successfully";
-  }
-
-  const steps: TimelineStep[] = [
-    { number: "01", title: "Application Submitted", description: "Received by LSCSO Recruitment" },
-    {
-      number: "02",
-      title: "Command Review",
-      description: view.currentStep > 1 ? "Written application review completed" : view.currentStep === 1 ? "Command Staff is reviewing the written application" : "Waiting for Command Staff review",
-    },
-    { number: "03", title: decisionTitle, description: decisionDescription },
-    { number: "04", title: interviewTitle, description: interviewDescription },
-    { number: "05", title: offerTitle, description: offerDescription },
-    { number: "06", title: appointmentTitle, description: appointmentDescription },
-  ];
-
-  if (view.terminal && view.currentStep === 2 && record.closure_code === "Command Closure") {
-    steps[2] = { number: "03", title: "Selection Process Closed — Not Selected", description: reason ? `Reason: ${reason}` : "Closed by LSCSO Recruitment" };
-  }
-  if (view.terminal && view.currentStep === 3 && record.closure_code === "Command Closure") {
-    steps[3] = { number: "04", title: "Selection Process Closed — Not Selected", description: reason ? `Reason: ${reason}` : "Closed by LSCSO Recruitment" };
-  }
-  if (view.terminal && view.currentStep === 4 && record.closure_code === "Command Closure") {
-    steps[4] = { number: "05", title: "Selection Process Closed — Not Selected", description: reason ? `Reason: ${reason}` : "Closed by LSCSO Recruitment" };
-  }
-
-  return steps;
-}
-
-function applicationLabel(number: number | string) {
-  return `APP-${String(number).padStart(4, "0")}`;
 }
 
 export function ApplicantStatusView({
@@ -402,45 +268,148 @@ export function ApplicantStatusView({
   applicantMessages: ApplicantMessage[];
   trackingToken?: string;
 }) {
-  const view = candidateView(record);
-  const steps = timelineSteps(record, view);
+  const view = viewFor(record);
+  const communication = String(record.applicant_status_message ?? "").trim();
+  const interviewTimeZone = normalizeRecruitmentTimeZone(record.interview_timezone || record.applicant_timezone);
+  const interviewTime = record.interview_scheduled_at
+    ? formatRecruitmentDateTime(record.interview_scheduled_at, interviewTimeZone)
+    : null;
+  const interviewStatus = publicInterviewStatus(record.interview_status);
+  const hasInterviewRecord = record.status === "Accepted"
+    || record.status === "Hired"
+    || ["Scheduled", "Completed", "Passed", "Failed", "No Show"].includes(String(record.interview_status ?? ""))
+    || ["Interview Failed", "Interview No Show"].includes(String(record.closure_code ?? ""));
   const showOffer = Boolean(record.offer_id && record.offer_status && record.offer_title && record.offer_terms && record.offer_issued_at);
 
-  return (
-    <main className="application-status-page">
-      <section className="application-status-hero">
-        <div className="site-shell">
-          <div className="application-status-masthead">
-            <div>
-              <p className="section-kicker">Careers & Recruitment · Candidate Status</p>
-              <span className={`application-status-badge application-status-badge--${view.tone}`}>{view.eyebrow}</span>
-              <h1>{view.title}</h1>
-              <p className="application-status-intro">{view.message}</p>
-            </div>
-            <aside className="application-status-seal">
-              <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={145} height={145} priority />
-              <span>Private Candidate Record</span>
-              <strong>{applicationLabel(record.application_number)}</strong>
-              <small>{record.applicant_name || "LSCSO Applicant"}</small>
-            </aside>
-          </div>
+  const steps = [
+    ["01", "Application", "Signed Sworn Personnel application received"],
+    ["02", "Command Review", "Written application screening and decision"],
+    ["03", "Interview", "Required LSCSO candidate interview"],
+    ["04", "Decision", "Interview assessment and selection decision"],
+    ["05", "Employment Offer", "Formal offer if selected to advance"],
+    ["06", "Appointment", "Final LSCSO personnel appointment"],
+  ];
 
-          <section className="application-status-summary" aria-label="Current candidate status">
-            <article><span>Current status</span><strong>{view.title}</strong></article>
-            <article><span>Last updated</span><strong><LocalDateTime value={record.updated_at} /></strong></article>
-            <article><span>Application submitted</span><strong><LocalDateTime value={record.submitted_at} /></strong></article>
+  return (
+    <main className="application-status-page attorney-status-page">
+      <section className="attorney-candidate-shell">
+        <article className={`attorney-candidate-card attorney-candidate-card--${view.tone}`}>
+          <header className="attorney-candidate-header">
+            <div className="attorney-candidate-agency">
+              <Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff's Office patch" width={88} height={88} priority />
+              <div>
+                <p>Los Santos County Sheriff&apos;s Office</p>
+                <strong>Sworn Personnel Recruitment</strong>
+                <span>Private candidate portal</span>
+              </div>
+            </div>
+            <div className="attorney-candidate-number"><span>Application</span><strong>{applicationLabel(record.application_number)}</strong></div>
+          </header>
+
+          <section className="attorney-candidate-overview">
+            <div className="attorney-candidate-overview__copy">
+              <span className="attorney-candidate-kicker">{view.eyebrow}</span>
+              <h1>{view.title}</h1>
+              <p>{view.message}</p>
+            </div>
+            <aside className="attorney-candidate-action">
+              <span>Current action</span>
+              <strong>{view.actionLabel}</strong>
+              <p>{view.next}</p>
+            </aside>
           </section>
 
-          {applicantMessages.length ? (
-            <section className="application-status-communications" aria-label="Recruitment communications">
-              <div className="application-status-communications__heading">
-                <div><span>Recruitment communications</span><h2>Messages from LSCSO Recruitment</h2></div>
-                <strong>{applicantMessages.length} {applicantMessages.length === 1 ? "message" : "messages"}</strong>
+          <section className="attorney-candidate-progress candidate-progress--six" aria-label="LSCSO recruitment progress">
+            {steps.map(([number, title, description], index) => {
+              const stageNumber = index + 1;
+              const complete = stageNumber < view.stage || (view.stage === 6 && stageNumber === 6 && view.tone === "complete");
+              const current = stageNumber === view.stage && !complete;
+              return (
+                <article key={number} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`}>
+                  <span>{complete ? "✓" : number}</span>
+                  <div><strong>{title}</strong><small>{description}</small></div>
+                </article>
+              );
+            })}
+          </section>
+
+          {hasInterviewRecord ? (
+            <section className="attorney-interview-card">
+              <div className="attorney-section-heading">
+                <div><span>Interview record</span><h2>LSCSO candidate interview</h2></div>
+                <b>{interviewStatus}</b>
               </div>
-              <div className="application-status-communications__history">
+              <div className="attorney-interview-grid">
+                <article>
+                  <span>Official scheduled time</span>
+                  <strong>{interviewTime || "Not yet scheduled"}</strong>
+                  {interviewTime ? <small>This is the interview time recorded by LSCSO.</small> : <small>LSCSO has not recorded an interview time yet.</small>}
+                </article>
+                <article>
+                  <span>Interview timezone</span>
+                  <strong>{recruitmentTimeZoneLabel(interviewTimeZone)}</strong>
+                  <small>The interview time is anchored to this timezone and does not change based on the device viewing this page.</small>
+                </article>
+                <article>
+                  <span>Interview status</span>
+                  <strong>{interviewStatus}</strong>
+                  <small>{record.interview_status === "Failed"
+                    ? "The interview was completed. This status means the applicant was not selected to advance after the interview assessment."
+                    : record.interview_status === "No Show"
+                      ? "This status means the scheduled interview was not attended."
+                      : record.interview_status === "Passed"
+                        ? "The interview decision allows the applicant to advance to the employment-offer stage."
+                        : record.interview_status === "Completed"
+                          ? "The interview is complete and the selection decision is still pending."
+                          : "The interview remains an active step in the recruitment process."}</small>
+                </article>
+              </div>
+            </section>
+          ) : null}
+
+          {showOffer ? (
+            <div className="candidate-offer-wrap">
+              <EmploymentOfferAcceptance
+                trackingToken={trackingToken}
+                offerId={record.offer_id!}
+                status={record.offer_status!}
+                title={record.offer_title!}
+                rank={record.offer_rank || "Recruit"}
+                terms={record.offer_terms!}
+                issuedAt={record.offer_issued_at!}
+                expiresAt={record.offer_expires_at}
+                acceptedAt={record.offer_accepted_at}
+                signatureName={record.offer_signature_name}
+              />
+            </div>
+          ) : null}
+
+          <section className="attorney-candidate-details">
+            <div className="attorney-section-heading"><div><span>Candidate record</span><h2>Application details</h2></div></div>
+            <div className="attorney-detail-grid">
+              <article><span>Applicant</span><strong>{record.applicant_name || "LSCSO Applicant"}</strong></article>
+              <article><span>Track</span><strong>Sworn Personnel</strong></article>
+              <article><span>Application status</span><strong>{record.status}</strong></article>
+              <article><span>Applicant timezone</span><strong>{record.applicant_timezone || "Not recorded"}</strong></article>
+              <article><span>Submitted</span><strong><LocalDateTime value={record.submitted_at} /></strong></article>
+              <article><span>Last updated</span><strong><LocalDateTime value={record.updated_at} /></strong></article>
+            </div>
+          </section>
+
+          {communication ? (
+            <section className="attorney-candidate-message">
+              <span>Current message from LSCSO</span>
+              <p>{communication}</p>
+            </section>
+          ) : null}
+
+          {applicantMessages.length ? (
+            <section className="attorney-candidate-messages">
+              <div className="attorney-section-heading"><div><span>Communications</span><h2>Messages from LSCSO</h2></div></div>
+              <div className="attorney-message-list">
                 {applicantMessages.map((item) => (
                   <article key={item.id}>
-                    <div><strong>LSCSO Recruitment</strong><span><LocalDateTime value={item.sent_at} /></span></div>
+                    <header><strong>LSCSO Recruitment</strong><span><LocalDateTime value={item.sent_at} /></span></header>
                     <p>{item.content}</p>
                   </article>
                 ))}
@@ -448,56 +417,11 @@ export function ApplicantStatusView({
             </section>
           ) : null}
 
-          {showOffer ? (
-            <EmploymentOfferAcceptance
-              trackingToken={trackingToken}
-              offerId={record.offer_id!}
-              status={record.offer_status!}
-              title={record.offer_title!}
-              rank={record.offer_rank || "Recruit"}
-              terms={record.offer_terms!}
-              issuedAt={record.offer_issued_at!}
-              expiresAt={record.offer_expires_at}
-              acceptedAt={record.offer_accepted_at}
-              signatureName={record.offer_signature_name}
-            />
-          ) : null}
-
-          <section className="application-status-next-action">
-            <span>{view.terminal ? "Disposition" : "Your next action"}</span>
-            <h2>{view.nextAction}</h2>
-            {record.interview_scheduled_at && record.status === "Accepted" && record.interview_status === "Scheduled" ? (
-              <p>Scheduled interview: <strong><LocalDateTime value={record.interview_scheduled_at} /></strong> <small>(shown in your device&apos;s local time)</small></p>
-            ) : null}
-          </section>
-
-          <section className="application-status-timeline" aria-label="Recruitment timeline">
-            {steps.map(({ number, title, description }, index) => {
-              const complete = index < view.currentStep || (index === view.currentStep && Boolean(view.currentComplete));
-              const current = index === view.currentStep;
-              const className = [
-                complete ? "is-complete" : "",
-                current ? "is-current" : "",
-                current && view.terminal ? "is-terminal" : "",
-              ].filter(Boolean).join(" ");
-              return (
-                <article className={className} key={number}>
-                  <div><span>{current && view.terminal ? "×" : complete ? "✓" : number}</span></div>
-                  <section><strong>{title}</strong><small>{description}</small></section>
-                </article>
-              );
-            })}
-          </section>
-
-          <section className="application-status-privacy">
-            <div>
-              <span>Private tracking link</span>
-              <strong>Keep this page bookmarked.</strong>
-              <p>This link is private. Internal Command notes and interview notes are not displayed here.</p>
-            </div>
-            <Link className="button button--outline" href="/join">Join LSCSO</Link>
-          </section>
-        </div>
+          <footer className="attorney-candidate-footer">
+            <p>This page is private and tied to your application. Keep the tracking link secure.</p>
+            <Link className="button button--outline" href="/join">Return to Join LSCSO</Link>
+          </footer>
+        </article>
       </section>
     </main>
   );
