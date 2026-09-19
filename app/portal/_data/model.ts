@@ -1,6 +1,6 @@
 export type AccessTier = "Executive" | "Command" | "Supervisor" | "Preliminary" | "Deputy" | "Attorney";
 
-export type PersonnelStatus = "Active" | "Acting" | "Suspended" | "Deactivated";
+export type PersonnelStatus = "Active" | "Acting" | "Reserve" | "Suspended" | "Deactivated";
 
 export type PersonnelRecord = {
   profileId?: string;
