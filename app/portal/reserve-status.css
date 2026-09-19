@@ -1,0 +1,19 @@
+.portal-status--reserve {
+  border-color: #9fb9c9;
+  background: #edf5f8;
+  color: #3f6679;
+}
+
+.portal-status--reserve::before {
+  background: #4e7f96;
+}
+
+[data-theme="dark"] .portal-status--reserve {
+  border-color: rgba(124, 174, 199, 0.52);
+  background: rgba(67, 108, 128, 0.18);
+  color: #9ed0e7;
+}
+
+[data-theme="dark"] .portal-status--reserve::before {
+  background: #82bdd8;
+}
