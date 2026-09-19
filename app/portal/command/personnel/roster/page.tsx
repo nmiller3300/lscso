@@ -221,7 +221,7 @@ export default async function FullRosterPage() {
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
           <div><p>Department roster</p><h2>Personnel overview</h2></div>
-          <span>{operationalPersonnel.length} active records</span>
+          <span>{operationalPersonnel.length} current records</span>
         </div>
         <p className="command-v2-compact-copy">Select a member to open the full personnel record. Department Attorneys are listed by LS employee number and never display an operational call sign.</p>
         <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
