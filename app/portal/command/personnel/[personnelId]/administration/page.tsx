@@ -4,6 +4,7 @@ import { PersonnelDelegationManager } from "../../../../_components/PersonnelDel
 import { PersonnelIdentityManager } from "../../../../_components/PersonnelIdentityManager";
 import { PersonnelLoaManager } from "../../../../_components/PersonnelLoaManager";
 import { PersonnelRecordHeader } from "../../../../_components/PersonnelRecordHeader";
+import { PersonnelTerminationControl } from "../../../../_components/PersonnelTerminationControl";
 import { PortalShell } from "../../../../_components/PortalShell";
 import { canAccessPersonnelRecord } from "@/lib/authorization/can-access-personnel-record";
 import { createClient } from "@/lib/supabase/server";
@@ -12,6 +13,7 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 type PageProps = { params: Promise<{ personnelId: string }> };
 const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
 const DELEGATION_MANAGERS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const TERMINATION_AUTHORITY = new Set(["Sheriff", "Undersheriff"]);
 const OPEN_ENDED_RETURN = "9999-12-31";
 
 function formatDate(value: string) {
@@ -67,6 +69,7 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
   const canManageDelegations = DELEGATION_MANAGERS.has(profile.rank) && profile.id !== member.id;
   const canGrantTemporaryCommand = ["Sheriff", "Undersheriff"].includes(profile.rank);
   const canManageAssignments = ["Executive", "Command"].includes(profile.access_tier);
+  const canTerminate = TERMINATION_AUTHORITY.has(profile.rank) && profile.id !== member.id && member.status !== "Deactivated";
   const administrationDisplayStatus = member.status === "Suspended"
     ? "Suspended"
     : activeOrUpcomingLeave && activeOrUpcomingLeave.starts_on <= today
@@ -157,6 +160,15 @@ export default async function PersonnelAdministrationPage({ params }: PageProps)
           </div>
         </section>
       )}
+
+      {canTerminate ? (
+        <PersonnelTerminationControl
+          profileId={member.id}
+          personnelId={member.personnel_id}
+          displayName={member.display_name}
+          rank={member.rank}
+        />
+      ) : null}
 
       <section className="portal-panel">
         <div className="portal-panel-heading"><div><p>Administrative record</p><h2>History & requests</h2></div><span>Reference</span></div>
