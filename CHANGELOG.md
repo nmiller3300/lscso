@@ -9,6 +9,18 @@ This file is the authoritative development history for the Los Santos County She
 - Historical entries from August 20 through September 11, 2026 were backfilled from the repository commit history and database migrations. Temporary implementation churn and immediately reverted experiments are summarized by the meaningful final behavior rather than copied as raw Git noise.
 - Git remains the forensic commit-level record. This changelog records the lasting system capability and behavior people actually need to understand.
 
+## 2026-09-19
+
+### Added
+- **FiveM Integration — LSCSO Mobile Pairing API**: Added a server-authenticated mobile pairing endpoint for the LB Phone personnel app so active personnel can verify their normal LSCSO credentials and receive the same short-lived one-time pairing codes used by the Personnel Portal without first opening the website.
+- **Personnel Portal — Optional FiveM Account Pairing**: Restored the Account Connections pairing workflow so personnel may generate a pairing code from either the website or the LSCSO mobile app and bind the current LSCSO FiveM character to the same permanent personnel account.
+
+### Changed
+- **FiveM Pairing — In-Game Command**: Standardized pairing instructions on `/fivemlink <code>` so website-issued and phone-issued codes redeem through the same FiveM identity-link endpoint and existing `fivem_identity_links` record.
+
+### Security
+- **Mobile Pairing — Credential and Code Isolation**: Kept LSCSO passwords out of pairing tables and browser persistence, retained server-only FiveM integration authentication, and continued storing pairing codes only as SHA-256 hashes with short expirations and one-time consumption.
+
 ## 2026-09-14
 
 ### Added
