@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getActiveJailbirds } from "../../lib/jailbirds";
 import "./jailbirds.css";
 
@@ -20,6 +21,12 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
+function chargeSummary(value: string | null) {
+  if (!value) return "Booking details available";
+  const firstLine = value.split(/\r?\n/).map((line) => line.trim()).find(Boolean) ?? value;
+  return firstLine.length > 88 ? `${firstLine.slice(0, 85).trim()}…` : firstLine;
+}
+
 export default async function JailbirdsPage() {
   const records = await getActiveJailbirds();
 
@@ -32,7 +39,8 @@ export default async function JailbirdsPage() {
             <h1>Jailbirds</h1>
             <p>
               Recent booking photographs released by the Los Santos County Sheriff’s Office.
-              Entries are automatically removed 72 hours after publication.
+              Select a booking to view the arrest details and listed charges. Entries are
+              automatically removed 72 hours after publication.
             </p>
           </div>
         </div>
@@ -51,39 +59,43 @@ export default async function JailbirdsPage() {
           <div className="jailbirds-grid">
             {records.map((record) => (
               <article className="jailbird-card" key={record.id}>
-                <div className="jailbird-photo">
-                  {record.imageUrl ? (
-                    <img src={record.imageUrl} alt={`Booking photograph of ${record.full_name}`} />
-                  ) : (
-                    <div className="jailbird-photo__missing">Photo unavailable</div>
-                  )}
-                  <span className="jailbird-stamp">LSCSO</span>
-                </div>
-                <div className="jailbird-card__body">
-                  <div className="jailbird-card__title">
-                    <p>Booked</p>
-                    <h2>{record.full_name}</h2>
+                <Link className="jailbird-card__link" href={`/jailbirds/${record.id}`}>
+                  <div className="jailbird-photo">
+                    {record.imageUrl ? (
+                      <img src={record.imageUrl} alt={`Booking photograph of ${record.full_name}`} />
+                    ) : (
+                      <div className="jailbird-photo__missing">Photo unavailable</div>
+                    )}
+                    <span className="jailbird-stamp">LSCSO</span>
                   </div>
-
-                  <dl>
-                    {record.booking_number ? (
-                      <div>
-                        <dt>Booking #</dt>
-                        <dd>{record.booking_number}</dd>
-                      </div>
-                    ) : null}
-                    <div>
-                      <dt>Arrest Date</dt>
-                      <dd>{formatDate(record.arrested_at)}</dd>
+                  <div className="jailbird-card__body">
+                    <div className="jailbird-card__title">
+                      <p>Booked</p>
+                      <h2>{record.full_name}</h2>
                     </div>
-                    {record.charges ? (
-                      <div className="jailbird-charges">
-                        <dt>Charges</dt>
-                        <dd>{record.charges}</dd>
+
+                    <dl>
+                      {record.booking_number ? (
+                        <div>
+                          <dt>Booking #</dt>
+                          <dd>{record.booking_number}</dd>
+                        </div>
+                      ) : null}
+                      <div>
+                        <dt>Arrest Date</dt>
+                        <dd>{formatDate(record.arrested_at)}</dd>
                       </div>
-                    ) : null}
-                  </dl>
-                </div>
+                      <div className="jailbird-charges">
+                        <dt>Charge</dt>
+                        <dd>{chargeSummary(record.charges)}</dd>
+                      </div>
+                    </dl>
+                    <div className="jailbird-card__open">
+                      <span>View booking profile</span>
+                      <b aria-hidden="true">→</b>
+                    </div>
+                  </div>
+                </Link>
               </article>
             ))}
           </div>
