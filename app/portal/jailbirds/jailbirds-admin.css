@@ -1,0 +1,190 @@
+.jailbirds-admin-page {
+  min-height: 100vh;
+  padding: 58px 24px 90px;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(187, 164, 95, 0.09), transparent 28%),
+    #0b0c0a;
+  color: #f5f2e9;
+}
+
+.jailbirds-admin-shell {
+  width: min(1060px, 100%);
+  margin: 0 auto;
+}
+
+.jailbirds-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 28px;
+  margin-bottom: 24px;
+}
+
+.jailbirds-admin-kicker,
+.jailbirds-admin-panel__heading span {
+  color: #d2bd7b;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.jailbirds-admin-header h1 {
+  margin: 8px 0 7px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(44px, 6vw, 72px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.jailbirds-admin-header p {
+  margin: 0;
+  color: rgba(255,255,255,0.57);
+}
+
+.jailbirds-admin-header a {
+  padding: 12px 14px;
+  border: 1px solid rgba(210, 189, 123, 0.35);
+  color: #e7d69f;
+  font-size: 11px;
+  font-weight: 750;
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.jailbirds-admin-panel {
+  border: 1px solid rgba(255,255,255,0.11);
+  background: rgba(19, 20, 17, 0.94);
+  box-shadow: 0 28px 70px rgba(0,0,0,0.28);
+}
+
+.jailbirds-admin-panel__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 23px 26px;
+  border-bottom: 1px solid rgba(255,255,255,0.09);
+}
+
+.jailbirds-admin-panel__heading h2 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 650;
+}
+
+.jailbirds-admin-panel__heading strong {
+  padding: 8px 10px;
+  border: 1px solid rgba(210,189,123,0.4);
+  color: #d2bd7b;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+}
+
+.jailbirds-admin-form {
+  padding: 26px;
+}
+
+.jailbirds-admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.jailbirds-admin-grid label {
+  display: grid;
+  gap: 8px;
+}
+
+.jailbirds-admin-grid label > span {
+  color: rgba(255,255,255,0.7);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.jailbirds-admin-grid input,
+.jailbirds-admin-grid textarea {
+  width: 100%;
+  border: 1px solid rgba(255,255,255,0.13);
+  border-radius: 0;
+  outline: none;
+  background: #10110f;
+  color: #f6f3ea;
+  font: inherit;
+  padding: 13px 14px;
+}
+
+.jailbirds-admin-grid input:focus,
+.jailbirds-admin-grid textarea:focus {
+  border-color: rgba(210,189,123,0.72);
+  box-shadow: 0 0 0 3px rgba(187,164,95,0.08);
+}
+
+.jailbirds-admin-file small {
+  color: rgba(255,255,255,0.42);
+  font-size: 10px;
+}
+
+.jailbirds-admin-wide {
+  grid-column: 1 / -1;
+}
+
+.jailbirds-admin-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid rgba(255,255,255,0.09);
+}
+
+.jailbirds-admin-actions p {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(255,255,255,0.47);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.jailbirds-admin-actions button {
+  flex: 0 0 auto;
+  border: 1px solid #c8b36f;
+  background: #c8b36f;
+  color: #11120f;
+  padding: 13px 18px;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.jailbirds-admin-actions button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.jailbirds-admin-status {
+  margin-top: 18px;
+  padding: 13px 14px;
+  border: 1px solid rgba(210,189,123,0.26);
+  background: rgba(187,164,95,0.07);
+  color: #e5d69f;
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .jailbirds-admin-page { padding: 34px 16px 70px; }
+  .jailbirds-admin-header,
+  .jailbirds-admin-actions { align-items: stretch; flex-direction: column; }
+  .jailbirds-admin-header a { align-self: flex-start; }
+  .jailbirds-admin-grid { grid-template-columns: 1fr; }
+  .jailbirds-admin-wide { grid-column: auto; }
+  .jailbirds-admin-actions button { width: 100%; }
+}
