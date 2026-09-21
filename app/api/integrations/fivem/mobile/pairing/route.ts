@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { authorizeFiveMIntegration } from "@/lib/integrations/fivem/auth";
@@ -27,9 +28,7 @@ async function hashPairingCode(code: string) {
 }
 
 function generatePairingCode() {
-  const values = new Uint32Array(1);
-  crypto.getRandomValues(values);
-  return String(values[0] % 1_000_000).padStart(6, "0");
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
 function noStore(payload: unknown, status = 200) {
@@ -119,29 +118,11 @@ export async function POST(request: Request) {
       });
     }
 
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + CODE_TTL_MINUTES * 60 * 1000).toISOString();
-
-    await admin
-      .from("fivem_pairing_codes")
-      .delete()
-      .eq("personnel_profile_id", profile.id)
-      .is("consumed_at", null);
-
-    await admin
-      .from("fivem_pairing_codes")
-      .delete()
-      .lt("expires_at", new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString());
-
-    for (let attempt = 0; attempt < 10; attempt += 1) {
+  for (let attempt = 0; attempt < 10; attempt += 1) {
       const code = generatePairingCode();
       const codeHash = await hashPairingCode(code);
-      const { error: insertError } = await admin
-        .from("fivem_pairing_codes")
-        .insert({
-          personnel_profile_id: profile.id,
-          code_hash: codeHash,
-          expires_at: expiresAt,
+      const { data: expiresAt, error: insertError } = await admin.rpc("mobile_create_pairing", {
+          p_profile_id: profile.id, p_code_hash: codeHash,
         });
 
       if (!insertError) {

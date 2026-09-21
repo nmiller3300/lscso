@@ -32,7 +32,10 @@ export function PortalRealtimeRefresh() {
       if (timer !== null) window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         timer = null;
-        if (document.visibilityState === "visible") router.refresh();
+        if (document.visibilityState === "visible") {
+          router.refresh();
+          window.dispatchEvent(new Event("lscso:records-changed"));
+        }
       }, 180);
     };
 
@@ -49,7 +52,10 @@ export function PortalRealtimeRefresh() {
     });
 
     const fallback = window.setInterval(() => {
-      if (document.visibilityState === "visible") router.refresh();
+      if (document.visibilityState === "visible") {
+          router.refresh();
+          window.dispatchEvent(new Event("lscso:records-changed"));
+        }
     }, 30_000);
 
     const onVisibility = () => {

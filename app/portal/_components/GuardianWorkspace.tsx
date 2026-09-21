@@ -114,6 +114,12 @@ const positiveCategories = [
 
 export function GuardianWorkspace() {
   const currentProfile = usePortalProfile();
+  const [dataRevision, setDataRevision] = useState(0);
+  useEffect(() => {
+    const refresh = () => setDataRevision(value => value + 1);
+    window.addEventListener("lscso:records-changed", refresh);
+    return () => window.removeEventListener("lscso:records-changed", refresh);
+  }, []);
   const formRef = useRef<HTMLFormElement>(null);
   const [kind, setKind] = useState<GuardianKind>("feedback");
   const [selectedCategories, setSelectedCategories] = useState<string[]>(["Communication"]);
@@ -227,7 +233,7 @@ export function GuardianWorkspace() {
 
     void loadGuardianData();
     return () => { cancelled = true; };
-  }, [currentProfile.id]);
+  }, [currentProfile.id, dataRevision]);
 
   useEffect(() => {
     let cancelled = false;

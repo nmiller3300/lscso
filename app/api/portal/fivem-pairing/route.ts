@@ -1,3 +1,4 @@
+import { randomInt } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -17,9 +18,7 @@ async function hashPairingCode(code: string) {
 }
 
 function generatePairingCode() {
-  const values = new Uint32Array(1);
-  crypto.getRandomValues(values);
-  return String(values[0] % 1_000_000).padStart(6, "0");
+  return String(randomInt(0, 1_000_000)).padStart(6, "0");
 }
 
 async function getAuthenticatedProfile() {
@@ -57,7 +56,7 @@ export async function GET() {
   const { admin, profile } = context;
   const { data: link, error: linkError } = await admin
     .from("fivem_identity_links")
-    .select("linked_at,last_seen_at,last_seen_grade")
+    .select("citizen_id,linked_at,last_seen_at,last_seen_grade")
     .eq("personnel_profile_id", profile.id)
     .eq("active", true)
     .maybeSingle();
@@ -75,6 +74,7 @@ export async function GET() {
       connected: Boolean(link),
       link: link
         ? {
+            citizenId: link.citizen_id,
             linkedAt: link.linked_at,
             lastSeenAt: link.last_seen_at,
             lastSeenGrade: link.last_seen_grade,
@@ -117,32 +117,12 @@ export async function POST() {
     );
   }
 
-  const now = new Date();
-  const expiresAt = new Date(
-    now.getTime() + CODE_TTL_MINUTES * 60 * 1000,
-  ).toISOString();
-
-  await admin
-    .from("fivem_pairing_codes")
-    .delete()
-    .eq("personnel_profile_id", profile.id)
-    .is("consumed_at", null);
-
-  await admin
-    .from("fivem_pairing_codes")
-    .delete()
-    .lt("expires_at", new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString());
-
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const code = generatePairingCode();
     const codeHash = await hashPairingCode(code);
-    const { error: insertError } = await admin
-      .from("fivem_pairing_codes")
-      .insert({
-        personnel_profile_id: profile.id,
-        code_hash: codeHash,
-        expires_at: expiresAt,
-      });
+    const { data: expiresAt, error: insertError } = await admin.rpc("mobile_create_pairing", {
+          p_profile_id: profile.id, p_code_hash: codeHash,
+        });
 
     if (!insertError) {
       return NextResponse.json(
@@ -168,4 +148,12 @@ export async function POST() {
     { ok: false, error: "A unique pairing code could not be created. Try again." },
     { status: 503, headers: { "Cache-Control": "no-store" } },
   );
+}
+
+export async function DELETE(request: Request) {
+  if (request.headers.get("origin") !== new URL(request.url).origin) return NextResponse.json({ok:false,error:"Invalid request origin."},{status:403});
+  const context = await getAuthenticatedProfile();
+  if (!context) return NextResponse.json({ok:false,error:"Sign in to disconnect your character."},{status:401});
+  const { error } = await context.admin.rpc("mobile_disconnect_character", { p_profile_id: context.profile.id });
+  return NextResponse.json(error ? {ok:false,error:"Could not disconnect the character."} : {ok:true}, {status:error?500:200,headers:{"Cache-Control":"no-store"}});
 }
