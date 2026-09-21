@@ -17,6 +17,7 @@ const mobilePrimaryNavigation = [
   { href: "/archives", label: "Historical Archives", detail: "Department history & released records" },
   { href: "/office-of-the-sheriff", label: "Office of the Sheriff", detail: "Executive leadership" },
   { href: "/open-records", label: "Open Records", detail: "Request public records & track releases" },
+  { href: "/jailbirds", label: "Jailbirds", detail: "Recent arrest bookings & public releases" },
 ];
 
 export function SiteHeader() {
@@ -115,6 +116,7 @@ export function SiteHeader() {
           </details>
 
           <Link href="/open-records">Open Records</Link>
+          <Link href="/jailbirds">Jailbirds</Link>
           <Link href="/join">Join LSCSO</Link>
           <Link href="/portal">Personnel Portal</Link>
         </nav>
@@ -214,7 +216,7 @@ export function SiteHeader() {
           .refined-desktop-navigation {
             flex: 1 1 auto;
             justify-content: flex-end;
-            gap: clamp(18px, 1.55vw, 28px);
+            gap: clamp(16px, 1.25vw, 24px);
             font-size: 11px;
             letter-spacing: 0.065em;
           }
@@ -352,9 +354,9 @@ export function SiteHeader() {
           }
 
           .refined-desktop-navigation {
-            gap: 15px;
-            font-size: 10px;
-            letter-spacing: 0.045em;
+            gap: 12px;
+            font-size: 9.5px;
+            letter-spacing: 0.035em;
           }
         }
 
