@@ -14,6 +14,16 @@ export type JailbirdRecord = {
   expires_at: string;
 };
 
+async function signJailbirdImage(imagePath: string) {
+  const admin = createAdminClient() as any;
+  const { data, error } = await admin.storage
+    .from(JAILBIRDS_BUCKET)
+    .createSignedUrl(imagePath, 60 * 60);
+
+  if (error) throw error;
+  return data?.signedUrl ?? null;
+}
+
 export async function getActiveJailbirds(limit = 60) {
   const admin = createAdminClient() as any;
   const now = new Date().toISOString();
@@ -40,6 +50,27 @@ export async function getActiveJailbirds(limit = 60) {
     ...record,
     imageUrl: signed?.[index]?.signedUrl ?? null,
   }));
+}
+
+export async function getActiveJailbirdById(id: string) {
+  const admin = createAdminClient() as any;
+  const now = new Date().toISOString();
+
+  const { data, error } = await admin
+    .from("jailbirds")
+    .select("id,full_name,booking_number,charges,arrested_at,image_path,created_at,expires_at")
+    .eq("id", id)
+    .gt("expires_at", now)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!data) return null;
+
+  const record = data as JailbirdRecord;
+  return {
+    ...record,
+    imageUrl: await signJailbirdImage(record.image_path),
+  };
 }
 
 export async function purgeExpiredJailbirds() {
