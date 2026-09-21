@@ -1,0 +1,262 @@
+.jailbirds-page {
+  min-height: 100vh;
+  background: #f1eee6;
+  color: #191a17;
+}
+
+.jailbirds-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 92px 0 72px;
+  border-bottom: 1px solid rgba(187, 164, 95, 0.32);
+  background:
+    linear-gradient(120deg, rgba(7, 8, 7, 0.97), rgba(18, 19, 16, 0.93)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 38px);
+  color: #fff;
+}
+
+.jailbirds-hero::after {
+  content: "BOOKING RELEASE";
+  position: absolute;
+  right: -24px;
+  bottom: -24px;
+  color: rgba(255, 255, 255, 0.035);
+  font-size: clamp(68px, 10vw, 150px);
+  font-weight: 900;
+  letter-spacing: -0.06em;
+  white-space: nowrap;
+}
+
+.jailbirds-hero__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.jailbirds-hero__inner > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 520px);
+  align-items: end;
+  gap: 40px;
+}
+
+.jailbirds-hero h1 {
+  margin: 8px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(58px, 8vw, 112px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+
+.jailbirds-hero p:not(.section-kicker) {
+  margin: 0;
+  color: rgba(255,255,255,0.68);
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+.jailbirds-content {
+  padding-top: 56px;
+  padding-bottom: 90px;
+}
+
+.jailbirds-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 32px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid rgba(21, 22, 19, 0.22);
+}
+
+.jailbirds-heading span,
+.jailbirds-heading strong {
+  display: block;
+}
+
+.jailbirds-heading span {
+  margin-bottom: 5px;
+  color: #6d5c2c;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.jailbirds-heading strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 25px;
+  font-weight: 600;
+}
+
+.jailbirds-heading > p {
+  max-width: 520px;
+  margin: 0;
+  color: #6a6b64;
+  font-size: 12px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.jailbirds-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  padding-top: 28px;
+}
+
+.jailbird-card {
+  overflow: hidden;
+  border: 1px solid rgba(34, 35, 30, 0.19);
+  background: #fbfaf6;
+  box-shadow: 0 14px 30px rgba(32, 30, 23, 0.07);
+}
+
+.jailbird-photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: #252722;
+}
+
+.jailbird-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  filter: saturate(0.88) contrast(1.02);
+}
+
+.jailbird-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.06);
+}
+
+.jailbird-stamp {
+  position: absolute;
+  left: 14px;
+  bottom: 14px;
+  padding: 7px 9px 6px;
+  border: 1px solid rgba(255,255,255,0.45);
+  background: rgba(9,10,8,0.64);
+  color: rgba(255,255,255,0.9);
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.18em;
+  backdrop-filter: blur(8px);
+}
+
+.jailbird-photo__missing {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: rgba(255,255,255,0.54);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.jailbird-card__body {
+  padding: 22px 22px 24px;
+}
+
+.jailbird-card__title {
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(28,29,25,0.14);
+}
+
+.jailbird-card__title p {
+  margin: 0 0 3px;
+  color: #8a7438;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.jailbird-card__title h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.jailbird-card dl {
+  margin: 0;
+}
+
+.jailbird-card dl > div {
+  display: grid;
+  grid-template-columns: 95px minmax(0, 1fr);
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(28,29,25,0.1);
+}
+
+.jailbird-card dl > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.jailbird-card dt {
+  color: #77786f;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.jailbird-card dd {
+  margin: 0;
+  color: #262722;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+
+.jailbird-charges dd {
+  white-space: pre-wrap;
+}
+
+.jailbirds-empty {
+  margin-top: 28px;
+  padding: 70px 24px;
+  border: 1px dashed rgba(30,31,27,0.24);
+  text-align: center;
+}
+
+.jailbirds-empty span {
+  color: #8a7438;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.18em;
+}
+
+.jailbirds-empty h2 {
+  margin: 10px 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 32px;
+}
+
+.jailbirds-empty p {
+  margin: 0;
+  color: #707169;
+}
+
+@media (max-width: 980px) {
+  .jailbirds-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .jailbirds-hero__inner > div { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 640px) {
+  .jailbirds-hero { padding: 64px 0 54px; }
+  .jailbirds-grid { grid-template-columns: 1fr; }
+  .jailbirds-heading { align-items: start; flex-direction: column; }
+  .jailbirds-heading > p { text-align: left; }
+  .jailbird-card dl > div { grid-template-columns: 82px minmax(0, 1fr); }
+}
