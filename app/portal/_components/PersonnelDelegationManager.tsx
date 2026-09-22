@@ -30,12 +30,14 @@ type Props = {
 const baseDelegations = [
   "Personnel Administration",
   "Training Administration",
+  "Hiring Administration",
   "Division Administration",
 ] as const;
 
 const delegationDescriptions: Record<string, string> = {
   "Personnel Administration": "Manage normal personnel records and organizational assignments without protected account-deactivation authority.",
   "Training Administration": "Manage FTO qualifications, trainee assignments, training progress, and department certifications.",
+  "Hiring Administration": "Manage the full recruitment workflow: application form and availability, candidate review, interviews, applicant communications, employment offers, and final appointments. Hard-delete cleanup remains Sheriff / Undersheriff only.",
   "Division Administration": "Manage personnel assignments inside one selected organizational area without department-wide authority.",
   "Temporary Command Authority": "Time-limited executive delegation for assignments, training, certifications, and personnel changes for 1st Lieutenant and below. Account deactivation is never included.",
 };
