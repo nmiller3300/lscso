@@ -8,6 +8,11 @@ type MaintenanceRow = {
   effective_mode: "operational" | "scheduled" | "maintenance";
 };
 
+type CommandRouteAccess = {
+  standardWorkspace: boolean;
+  hiringAuthority: boolean;
+};
+
 function maintenanceClient(request: NextRequest) {
   return createServerClient<any>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     cookies: {
@@ -40,6 +45,44 @@ async function hasExecutiveBypass(request: NextRequest) {
       ["Active", "Acting"].includes(profile.status);
   } catch {
     return false;
+  }
+}
+
+async function commandRouteAccess(request: NextRequest): Promise<CommandRouteAccess> {
+  try {
+    const supabase = maintenanceClient(request);
+    const { data: userData } = await supabase.auth.getUser();
+    if (!userData.user) return { standardWorkspace: false, hiringAuthority: false };
+
+    const { data: profile } = await supabase
+      .from("personnel_profiles")
+      .select("id,access_tier,status")
+      .eq("auth_user_id", userData.user.id)
+      .maybeSingle();
+
+    if (!profile || !["Active", "Acting"].includes(profile.status)) {
+      return { standardWorkspace: false, hiringAuthority: false };
+    }
+
+    const standardWorkspace = ["Executive", "Command", "Supervisor", "Preliminary", "Attorney"].includes(profile.access_tier);
+    if (standardWorkspace) return { standardWorkspace: true, hiringAuthority: ["Executive", "Command"].includes(profile.access_tier) };
+
+    const now = new Date().toISOString();
+    const { data: delegations } = await supabase
+      .from("personnel_delegations")
+      .select("id,expires_at")
+      .eq("profile_id", profile.id)
+      .eq("delegation_type", "Hiring Administration")
+      .is("revoked_at", null)
+      .lte("starts_at", now);
+
+    const hiringAuthority = (delegations ?? []).some(
+      (delegation: any) => !delegation.expires_at || delegation.expires_at > now,
+    );
+
+    return { standardWorkspace: false, hiringAuthority };
+  } catch {
+    return { standardWorkspace: false, hiringAuthority: false };
   }
 }
 
@@ -97,6 +140,18 @@ export async function proxy(request: NextRequest) {
     url.pathname = "/portal/onboarding";
     url.search = "";
     return copyCookies(sessionResponse, NextResponse.redirect(url));
+  }
+
+  if (pathname.startsWith("/portal/command")) {
+    const access = await commandRouteAccess(request);
+    const recruitmentRoute = pathname === "/portal/command/applications" || pathname.startsWith("/portal/command/applications/");
+
+    if (!access.standardWorkspace && access.hiringAuthority && !recruitmentRoute) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/portal/my-office";
+      url.search = "";
+      return copyCookies(sessionResponse, NextResponse.redirect(url));
+    }
   }
 
   return sessionResponse;
