@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 import { APPLICATION_QUESTION_TYPES, type ApplicationQuestionType } from "@/lib/recruitment/application";
 
-const EDITOR_RANKS = new Set(["Sheriff", "Undersheriff"]);
 const QUESTION_TYPES = new Set<string>(APPLICATION_QUESTION_TYPES);
 
 function clean(value: unknown, max = 1200) {
@@ -27,13 +27,13 @@ function makeQuestionKey(prompt: string) {
 
 async function authorize() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !EDITOR_RANKS.has(profile.rank)) return null;
+  if (!profile || !(await hasHiringAuthority(profile))) return null;
   return profile;
 }
 
 export async function POST(request: Request) {
   const profile = await authorize();
-  if (!profile) return NextResponse.json({ error: "Only the Sheriff or Undersheriff may edit the application form." }, { status: 403 });
+  if (!profile) return NextResponse.json({ error: "You do not have permission to edit the application form." }, { status: 403 });
   const supabase = await createClient() as any;
 
   try {
