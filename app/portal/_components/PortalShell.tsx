@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
 import { CoffeeBreakButton } from "./CoffeeBreakButton";
 import { CommandQuickFind } from "./CommandQuickFind";
+import { HiringAuthorityShortcut } from "./HiringAuthorityShortcut";
 import { LegacyPortalModalBridge } from "./LegacyPortalModalBridge";
 import { MyInfoSectionNav } from "./MyInfoSectionNav";
 import { MyPerformanceEvaluations } from "./MyPerformanceEvaluations";
@@ -43,7 +44,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
         </div>
         <div className="portal-sidebar-label">{audience === "command" ? "Command workspace" : "Personnel workspace"}</div>
         <PortalNavigation active={active} audience={audience} />
-        <div className="portal-sidebar-utility"><CoffeeBreakButton /></div>
+        <div className="portal-sidebar-utility"><HiringAuthorityShortcut /><CoffeeBreakButton /></div>
         <div className="portal-sidebar-foot">
           <span className="portal-security-pulse" aria-hidden="true" />
           <div><strong>LSCSO Personnel</strong><small>Department workspace</small></div>
@@ -58,6 +59,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
           </div>
           <div className="portal-topbar-actions">
             <div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>
+            <HiringAuthorityShortcut compact />
             {audience === "command" ? <CommandQuickFind /> : null}
             <PortalNotificationLink audience={audience} />
             <PortalAccountMenu />
