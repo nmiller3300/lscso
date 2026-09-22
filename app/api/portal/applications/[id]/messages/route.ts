@@ -1,12 +1,11 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 
-const allowedTiers = new Set(["Executive", "Command"]);
-
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !allowedTiers.has(profile.access_tier)) {
+  if (!profile || !(await hasHiringAuthority(profile))) {
     return NextResponse.json({ error: "You do not have permission to send applicant messages." }, { status: 403 });
   }
 
