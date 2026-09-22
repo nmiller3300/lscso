@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { PortalShell } from "../../../_components/PortalShell";
+import { getHiringAuthorityPersonnel, hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
@@ -16,16 +17,16 @@ import "./recruitment-premium.css";
 
 export default async function ApplicationPage({ params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
+  if (!profile || !(await hasHiringAuthority(profile))) redirect("/portal");
   const { id } = await params;
   const supabase = await createClient() as any;
-  const [{ data: application }, { data: people }, { data: notes }, { data: history }, { data: applicantMessages }, { data: offers }] = await Promise.all([
+  const [{ data: application }, { data: notes }, { data: history }, { data: applicantMessages }, { data: offers }, people] = await Promise.all([
     supabase.from("recruitment_applications").select("*").eq("id", id).maybeSingle(),
-    supabase.from("personnel_profiles").select("id,display_name,access_tier,status").in("access_tier", ["Executive", "Command"]).in("status", ["Active", "Acting"]).order("display_name"),
     supabase.from("recruitment_application_notes").select("*").eq("application_id", id).order("created_at", { ascending: false }),
     supabase.from("recruitment_application_history").select("*").eq("application_id", id).order("created_at", { ascending: false }),
     supabase.from("recruitment_applicant_messages").select("id,application_id,author_profile_id,content,created_at").eq("application_id", id).order("created_at", { ascending: true }),
     supabase.from("recruitment_employment_offers").select("*").eq("application_id", id).order("issued_at", { ascending: false }),
+    getHiringAuthorityPersonnel(),
   ]);
   if (!application) notFound();
 
