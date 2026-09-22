@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../_components/PortalShell";
+import { getHiringAuthorityPersonnel, hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { ApplicationsDirectory } from "./ApplicationsDirectory";
@@ -8,18 +9,17 @@ import { ApplicationAvailabilityControl } from "./ApplicationAvailabilityControl
 
 export default async function CommandApplicationsPage() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
+  if (!profile || !(await hasHiringAuthority(profile))) redirect("/portal");
 
   const supabase = await createClient() as any;
-  const [applicationsResult, peopleResult, settingsResult, offersResult] = await Promise.all([
+  const [applicationsResult, settingsResult, offersResult, people] = await Promise.all([
     supabase.from("recruitment_applications").select("id,application_number,application_track,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id,interview_status,hired_profile_id,recruitment_closed_at").order("submitted_at", { ascending: false }).limit(250),
-    supabase.from("personnel_profiles").select("id,display_name,rank,access_tier,status").in("access_tier", ["Executive", "Command"]).in("status", ["Active", "Acting"]).order("display_name"),
     supabase.from("recruitment_settings").select("applications_open,department_attorney_applications_open,updated_at,updated_by_profile_id").eq("id", "applications").maybeSingle(),
     supabase.from("recruitment_employment_offers").select("application_id,status,expires_at,issued_at").order("issued_at", { ascending: false }),
+    getHiringAuthorityPersonnel(),
   ]);
 
   const applications = applicationsResult.data ?? [];
-  const people = peopleResult.data ?? [];
   const names = new Map(people.map((person: any) => [person.id, person.display_name]));
   const fullNames = new Map<string, string>(people.map((person: any): [string, string] => [person.id, `${person.rank} ${person.display_name}`]));
   const settings = settingsResult.data;
@@ -42,7 +42,6 @@ export default async function CommandApplicationsPage() {
   const interviewsInProgress = swornApplications.filter((item: any) => item.status === "Accepted" && !["Passed", "Failed"].includes(item.interview_status)).length;
   const offerStage = swornApplications.filter((item: any) => item.status === "Accepted" && item.interview_status === "Passed" && offerStatus(item.id) !== "Accepted").length;
   const closed = applications.filter((item: any) => ["Denied", "Withdrawn", "Archived", "Hired"].includes(item.status) || Boolean(item.hired_profile_id) || Boolean(item.recruitment_closed_at)).length;
-  const canEditApplication = ["Sheriff", "Undersheriff"].includes(profile.rank);
 
   return (
     <PortalShell
@@ -50,7 +49,7 @@ export default async function CommandApplicationsPage() {
       eyebrow="Personnel · Recruitment"
       title="Recruitment"
       description="Sworn Personnel and Department Attorney applications, review, interviews, offers, and appointments."
-      actions={canEditApplication ? <Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Sworn Application Form Editor</Link> : undefined}
+      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Sworn Application Form Editor</Link>}
     >
       <div className="deputy-summary-grid recruitment-metrics">
         <article><span>New</span><strong>{String(newApplications).padStart(2, "0")}</strong><small>Awaiting review</small></article>
