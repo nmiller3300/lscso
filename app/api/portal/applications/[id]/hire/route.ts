@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
-const ALLOWED_TIERS = new Set(["Executive", "Command"]);
-
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !ALLOWED_TIERS.has(profile.access_tier)) {
-    return NextResponse.json({ error: "Only active Command Staff may complete a Recruit appointment." }, { status: 403 });
+  if (!profile || !(await hasHiringAuthority(profile))) {
+    return NextResponse.json({ error: "You do not have permission to complete a Recruit appointment." }, { status: 403 });
   }
 
   const { id } = await params;
