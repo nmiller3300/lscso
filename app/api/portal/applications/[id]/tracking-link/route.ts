@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
-
-const allowedTiers = new Set(["Executive", "Command"]);
 
 function errorStatus(message: string) {
   const normalized = message.toLowerCase();
@@ -13,7 +12,7 @@ function errorStatus(message: string) {
 
 async function authorize() {
   const profile = await getCurrentPortalProfile();
-  return profile && allowedTiers.has(profile.access_tier) ? profile : null;
+  return profile && await hasHiringAuthority(profile) ? profile : null;
 }
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
