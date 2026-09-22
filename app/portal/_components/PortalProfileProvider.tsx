@@ -3,13 +3,17 @@
 import { createContext, useContext, type ReactNode } from "react";
 import type { PortalProfile } from "@/lib/supabase/portal-types";
 
-const PortalProfileContext = createContext<PortalProfile | null>(null);
+export type PortalProfileContextValue = PortalProfile & {
+  hiring_authority?: boolean;
+};
+
+const PortalProfileContext = createContext<PortalProfileContextValue | null>(null);
 
 export function PortalProfileProvider({
   profile,
   children,
 }: {
-  profile: PortalProfile;
+  profile: PortalProfileContextValue;
   children: ReactNode;
 }) {
   return (
