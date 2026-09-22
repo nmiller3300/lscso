@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
-
-const allowedTiers = new Set(["Executive", "Command"]);
 
 function clean(value: unknown, max = 40) {
   return typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -39,7 +38,7 @@ function actionErrorStatus(message: string) {
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !allowedTiers.has(profile.access_tier)) {
+  if (!profile || !(await hasHiringAuthority(profile))) {
     return NextResponse.json({ error: "You do not have permission to perform this action." }, { status: 403 });
   }
 
