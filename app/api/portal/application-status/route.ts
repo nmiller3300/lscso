@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
+import { hasHiringAuthority } from "@/lib/authorization/hiring-authority";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 import { RECRUITMENT_STATUS_ID } from "@/lib/recruitment/status";
 import { APPLICATION_TRACKS, type ApplicationTrack } from "@/lib/recruitment/application";
 
-const allowedTiers = new Set(["Executive", "Command"]);
 const allowedTracks = new Set<string>(APPLICATION_TRACKS);
 
 export async function PATCH(request: Request) {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !allowedTiers.has(profile.access_tier)) {
+  if (!profile || !(await hasHiringAuthority(profile))) {
     return NextResponse.json({ error: "You do not have permission to control recruitment applications." }, { status: 403 });
   }
 
