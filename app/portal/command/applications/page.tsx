@@ -14,7 +14,7 @@ export default async function CommandApplicationsPage() {
   const supabase = await createClient() as any;
   const [applicationsResult, settingsResult, offersResult, people] = await Promise.all([
     supabase.from("recruitment_applications").select("id,application_number,application_track,full_name,discord_username,status,submitted_at,created_at,updated_at,reviewer_profile_id,interview_status,hired_profile_id,recruitment_closed_at").order("submitted_at", { ascending: false }).limit(250),
-    supabase.from("recruitment_settings").select("applications_open,department_attorney_applications_open,updated_at,updated_by_profile_id").eq("id", "applications").maybeSingle(),
+    supabase.from("recruitment_settings").select("applications_open,department_attorney_applications_open,forensics_specialist_applications_open,updated_at,updated_by_profile_id").eq("id", "applications").maybeSingle(),
     supabase.from("recruitment_employment_offers").select("application_id,status,expires_at,issued_at").order("issued_at", { ascending: false }),
     getHiringAuthorityPersonnel(),
   ]);
@@ -34,13 +34,15 @@ export default async function CommandApplicationsPage() {
     return offer.status;
   };
 
-  const swornApplications = applications.filter((item: any) => item.application_track !== "Department Attorney");
+  const swornApplications = applications.filter((item: any) => item.application_track === "Sworn Personnel");
+  const forensicsApplications = applications.filter((item: any) => item.application_track === "Forensics Specialist");
   const attorneyApplications = applications.filter((item: any) => item.application_track === "Department Attorney");
   const newApplications = applications.filter((item: any) => item.status === "Submitted").length;
   const underReview = applications.filter((item: any) => item.status === "Under Review").length;
-  const attorneySelected = attorneyApplications.filter((item: any) => item.status === "Accepted").length;
-  const interviewsInProgress = swornApplications.filter((item: any) => item.status === "Accepted" && !["Passed", "Failed"].includes(item.interview_status)).length;
+  const forensicsInSelection = forensicsApplications.filter((item: any) => item.status === "Accepted" && !item.hired_profile_id).length;
+  const interviewsInProgress = [...swornApplications, ...forensicsApplications].filter((item: any) => item.status === "Accepted" && !["Passed", "Failed"].includes(item.interview_status)).length;
   const offerStage = swornApplications.filter((item: any) => item.status === "Accepted" && item.interview_status === "Passed" && offerStatus(item.id) !== "Accepted").length;
+  const attorneySelected = attorneyApplications.filter((item: any) => item.status === "Accepted").length;
   const closed = applications.filter((item: any) => ["Denied", "Withdrawn", "Archived", "Hired"].includes(item.status) || Boolean(item.hired_profile_id) || Boolean(item.recruitment_closed_at)).length;
 
   return (
@@ -48,15 +50,16 @@ export default async function CommandApplicationsPage() {
       active="applications"
       eyebrow="Personnel · Recruitment"
       title="Recruitment"
-      description="Sworn Personnel and Department Attorney applications, review, interviews, offers, and appointments."
-      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Sworn Application Form Editor</Link>}
+      description="Sworn Personnel, Forensics Specialist, and Department Attorney applications, review, interviews, offers, and appointments."
+      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Application Form Editor</Link>}
     >
       <div className="deputy-summary-grid recruitment-metrics">
         <article><span>New</span><strong>{String(newApplications).padStart(2, "0")}</strong><small>Awaiting review</small></article>
         <article><span>Under review</span><strong>{String(underReview).padStart(2, "0")}</strong><small>All career tracks</small></article>
-        <article><span>Attorney selected</span><strong>{String(attorneySelected).padStart(2, "0")}</strong><small>Accepted legal applicants</small></article>
-        <article><span>Sworn interview</span><strong>{String(interviewsInProgress).padStart(2, "0")}</strong><small>Interview stage</small></article>
+        <article><span>Forensics</span><strong>{String(forensicsInSelection).padStart(2, "0")}</strong><small>Active specialist selection</small></article>
+        <article><span>Interviews</span><strong>{String(interviewsInProgress).padStart(2, "0")}</strong><small>Sworn &amp; Forensics</small></article>
         <article><span>Sworn offer</span><strong>{String(offerStage).padStart(2, "0")}</strong><small>Offer / signature stage</small></article>
+        <article><span>Attorney selected</span><strong>{String(attorneySelected).padStart(2, "0")}</strong><small>Accepted legal applicants</small></article>
         <article><span>Closed</span><strong>{String(closed).padStart(2, "0")}</strong><small>Finalized</small></article>
       </div>
 
@@ -65,7 +68,7 @@ export default async function CommandApplicationsPage() {
         items={applications.map((item: any) => ({
           id: item.id,
           applicationNumber: item.application_number,
-          applicationTrack: item.application_track === "Department Attorney" ? "Department Attorney" : "Sworn Personnel",
+          applicationTrack: item.application_track === "Department Attorney" ? "Department Attorney" : item.application_track === "Forensics Specialist" ? "Forensics Specialist" : "Sworn Personnel",
           fullName: item.full_name,
           discord: item.discord_username,
           status: item.status,
@@ -74,7 +77,7 @@ export default async function CommandApplicationsPage() {
           reviewer: names.get(item.reviewer_profile_id) ?? null,
           reviewerId: item.reviewer_profile_id,
           interviewStatus: item.interview_status ?? null,
-          offerStatus: item.application_track === "Department Attorney" ? null : offerStatus(item.id),
+          offerStatus: item.application_track === "Sworn Personnel" ? offerStatus(item.id) : null,
           closed: item.status === "Archived" || Boolean(item.recruitment_closed_at),
           hired: item.status === "Hired" || Boolean(item.hired_profile_id),
         }))}
@@ -82,6 +85,7 @@ export default async function CommandApplicationsPage() {
 
       <ApplicationAvailabilityControl
         initialSwornOpen={settings?.applications_open === true}
+        initialForensicsOpen={settings?.forensics_specialist_applications_open === true}
         initialAttorneyOpen={settings?.department_attorney_applications_open === true}
         initialUpdatedAt={settings?.updated_at ?? null}
         initialUpdatedBy={settings?.updated_by_profile_id ? fullNames.get(settings.updated_by_profile_id) ?? null : null}
