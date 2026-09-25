@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 
 const divisions = [
   { href: "/patrol", label: "Patrol", detail: "Primary field operations" },
+  { href: "/forensic-services", label: "Forensic Services", detail: "Scene processing & forensic support" },
   { href: "/internal-affairs", label: "Internal Affairs", detail: "Standards & accountability" },
   { href: "/training-recruitment", label: "Training & Recruitment", detail: "Development & hiring" },
 ];
