@@ -49,8 +49,8 @@ export const rankAccess = [
   },
   {
     tier: "Deputy",
-    ranks: ["Master Deputy", "Deputy III", "Deputy II", "Deputy", "Recruit"],
-    scope: "Access to own record, certifications, assignments, and requests.",
+    ranks: ["Master Deputy", "Deputy III", "Deputy II", "Deputy", "Recruit", "Forensics Specialist"],
+    scope: "Standard personnel portal access to own record, certifications, assignments, and requests.",
   },
   {
     tier: "Attorney",
