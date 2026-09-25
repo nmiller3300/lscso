@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PortalResponsiveCinematicBackdrop } from "../../../../portal/_components/PortalResponsiveCinematicBackdrop";
 import { ApplicantStatusView, type ApplicantMessage, type ApplicantStatusRecord } from "../ApplicantStatusView";
 import { DepartmentAttorneyStatusView } from "../DepartmentAttorneyStatusView";
+import { ForensicsSpecialistStatusView } from "../ForensicsSpecialistStatusView";
 import { ApplicantStatusLiveRefresh } from "./ApplicantStatusLiveRefresh";
 import "../../../../portal/portal-login-responsive-cinematic.css";
 import "../../application.css";
@@ -93,7 +94,9 @@ export default async function ApplicantStatusPage({ params }: { params: Promise<
     && !String(record.closure_code ?? "").trim();
   const candidateView = record.application_track === "Department Attorney"
     ? <DepartmentAttorneyStatusView record={record} applicantMessages={applicantMessages} />
-    : <ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} />;
+    : record.application_track === "Forensics Specialist"
+      ? <ForensicsSpecialistStatusView record={record} applicantMessages={applicantMessages} />
+      : <ApplicantStatusView record={record} applicantMessages={applicantMessages} trackingToken={rawToken} />;
 
   return (
     <>

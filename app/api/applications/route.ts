@@ -66,17 +66,26 @@ export async function POST(request: Request) {
     const trackingTokenHash = createHash("sha256").update(trackingToken).digest("hex");
     const supabase = await createServerClient() as any;
 
-    const { data, error } = await supabase
-      .rpc("submit_recruitment_application", {
-        p_answers: body.answers,
-        p_signature_name: signatureName,
-        p_certification_text: APPLICATION_CERTIFICATION_TEXT,
-        p_tracking_token_hash: trackingTokenHash,
-        p_ai_policy_acknowledged: true,
-        p_tracking_token: trackingToken,
-        p_application_track: track,
-      })
-      .single();
+    const rpcRequest = track === "Forensics Specialist"
+      ? supabase.rpc("submit_forensics_application", {
+          p_answers: body.answers,
+          p_signature_name: signatureName,
+          p_certification_text: APPLICATION_CERTIFICATION_TEXT,
+          p_tracking_token_hash: trackingTokenHash,
+          p_ai_policy_acknowledged: true,
+          p_tracking_token: trackingToken,
+        })
+      : supabase.rpc("submit_recruitment_application", {
+          p_answers: body.answers,
+          p_signature_name: signatureName,
+          p_certification_text: APPLICATION_CERTIFICATION_TEXT,
+          p_tracking_token_hash: trackingTokenHash,
+          p_ai_policy_acknowledged: true,
+          p_tracking_token: trackingToken,
+          p_application_track: track,
+        });
+
+    const { data, error } = await rpcRequest.single();
 
     if (error || !data) {
       const message = error?.message || "The application could not be saved.";

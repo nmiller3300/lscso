@@ -8,6 +8,7 @@ import type { ApplicationTrack } from "@/lib/recruitment/application";
 
 type Props = {
   initialSwornOpen: boolean;
+  initialForensicsOpen: boolean;
   initialAttorneyOpen: boolean;
   initialUpdatedAt: string | null;
   initialUpdatedBy: string | null;
@@ -15,14 +16,17 @@ type Props = {
 
 export function ApplicationAvailabilityControl({
   initialSwornOpen,
+  initialForensicsOpen,
   initialAttorneyOpen,
   initialUpdatedAt,
   initialUpdatedBy,
 }: Props) {
   const router = useRouter();
   const [swornOpen, setSwornOpen] = useState(initialSwornOpen);
+  const [forensicsOpen, setForensicsOpen] = useState(initialForensicsOpen);
   const [attorneyOpen, setAttorneyOpen] = useState(initialAttorneyOpen);
   const [savedSwornOpen, setSavedSwornOpen] = useState(initialSwornOpen);
+  const [savedForensicsOpen, setSavedForensicsOpen] = useState(initialForensicsOpen);
   const [savedAttorneyOpen, setSavedAttorneyOpen] = useState(initialAttorneyOpen);
   const [updatedAt, setUpdatedAt] = useState(initialUpdatedAt);
   const [updatedBy, setUpdatedBy] = useState(initialUpdatedBy);
@@ -44,8 +48,9 @@ export function ApplicationAvailabilityControl({
   async function save() {
     if (pending) return;
     const swornChanged = swornOpen !== savedSwornOpen;
+    const forensicsChanged = forensicsOpen !== savedForensicsOpen;
     const attorneyChanged = attorneyOpen !== savedAttorneyOpen;
-    if (!swornChanged && !attorneyChanged) return;
+    if (!swornChanged && !forensicsChanged && !attorneyChanged) return;
 
     setPending(true);
     setError("");
@@ -53,52 +58,54 @@ export function ApplicationAvailabilityControl({
     try {
       let latest: any = null;
       if (swornChanged) latest = await updateTrack("Sworn Personnel", swornOpen);
+      if (forensicsChanged) latest = await updateTrack("Forensics Specialist", forensicsOpen);
       if (attorneyChanged) latest = await updateTrack("Department Attorney", attorneyOpen);
       setSavedSwornOpen(swornOpen);
+      setSavedForensicsOpen(forensicsOpen);
       setSavedAttorneyOpen(attorneyOpen);
       if (latest) {
         setUpdatedAt(latest.updatedAt);
         setUpdatedBy(latest.updatedBy);
       }
-      setNotice("Public application availability has been updated for both career tracks.");
+      setNotice("Public application availability has been updated for the career tracks.");
       router.refresh();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "Application availability could not be updated.");
       setSwornOpen(savedSwornOpen);
+      setForensicsOpen(savedForensicsOpen);
       setAttorneyOpen(savedAttorneyOpen);
     } finally {
       setPending(false);
     }
   }
 
-  const hasChanges = swornOpen !== savedSwornOpen || attorneyOpen !== savedAttorneyOpen;
-  const openCount = Number(savedSwornOpen) + Number(savedAttorneyOpen);
+  const hasChanges = swornOpen !== savedSwornOpen || forensicsOpen !== savedForensicsOpen || attorneyOpen !== savedAttorneyOpen;
+  const openCount = Number(savedSwornOpen) + Number(savedForensicsOpen) + Number(savedAttorneyOpen);
 
   return (
     <section className={`portal-panel recruitment-availability recruitment-availability--${openCount ? "open" : "closed"}`}>
       <div className="portal-panel-heading">
         <div><p>Public recruitment control</p><h2>Application availability</h2></div>
         <b className={`recruitment-availability__badge recruitment-availability__badge--${openCount ? "open" : "closed"}`}>
-          {openCount === 2 ? "2 tracks open" : openCount === 1 ? "1 track open" : "Applications closed"}
+          {openCount ? `${openCount} ${openCount === 1 ? "track" : "tracks"} open` : "Applications closed"}
         </b>
       </div>
 
       <div className="recruitment-availability__layout">
         <div>
           <strong>Control each public application independently.</strong>
-          <p>
-            These settings control the career choices shown on <Link href="/join/application" target="_blank">/join/application</Link> and whether the submission system accepts each role.
-          </p>
-          <small>
-            Last updated {updatedAt ? new Date(updatedAt).toLocaleString() : "when the system was created"}
-            {updatedBy ? ` by ${updatedBy}` : ""}.
-          </small>
+          <p>These settings control the career choices shown on <Link href="/join/application" target="_blank">/join/application</Link> and whether the submission system accepts each role.</p>
+          <small>Last updated {updatedAt ? new Date(updatedAt).toLocaleString() : "when the system was created"}{updatedBy ? ` by ${updatedBy}` : ""}.</small>
         </div>
 
         <div className="recruitment-availability__controls">
           <div className="portal-glass-setting-row portal-glass-setting-row--compact">
             <div><strong>Sworn Personnel applications</strong><small>Deputy candidate application, interview, employment offer, and appointment workflow.</small></div>
             <GlassBlobToggle checked={swornOpen} disabled={pending} label="Accept Sworn Personnel applications" onChange={setSwornOpen} />
+          </div>
+          <div className="portal-glass-setting-row portal-glass-setting-row--compact">
+            <div><strong>Forensics Specialist applications</strong><small>Forensic Services specialist selection, interview, and civilian personnel appointment workflow.</small></div>
+            <GlassBlobToggle checked={forensicsOpen} disabled={pending} label="Accept Forensics Specialist applications" onChange={setForensicsOpen} />
           </div>
           <div className="portal-glass-setting-row portal-glass-setting-row--compact">
             <div><strong>Department Attorney applications</strong><small>Legal-counsel application and Command selection workflow. This track is independent from sworn recruitment.</small></div>

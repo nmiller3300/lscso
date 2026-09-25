@@ -1,7 +1,7 @@
 export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Denied", "Hired", "Withdrawn", "Archived"] as const;
 export const APPLICATION_REVIEW_STATUSES = ["Submitted", "Under Review"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;
-export const APPLICATION_TRACKS = ["Sworn Personnel", "Department Attorney"] as const;
+export const APPLICATION_TRACKS = ["Sworn Personnel", "Department Attorney", "Forensics Specialist"] as const;
 export type ApplicationTrack = typeof APPLICATION_TRACKS[number];
 
 export const APPLICATION_QUESTION_TYPES = ["short_text", "long_text", "multiple_choice", "yes_no"] as const;
@@ -58,6 +58,10 @@ export function isDepartmentAttorneyTrack(track?: string | null) {
   return track === "Department Attorney";
 }
 
+export function isForensicsSpecialistTrack(track?: string | null) {
+  return track === "Forensics Specialist";
+}
+
 export function applicationLabel(applicationNumber: number | string) {
   return `APP-${String(applicationNumber).padStart(4, "0")}`;
 }
@@ -66,7 +70,7 @@ export function applicationStatusLabel(status: string) {
   switch (status) {
     case "Accepted": return "Application Accepted";
     case "Interview": return "Legacy Interview Stage";
-    case "Hired": return "Hired · Recruit";
+    case "Hired": return "Hired · Personnel Record Created";
     default: return status;
   }
 }
@@ -93,6 +97,24 @@ export function applicationNextAction(
       return "Contact the applicant and schedule the required Department Attorney interview.";
     }
     return "Continue the documented Department Attorney selection workflow.";
+  }
+
+  if (track === "Forensics Specialist") {
+    if (hired || status === "Hired") return "Forensics Specialist personnel record created — continue Forensic Services onboarding.";
+    if (status === "Denied") return "Application closed — applicant was not selected.";
+    if (status === "Withdrawn") return "Application withdrawn — no further action required.";
+    if (status === "Archived") return "Selection process closed — no further recruitment action is pending.";
+    if (status === "Submitted") return "Assign a Command reviewer and begin Forensic Services screening.";
+    if (status === "Under Review") return "Complete Command screening, then accept or deny the application.";
+    if (status === "Accepted") {
+      if (interviewStatus === "Passed") return "Interview completed — applicant may now be appointed as Forensics Specialist.";
+      if (interviewStatus === "Failed") return "Interview completed — applicant was not selected to advance to appointment.";
+      if (interviewStatus === "Scheduled") return "Interview scheduled — complete the interview and record the selection decision.";
+      if (interviewStatus === "No Show") return "Interview no-show recorded — reschedule the interview or close the selection process separately.";
+      if (interviewStatus === "Completed") return "Interview completed — record the selection decision.";
+      return "Contact the applicant and schedule the required Forensics Specialist interview.";
+    }
+    return "Continue the documented Forensics Specialist selection workflow.";
   }
 
   if (hired || status === "Hired") return "Personnel record created — continue onboarding and training.";

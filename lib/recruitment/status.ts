@@ -9,6 +9,7 @@ export type RecruitmentStatus = {
   isOpen: boolean;
   swornApplicationsOpen: boolean;
   departmentAttorneyApplicationsOpen: boolean;
+  forensicsSpecialistApplicationsOpen: boolean;
   updatedAt: string | null;
 };
 
@@ -19,7 +20,7 @@ export async function getRecruitmentStatus(): Promise<RecruitmentStatus> {
 
   const { data, error } = await supabase
     .from("recruitment_settings")
-    .select("applications_open,department_attorney_applications_open,updated_at")
+    .select("applications_open,department_attorney_applications_open,forensics_specialist_applications_open,updated_at")
     .eq("id", RECRUITMENT_STATUS_ID)
     .maybeSingle();
 
@@ -28,17 +29,20 @@ export async function getRecruitmentStatus(): Promise<RecruitmentStatus> {
       isOpen: false,
       swornApplicationsOpen: false,
       departmentAttorneyApplicationsOpen: false,
+      forensicsSpecialistApplicationsOpen: false,
       updatedAt: null,
     };
   }
 
   const swornApplicationsOpen = data.applications_open === true;
   const departmentAttorneyApplicationsOpen = data.department_attorney_applications_open === true;
+  const forensicsSpecialistApplicationsOpen = data.forensics_specialist_applications_open === true;
 
   return {
-    isOpen: swornApplicationsOpen || departmentAttorneyApplicationsOpen,
+    isOpen: swornApplicationsOpen || departmentAttorneyApplicationsOpen || forensicsSpecialistApplicationsOpen,
     swornApplicationsOpen,
     departmentAttorneyApplicationsOpen,
+    forensicsSpecialistApplicationsOpen,
     updatedAt: data.updated_at ?? null,
   };
 }

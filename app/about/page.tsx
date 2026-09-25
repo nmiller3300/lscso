@@ -175,6 +175,7 @@ export default function AboutPage() {
           <div className="page-actions page-actions--dark">
             <RouteLink href="/office-of-the-sheriff" variant="text">Office Leadership</RouteLink>
             <RouteLink href="/patrol" variant="text">Patrol Operations</RouteLink>
+            <RouteLink href="/forensic-services" variant="text">Forensic Services</RouteLink>
           </div>
         </div>
       </section>
