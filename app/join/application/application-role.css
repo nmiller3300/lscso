@@ -33,7 +33,7 @@
 
 .application-role-select__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -41,7 +41,7 @@
   position: relative;
   display: grid;
   gap: 10px;
-  min-height: 190px;
+  min-height: 208px;
   padding: 22px;
   border: 1px solid rgba(255,255,255,.11);
   background: rgba(255,255,255,.035);
@@ -55,6 +55,12 @@
   transform: translateY(-2px);
   border-color: rgba(216, 194, 125, .6);
   background: rgba(216, 194, 125, .07);
+}
+
+.application-role-card--forensics {
+  background:
+    linear-gradient(145deg, rgba(216, 194, 125, .055), rgba(255,255,255,.025)),
+    rgba(255,255,255,.03);
 }
 
 .application-role-card.is-closed {
@@ -111,6 +117,10 @@
   border: 1px solid rgba(216, 194, 125, .25);
   color: rgba(255,255,255,.72);
   background: rgba(216, 194, 125, .05);
+}
+
+@media (max-width: 1080px) {
+  .application-role-select__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 720px) {
