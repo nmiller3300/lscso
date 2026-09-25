@@ -120,6 +120,7 @@ export function SiteFooter() {
           <div>
             <span>Operations</span>
             <Link href="/patrol">Patrol Division</Link>
+            <Link href="/forensic-services">Forensic Services</Link>
             <Link href="/training-recruitment">Training &amp; Recruitment</Link>
           </div>
         </div>
