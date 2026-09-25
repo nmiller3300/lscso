@@ -2,10 +2,16 @@ import { createClient } from "@/lib/supabase/server";
 import type { ApplicationTrack, RecruitmentApplicationQuestion } from "./application";
 
 function mapQuestion(row: any): RecruitmentApplicationQuestion {
+  const applicationTrack: ApplicationTrack = row.application_track === "Department Attorney"
+    ? "Department Attorney"
+    : row.application_track === "Forensics Specialist"
+      ? "Forensics Specialist"
+      : "Sworn Personnel";
+
   return {
     id: String(row.id),
     questionKey: String(row.question_key),
-    applicationTrack: row.application_track === "Department Attorney" ? "Department Attorney" : "Sworn Personnel",
+    applicationTrack,
     sectionTitle: String(row.section_title),
     sectionShortTitle: String(row.section_short_title),
     sectionEyebrow: String(row.section_eyebrow),
