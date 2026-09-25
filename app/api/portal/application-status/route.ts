@@ -27,7 +27,9 @@ export async function PATCH(request: Request) {
     const updatedAt = new Date().toISOString();
     const availability = track === "Department Attorney"
       ? { department_attorney_applications_open: body.isOpen }
-      : { applications_open: body.isOpen };
+      : track === "Forensics Specialist"
+        ? { forensics_specialist_applications_open: body.isOpen }
+        : { applications_open: body.isOpen };
 
     const { error } = await supabase.from("recruitment_settings").upsert({
       id: RECRUITMENT_STATUS_ID,
