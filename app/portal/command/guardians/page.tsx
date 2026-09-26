@@ -1,4 +1,5 @@
 import { GuardianDirectory } from "../../_components/GuardianDirectory";
+import { GuardianWorkspace } from "../../_components/GuardianWorkspace";
 import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 
@@ -28,19 +29,34 @@ export default async function GuardianCenterPage({ searchParams }: PageProps) {
   const visibleGuardians = (guardians ?? []).filter((record: any) => record.structured_fields?.lifecycle_state !== "Scheduled");
 
   return (
-    <PortalShell active="guardians" eyebrow="Supervision" title="Guardians" description="Find, review, and create authorized Guardian records.">
-      <GuardianDirectory initialQuery={params.q?.slice(0, 120) ?? ""} records={visibleGuardians.map((record:any) => ({
-        id: record.id,
-        guardianNumber: Number(record.guardian_number),
-        recordType: record.record_type,
-        status: record.status,
-        title: record.title,
-        subjectName: names.get(record.subject_profile_id)?.display_name ?? "Restricted personnel",
-        subjectPersonnelId: names.get(record.subject_profile_id)?.personnel_id ?? "",
-        authorName: names.get(record.author_profile_id)?.display_name ?? "Command",
-        createdAt: record.created_at,
-        followUpDueAt: record.follow_up_due_at,
-      }))} />
+    <PortalShell
+      active="guardians"
+      eyebrow="Guardian Workspace"
+      title="Guardians"
+      description="Create authorized Guardian actions, review routed records, and search the Guardian history from one workspace."
+    >
+      <GuardianWorkspace />
+
+      <section className="portal-panel" aria-labelledby="guardian-record-directory-title">
+        <div className="portal-panel-heading">
+          <div>
+            <p>Guardian records</p>
+            <h2 id="guardian-record-directory-title">Search existing records</h2>
+          </div>
+        </div>
+        <GuardianDirectory initialQuery={params.q?.slice(0, 120) ?? ""} records={visibleGuardians.map((record:any) => ({
+          id: record.id,
+          guardianNumber: Number(record.guardian_number),
+          recordType: record.record_type,
+          status: record.status,
+          title: record.title,
+          subjectName: names.get(record.subject_profile_id)?.display_name ?? "Restricted personnel",
+          subjectPersonnelId: names.get(record.subject_profile_id)?.personnel_id ?? "",
+          authorName: names.get(record.author_profile_id)?.display_name ?? "Command",
+          createdAt: record.created_at,
+          followUpDueAt: record.follow_up_due_at,
+        }))} />
+      </section>
     </PortalShell>
   );
 }
