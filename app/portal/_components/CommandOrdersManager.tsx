@@ -59,6 +59,7 @@ const isScheduledAt = (item: CommandOrderItem, now: number) => {
 };
 
 const displayStatus = (item: CommandOrderItem, now: number) => isScheduledAt(item, now) ? "Scheduled" : item.status;
+const orderNumber = (item: CommandOrderItem) => `CO-${String(item.orderNumber).padStart(4, "0")}`;
 
 export function CommandOrdersManager({ initialOrders }: { initialOrders: CommandOrderItem[] }) {
   const router = useRouter();
@@ -170,7 +171,7 @@ export function CommandOrdersManager({ initialOrders }: { initialOrders: Command
 
   async function action(item: CommandOrderItem, kind: "publish" | "rescind") {
     if (pending) return;
-    if (kind === "rescind" && !window.confirm(`Rescind CO-${String(item.orderNumber).padStart(4, "0")}? Personnel will be notified.`)) return;
+    if (kind === "rescind" && !window.confirm(`Rescind ${orderNumber(item)}? Personnel will be notified.`)) return;
 
     setPending(true);
     setError("");
@@ -205,43 +206,54 @@ export function CommandOrdersManager({ initialOrders }: { initialOrders: Command
 
     <section className="portal-panel">
       <div className="portal-panel-heading"><div><p>Permanent archive</p><h2>Order ledger</h2></div><span>{safeOrders.length} total</span></div>
-      <div className="deputy-request-history">
+      <div className="command-order-stack">
         {safeOrders.map((item) => {
           const recipients = Array.isArray(item.recipients) ? item.recipients : [];
           const outstanding = recipients.filter((recipient) => !recipient.acknowledgedAt);
-          return <article key={item.id}>
-            <span>CO</span>
-            <div>
-              <strong>CO-{String(item.orderNumber).padStart(4, "0")} · {item.title || "Untitled Command Order"}</strong>
-              <small>{displayStatus(item, clock)} · {item.targetAudience || "Assigned personnel"} · Effective {when(item.effectiveAt)} · Issued by {item.issuer || "Command"}</small>
-              <p>{item.body || "No directive text was provided."}</p>
-              {item.acknowledgmentRequired ? <>
-                <small>Acknowledged {item.acknowledgedCount ?? 0}/{item.targetCount ?? recipients.length}{item.acknowledgmentDueAt ? ` · Due ${when(item.acknowledgmentDueAt)}` : ""}</small>
-                <details style={{ marginTop: 8 }}>
-                  <summary style={{ cursor: "pointer" }}>Acknowledgment roster · {outstanding.length} outstanding</summary>
-                  <div style={{ display: "grid", gap: 6, marginTop: 8 }}>
-                    {recipients.map((recipient) => <small key={recipient.profileId}>{recipient.name || "Personnel member"} — {recipient.acknowledgedAt ? `Acknowledged ${when(recipient.acknowledgedAt)}` : "Outstanding"}</small>)}
-                    {!recipients.length ? <small>No eligible personnel are currently assigned to this audience.</small> : null}
-                  </div>
-                </details>
-              </> : null}
+          const status = displayStatus(item, clock);
+          const tone = status === "Scheduled" ? " command-order-card--scheduled" : item.acknowledgmentRequired && outstanding.length ? " command-order-card--required" : "";
+          return <details className={`command-order-card${tone}`} key={item.id}>
+            <summary>
+              <span className="command-order-card__mark" aria-hidden="true">CO</span>
+              <span className="command-order-card__heading">
+                <strong>{orderNumber(item)} · {item.title || "Untitled Command Order"}</strong>
+                <small>{status} · {item.targetAudience || "Assigned personnel"} · Effective {when(item.effectiveAt)}</small>
+              </span>
+              <span className="command-order-card__state">{status}</span>
+            </summary>
+            <div className="command-order-card__body">
+              <p className="command-order-card__directive">{item.body || "No directive text was provided."}</p>
+              <div className="command-order-card__meta">
+                <span>Issued by {item.issuer || "Command"}</span>
+                <span>Created {when(item.createdAt)}</span>
+                {item.acknowledgmentRequired ? <span>Acknowledged {item.acknowledgedCount ?? 0}/{item.targetCount ?? recipients.length}</span> : <span>No acknowledgment required</span>}
+                {item.acknowledgmentDueAt ? <span>Due {when(item.acknowledgmentDueAt)}</span> : null}
+              </div>
+
+              {item.acknowledgmentRequired ? <details className="personnel-history-disclosure" style={{ marginTop: 14 }}>
+                <summary><strong>Acknowledgment roster</strong><span>{outstanding.length} outstanding</span></summary>
+                <div className="personnel-compact-records" style={{ display: "grid", gap: 7, padding: 12 }}>
+                  {recipients.map((recipient) => <small key={recipient.profileId}>{recipient.name || "Personnel member"} — {recipient.acknowledgedAt ? `Acknowledged ${when(recipient.acknowledgedAt)}` : "Outstanding"}</small>)}
+                  {!recipients.length ? <small>No eligible personnel are currently assigned to this audience.</small> : null}
+                </div>
+              </details> : null}
+
+              <div className="command-order-card__actions">
+                {item.status === "Draft" ? <button className="portal-button portal-button--secondary" disabled={pending} onClick={() => beginEdit(item)} type="button">Edit draft</button> : null}
+                {item.status === "Draft" ? <button className="portal-button portal-button--primary" disabled={pending} onClick={() => action(item, "publish")} type="button">Publish order</button> : null}
+                {item.status !== "Rescinded" ? <button className="portal-button portal-button--danger" disabled={pending} onClick={() => action(item, "rescind")} type="button">Rescind</button> : null}
+              </div>
             </div>
-            <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-              <b>{displayStatus(item, clock)}</b>
-              {item.status === "Draft" ? <button className="portal-button portal-button--secondary" disabled={pending} onClick={() => beginEdit(item)} type="button">Edit</button> : null}
-              {item.status === "Draft" ? <button className="portal-button portal-button--secondary" disabled={pending} onClick={() => action(item, "publish")} type="button">Publish</button> : null}
-              {item.status !== "Rescinded" ? <button className="portal-button portal-button--danger" disabled={pending} onClick={() => action(item, "rescind")} type="button">Rescind</button> : null}
-            </div>
-          </article>;
+          </details>;
         })}
-        {!safeOrders.length ? <div className="portal-empty-state"><strong>No Command Orders have been created.</strong></div> : null}
+        {!safeOrders.length ? <div className="portal-empty-state"><strong>No Command Orders have been created.</strong><span>Create the first directive from this workspace.</span></div> : null}
       </div>
     </section>
 
     {open ? <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target && !pending) { setOpen(false); setEditing(null); } }}>
       <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="command-order-title">
         <div className="portal-modal-heading">
-          <div><span>Department directive</span><h2 id="command-order-title">{editing ? `Edit CO-${String(editing.orderNumber).padStart(4, "0")}` : "New Command Order"}</h2></div>
+          <div><span>Department directive</span><h2 id="command-order-title">{editing ? `Edit ${orderNumber(editing)}` : "New Command Order"}</h2></div>
           <button disabled={pending} onClick={() => { setOpen(false); setEditing(null); }} type="button" aria-label="Close">×</button>
         </div>
         <form onSubmit={save}>
