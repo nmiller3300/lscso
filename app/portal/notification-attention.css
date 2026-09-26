@@ -6,27 +6,15 @@
   transition: background 160ms ease, border-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
-.portal-notification-button.has-unread {
-  border-color: rgba(187, 164, 95, 0.5);
-  background: rgba(187, 164, 95, 0.10);
-  color: var(--portal-text);
-  box-shadow: 0 0 0 3px rgba(187, 164, 95, 0.06);
-}
-
-.portal-notification-button.has-unread > span {
-  background: #bba45f;
-  color: #11110f;
-  font-weight: 900;
-}
-
+.portal-notification-button.has-unread,
 .portal-notification-button.has-actions {
   border-color: rgba(176, 48, 48, 0.72);
   background: rgba(176, 48, 48, 0.16);
   color: #ffb3b3;
   box-shadow: 0 0 0 3px rgba(176, 48, 48, 0.10);
-  animation: portalNotificationButtonPulse 1.25s ease 2;
 }
 
+.portal-notification-button.has-unread > span,
 .portal-notification-button.has-actions > span {
   background: #b83232;
   color: #fff;
@@ -34,110 +22,44 @@
   box-shadow: 0 0 0 4px rgba(184, 50, 50, 0.14);
 }
 
+/* The header count is the notification indicator. Do not interrupt the user with a page overlay. */
 .portal-notification-attention {
-  position: fixed;
-  top: 78px;
-  right: 24px;
-  z-index: 1600;
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 13px;
-  align-items: center;
-  width: min(520px, calc(100vw - 48px));
-  padding: 15px 46px 15px 15px;
-  border: 1px solid rgba(187, 164, 95, 0.62);
-  background: rgba(22, 22, 19, 0.98);
-  color: #f6f3e8;
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42), 0 0 0 4px rgba(187, 164, 95, 0.08);
-  backdrop-filter: blur(16px);
-  animation: portalAttentionEnter 220ms ease-out both;
+  display: none !important;
 }
 
-.portal-notification-attention.has-actions {
-  border-color: rgba(204, 67, 67, 0.85);
-  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.46), 0 0 0 4px rgba(184, 50, 50, 0.14);
+/* Keep transient operation notices small instead of presenting another large banner. */
+.portal-toast {
+  position: fixed !important;
+  top: auto !important;
+  right: 16px !important;
+  bottom: 16px !important;
+  left: auto !important;
+  width: auto !important;
+  max-width: min(360px, calc(100vw - 32px)) !important;
+  min-height: 0 !important;
+  padding: 9px 12px !important;
+  border: 1px solid rgba(184, 50, 50, 0.66) !important;
+  border-radius: 999px !important;
+  background: rgba(47, 15, 15, 0.97) !important;
+  color: #ffd2d2 !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.32), 0 0 0 3px rgba(184, 50, 50, 0.08) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  line-height: 1.35 !important;
+  transform: none !important;
+  animation: none !important;
 }
 
-.portal-notification-attention-icon {
-  display: grid;
-  place-items: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #bba45f;
-  color: #11110f;
-  font-size: 22px;
-  font-weight: 950;
-}
-
-.portal-notification-attention.has-actions .portal-notification-attention-icon {
-  background: #b83232;
-  color: #fff;
-}
-
-.portal-notification-attention-copy {
-  min-width: 0;
-}
-
-.portal-notification-attention-copy small,
-.portal-notification-attention-copy strong,
-.portal-notification-attention-copy span {
-  display: block;
-}
-
-.portal-notification-attention-copy small {
-  margin-bottom: 3px;
-  color: #d7c475;
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-}
-
-.portal-notification-attention.has-actions .portal-notification-attention-copy small {
-  color: #ff9e9e;
-}
-
-.portal-notification-attention-copy strong {
-  font-size: 15px;
-  line-height: 1.25;
-}
-
-.portal-notification-attention-copy span {
-  margin-top: 4px;
-  color: rgba(255,255,255,0.68);
-  font-size: 12px;
-  line-height: 1.4;
-}
-
-.portal-notification-attention-link {
-  min-height: 36px;
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  border: 1px solid rgba(187, 164, 95, 0.55);
-  color: #f1df9c;
-  font-size: 11px;
-  font-weight: 850;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.portal-notification-attention.has-actions .portal-notification-attention-link {
-  border-color: rgba(255, 137, 137, 0.55);
-  color: #ffc2c2;
-}
-
-.portal-notification-attention-close {
-  position: absolute;
-  top: 8px;
-  right: 9px;
-  width: 28px;
-  height: 28px;
-  border: 0;
-  background: transparent;
-  color: rgba(255,255,255,0.58);
-  cursor: pointer;
-  font-size: 20px;
+.portal-toast::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 7px;
+  border-radius: 999px;
+  background: #e44c4c;
+  box-shadow: 0 0 0 3px rgba(228, 76, 76, 0.14);
+  vertical-align: 1px;
 }
 
 .portal-inbox-list > article:not(.is-read) {
@@ -164,41 +86,10 @@
   box-shadow: inset 3px 0 0 rgba(177, 104, 35, 0.75);
 }
 
-@keyframes portalNotificationButtonPulse {
-  0%, 100% { transform: translateZ(0); box-shadow: 0 0 0 3px rgba(176, 48, 48, 0.10); }
-  50% { transform: translateZ(0) scale(1.025); box-shadow: 0 0 0 6px rgba(176, 48, 48, 0.14); }
-}
-
-@keyframes portalAttentionEnter {
-  from { opacity: 0; transform: translateY(-8px) scale(0.985); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
 @media (max-width: 780px) {
-  .portal-notification-attention {
-    top: 70px;
-    left: 12px;
-    right: 12px;
-    width: auto;
-    grid-template-columns: 38px minmax(0, 1fr);
-    padding: 13px 42px 13px 13px;
-  }
-
-  .portal-notification-attention-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  .portal-notification-attention-link {
-    grid-column: 2;
-    justify-self: start;
-    margin-top: 2px;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .portal-notification-button.has-actions,
-  .portal-notification-attention {
-    animation: none;
+  .portal-toast {
+    right: 12px !important;
+    bottom: 12px !important;
+    max-width: calc(100vw - 24px) !important;
   }
 }
