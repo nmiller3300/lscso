@@ -1,0 +1,180 @@
+/* Final personnel-record navigation pass.
+ * Loaded after all legacy portal styles so older tab/QOL rules cannot collapse
+ * the redesigned record header or pull Common Tasks underneath it.
+ */
+
+.personnel-record-shell {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 0 20px !important;
+  overflow: hidden !important;
+}
+
+.personnel-record-shell .personnel-record-navigation {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 146px;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.personnel-record-navigation__context,
+.personnel-record-navigation__groups,
+.personnel-record-navigation__groups > section,
+.personnel-record-navigation__links,
+.personnel-record-navigation__links > a {
+  position: relative !important;
+  inset: auto !important;
+  float: none !important;
+}
+
+.personnel-record-navigation__groups {
+  align-items: stretch;
+}
+
+.personnel-record-navigation__groups > section {
+  display: flex;
+  flex-direction: column;
+}
+
+.personnel-record-navigation__links {
+  flex: 1;
+  align-content: start;
+}
+
+.personnel-record-navigation__links > a {
+  isolation: isolate;
+}
+
+/* Common Tasks must always begin below the complete personnel-record shell. */
+.personnel-record-shell + .personnel-record-qol,
+.personnel-record-shell + section.personnel-record-qol,
+.personnel-record-qol {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 1 !important;
+  clear: both !important;
+  margin-top: 0 !important;
+  transform: none !important;
+}
+
+.personnel-record-qol .portal-panel-heading {
+  position: relative !important;
+  inset: auto !important;
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.personnel-record-qol-actions {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+@media (min-width: 1180px) {
+  .personnel-record-navigation__group-heading > small {
+    display: block;
+    margin-top: 4px;
+  }
+
+  .personnel-record-navigation__label > small {
+    display: block;
+    margin-top: 3px;
+    overflow: hidden;
+    color: rgba(255,255,255,.34);
+    font-size: .59rem;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .personnel-record-navigation__links > a {
+    min-height: 58px;
+  }
+}
+
+@media (max-width: 980px) {
+  .personnel-record-shell .personnel-record-navigation {
+    grid-template-columns: 1fr !important;
+  }
+
+  .personnel-record-navigation__context {
+    border-right: 0 !important;
+    border-bottom: 1px solid rgba(255,255,255,.075);
+  }
+
+  .personnel-record-navigation__groups {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .personnel-record-navigation__groups > section:last-child {
+    grid-column: 1 / -1;
+    border-top: 1px solid rgba(255,255,255,.075);
+  }
+}
+
+@media (max-width: 620px) {
+  .personnel-record-shell {
+    margin-bottom: 14px !important;
+    border-radius: 16px !important;
+  }
+
+  .personnel-record-shell .personnel-record-navigation {
+    min-height: 0;
+  }
+
+  .personnel-record-navigation__context {
+    padding: 15px 16px !important;
+  }
+
+  .personnel-record-navigation__groups {
+    display: block !important;
+  }
+
+  .personnel-record-navigation__groups > section,
+  .personnel-record-navigation__groups > section:last-child {
+    padding: 11px 10px 12px !important;
+    border-right: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.065);
+  }
+
+  .personnel-record-navigation__group-heading {
+    min-height: 0 !important;
+    padding: 0 6px 7px !important;
+  }
+
+  .personnel-record-navigation__links {
+    grid-template-columns: 1fr !important;
+  }
+
+  .personnel-record-navigation__links > a {
+    min-height: 52px !important;
+  }
+
+  .personnel-record-qol {
+    margin-top: 0 !important;
+  }
+
+  .personnel-record-qol-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .personnel-record-qol-actions .portal-button,
+  .personnel-record-qol-actions a,
+  .personnel-record-qol-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
