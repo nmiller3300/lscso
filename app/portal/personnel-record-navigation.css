@@ -1,0 +1,369 @@
+/* Personnel record navigation redesign.
+ * Loaded after legacy portal styles so the old tab-grid rules cannot collapse
+ * or overlap the personnel header and Common Tasks panel.
+ */
+
+.personnel-record-shell {
+  display: block !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 0 22px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 20px !important;
+  background: rgba(11,15,17,.88) !important;
+  box-shadow: 0 24px 70px rgba(0,0,0,.28) !important;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.personnel-record-identity {
+  position: relative !important;
+  z-index: 1;
+  overflow: hidden !important;
+  border-bottom: 1px solid rgba(255,255,255,.07) !important;
+  background:
+    radial-gradient(circle at 90% 0%, rgba(208,180,93,.12), transparent 28%),
+    linear-gradient(118deg, rgba(23,28,30,.98), rgba(12,17,20,.96)) !important;
+}
+
+.personnel-record-navigation {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 2;
+  display: grid !important;
+  grid-template-columns: minmax(180px,.64fr) minmax(0,3.36fr) !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 156px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-top: 1px solid rgba(255,255,255,.035) !important;
+  background: rgba(8,12,14,.82) !important;
+}
+
+.personnel-record-navigation__context {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px !important;
+  border-right: 1px solid rgba(255,255,255,.075);
+  background: linear-gradient(135deg, rgba(208,180,93,.075), rgba(255,255,255,.012));
+}
+
+.personnel-record-navigation__context > span,
+.personnel-record-navigation__group-heading > span {
+  color: #d0b45d;
+  font-size: .61rem;
+  font-weight: 850;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+
+.personnel-record-navigation__context > strong {
+  color: rgba(255,255,255,.96);
+  font-size: 1rem;
+  letter-spacing: -.018em;
+}
+
+.personnel-record-navigation__context > small {
+  max-width: 190px;
+  color: rgba(255,255,255,.43);
+  font-size: .68rem;
+  line-height: 1.48;
+}
+
+.personnel-record-navigation__groups {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: .9fr 1fr 1.25fr !important;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.personnel-record-navigation__groups > section {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  min-width: 0;
+  flex-direction: column;
+  padding: 13px 12px 14px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255,255,255,.07) !important;
+  background: transparent;
+}
+
+.personnel-record-navigation__groups > section:last-child {
+  border-right: 0 !important;
+}
+
+.personnel-record-navigation__groups > section.is-active-group {
+  background: linear-gradient(180deg, rgba(208,180,93,.05), transparent 90%);
+}
+
+.personnel-record-navigation__group-heading {
+  min-height: 48px;
+  padding: 0 7px 8px;
+}
+
+.personnel-record-navigation__group-heading > small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255,255,255,.32);
+  font-size: .6rem;
+  line-height: 1.35;
+}
+
+.personnel-record-navigation__links {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  flex: 1;
+  gap: 6px !important;
+  align-content: start;
+}
+
+.personnel-record-navigation__links > a {
+  position: relative !important;
+  inset: auto !important;
+  display: grid !important;
+  grid-template-columns: 31px minmax(0,1fr) auto !important;
+  gap: 10px !important;
+  align-items: center;
+  min-width: 0;
+  min-height: 54px;
+  padding: 8px 10px !important;
+  overflow: hidden;
+  border: 1px solid transparent !important;
+  border-radius: 12px !important;
+  background: transparent !important;
+  color: rgba(255,255,255,.58) !important;
+  text-decoration: none !important;
+  transform: none !important;
+  transition: transform 180ms cubic-bezier(.2,.8,.2,1), border-color 180ms ease, background 180ms ease, color 180ms ease, box-shadow 180ms ease !important;
+  isolation: isolate;
+}
+
+.personnel-record-navigation__links > a:hover,
+.personnel-record-navigation__links > a:focus-visible {
+  border-color: rgba(255,255,255,.09) !important;
+  background: rgba(255,255,255,.04) !important;
+  color: rgba(255,255,255,.92) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 10px 24px rgba(0,0,0,.14);
+}
+
+.personnel-record-navigation__links > a.is-active {
+  border-color: rgba(208,180,93,.3) !important;
+  background: linear-gradient(110deg, rgba(208,180,93,.16), rgba(208,180,93,.035)) !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 10px 24px rgba(0,0,0,.16);
+}
+
+.personnel-record-navigation__links > a.is-active::before {
+  position: absolute;
+  inset: 8px auto 8px 0;
+  width: 2px;
+  border-radius: 999px;
+  background: #d0b45d;
+  box-shadow: 0 0 14px rgba(208,180,93,.45);
+  content: "";
+}
+
+.personnel-record-navigation__glyph {
+  width: 31px;
+  height: 31px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 9px;
+  background: rgba(255,255,255,.02);
+  color: rgba(255,255,255,.56);
+  font-size: .52rem;
+  font-weight: 900;
+  letter-spacing: .04em;
+}
+
+.personnel-record-navigation__links > a.is-active .personnel-record-navigation__glyph {
+  border-color: rgba(208,180,93,.42);
+  background: rgba(208,180,93,.13);
+  color: #e4cf8d;
+}
+
+.personnel-record-navigation__label {
+  min-width: 0;
+}
+
+.personnel-record-navigation__label > strong {
+  display: block;
+  overflow: hidden;
+  color: inherit;
+  font-size: .72rem;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.personnel-record-navigation__label > small {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: rgba(255,255,255,.33);
+  font-size: .57rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.personnel-record-navigation__arrow {
+  color: rgba(255,255,255,.24);
+  font-size: .82rem;
+  transition: transform 180ms ease, color 180ms ease;
+}
+
+.personnel-record-navigation__links > a:hover .personnel-record-navigation__arrow,
+.personnel-record-navigation__links > a.is-active .personnel-record-navigation__arrow {
+  color: #d0b45d;
+  transform: translateX(2px);
+}
+
+/* Do not allow legacy QOL styles to pull Common Tasks into the record header. */
+.personnel-record-shell + .personnel-record-qol,
+.personnel-record-shell + section.personnel-record-qol,
+.personnel-record-qol {
+  position: relative !important;
+  inset: auto !important;
+  z-index: 1 !important;
+  clear: both !important;
+  margin-top: 0 !important;
+  transform: none !important;
+}
+
+.personnel-record-qol .portal-panel-heading {
+  position: relative !important;
+  inset: auto !important;
+  margin: 0 0 16px !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+.personnel-record-qol-actions {
+  position: relative !important;
+  inset: auto !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+@media (max-width: 1100px) {
+  .personnel-record-navigation {
+    grid-template-columns: 1fr !important;
+  }
+
+  .personnel-record-navigation__context {
+    border-right: 0;
+    border-bottom: 1px solid rgba(255,255,255,.075);
+  }
+
+  .personnel-record-navigation__context > small {
+    max-width: none;
+  }
+}
+
+@media (max-width: 860px) {
+  .personnel-record-shell {
+    border-radius: 16px !important;
+  }
+
+  .personnel-record-navigation__context {
+    padding: 15px 16px !important;
+  }
+
+  .personnel-record-navigation__groups {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x proximity;
+    scrollbar-width: thin;
+  }
+
+  .personnel-record-navigation__groups > section {
+    flex: 0 0 min(82vw, 360px);
+    scroll-snap-align: start;
+  }
+}
+
+@media (max-width: 620px) {
+  .personnel-record-shell {
+    margin-bottom: 14px !important;
+  }
+
+  .personnel-record-navigation {
+    min-height: 0 !important;
+  }
+
+  .personnel-record-navigation__context {
+    display: none !important;
+  }
+
+  .personnel-record-navigation__groups {
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .personnel-record-navigation__groups > section,
+  .personnel-record-navigation__groups > section:last-child {
+    padding: 11px 10px 12px !important;
+    border-right: 0 !important;
+    border-top: 1px solid rgba(255,255,255,.065) !important;
+  }
+
+  .personnel-record-navigation__groups > section:first-child {
+    border-top: 0 !important;
+  }
+
+  .personnel-record-navigation__group-heading {
+    min-height: 0;
+    padding: 0 6px 7px;
+  }
+
+  .personnel-record-navigation__group-heading > small {
+    display: none;
+  }
+
+  .personnel-record-navigation__links > a {
+    min-height: 52px;
+  }
+
+  .personnel-record-navigation__label > small {
+    display: none;
+  }
+
+  .personnel-record-qol-actions {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .personnel-record-qol-actions .portal-button,
+  .personnel-record-qol-actions a,
+  .personnel-record-qol-actions button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .personnel-record-navigation__links > a,
+  .personnel-record-navigation__arrow {
+    transition: none !important;
+  }
+}
