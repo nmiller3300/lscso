@@ -18,7 +18,8 @@ const commandNavigation: NavigationItem[] = [
   { id:"promotions",href:"/portal/command/promotions",label:"Promotion Review",mobileLabel:"Promotions",glyph:"UP",section:"Command Work",detail:"Career progression" },
   { id:"approvals",href:"/portal/command/approvals",label:"Approvals & Requests",mobileLabel:"Approvals",glyph:"RQ",section:"Command Work",detail:"Pending decisions" },
   { id:"applications",href:"/portal/command/applications",label:"Recruitment",mobileLabel:"Recruitment",glyph:"AP",section:"Command Work",detail:"Applications and hiring" },
-  { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Operations",detail:"Guardians and oversight",matches:["guardians"] },
+  { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Operations",detail:"Personnel oversight" },
+  { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Operations",detail:"Create, review, and track Guardians" },
   { id:"training",href:"/portal/command/training",label:"Training & FTO",mobileLabel:"Training",glyph:"TR",section:"Operations",detail:"Training and FTO",matches:["certifications"] },
   { id:"orders",href:"/portal/command/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
   { id:"psa",href:"/portal/command/psa",label:"Public Information",mobileLabel:"Public Info",glyph:"PS",section:"Department",detail:"PSAs and notices" },
@@ -27,7 +28,8 @@ const commandNavigation: NavigationItem[] = [
   myRequests,
 ];
 const supervisorNavigation: NavigationItem[] = [
-  { id:"supervision",href:"/portal/command/supervision",label:"My Personnel & Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Work",detail:"Assigned personnel",matches:["guardians"] },
+  { id:"supervision",href:"/portal/command/supervision",label:"My Personnel & Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Work",detail:"Assigned personnel" },
+  { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Work",detail:"Create and manage authorized Guardians" },
   { id:"promotions",href:"/portal/command/promotions",label:"Promotion Recommendations",mobileLabel:"Promotions",glyph:"UP",section:"Work",detail:"Recommend personnel" },
   { id:"approvals",href:"/portal/command/approvals",label:"Assigned Requests",mobileLabel:"Requests",glyph:"RQ",section:"Work",detail:"Pending requests" },
   { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Work",detail:"Training and qualifications",matches:["certifications"] },
