@@ -70,8 +70,8 @@ const guardianTypes: Record<GuardianKind, {
     label: "Written Warning",
     short: "WW",
     purpose: "Formally identify conduct requiring documented correction and follow-up.",
-    approval: "Command approval required before issue",
-    action: "Submit for Command Review",
+    approval: "Supervisor may issue directly",
+    action: "Issue Guardian",
     tone: "amber",
   },
   writeup: {
@@ -86,8 +86,8 @@ const guardianTypes: Record<GuardianKind, {
     label: "Commendation",
     short: "CM",
     purpose: "Recognize exceptional judgment, service, initiative, or performance.",
-    approval: "Supervisor may issue directly",
-    action: "Issue Guardian",
+    approval: "Command staff may issue directly",
+    action: "Issue Commendation",
     tone: "green",
   },
 };
@@ -141,7 +141,8 @@ export function GuardianWorkspace() {
 
   const config = guardianTypes[kind];
   const categories = kind === "commendation" ? positiveCategories : conductCategories;
-  const requiresApproval = kind === "warning" || kind === "writeup";
+  const canAuthorCommendation = ["Executive", "Command"].includes(currentProfile.access_tier);
+  const requiresApproval = kind === "writeup";
   const visibleRecords = showAllRecords ? records : records.slice(0, 4);
   const projectedPoints = currentMemberPoints + (kind === "commendation" ? 0 : pointsAssessed);
   const projectedTier = pointTiers.find((tier) =>
@@ -266,6 +267,7 @@ export function GuardianWorkspace() {
   }
 
   function selectKind(nextKind: GuardianKind) {
+    if (nextKind === "commendation" && !canAuthorCommendation) return;
     setKind(nextKind);
     setPointsAssessed(0);
     setEscalationOverride(false);
@@ -273,6 +275,10 @@ export function GuardianWorkspace() {
   }
 
   async function persistGuardian(status: string) {
+    if (kind === "commendation" && !canAuthorCommendation) {
+      throw new Error("Commendations may only be authored by Command staff.");
+    }
+
     const form = formRef.current ? new FormData(formRef.current) : new FormData();
     const subjectProfileId = String(form.get("member") ?? "");
     const subject = personnel.find((member) => member.id === subjectProfileId);
@@ -449,14 +455,24 @@ export function GuardianWorkspace() {
             <div><strong>Select the Guardian type</strong><small>The workflow adjusts automatically.</small></div>
           </div>
           <div className="guardian-type-grid">
-            {(Object.entries(guardianTypes) as Array<[GuardianKind, (typeof guardianTypes)[GuardianKind]]>).map(([id, item]) => (
-              <button className={kind === id ? `is-active guardian-tone--${item.tone}` : undefined} key={id} onClick={() => selectKind(id)} type="button">
-                <span>{item.short}</span>
-                <strong>{item.label}</strong>
-                <small>{item.purpose}</small>
-                <b>{item.approval}</b>
-              </button>
-            ))}
+            {(Object.entries(guardianTypes) as Array<[GuardianKind, (typeof guardianTypes)[GuardianKind]]>).map(([id, item]) => {
+              const restricted = id === "commendation" && !canAuthorCommendation;
+              return (
+                <button
+                  aria-disabled={restricted}
+                  className={kind === id ? `is-active guardian-tone--${item.tone}` : restricted ? "is-restricted" : undefined}
+                  disabled={restricted}
+                  key={id}
+                  onClick={() => selectKind(id)}
+                  type="button"
+                >
+                  <span>{item.short}</span>
+                  <strong>{item.label}</strong>
+                  <small>{item.purpose}</small>
+                  <b>{restricted ? "Command staff only" : item.approval}</b>
+                </button>
+              );
+            })}
           </div>
 
           <form key={`${kind}-${formKey}`} onSubmit={submitGuardian} ref={formRef}>
@@ -641,9 +657,9 @@ export function GuardianWorkspace() {
                 <div><strong>{config.label} routing</strong><small>{config.approval}</small></div>
               </div>
               <ol>
-                <li className="is-current"><span>1</span>Supervisor completes record</li>
+                <li className="is-current"><span>1</span>{kind === "commendation" ? "Command completes record" : "Supervisor completes record"}</li>
                 {requiresApproval ? <li><span>2</span>Command approves or returns</li> : null}
-                <li><span>{requiresApproval ? "3" : "2"}</span>Supervisor issues Guardian</li>
+                <li><span>{requiresApproval ? "3" : "2"}</span>{kind === "commendation" ? "Command issues Commendation" : "Supervisor issues Guardian"}</li>
                 <li><span>{requiresApproval ? "4" : "3"}</span>Member acknowledges / responds</li>
               </ol>
             </div>
