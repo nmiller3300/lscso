@@ -21,7 +21,7 @@ const commandNavigation: NavigationItem[] = [
   { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Operations",detail:"Personnel oversight" },
   { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Operations",detail:"Create, review, and track Guardians" },
   { id:"training",href:"/portal/command/training",label:"Training & FTO",mobileLabel:"Training",glyph:"TR",section:"Operations",detail:"Training and FTO",matches:["certifications"] },
-  { id:"orders",href:"/portal/command/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
+  { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
   { id:"psa",href:"/portal/command/psa",label:"Public Information",mobileLabel:"Public Info",glyph:"PS",section:"Department",detail:"PSAs and notices" },
   { id:"administration",href:"/portal/command/administration",label:"Administration",mobileLabel:"Admin",glyph:"AD",section:"Administration",detail:"Accounts and system tools",matches:["activity"] },
   myInfo,
