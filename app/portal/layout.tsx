@@ -44,6 +44,7 @@ import "./portal-card-clarity.css";
 import "./recruitment-interview-polish.css";
 import "./portal-overlay-fix.css";
 import "./reserve-status.css";
+import "./portal-premium-overhaul.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",
