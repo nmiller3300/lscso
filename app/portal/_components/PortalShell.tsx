@@ -9,6 +9,7 @@ import { LegacyPortalModalBridge } from "./LegacyPortalModalBridge";
 import { MyInfoSectionNav } from "./MyInfoSectionNav";
 import { MyPerformanceEvaluations } from "./MyPerformanceEvaluations";
 import { PortalAccountMenu } from "./PortalAccountMenu";
+import { PortalInteractionLayer } from "./PortalInteractionLayer";
 import { PortalInteriorBackdrop } from "./PortalInteriorBackdrop";
 import { PortalNavigation } from "./PortalNavigation";
 import { PortalNotificationLink } from "./PortalNotificationLink";
@@ -33,6 +34,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
       <PortalInteriorBackdrop />
       <LegacyPortalModalBridge />
       <PortalRealtimeRefresh />
+      <PortalInteractionLayer />
 
       <aside className="portal-sidebar">
         <div className="portal-sidebar-head">
