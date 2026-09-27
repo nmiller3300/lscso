@@ -1,23 +1,201 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { GuardianRecordDocument } from "../../../_components/GuardianRecordDocument";
 import { PortalShell } from "../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 
 type GuardianRecordPageProps = { params: Promise<{ guardianNumber: string }> };
-const evaluationRatingLabels:Record<string,string>={professional_conduct:"Professional Conduct",policy_knowledge:"Policy Knowledge",communication:"Communication",judgment_decision_making:"Judgment & Decision-Making",report_documentation:"Reports & Documentation",officer_safety_tactics:"Officer Safety & Tactics",initiative_reliability:"Initiative & Reliability",teamwork_leadership:"Teamwork & Leadership"};
-function dateLabel(value:unknown){const text=String(value??"");if(!text)return"Not recorded";return new Date(text.length===10?`${text}T12:00:00`:text).toLocaleDateString()}
 
-export default async function GuardianRecordPage({params}:GuardianRecordPageProps){
- const {guardianNumber}=await params;const numeric=Number(guardianNumber);if(!Number.isFinite(numeric))notFound();
- const supabase=await createClient() as any;const {data:record}=await supabase.from("guardian_records").select("*").eq("guardian_number",numeric).maybeSingle();if(!record)notFound();
- const fields=record.structured_fields&&typeof record.structured_fields==="object"?record.structured_fields as Record<string,any>:{};if(fields.lifecycle_state==="Scheduled")redirect("/portal/command/guardians/evaluations");
- const [{data:subject},{data:author}]=await Promise.all([supabase.from("personnel_profiles").select("personnel_id,display_name,rank,call_sign").eq("id",record.subject_profile_id).maybeSingle(),supabase.from("personnel_profiles").select("display_name,rank,call_sign").eq("id",record.author_profile_id).maybeSingle()]);
- const isEvaluation=record.record_type==="Performance Evaluation";const ratings=fields.ratings&&typeof fields.ratings==="object"?fields.ratings as Record<string,number>:{};const ratingEntries=Object.entries(evaluationRatingLabels).map(([key,label])=>({key,label,value:Number(ratings[key]??0)}));
- return <PortalShell active="guardians" eyebrow={`Guardian G-${String(record.guardian_number).padStart(4,"0")}`} title={record.title} description={`${record.reference_number} · ${record.record_type} · ${record.status}`} actions={<><Link className="portal-button portal-button--secondary" href="/portal/command/guardians">Back to Guardians</Link><Link className="portal-button portal-button--primary" href={isEvaluation?"/portal/command/guardians/evaluations":"/portal/command/guardians/manage"}>{isEvaluation?"Open evaluations":"Open management"}</Link></>}>
-  <div className="command-v2-workspace-grid"><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Reference</p><h2>{record.reference_number}</h2></div><span>G-{String(record.guardian_number).padStart(4,"0")}</span></div><p className="command-v2-compact-copy">System generated · permanent Guardian identifier</p></section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Subject</p><h2>{subject?.display_name??"Restricted personnel"}</h2></div><span>{subject?.personnel_id??""}</span></div><p className="command-v2-compact-copy">{subject?.rank??""}{subject?.call_sign?` · ${subject.call_sign}`:""}</p></section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>{isEvaluation?"Evaluated by":"Issued by"}</p><h2>{author?.display_name??"Department personnel"}</h2></div></div><p className="command-v2-compact-copy">{author?.rank??""}{author?.call_sign?` · ${author.call_sign}`:""}</p></section><section className="portal-panel command-v2-launcher"><div className="portal-panel-heading"><div><p>Status</p><h2>{record.status}</h2></div></div><p className="command-v2-compact-copy">{isEvaluation?`Issued ${new Date(record.issued_at??record.created_at).toLocaleString()}`:`Incident ${new Date(record.incident_at).toLocaleString()}`}</p></section></div>
-  {isEvaluation?<><section className="deputy-summary-grid command-v2-record-metrics" style={{marginTop:16}}><article><span>Evaluation type</span><strong>{String(fields.evaluation_kind??"Performance")}</strong><small>Guardian performance record</small></article><article><span>Review period</span><strong>{dateLabel(fields.period_start)}</strong><small>through {dateLabel(fields.period_end)}</small></article><article><span>Overall rating</span><strong>{Number(fields.overall_average??0).toFixed(2)}</strong><small>{String(fields.overall_rating??"Not rated")}</small></article><article><span>Disciplinary points</span><strong>00</strong><small>Non-disciplinary evaluation</small></article></section>
-   <section className="portal-panel" style={{marginTop:16}}><div className="portal-panel-heading"><div><p>1–5 scale</p><h2>Performance ratings</h2></div><span>{String(fields.overall_rating??"")}</span></div><div className="portal-form-grid" style={{marginTop:14}}>{ratingEntries.map(rating=><div className="command-v2-inline-state" key={rating.key}><strong>{rating.label}</strong><span>{rating.value||"—"} / 5{rating.value?` · ${rating.value===1?"Unsatisfactory":rating.value===2?"Needs Improvement":rating.value===3?"Meets Expectations":rating.value===4?"Exceeds Expectations":"Exceptional"}`:""}</span></div>)}</div></section>
-   <section className="portal-panel command-v2-record-body" style={{marginTop:16}}><div className="portal-panel-heading"><div><p>Supervisor assessment</p><h2>Evaluation narrative</h2></div>{fields.remediation_required?<span>Remediation required</span>:null}</div><dl className="command-v2-record-detail-list">{fields.reference?<><dt>Related event / external reference</dt><dd>{String(fields.reference)}</dd></>:null}<dt>Overall assessment</dt><dd>{String(fields.supervisor_summary??record.observed_behavior??"Not recorded")}</dd><dt>Strengths</dt><dd>{String(fields.strengths??record.action_taken??"Not recorded")}</dd><dt>Improvement areas</dt><dd>{String(fields.improvement_areas??record.expected_standard??"Not recorded")}</dd><dt>Goals / next-period expectations</dt><dd>{String(fields.goals??record.follow_up_plan??"Not recorded")}</dd>{fields.remediation_required?<><dt>Required remediation / training</dt><dd>{String(fields.remediation_plan??"Required")}</dd></>:null}{record.follow_up_due_at?<><dt>Follow-up date</dt><dd>{new Date(record.follow_up_due_at).toLocaleString()}</dd></>:null}{record.employee_response?<><dt>Member response</dt><dd>{record.employee_response}</dd></>:null}{record.acknowledged_at?<><dt>Acknowledged</dt><dd>{new Date(record.acknowledged_at).toLocaleString()} · Receipt only, not agreement</dd></>:null}</dl>{fields.remediation_required?<div className="portal-modal-actions"><Link className="portal-button portal-button--secondary" href="/portal/command/training">Open Training & FTO</Link></div>:null}</section></>:
-   <section className="portal-panel command-v2-record-body"><div className="portal-panel-heading"><div><p>Guardian record</p><h2>Record details</h2></div><span>{record.reference_number}</span></div><dl className="command-v2-record-detail-list"><dt>System reference</dt><dd>{record.reference_number}</dd>{fields.reference?<><dt>Related event / external reference</dt><dd>{String(fields.reference)}</dd></>:null}{record.location?<><dt>Location</dt><dd>{record.location}</dd></>:null}{record.policy_reference?<><dt>Policy reference</dt><dd>{record.policy_reference}</dd></>:null}{record.observed_behavior?<><dt>Observed behavior</dt><dd>{record.observed_behavior}</dd></>:null}{record.expected_standard?<><dt>Expected standard</dt><dd>{record.expected_standard}</dd></>:null}{record.action_taken?<><dt>Action taken</dt><dd>{record.action_taken}</dd></>:null}{record.follow_up_plan?<><dt>Follow-up</dt><dd>{record.follow_up_plan}</dd></>:null}{record.employee_response?<><dt>Employee response</dt><dd>{record.employee_response}</dd></>:null}</dl></section>}
- </PortalShell>
+const evaluationRatingLabels: Record<string, string> = {
+  professional_conduct: "Professional Conduct",
+  policy_knowledge: "Policy Knowledge",
+  communication: "Communication",
+  judgment_decision_making: "Judgment & Decision-Making",
+  report_documentation: "Reports & Documentation",
+  officer_safety_tactics: "Officer Safety & Tactics",
+  initiative_reliability: "Initiative & Reliability",
+  teamwork_leadership: "Teamwork & Leadership",
+};
+
+function dateOnly(value: unknown) {
+  const text = String(value ?? "");
+  if (!text) return "Not recorded";
+  const date = new Date(text.length === 10 ? `${text}T12:00:00` : text);
+  if (Number.isNaN(date.getTime())) return text;
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
+function dateTime(value: unknown) {
+  const text = String(value ?? "");
+  if (!text) return "Not recorded";
+  const date = new Date(text.length === 10 ? `${text}T12:00:00` : text);
+  if (Number.isNaN(date.getTime())) return text;
+  return date.toLocaleString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export default async function GuardianRecordPage({ params }: GuardianRecordPageProps) {
+  const { guardianNumber } = await params;
+  const numeric = Number(guardianNumber);
+  if (!Number.isFinite(numeric)) notFound();
+
+  const supabase = await createClient() as any;
+  const { data: record } = await supabase
+    .from("guardian_records")
+    .select("*")
+    .eq("guardian_number", numeric)
+    .maybeSingle();
+
+  if (!record) notFound();
+
+  const fields = record.structured_fields && typeof record.structured_fields === "object"
+    ? record.structured_fields as Record<string, any>
+    : {};
+
+  if (fields.lifecycle_state === "Scheduled") {
+    redirect("/portal/command/guardians/evaluations");
+  }
+
+  const [
+    { data: subject },
+    { data: author },
+    { data: acknowledgment },
+  ] = await Promise.all([
+    supabase
+      .from("personnel_profiles")
+      .select("personnel_id,display_name,rank,call_sign")
+      .eq("id", record.subject_profile_id)
+      .maybeSingle(),
+    supabase
+      .from("personnel_profiles")
+      .select("personnel_id,display_name,rank,call_sign")
+      .eq("id", record.author_profile_id)
+      .maybeSingle(),
+    supabase
+      .from("guardian_acknowledgments")
+      .select("fingerprint_id,typed_name,signature_method,acknowledgment_text,personnel_id_snapshot,display_name_snapshot,rank_snapshot,call_sign_snapshot,response_text,signed_at")
+      .eq("guardian_id", record.id)
+      .maybeSingle(),
+  ]);
+
+  const isEvaluation = record.record_type === "Performance Evaluation";
+  const ratings = fields.ratings && typeof fields.ratings === "object"
+    ? fields.ratings as Record<string, number>
+    : {};
+  const ratingEntries = Object.entries(evaluationRatingLabels).map(([key, label]) => ({
+    key,
+    label,
+    value: Number(ratings[key] ?? 0),
+  }));
+
+  const category = Array.isArray(fields.categories)
+    ? fields.categories.map(String).join(", ")
+    : String(record.title ?? "").includes(":")
+      ? String(record.title).split(":").slice(1).join(":").trim()
+      : "";
+
+  const subjectSnapshot = {
+    id: String(record.subject_profile_id),
+    personnelId: String(subject?.personnel_id ?? ""),
+    displayName: String(subject?.display_name ?? "Restricted personnel"),
+    rank: String(subject?.rank ?? ""),
+    callSign: subject?.call_sign ? String(subject.call_sign) : null,
+  };
+
+  const authorSnapshot = {
+    id: String(record.author_profile_id),
+    personnelId: String(author?.personnel_id ?? ""),
+    displayName: String(author?.display_name ?? "Department personnel"),
+    rank: String(author?.rank ?? ""),
+    callSign: author?.call_sign ? String(author.call_sign) : null,
+  };
+
+  return (
+    <PortalShell
+      active="guardians"
+      eyebrow={`Guardian G-${String(record.guardian_number).padStart(4, "0")}`}
+      title={record.title}
+      description={`${record.reference_number} · ${record.record_type} · ${record.status}`}
+      actions={(
+        <>
+          <Link className="portal-button portal-button--secondary" href="/portal/command/guardians">
+            Back to Guardians
+          </Link>
+          <Link
+            className="portal-button portal-button--primary"
+            href={isEvaluation ? "/portal/command/guardians/evaluations" : "/portal/command/guardians/manage"}
+          >
+            {isEvaluation ? "Open evaluations" : "Open management"}
+          </Link>
+        </>
+      )}
+    >
+      <GuardianRecordDocument
+        guardianId={String(record.id)}
+        guardianNumber={String(record.guardian_number).padStart(4, "0")}
+        referenceNumber={String(record.reference_number)}
+        title={String(record.title ?? record.record_type)}
+        recordType={String(record.record_type)}
+        category={category}
+        status={String(record.status)}
+        incidentDate={dateTime(record.incident_at)}
+        issuedDate={record.issued_at
+          ? dateTime(record.issued_at)
+          : record.status === "Draft"
+            ? "Not issued"
+            : dateTime(record.created_at)}
+        location={String(record.location ?? "")}
+        policyReference={String(record.policy_reference ?? "")}
+        relatedReference={String(fields.reference ?? "")}
+        pointsAssessed={Number(record.points_assessed ?? 0)}
+        observedConduct={String(record.observed_behavior ?? "")}
+        operationalImpact={String(fields.impact ?? "")}
+        expectedStandard={String(record.expected_standard ?? "")}
+        supervisorContext={String(fields.context ?? "")}
+        followUpPlan={String(record.follow_up_plan ?? "")}
+        followUpDate={record.follow_up_due_at ? dateTime(record.follow_up_due_at) : ""}
+        responseWindow={String(fields.response_window ?? "")}
+        allowResponse={fields.allow_response !== false}
+        memberResponse={String(record.employee_response ?? acknowledgment?.response_text ?? "")}
+        acknowledgedAt={record.acknowledged_at ? dateTime(record.acknowledged_at) : ""}
+        subject={subjectSnapshot}
+        author={authorSnapshot}
+        acknowledgment={acknowledgment ? {
+          fingerprintId: String(acknowledgment.fingerprint_id ?? ""),
+          typedName: acknowledgment.typed_name ? String(acknowledgment.typed_name) : null,
+          signatureMethod: String(acknowledgment.signature_method ?? "Digital acknowledgment"),
+          acknowledgmentText: String(acknowledgment.acknowledgment_text ?? ""),
+          displayNameSnapshot: String(acknowledgment.display_name_snapshot ?? subjectSnapshot.displayName),
+          rankSnapshot: String(acknowledgment.rank_snapshot ?? subjectSnapshot.rank),
+          personnelIdSnapshot: String(acknowledgment.personnel_id_snapshot ?? subjectSnapshot.personnelId),
+          callSignSnapshot: acknowledgment.call_sign_snapshot ? String(acknowledgment.call_sign_snapshot) : null,
+          responseText: acknowledgment.response_text ? String(acknowledgment.response_text) : null,
+          signedAt: dateTime(acknowledgment.signed_at),
+        } : null}
+        evaluation={isEvaluation ? {
+          kind: String(fields.evaluation_kind ?? "Performance"),
+          periodStart: dateOnly(fields.period_start),
+          periodEnd: dateOnly(fields.period_end),
+          overallAverage: Number(fields.overall_average ?? 0).toFixed(2),
+          overallRating: String(fields.overall_rating ?? "Not rated"),
+          ratings: ratingEntries,
+          supervisorSummary: String(fields.supervisor_summary ?? record.observed_behavior ?? ""),
+          strengths: String(fields.strengths ?? record.action_taken ?? ""),
+          improvementAreas: String(fields.improvement_areas ?? record.expected_standard ?? ""),
+          goals: String(fields.goals ?? record.follow_up_plan ?? ""),
+          remediationRequired: fields.remediation_required === true,
+          remediationPlan: String(fields.remediation_plan ?? ""),
+        } : null}
+      />
+    </PortalShell>
+  );
 }
