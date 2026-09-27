@@ -112,18 +112,23 @@ export default async function CommandHomePage() {
           </div>
         </section>
 
-        <aside className="portal-panel command-home-quick-actions">
-          <div className="portal-panel-heading"><div><p>Quick actions</p><h2>Start work</h2></div><span>Daily work</span></div>
-          <nav aria-label="Command quick actions">
-            <Link href="/portal/command/promotions"><span>Career</span><strong>Promotion Review</strong><b>→</b></Link>
-            <Link href="/portal/command/guardians/evaluations"><span>Supervision</span><strong>Performance Evaluations</strong><b>→</b></Link>
-            <Link href="/portal/command/approvals"><span>Decisions</span><strong>Approvals & Requests</strong><b>→</b></Link>
-            <Link href="/portal/command/personnel/roster"><span>Personnel</span><strong>Roster & Personnel Actions</strong><b>→</b></Link>
-            <Link href="/portal/command/applications"><span>Recruitment</span><strong>Applications & Interviews</strong><b>→</b></Link>
-            <Link href="/portal/command/guardians"><span>Supervision</span><strong>Create / Review Guardians</strong><b>→</b></Link>
-            <Link href="/portal/command/training"><span>Training</span><strong>Training & FTO</strong><b>→</b></Link>
-            <Link href="/portal/my-office"><span>Personal</span><strong>Open My Info</strong><b>→</b></Link>
-          </nav>
+        <aside className="portal-panel command-home-quick-actions command-home-work-launcher">
+          <div className="portal-panel-heading"><div><p>Command workspace</p><h2>Work launcher</h2></div><span>Daily work</span></div>
+          <div className="command-home-work-launcher__primary" aria-label="Primary Command workspaces">
+            <Link href="/portal/command/approvals"><span>Decisions</span><strong>Approvals & Requests</strong><small>Review work currently routed to you.</small><b>→</b></Link>
+            <Link href="/portal/command/guardians/evaluations"><span>Supervision</span><strong>Performance Evaluations</strong><small>Handle scheduled, due, and overdue evaluations.</small><b>→</b></Link>
+            <Link href="/portal/command/applications"><span>Recruitment</span><strong>Applications & Interviews</strong><small>Review candidates and move hiring forward.</small><b>→</b></Link>
+            <Link href="/portal/command/personnel/roster"><span>Personnel</span><strong>Roster & Personnel Actions</strong><small>Open department personnel and service actions.</small><b>→</b></Link>
+          </div>
+          <div className="command-home-work-launcher__secondary">
+            <span>More workspaces</span>
+            <nav aria-label="Additional Command workspaces">
+              <Link href="/portal/command/promotions">Promotion Review<b>→</b></Link>
+              <Link href="/portal/command/guardians">Guardian Workspace<b>→</b></Link>
+              <Link href="/portal/command/training">Training & FTO<b>→</b></Link>
+              <Link href="/portal/my-office">My Info<b>→</b></Link>
+            </nav>
+          </div>
         </aside>
       </div>
     </PortalShell>
