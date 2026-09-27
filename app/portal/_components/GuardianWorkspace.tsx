@@ -290,7 +290,7 @@ export function GuardianWorkspace() {
     const eventDate = String(form.get("eventDate") ?? new Date().toISOString().slice(0, 10));
     const followUpDate = String(form.get("followUpDate") ?? "");
     const title = `${config.label}: ${selectedCategories[0] ?? "Personnel action"}`;
-    const supabase = createClient();
+    const supabase = createClient() as any;
 
     const { data, error } = await supabase.from("guardian_records").insert({
       subject_profile_id: subjectProfileId,
