@@ -24,9 +24,46 @@ create index if not exists current_administration_public_order_idx
 
 alter table public.current_administration enable row level security;
 
--- Current administration is intentionally managed only through authenticated
--- server actions using the service-role client. No browser-side table policies
--- are created here.
+-- Managed only by authenticated server actions using the service-role client.
+-- Public visitors receive a deliberately limited projection through the function below.
+
+create or replace function public.get_public_current_administration()
+returns table (
+  id uuid,
+  display_name text,
+  rank text,
+  position_title text,
+  call_sign text,
+  portrait_url text,
+  public_bio text,
+  responsibilities text[],
+  appointment_status text,
+  display_order integer
+)
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select
+    ca.id,
+    ca.display_name,
+    ca.rank,
+    ca.position_title,
+    ca.call_sign,
+    ca.portrait_url,
+    ca.public_bio,
+    ca.responsibilities,
+    ca.appointment_status,
+    ca.display_order
+  from public.current_administration ca
+  where ca.is_active = true
+    and ca.is_public = true
+  order by ca.display_order asc, ca.rank asc, ca.display_name asc;
+$$;
+
+revoke all on function public.get_public_current_administration() from public;
+grant execute on function public.get_public_current_administration() to anon, authenticated;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
