@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 type GuardianDirectoryRecord = {
   id: string;
   guardianNumber: number;
+  referenceNumber: string;
   recordType: string;
   status: string;
   title: string;
@@ -52,6 +53,7 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
       const haystack = [
         `g-${String(record.guardianNumber).padStart(4, "0")}`,
         String(record.guardianNumber),
+        record.referenceNumber,
         record.recordType,
         record.status,
         record.title,
@@ -86,7 +88,7 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
         <div className="portal-panel-heading"><div><p>Find records</p><h2>Guardian records</h2></div><Link href="/portal/command/guardians/manage">New Guardian</Link></div>
         <label className="command-v2-search-field">
           <span>Search</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Guardian number, employee, supervisor, type..." />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Guardian reference, G-number, employee, supervisor, type..." />
         </label>
         <div className="command-v2-division-browser" aria-label="Filter Guardian status">
           {statuses.map((item) => <button className={status === item ? "is-active" : undefined} key={item} onClick={() => setStatus((current) => current === item ? null : item)} type="button"><strong>{item}</strong></button>)}
@@ -99,7 +101,7 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
           <div className="command-v2-personnel-results">
             {filtered.map((record) => (
               <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}>
-                <div><strong>G-{String(record.guardianNumber).padStart(4, "0")} · {record.title}</strong><span>{record.subjectName} · {record.recordType} · {record.authorName}</span></div>
+                <div><strong>{record.referenceNumber} · {record.title}</strong><span>G-{String(record.guardianNumber).padStart(4, "0")} · {record.subjectName} · {record.recordType} · {record.authorName}</span></div>
                 <div><span>{new Date(record.createdAt).toLocaleDateString()}</span><b>{record.status}</b></div>
               </Link>
             ))}
@@ -118,12 +120,12 @@ export function GuardianDirectory({ records, initialQuery = "" }: GuardianDirect
 
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Repeat access</p><h2>Recently viewed</h2></div></div>
-          {recent.length ? <div className="command-v2-mini-list">{recent.map((record) => <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}><strong>G-{String(record.guardianNumber).padStart(4, "0")} · {record.subjectName}</strong><span>{record.recordType} · {record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed Guardians yet.</strong></div>}
+          {recent.length ? <div className="command-v2-mini-list">{recent.map((record) => <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}><strong>{record.referenceNumber}</strong><span>G-{String(record.guardianNumber).padStart(4, "0")} · {record.subjectName} · {record.recordType} · {record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No recently viewed Guardians yet.</strong></div>}
         </section>
 
         <section className="portal-panel command-v2-launcher">
           <div className="portal-panel-heading"><div><p>Follow-up</p><h2>Needs attention</h2></div></div>
-          {followUps.length ? <div className="command-v2-mini-list">{followUps.map((record) => <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}><strong>G-{String(record.guardianNumber).padStart(4, "0")} · {record.subjectName}</strong><span>Due {new Date(record.followUpDueAt!).toLocaleDateString()} · {record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No Guardian follow-ups due.</strong></div>}
+          {followUps.length ? <div className="command-v2-mini-list">{followUps.map((record) => <Link href={`/portal/command/guardians/${record.guardianNumber}`} key={record.id} onClick={() => remember(record.id)}><strong>{record.referenceNumber} · {record.subjectName}</strong><span>Due {new Date(record.followUpDueAt!).toLocaleDateString()} · {record.status}</span></Link>)}</div> : <div className="portal-empty-state"><strong>No Guardian follow-ups due.</strong></div>}
         </section>
 
         <section className="portal-panel command-v2-launcher">
