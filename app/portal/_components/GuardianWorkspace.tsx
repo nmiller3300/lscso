@@ -9,6 +9,7 @@ type GuardianKind = "feedback" | "warning" | "writeup" | "commendation";
 type GuardianRecord = {
   databaseId: string;
   id: string;
+  referenceNumber: string;
   type: string;
   member: string;
   author: string;
@@ -162,7 +163,7 @@ export function GuardianWorkspace() {
       ] = await Promise.all([
         supabase.from("personnel_profiles").select("id,display_name,rank,call_sign,is_test_account").neq("status", "Deactivated").order("personnel_id"),
         supabase.rpc("get_personnel_in_my_purview"),
-        supabase.from("guardian_records").select("id,guardian_number,subject_profile_id,author_profile_id,record_type,status,follow_up_due_at,created_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,points_assessed,escalation_override").order("created_at", { ascending: false }),
+        supabase.from("guardian_records").select("id,guardian_number,reference_number,subject_profile_id,author_profile_id,record_type,status,follow_up_due_at,created_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,points_assessed,escalation_override").order("created_at", { ascending: false }),
         supabase.from("disciplinary_point_tiers").select("id,min_points,max_points,tier_name,action_required,color_key").order("sort_order"),
       ]);
 
@@ -213,6 +214,7 @@ export function GuardianWorkspace() {
       setRecords((guardianRows ?? []).map((record: any) => ({
         databaseId: record.id,
         id: `G-${String(record.guardian_number).padStart(4, "0")}`,
+        referenceNumber: record.reference_number,
         type: record.record_type,
         member: names.get(record.subject_profile_id) ?? "Restricted personnel",
         author: names.get(record.author_profile_id) ?? "Command",
@@ -318,13 +320,14 @@ export function GuardianWorkspace() {
       escalation_reason: kind === "commendation" ? null : String(form.get("escalationReason") ?? "").trim() || null,
       submitted_at: status === "Draft" ? null : new Date().toISOString(),
       issued_at: status === "Awaiting Acknowledgment" ? new Date().toISOString() : null,
-    }).select("id,guardian_number,record_type,status,follow_up_due_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan").single();
+    }).select("id,guardian_number,reference_number,record_type,status,follow_up_due_at,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan").single();
 
     if (error || !data) throw new Error(error?.message ?? "The Guardian could not be saved.");
 
     return {
       databaseId: data.id,
       id: `G-${String(data.guardian_number).padStart(4, "0")}`,
+      referenceNumber: data.reference_number,
       type: data.record_type,
       member: subject.displayName,
       author: currentProfile.display_name,
@@ -350,7 +353,7 @@ export function GuardianWorkspace() {
     try {
       const record = await persistGuardian("Draft");
       setRecords((current) => [record, ...current]);
-      setNotice(`${record.id} saved securely as a draft.`);
+      setNotice(`${record.referenceNumber} saved securely as a draft.`);
       window.setTimeout(() => setNotice(""), 3400);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "The Guardian could not be saved.");
@@ -380,8 +383,8 @@ export function GuardianWorkspace() {
     setSelectedCategories(kind === "commendation" ? ["Exceptional judgment"] : ["Communication"]);
     setNotice(
       requiresApproval
-        ? `${record.id} routed to the Command approval queue.`
-        : `${record.id} issued for personnel acknowledgment.`,
+        ? `${record.referenceNumber} routed to the Command approval queue.`
+        : `${record.referenceNumber} issued for personnel acknowledgment.`,
     );
     window.setTimeout(() => setNotice(""), 3800);
     setSavingGuardian(false);
@@ -414,7 +417,7 @@ export function GuardianWorkspace() {
     setRecords((current) => current.map((item) => item.databaseId === record.databaseId ? { ...item, status: data.status } : item));
     setSelectedRecord(null);
     setReviewNotes("");
-    setNotice(`${record.id} ${decision === "Approved" ? "approved" : "declined"}. The action was written to the audit log.`);
+    setNotice(`${record.referenceNumber} ${decision === "Approved" ? "approved" : "declined"}. The action was written to the audit log.`);
     window.setTimeout(() => setNotice(""), 3800);
   }
 
@@ -427,7 +430,7 @@ export function GuardianWorkspace() {
       return;
     }
     setRecords((current) => current.map((item) => item.databaseId === record.databaseId ? { ...item, status: data.status } : item));
-    setNotice(`${record.id} issued to ${record.member} for acknowledgment.`);
+    setNotice(`${record.referenceNumber} issued to ${record.member} for acknowledgment.`);
     window.setTimeout(() => setNotice(""), 3800);
   }
 
@@ -440,7 +443,7 @@ export function GuardianWorkspace() {
           <p>Required selections create consistency; focused narrative fields preserve context and professional judgment.</p>
         </div>
         <div className="guardian-protection-chips">
-          <span>Case number auto-generated</span>
+          <span>Guardian reference auto-generated</span>
           <span>Immutable after issue</span>
           <span>Amendments remain visible</span>
           <span>Acknowledgment ≠ agreement</span>
@@ -498,8 +501,8 @@ export function GuardianWorkspace() {
                   <input defaultValue={localDateInputValue()} name="eventDate" type="date" />
                 </label>
                 <label>
-                  Event / reference number
-                  <input name="reference" placeholder="Optional CAD, case, or training ID" />
+                  Related event / reference number
+                  <input name="reference" placeholder="Optional CAD, case, incident, or training ID" />
                 </label>
                 <label>
                   Primary division
@@ -507,6 +510,11 @@ export function GuardianWorkspace() {
                     <option>Patrol Division</option><option>Training & FTO</option><option>Internal Affairs</option><option>Office of the Sheriff</option>
                   </select>
                 </label>
+                <div className="guardian-author-identity">
+                  <span>Guardian reference number</span>
+                  <strong>Assigned automatically when saved</strong>
+                  <small>Permanent format: LSCSO-GDN-YYYY-####</small>
+                </div>
                 <div className="guardian-author-identity" aria-label={`Recorded by ${currentProfile.display_name}, ${currentProfile.rank}`}>
                   <span>Recorded by</span>
                   <strong>{currentProfile.display_name}</strong>
@@ -683,7 +691,7 @@ export function GuardianWorkspace() {
             <article key={record.id}>
               <div>
                 <span>{record.type.slice(0, 2).toUpperCase()}</span>
-                <div><strong>{record.id}</strong><small>{record.type}</small></div>
+                <div><strong>{record.id}</strong><small>{record.referenceNumber}</small><small>{record.type}</small></div>
               </div>
               <h3>{record.member}</h3>
               <p>Created by {record.author}</p>
@@ -737,11 +745,12 @@ export function GuardianWorkspace() {
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setSelectedRecord(null); }}>
           <section className="portal-modal portal-modal--guardian-review" role="dialog" aria-modal="true" aria-labelledby="guardian-review-title">
             <div className="portal-modal-heading">
-              <div><span>{selectedRecord.id} · {selectedRecord.status}</span><h2 id="guardian-review-title">{selectedRecord.type} for {selectedRecord.member}</h2></div>
+              <div><span>{selectedRecord.id} · {selectedRecord.referenceNumber} · {selectedRecord.status}</span><h2 id="guardian-review-title">{selectedRecord.type} for {selectedRecord.member}</h2></div>
               <button onClick={() => setSelectedRecord(null)} type="button" aria-label="Close Guardian review">×</button>
             </div>
             <div className="guardian-review-content">
               <div className="guardian-review-facts">
+                <div><span>Guardian reference</span><strong>{selectedRecord.referenceNumber}</strong></div>
                 <div><span>Recorded by</span><strong>{selectedRecord.author}</strong></div>
                 <div><span>Event date</span><strong>{selectedRecord.incidentAt}</strong></div>
                 <div><span>Division / location</span><strong>{selectedRecord.location}</strong></div>
