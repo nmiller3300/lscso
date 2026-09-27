@@ -1,4 +1,5 @@
 import { GuardianDirectory } from "../../_components/GuardianDirectory";
+import { GuardianReferenceWorkspaceBridge } from "../../_components/GuardianReferenceWorkspaceBridge";
 import { GuardianWorkspace } from "../../_components/GuardianWorkspace";
 import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
@@ -35,6 +36,7 @@ export default async function GuardianCenterPage({ searchParams }: PageProps) {
       title="Guardians"
       description="Create authorized Guardian actions, review routed records, and search the Guardian history from one workspace."
     >
+      <GuardianReferenceWorkspaceBridge />
       <GuardianWorkspace />
 
       <section className="portal-panel" aria-labelledby="guardian-record-directory-title">
