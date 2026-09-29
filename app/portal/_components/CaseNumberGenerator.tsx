@@ -80,7 +80,7 @@ export function CaseNumberGenerator() {
     setError("");
     setCopied(false);
 
-    const supabase = createClient();
+    const supabase = createClient() as any;
     const { data, error: rpcError } = await supabase.rpc("generate_case_number", {
       p_case_type: selected,
     });
