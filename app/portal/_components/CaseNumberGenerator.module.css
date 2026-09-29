@@ -3,7 +3,6 @@
   align-items: center;
   gap: 9px;
   min-height: 38px;
-  margin-top: 8px;
   padding: 0 14px;
   border: 1px solid rgba(200, 164, 79, 0.55);
   border-radius: 8px;
@@ -49,6 +48,7 @@
   width: min(680px, 100%);
   max-height: min(760px, calc(100vh - 48px));
   overflow: auto;
+  transform: translateY(32px);
   border: 1px solid rgba(189, 162, 99, 0.28);
   border-radius: 14px;
   background: #111415;
@@ -303,7 +303,6 @@
 @media (max-width: 720px) {
   .trigger {
     min-height: 36px;
-    margin-top: 4px;
     padding: 0 10px;
     font-size: 0.74rem;
   }
@@ -320,6 +319,7 @@
   .dialog {
     width: 100%;
     max-height: 88vh;
+    transform: none;
     border-radius: 14px 14px 0 0;
   }
 
