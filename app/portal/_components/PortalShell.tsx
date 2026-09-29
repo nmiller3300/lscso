@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
+import { CaseNumberGenerator } from "./CaseNumberGenerator";
 import { CoffeeBreakButton } from "./CoffeeBreakButton";
 import { CommandQuickFind } from "./CommandQuickFind";
 import { HiringAuthorityShortcut } from "./HiringAuthorityShortcut";
@@ -61,6 +62,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
           </div>
           <div className="portal-topbar-actions">
             <div className="portal-mobile-menu-host"><PortalNavigation active={active} audience={audience} /></div>
+            <CaseNumberGenerator />
             <HiringAuthorityShortcut compact />
             {audience === "command" ? <CommandQuickFind /> : null}
             <PortalNotificationLink audience={audience} />
