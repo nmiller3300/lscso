@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 import { createClient } from "@/lib/supabase/client";
 import styles from "./CaseNumberGenerator.module.css";
 
@@ -120,6 +121,79 @@ export function CaseNumberGenerator() {
     setCopied(false);
   }
 
+  const modal = open ? (
+    <div className={styles.backdrop} role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) closeGenerator();
+    }}>
+      <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="case-number-title">
+        <header className={styles.header}>
+          <div>
+            <span className={styles.eyebrow}>LSCSO REPORTING</span>
+            <h2 id="case-number-title">Generate Case Number</h2>
+            <p>Select the report type. The portal will issue the next official number automatically.</p>
+          </div>
+          <button className={styles.close} type="button" onClick={closeGenerator} aria-label="Close case number generator">×</button>
+        </header>
+
+        {!generated ? (
+          <div className={styles.body}>
+            <div className={styles.options}>
+              {caseTypes.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  className={`${styles.option}${selected === item.key ? ` ${styles.optionSelected}` : ""}`}
+                  onClick={() => {
+                    setSelected(item.key);
+                    setError("");
+                  }}
+                  aria-pressed={selected === item.key}
+                >
+                  <span className={styles.prefix}>{item.prefix}</span>
+                  <span className={styles.optionCopy}>
+                    <strong>{item.label}</strong>
+                    <small>{item.description}</small>
+                  </span>
+                  <span className={styles.radio} aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.notice}>
+              <strong>Numbers are permanent.</strong>
+              <span>Once issued, a case number is logged and will not be recycled.</span>
+            </div>
+
+            {error ? <div className={styles.error} role="alert">{error}</div> : null}
+
+            <div className={styles.actions}>
+              <button className={styles.secondary} type="button" onClick={closeGenerator}>Cancel</button>
+              <button className={styles.primary} type="button" onClick={() => void generateNumber()} disabled={!selected || loading}>
+                {loading ? "Generating…" : selectedCase ? `Generate ${selectedCase.prefix} Number` : "Generate Case Number"}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.resultBody}>
+            <div className={styles.successMark} aria-hidden="true">✓</div>
+            <span className={styles.resultLabel}>{generated.case_label}</span>
+            <strong className={styles.caseNumber}>{generated.case_number}</strong>
+            <p>This number is now officially issued and recorded to your personnel profile.</p>
+
+            {error ? <div className={styles.error} role="alert">{error}</div> : null}
+
+            <div className={styles.resultActions}>
+              <button className={styles.primary} type="button" onClick={() => void copyNumber()}>
+                {copied ? "Copied" : "Copy Case Number"}
+              </button>
+              <button className={styles.secondary} type="button" onClick={startAnother}>Generate Another</button>
+            </div>
+          </div>
+        )}
+      </section>
+    </div>
+  ) : null;
+
   return (
     <>
       <button className={styles.trigger} type="button" onClick={openGenerator}>
@@ -127,78 +201,7 @@ export function CaseNumberGenerator() {
         <span>Generate Case #</span>
       </button>
 
-      {open ? (
-        <div className={styles.backdrop} role="presentation" onMouseDown={(event) => {
-          if (event.target === event.currentTarget) closeGenerator();
-        }}>
-          <section className={styles.dialog} role="dialog" aria-modal="true" aria-labelledby="case-number-title">
-            <header className={styles.header}>
-              <div>
-                <span className={styles.eyebrow}>LSCSO REPORTING</span>
-                <h2 id="case-number-title">Generate Case Number</h2>
-                <p>Select the report type. The portal will issue the next official number automatically.</p>
-              </div>
-              <button className={styles.close} type="button" onClick={closeGenerator} aria-label="Close case number generator">×</button>
-            </header>
-
-            {!generated ? (
-              <div className={styles.body}>
-                <div className={styles.options}>
-                  {caseTypes.map((item) => (
-                    <button
-                      key={item.key}
-                      type="button"
-                      className={`${styles.option}${selected === item.key ? ` ${styles.optionSelected}` : ""}`}
-                      onClick={() => {
-                        setSelected(item.key);
-                        setError("");
-                      }}
-                      aria-pressed={selected === item.key}
-                    >
-                      <span className={styles.prefix}>{item.prefix}</span>
-                      <span className={styles.optionCopy}>
-                        <strong>{item.label}</strong>
-                        <small>{item.description}</small>
-                      </span>
-                      <span className={styles.radio} aria-hidden="true" />
-                    </button>
-                  ))}
-                </div>
-
-                <div className={styles.notice}>
-                  <strong>Numbers are permanent.</strong>
-                  <span>Once issued, a case number is logged and will not be recycled.</span>
-                </div>
-
-                {error ? <div className={styles.error} role="alert">{error}</div> : null}
-
-                <div className={styles.actions}>
-                  <button className={styles.secondary} type="button" onClick={closeGenerator}>Cancel</button>
-                  <button className={styles.primary} type="button" onClick={() => void generateNumber()} disabled={!selected || loading}>
-                    {loading ? "Generating…" : selectedCase ? `Generate ${selectedCase.prefix} Number` : "Generate Case Number"}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className={styles.resultBody}>
-                <div className={styles.successMark} aria-hidden="true">✓</div>
-                <span className={styles.resultLabel}>{generated.case_label}</span>
-                <strong className={styles.caseNumber}>{generated.case_number}</strong>
-                <p>This number is now officially issued and recorded to your personnel profile.</p>
-
-                {error ? <div className={styles.error} role="alert">{error}</div> : null}
-
-                <div className={styles.resultActions}>
-                  <button className={styles.primary} type="button" onClick={() => void copyNumber()}>
-                    {copied ? "Copied" : "Copy Case Number"}
-                  </button>
-                  <button className={styles.secondary} type="button" onClick={startAnother}>Generate Another</button>
-                </div>
-              </div>
-            )}
-          </section>
-        </div>
-      ) : null}
+      {modal && typeof document !== "undefined" ? createPortal(modal, document.body) : null}
     </>
   );
 }
