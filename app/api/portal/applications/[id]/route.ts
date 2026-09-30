@@ -31,7 +31,9 @@ function actionErrorStatus(message: string) {
     normalized.includes("required") ||
     normalized.includes("cannot exceed") ||
     normalized.includes("only submitted") ||
-    normalized.includes("must be in the future")
+    normalized.includes("must be in the future") ||
+    normalized.includes("at least 24 hours") ||
+    normalized.includes("between 24 hours")
   ) return 400;
   return 500;
 }
@@ -62,11 +64,17 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         })
       : action === "reopen_no_show"
         ? supabase.rpc("command_reopen_recruitment_no_show", { p_application_id: id })
-        : supabase.rpc("command_recruitment_application_action", {
-            p_application_id: id,
-            p_action: action,
-            p_payload: body,
-          });
+        : action === "extend_offer"
+          ? supabase.rpc("command_recruitment_extend_offer", {
+              p_application_id: id,
+              p_offer_id: (body as Record<string, unknown>).offerId,
+              p_hours: Number((body as Record<string, unknown>).hours || 72),
+            })
+          : supabase.rpc("command_recruitment_application_action", {
+              p_application_id: id,
+              p_action: action,
+              p_payload: body,
+            });
     const { data, error } = await rpcRequest;
 
     if (error) {
