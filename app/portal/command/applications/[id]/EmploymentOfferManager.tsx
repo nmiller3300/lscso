@@ -35,9 +35,16 @@ const OFFER_RANKS = [
 ] as const;
 
 type OfferRank = (typeof OFFER_RANKS)[number];
+type OfferWindow = "" | "24" | "48" | "72" | "168";
 
 function defaultTerms(rank: string) {
   return `The Los Santos County Sheriff's Office offers you appointment at the rank of ${rank}, contingent upon completion of any department onboarding, training, certification, and administrative requirements applicable to the appointment. By accepting this offer, you confirm your intent to serve in accordance with LSCSO policies, standards, and lawful orders.`;
+}
+
+function expirationFromWindow(window: OfferWindow) {
+  if (!window) return "";
+  const hours = Number(window);
+  return new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 }
 
 export function EmploymentOfferManager({
@@ -58,7 +65,7 @@ export function EmploymentOfferManager({
   const [error, setError] = useState("");
   const [rank, setRank] = useState<OfferRank>("Recruit");
   const [terms, setTerms] = useState(() => defaultTerms("Recruit"));
-  const [expiresAt, setExpiresAt] = useState("");
+  const [offerWindow, setOfferWindow] = useState<OfferWindow>("72");
   const [terminateOpen, setTerminateOpen] = useState(false);
   const [terminationReason, setTerminationReason] = useState("");
   const generatedTerms = useMemo(() => defaultTerms(rank), [rank]);
@@ -99,8 +106,13 @@ export function EmploymentOfferManager({
       title: "Offer of Employment",
       rank,
       terms: terms.trim(),
-      expiresAt: expiresAt ? new Date(expiresAt).toISOString() : "",
+      expiresAt: expirationFromWindow(offerWindow),
     });
+  }
+
+  async function extendExpiredOffer() {
+    if (!offer) return;
+    await action({ action: "extend_offer", offerId: offer.id, hours: 72 });
   }
 
   async function terminateOffer() {
@@ -126,8 +138,18 @@ export function EmploymentOfferManager({
               {OFFER_RANKS.map((item) => <option key={item} value={item}>{item}</option>)}
             </select>
           </label>
-          <label>Offer expiration <em>Optional</em><input type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} /></label>
+          <label>
+            Offer valid for
+            <select value={offerWindow} onChange={(event) => setOfferWindow(event.target.value as OfferWindow)}>
+              <option value="24">24 hours</option>
+              <option value="48">48 hours</option>
+              <option value="72">72 hours</option>
+              <option value="168">7 days</option>
+              <option value="">No expiration</option>
+            </select>
+          </label>
         </div>
+        <p className="recruitment-offer-success">Offers with an expiration can never be issued for less than 24 hours. 72 hours is the default.</p>
         <label className="recruitment-wide-label">Offer terms<textarea rows={6} value={terms} onChange={(event) => setTerms(event.target.value)} /></label>
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         <button className="portal-button portal-button--primary" type="button" disabled={busy || terms.trim().length < 10} onClick={() => void issueOffer()}>
@@ -156,6 +178,16 @@ export function EmploymentOfferManager({
         </dl>
         <div className="recruitment-offer-terms"><span>Offer terms</span><p>{offer.terms}</p></div>
         {offer.status === "Accepted" ? <p className="recruitment-offer-success">✓ Applicant signed and accepted the employment offer. Appointment is unlocked below.</p> : null}
+        {expired ? (
+          <div className="recruitment-offer-success">
+            This offer expired before the applicant could respond. Reopen it for 72 hours without closing the recruitment case.
+            <div style={{ marginTop: 12 }}>
+              <button className="portal-button portal-button--primary" type="button" disabled={busy} onClick={() => void extendExpiredOffer()}>
+                {busy ? "Reopening…" : "Reopen Offer for 72 Hours"}
+              </button>
+            </div>
+          </div>
+        ) : null}
         {error ? <p className="application-error" role="alert">{error}</p> : null}
         {offer.status === "Pending" || offer.status === "Accepted" ? (
           <button className="portal-button portal-button--danger" type="button" disabled={busy} onClick={() => { setError(""); setTerminateOpen(true); }}>
