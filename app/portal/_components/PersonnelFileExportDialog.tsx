@@ -43,6 +43,7 @@ type Props = {
 export function PersonnelFileExportDialog({ personnelId, displayName, rank, initialKind = "internal", onClose }: Props) {
   const [kind, setKind] = useState<PersonnelFileExportKind>(initialKind);
   const [destination, setDestination] = useState("");
+  const [exportStarted, setExportStarted] = useState(false);
   const openRecords = kind === "open-records";
   const destinationLabel = openRecords ? "Requesting party / ORR reference" : "Destination department / agency";
   const destinationPlaceholder = openRecords ? "Requester, organization, or ORR-00000" : "Receiving department or agency";
@@ -50,6 +51,7 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
   useEffect(() => {
     setKind(initialKind);
     setDestination("");
+    setExportStarted(false);
   }, [initialKind, personnelId]);
 
   const notice = useMemo(() => {
@@ -72,15 +74,15 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
   }, [kind]);
 
   function createPdf() {
-    if (destination.trim().length < 2) return;
+    if (destination.trim().length < 2 || exportStarted) return;
     const wireExportType = kind === "internal" ? "normal" : kind;
     const query = new URLSearchParams({
       exportType: wireExportType,
       recipient: destination.trim(),
       sections: sectionsByKind[kind],
     });
+    setExportStarted(true);
     window.location.href = `/api/portal/personnel/${encodeURIComponent(personnelId)}/record-export?${query.toString()}`;
-    onClose();
   }
 
   return (
@@ -93,7 +95,7 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
 
         <p className="personnel-export-subject"><strong>{displayName}</strong> · {personnelId}{rank ? ` · ${rank}` : ""}</p>
 
-        <fieldset className="personnel-export-types">
+        <fieldset className="personnel-export-types" disabled={exportStarted}>
           <legend>File type</legend>
           <div className="personnel-export-type-grid">
             {(Object.keys(labels) as PersonnelFileExportKind[]).map((option) => (
@@ -117,6 +119,7 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
           <span>{destinationLabel}</span>
           <input
             autoFocus
+            disabled={exportStarted}
             value={destination}
             onChange={(event) => setDestination(event.target.value)}
             maxLength={160}
@@ -137,9 +140,16 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
           <p>{SAN_ANDREAS_EXEMPTION_RULE}</p>
         </div> : null}
 
+        {exportStarted ? (
+          <div className="portal-form-success" role="status">
+            <strong>PDF export started</strong>
+            <span>The personnel file download has been requested. You can close this window after the browser begins the download.</span>
+          </div>
+        ) : null}
+
         <div className="portal-modal-actions personnel-export-actions">
-          <button className="portal-button portal-button--secondary" onClick={onClose} type="button">Cancel</button>
-          <button className="portal-button portal-button--primary" disabled={destination.trim().length < 2} onClick={createPdf} type="button">Create {shortLabels[kind]} PDF</button>
+          <button className="portal-button portal-button--secondary" onClick={onClose} type="button">{exportStarted ? "Close" : "Cancel"}</button>
+          <button className="portal-button portal-button--primary" disabled={destination.trim().length < 2 || exportStarted} onClick={createPdf} type="button">{exportStarted ? "PDF Export Started" : `Create ${shortLabels[kind]} PDF`}</button>
         </div>
       </section>
     </div>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHero } from "../_components/PageHero";
 import { RouteLink } from "../_components/RouteLink";
+import "./forensic-services.css";
 
 export const metadata: Metadata = {
   title: "Forensic Services Division",
@@ -18,7 +19,7 @@ const responsibilities = [
 
 export default function ForensicServicesPage() {
   return (
-    <>
+    <div className="forensic-services-page">
       <PageHero
         eyebrow="Specialized Operations"
         title="Forensic Services Division"
@@ -84,6 +85,6 @@ export default function ForensicServicesPage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

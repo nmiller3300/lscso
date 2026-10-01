@@ -2,14 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
-function toLocalInput(value: string | null | undefined) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "";
-  const pad = (part: number) => String(part).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
+import { DEFAULT_RECRUITMENT_TIME_ZONE, formatRecruitmentDateTime, toDateTimeLocalInZone } from "@/lib/recruitment/timezones";
 
 export function ApplicantTrackingLinkManager({
   applicationId,
@@ -27,7 +20,7 @@ export function ApplicantTrackingLinkManager({
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [expiresAt, setExpiresAt] = useState(toLocalInput(initialExpiresAt));
+  const [expiresAt, setExpiresAt] = useState(toDateTimeLocalInZone(initialExpiresAt, DEFAULT_RECRUITMENT_TIME_ZONE));
 
   const trackingUrl = useMemo(() => token && origin
     ? `${origin}/join/application/status/${encodeURIComponent(token)}`
@@ -156,6 +149,7 @@ export function ApplicantTrackingLinkManager({
         <label>
           Tracking link expiration <em>Optional</em>
           <input type="datetime-local" value={expiresAt} onChange={(event) => setExpiresAt(event.target.value)} />
+          <small>Times are displayed in Eastern Time.</small>
         </label>
         <div className="recruitment-final-decision" style={{ alignSelf: "end" }}>
           <div>
@@ -164,7 +158,7 @@ export function ApplicantTrackingLinkManager({
           </div>
         </div>
       </div>
-      {initialExpiresAt ? <p className="command-v2-compact-copy">Applicant access {expired ? "expired" : "expires"} {new Date(initialExpiresAt).toLocaleString()}.</p> : null}
+      {initialExpiresAt ? <p className="command-v2-compact-copy">Applicant access {expired ? "expired" : "expires"} {formatRecruitmentDateTime(initialExpiresAt, DEFAULT_RECRUITMENT_TIME_ZONE)}.</p> : null}
 
       {error ? <p className="application-error" role="alert">{error}</p> : null}
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}

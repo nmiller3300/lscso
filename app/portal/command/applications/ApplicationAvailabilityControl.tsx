@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { GlassBlobToggle } from "../../_components/GlassBlobToggle";
 import type { ApplicationTrack } from "@/lib/recruitment/application";
+import { DEFAULT_RECRUITMENT_TIME_ZONE, formatRecruitmentDateTime } from "@/lib/recruitment/timezones";
 
 type Props = {
   initialSwornOpen: boolean;
@@ -95,7 +96,7 @@ export function ApplicationAvailabilityControl({
         <div>
           <strong>Control each public application independently.</strong>
           <p>These settings control the career choices shown on <Link href="/join/application" target="_blank">/join/application</Link> and whether the submission system accepts each role.</p>
-          <small>Last updated {updatedAt ? new Date(updatedAt).toLocaleString() : "when the system was created"}{updatedBy ? ` by ${updatedBy}` : ""}.</small>
+          <small>Last updated {updatedAt ? formatRecruitmentDateTime(updatedAt, DEFAULT_RECRUITMENT_TIME_ZONE) : "when the system was created"}{updatedBy ? ` by ${updatedBy}` : ""}.</small>
         </div>
 
         <div className="recruitment-availability__controls">

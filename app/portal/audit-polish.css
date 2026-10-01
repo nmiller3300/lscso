@@ -5,9 +5,21 @@
   word-spacing: 0.22em;
 }
 
-/* Small metric/status labels in panel headings were visually collapsing values into labels (for example 0DELEGATED). */
-.portal-panel-heading > span {
-  word-spacing: 0.2em;
+/* Small metric/status labels were visually collapsing values into labels (0WAITING, 2TOTAL, etc.). */
+.portal-panel-heading > span,
+.portal-section-heading > span,
+.portal-metric span,
+.deputy-summary-grid article span,
+.certification-summary-grid button span,
+.request-routing-status span,
+.portal-account-admin .portal-panel-heading > span,
+.command-v2-record-metrics article small {
+  word-spacing: 0.18em;
+}
+
+.portal-panel-heading,
+.portal-section-heading {
+  column-gap: 12px;
 }
 
 /* Training already has a dedicated Certification Center launcher in the Qualifications panel. */
@@ -21,4 +33,72 @@
 .portal-app[data-portal-active="applications"] .portal-button {
   word-break: normal;
   overflow-wrap: normal;
+}
+
+/* Account administration copy must never be clamped or end mid-sentence. */
+.portal-account-admin__intro,
+.portal-account-admin .portal-field-help,
+.portal-account-admin .portal-form-protection span,
+.portal-account-admin .portal-empty-state span {
+  display: block;
+  max-height: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+}
+
+/* Friendlier desktop date entry: type MM/DD/YYYY or open the picker from a full-size button. */
+.portal-friendly-date {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.portal-friendly-date > input[type="text"] {
+  width: 100%;
+  min-width: 0;
+}
+
+.portal-friendly-date > button {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 750;
+}
+
+.portal-friendly-date > button:hover,
+.portal-friendly-date > button:focus-visible {
+  border-color: rgba(214, 182, 107, 0.72);
+}
+
+.portal-friendly-date__native {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portal-friendly-date > small {
+  grid-column: 1 / -1;
+  color: #e6a6a6;
+  font-size: 0.76rem;
+}
+
+.portal-friendly-date.is-invalid > input[type="text"] {
+  border-color: rgba(224, 102, 102, 0.72) !important;
 }

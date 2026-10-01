@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { DEFAULT_RECRUITMENT_TIME_ZONE, formatRecruitmentDateTime } from "@/lib/recruitment/timezones";
 
 type ApplicantMessage = {
   id: string;
@@ -121,7 +122,7 @@ export function ApplicantStatusMessage({
           <article key={item.id} className="recruitment-applicant-message__history-item">
             <div>
               <strong>LSCSO Recruitment</strong>
-              <span>{new Date(item.created_at).toLocaleString()}{item.author_profile_id && names[item.author_profile_id] ? ` · ${names[item.author_profile_id]}` : ""}</span>
+              <span>{formatRecruitmentDateTime(item.created_at, DEFAULT_RECRUITMENT_TIME_ZONE)}{item.author_profile_id && names[item.author_profile_id] ? ` · ${names[item.author_profile_id]}` : ""}</span>
             </div>
             <p>{item.content}</p>
           </article>

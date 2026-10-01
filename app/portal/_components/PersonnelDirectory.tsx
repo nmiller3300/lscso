@@ -21,6 +21,34 @@ type ExportTarget = { member: DirectoryMember };
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
+const RANK_ORDER = [
+  "Sheriff",
+  "Undersheriff",
+  "Major",
+  "Captain",
+  "1st Lieutenant",
+  "Lieutenant",
+  "Sergeant",
+  "Corporal",
+  "Master Deputy",
+  "Deputy III",
+  "Deputy II",
+  "Deputy",
+  "Recruit",
+  "Department Attorney",
+  "Forensics Specialist",
+] as const;
+
+function rankSort(a: string, b: string) {
+  const aIndex = RANK_ORDER.indexOf(a as (typeof RANK_ORDER)[number]);
+  const bIndex = RANK_ORDER.indexOf(b as (typeof RANK_ORDER)[number]);
+  if (aIndex !== -1 || bIndex !== -1) {
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+    return aIndex - bIndex;
+  }
+  return a.localeCompare(b);
+}
 
 function probationSummary(member: DirectoryMember) {
   return member.probationary && member.probationDaysRemaining
@@ -60,7 +88,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     [favoriteIds, personnel],
   );
   const divisions = useMemo(() => Array.from(new Set(personnel.map((member) => member.division || "Unassigned"))).sort(), [personnel]);
-  const ranks = useMemo(() => Array.from(new Set(personnel.map((member) => member.rank))).sort(), [personnel]);
+  const ranks = useMemo(() => Array.from(new Set(personnel.map((member) => member.rank))).sort(rankSort), [personnel]);
   const statuses = useMemo(() => Array.from(new Set(personnel.map((member) => member.status))).sort(), [personnel]);
   const activeFilters = Boolean(query.trim() || division || rank || status || probationOnly);
   const filtered = useMemo(() => {

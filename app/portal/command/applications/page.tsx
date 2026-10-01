@@ -51,7 +51,7 @@ export default async function CommandApplicationsPage() {
       eyebrow="Personnel · Recruitment"
       title="Recruitment"
       description="Sworn Personnel, Forensics Specialist, and Department Attorney applications, review, interviews, offers, and appointments."
-      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Application Form Editor</Link>}
+      actions={<Link className="portal-button portal-button--secondary" href="/portal/command/applications/editor">Edit Application Form</Link>}
     >
       <div className="deputy-summary-grid recruitment-metrics">
         <article><span>New</span><strong>{String(newApplications).padStart(2, "0")}</strong><small>Awaiting review</small></article>

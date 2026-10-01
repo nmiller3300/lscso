@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PortalDialog } from "../../../_components/PortalDialog";
+import { DEFAULT_RECRUITMENT_TIME_ZONE, formatRecruitmentDateTime } from "@/lib/recruitment/timezones";
 
 export type RecruitmentOffer = {
   id: string;
@@ -171,10 +172,10 @@ export function EmploymentOfferManager({
         </div>
         <dl className="recruitment-offer-record">
           <div><dt>Position</dt><dd>{offer.offered_rank}</dd></div>
-          <div><dt>Issued</dt><dd>{new Date(offer.issued_at).toLocaleString()}</dd></div>
-          <div><dt>Expires</dt><dd>{offer.expires_at ? new Date(offer.expires_at).toLocaleString() : "No expiration"}</dd></div>
+          <div><dt>Issued</dt><dd>{formatRecruitmentDateTime(offer.issued_at, DEFAULT_RECRUITMENT_TIME_ZONE)}</dd></div>
+          <div><dt>Expires</dt><dd>{offer.expires_at ? formatRecruitmentDateTime(offer.expires_at, DEFAULT_RECRUITMENT_TIME_ZONE) : "No expiration"}</dd></div>
           <div><dt>Applicant signature</dt><dd>{offer.accepted_signature_name || "Pending"}</dd></div>
-          <div><dt>Accepted</dt><dd>{offer.accepted_at ? new Date(offer.accepted_at).toLocaleString() : "Not accepted"}</dd></div>
+          <div><dt>Accepted</dt><dd>{offer.accepted_at ? formatRecruitmentDateTime(offer.accepted_at, DEFAULT_RECRUITMENT_TIME_ZONE) : "Not accepted"}</dd></div>
         </dl>
         <div className="recruitment-offer-terms"><span>Offer terms</span><p>{offer.terms}</p></div>
         {offer.status === "Accepted" ? <p className="recruitment-offer-success">✓ Applicant signed and accepted the employment offer. Appointment is unlocked below.</p> : null}

@@ -1,0 +1,18 @@
+.forensic-services-page .reading-column,
+.forensic-services-page .reading-column p,
+.forensic-services-page .reading-column li,
+.forensic-services-page .page-actions,
+.forensic-services-page .route-link {
+  max-height: none !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+}
+
+.forensic-services-page .reading-column li {
+  margin-bottom: 10px;
+}

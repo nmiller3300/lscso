@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ChangelogCategory, LifetimeChangelogEntry } from "@/lib/lifetime-changelog";
 import styles from "./changelog.module.css";
 
@@ -9,6 +9,7 @@ type Props = {
 };
 
 const ALL_CATEGORIES = "All changes";
+const PAGE_SIZE = 50;
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -22,6 +23,7 @@ function formatDate(date: string) {
 export function LifetimeChangelog({ entries }: Props) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChangelogCategory | typeof ALL_CATEGORIES>(ALL_CATEGORIES);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const categories = useMemo(
     () => Array.from(new Set(entries.map((entry) => entry.category))),
@@ -37,19 +39,25 @@ export function LifetimeChangelog({ entries }: Props) {
     });
   }, [category, entries, query]);
 
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [query, category]);
+
+  const visibleEntries = filtered.slice(0, visibleCount);
   const grouped = useMemo(() => {
     const groups = new Map<string, LifetimeChangelogEntry[]>();
-    for (const entry of filtered) {
+    for (const entry of visibleEntries) {
       const current = groups.get(entry.date) ?? [];
       current.push(entry);
       groups.set(entry.date, current);
     }
     return Array.from(groups.entries());
-  }, [filtered]);
+  }, [visibleEntries]);
 
   const activeDays = new Set(entries.map((entry) => entry.date)).size;
   const firstDate = entries.at(-1)?.date;
   const latestDate = entries[0]?.date;
+  const remaining = Math.max(0, filtered.length - visibleEntries.length);
 
   return (
     <div className={styles.workspace}>
@@ -91,7 +99,7 @@ export function LifetimeChangelog({ entries }: Props) {
       </section>
 
       <div className={styles.resultBar}>
-        <span>{filtered.length} {filtered.length === 1 ? "change" : "changes"} shown</span>
+        <span>{visibleEntries.length} of {filtered.length} {filtered.length === 1 ? "change" : "changes"} shown</span>
         {(query || category !== ALL_CATEGORIES) ? (
           <button type="button" onClick={() => { setQuery(""); setCategory(ALL_CATEGORIES); }}>Clear filters</button>
         ) : null}
@@ -124,6 +132,13 @@ export function LifetimeChangelog({ entries }: Props) {
           </div>
         )}
       </section>
+
+      {remaining ? (
+        <div className={styles.resultBar}>
+          <span>{remaining} older {remaining === 1 ? "change" : "changes"} remaining</span>
+          <button type="button" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}>Show 50 more</button>
+        </div>
+      ) : null}
     </div>
   );
 }
