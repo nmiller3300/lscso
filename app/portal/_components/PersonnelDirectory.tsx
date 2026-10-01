@@ -21,6 +21,24 @@ type ExportTarget = { member: DirectoryMember };
 
 const RECENT_KEY = "lscso.command.recent-personnel:v1";
 const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
+const RANK_ROLE_ORDER = [
+  "Sheriff",
+  "Undersheriff",
+  "Major",
+  "Captain",
+  "1st Lieutenant",
+  "Lieutenant",
+  "Sergeant",
+  "Corporal",
+  "Master Deputy",
+  "Deputy III",
+  "Deputy II",
+  "Deputy",
+  "Recruit",
+  "Department Attorney",
+  "Forensics Specialist",
+] as const;
+const rankRolePriority = new Map<string, number>(RANK_ROLE_ORDER.map((value, index) => [value, index]));
 
 function probationSummary(member: DirectoryMember) {
   return member.probationary && member.probationDaysRemaining
@@ -60,7 +78,11 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
     [favoriteIds, personnel],
   );
   const divisions = useMemo(() => Array.from(new Set(personnel.map((member) => member.division || "Unassigned"))).sort(), [personnel]);
-  const ranks = useMemo(() => Array.from(new Set(personnel.map((member) => member.rank))).sort(), [personnel]);
+  const ranks = useMemo(() => Array.from(new Set(personnel.map((member) => member.rank))).sort((a, b) => {
+    const aPriority = rankRolePriority.get(a) ?? 999;
+    const bPriority = rankRolePriority.get(b) ?? 999;
+    return aPriority - bPriority || a.localeCompare(b);
+  }), [personnel]);
   const statuses = useMemo(() => Array.from(new Set(personnel.map((member) => member.status))).sort(), [personnel]);
   const activeFilters = Boolean(query.trim() || division || rank || status || probationOnly);
   const filtered = useMemo(() => {
@@ -106,7 +128,7 @@ export function PersonnelDirectory({ personnel }: PersonnelDirectoryProps) {
       <label className="command-v2-search-field"><span>Search</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "ArrowDown" && filtered.length) { event.preventDefault(); focusFirstResult(); } }} placeholder="Name, call sign, personnel ID, rank, division..." /></label>
       <div className="personnel-directory-filters">
         <label><span>Division</span><select value={division} onChange={(event) => setDivision(event.target.value)}><option value="">All divisions</option>{divisions.map((item) => <option key={item}>{item}</option>)}</select></label>
-        <label><span>Rank</span><select value={rank} onChange={(event) => setRank(event.target.value)}><option value="">All ranks</option>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
+        <label><span>Rank / role</span><select value={rank} onChange={(event) => setRank(event.target.value)}><option value="">All ranks / roles</option>{ranks.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label><span>Status</span><select value={status} onChange={(event) => setStatus(event.target.value)}><option value="">All statuses</option>{statuses.map((item) => <option key={item}>{item}</option>)}</select></label>
         <label className="personnel-directory-probation"><input checked={probationOnly} onChange={(event) => setProbationOnly(event.target.checked)} type="checkbox" /><span>Probation only</span></label>
       </div>
