@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import type { ChangelogCategory, LifetimeChangelogEntry } from "@/lib/lifetime-changelog";
 import styles from "./changelog.module.css";
 
@@ -9,7 +9,7 @@ type Props = {
 };
 
 const ALL_CATEGORIES = "All changes";
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 30;
 
 function formatDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -23,7 +23,7 @@ function formatDate(date: string) {
 export function LifetimeChangelog({ entries }: Props) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<ChangelogCategory | typeof ALL_CATEGORIES>(ALL_CATEGORIES);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [page, setPage] = useState(1);
 
   const categories = useMemo(
     () => Array.from(new Set(entries.map((entry) => entry.category))),
@@ -39,25 +39,26 @@ export function LifetimeChangelog({ entries }: Props) {
     });
   }, [category, entries, query]);
 
-  useEffect(() => {
-    setVisibleCount(PAGE_SIZE);
-  }, [query, category]);
+  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, pageCount);
+  const visible = useMemo(
+    () => filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [currentPage, filtered],
+  );
 
-  const visibleEntries = filtered.slice(0, visibleCount);
   const grouped = useMemo(() => {
     const groups = new Map<string, LifetimeChangelogEntry[]>();
-    for (const entry of visibleEntries) {
+    for (const entry of visible) {
       const current = groups.get(entry.date) ?? [];
       current.push(entry);
       groups.set(entry.date, current);
     }
     return Array.from(groups.entries());
-  }, [visibleEntries]);
+  }, [visible]);
 
   const activeDays = new Set(entries.map((entry) => entry.date)).size;
   const firstDate = entries.at(-1)?.date;
   const latestDate = entries[0]?.date;
-  const remaining = Math.max(0, filtered.length - visibleEntries.length);
 
   return (
     <div className={styles.workspace}>
@@ -65,9 +66,7 @@ export function LifetimeChangelog({ entries }: Props) {
         <div>
           <p className={styles.kicker}>Authoritative system history</p>
           <h2>Lifetime Changelog</h2>
-          <p>
-            The permanent development record for the LSCSO website and Personnel Portal. Every functional create, add, remove, fix, or behavior change belongs here with its release date.
-          </p>
+          <p>The permanent development record for the LSCSO website and Personnel Portal. Every functional create, add, remove, fix, or behavior change belongs here with its release date.</p>
         </div>
         <div className={styles.heroMark} aria-hidden="true">CL</div>
       </section>
@@ -82,16 +81,11 @@ export function LifetimeChangelog({ entries }: Props) {
       <section className={styles.controls}>
         <label className={styles.searchLabel}>
           <span>Search history</span>
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search features, fixes, workflows, Guardian, recruitment..."
-          />
+          <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Search features, fixes, workflows, Guardian, recruitment..." />
         </label>
         <label className={styles.filterLabel}>
           <span>Change type</span>
-          <select value={category} onChange={(event) => setCategory(event.target.value as ChangelogCategory | typeof ALL_CATEGORIES)}>
+          <select value={category} onChange={(event) => { setCategory(event.target.value as ChangelogCategory | typeof ALL_CATEGORIES); setPage(1); }}>
             <option>{ALL_CATEGORIES}</option>
             {categories.map((item) => <option key={item}>{item}</option>)}
           </select>
@@ -99,10 +93,8 @@ export function LifetimeChangelog({ entries }: Props) {
       </section>
 
       <div className={styles.resultBar}>
-        <span>{visibleEntries.length} of {filtered.length} {filtered.length === 1 ? "change" : "changes"} shown</span>
-        {(query || category !== ALL_CATEGORIES) ? (
-          <button type="button" onClick={() => { setQuery(""); setCategory(ALL_CATEGORIES); }}>Clear filters</button>
-        ) : null}
+        <span>{filtered.length} {filtered.length === 1 ? "change" : "changes"} · Page {currentPage} of {pageCount}</span>
+        {(query || category !== ALL_CATEGORIES) ? <button type="button" onClick={() => { setQuery(""); setCategory(ALL_CATEGORIES); setPage(1); }}>Clear filters</button> : null}
       </div>
 
       <section className={styles.timeline} aria-live="polite">
@@ -111,34 +103,25 @@ export function LifetimeChangelog({ entries }: Props) {
             <div className={styles.dateRail}>
               <span className={styles.dot} aria-hidden="true" />
               <time dateTime={date}>{formatDate(date)}</time>
-              <small>{dayEntries.length} {dayEntries.length === 1 ? "change" : "changes"}</small>
+              <small>{dayEntries.length} {dayEntries.length === 1 ? "change" : "changes"} on this page</small>
             </div>
             <div className={styles.entries}>
               {dayEntries.map((entry, index) => (
                 <div className={styles.entry} key={`${entry.date}-${entry.category}-${entry.title}-${index}`}>
                   <span className={`${styles.category} ${styles[`category${entry.category}`]}`}>{entry.category}</span>
-                  <div>
-                    <h3>{entry.title}</h3>
-                    <p>{entry.detail}</p>
-                  </div>
+                  <div><h3>{entry.title}</h3><p>{entry.detail}</p></div>
                 </div>
               ))}
             </div>
           </article>
-        )) : (
-          <div className={styles.empty}>
-            <strong>No matching changes.</strong>
-            <p>Try a broader search or clear the change-type filter.</p>
-          </div>
-        )}
+        )) : <div className={styles.empty}><strong>No matching changes.</strong><p>Try a broader search or clear the change-type filter.</p></div>}
       </section>
 
-      {remaining ? (
-        <div className={styles.resultBar}>
-          <span>{remaining} older {remaining === 1 ? "change" : "changes"} remaining</span>
-          <button type="button" onClick={() => setVisibleCount((current) => current + PAGE_SIZE)}>Show 50 more</button>
-        </div>
-      ) : null}
+      {pageCount > 1 ? <nav className={styles.pagination} aria-label="Lifetime changelog pages">
+        <button disabled={currentPage <= 1} onClick={() => setPage((current) => Math.max(1, current - 1))} type="button">Previous</button>
+        <span>Page {currentPage} of {pageCount}</span>
+        <button disabled={currentPage >= pageCount} onClick={() => setPage((current) => Math.min(pageCount, current + 1))} type="button">Next</button>
+      </nav> : null}
     </div>
   );
 }

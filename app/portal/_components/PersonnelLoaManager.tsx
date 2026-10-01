@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { GlassBlobToggle } from "./GlassBlobToggle";
+import { PortalDateField } from "./PortalDateField";
 
 type ActiveLeave = {
   id: string;
@@ -140,8 +141,8 @@ export function PersonnelLoaManager({ profileId, personnelId, displayName, activ
 
       <div className="personnel-admin-fields personnel-admin-fields--identity">
         <label><span>Leave type</span><select value={leaveType} onChange={(event) => setLeaveType(event.target.value)} disabled={pending}>{leaveTypes.map((item) => <option key={item}>{item}</option>)}</select></label>
-        <label><span>Starts on</span><input type="date" value={startsOn} onChange={(event) => setStartsOn(event.target.value)} disabled={pending} /></label>
-        <label><span>Expected return <small style={{ opacity: .65 }}>{openEnded ? "(open-ended)" : "(required)"}</small></span><input type="date" value={expectedReturnOn} min={startsOn || undefined} onChange={(event) => setExpectedReturnOn(event.target.value)} disabled={pending || openEnded} /></label>
+        <label><span>Starts on</span><PortalDateField value={startsOn} onChange={setStartsOn} disabled={pending} /></label>
+        <label><span>Expected return <small style={{ opacity: .65 }}>{openEnded ? "(open-ended)" : "(required)"}</small></span><PortalDateField value={expectedReturnOn} min={startsOn || undefined} onChange={setExpectedReturnOn} disabled={pending || openEnded} required={!openEnded} /></label>
       </div>
 
       <label className="portal-call-sign-field">

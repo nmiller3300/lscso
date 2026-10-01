@@ -112,12 +112,7 @@ export default async function TrainingWorkspacePage() {
       active="training"
       eyebrow="Training & FTO"
       title="Training & FTO"
-      actions={(
-        <>
-          {canManageTraining ? <TrainingAssignmentLauncher personnel={personnelOptions} /> : null}
-          <Link className="portal-button portal-button--secondary" href="/portal/command/certifications">Certification Center</Link>
-        </>
-      )}
+      actions={canManageTraining ? <TrainingAssignmentLauncher personnel={personnelOptions} /> : undefined}
     >
       <div className="portal-metric-grid portal-training-metrics">
         <article className="portal-metric portal-metric--gold"><span>{canManageTraining ? "Active trainees" : "My active trainees"}</span><strong>{trainingRows.length}</strong><small>Current progression</small></article>
@@ -127,26 +122,12 @@ export default async function TrainingWorkspacePage() {
       </div>
 
       <section className="portal-panel portal-training-board">
-        <div className="portal-panel-heading">
-          <div><p>Active training</p><h2>{canManageTraining ? "Department training board" : "My assigned trainees"}</h2></div>
-          <span>{trainingRows.length}</span>
-        </div>
+        <div className="portal-panel-heading"><div><p>Active training</p><h2>{canManageTraining ? "Department training board" : "My assigned trainees"}</h2></div><span>{trainingRows.length}</span></div>
         <div className="command-v2-personnel-results portal-training-trainee-list">
           {trainingRows.length ? trainingRows.map((row: any) => {
             const trainee = relationOne(row.trainee);
             const trainer = relationOne(row.trainer);
-            return (
-              <Link key={row.id} href={`/portal/command/personnel/${trainee?.personnel_id ?? ""}/training`}>
-                <div>
-                  <strong>{trainee?.call_sign ?? trainee?.personnel_id ?? "Trainee"} · {trainee?.display_name ?? "Assigned trainee"}</strong>
-                  <span>{row.program_type} · {row.phase} · {row.status}</span>
-                </div>
-                <div className="portal-training-progress-value">
-                  <strong>{row.progress_percent}%</strong>
-                  <span>{trainer?.display_name ? `Trainer: ${trainer.display_name}` : "Trainer unassigned"}</span>
-                </div>
-              </Link>
-            );
+            return <Link key={row.id} href={`/portal/command/personnel/${trainee?.personnel_id ?? ""}/training`}><div><strong>{trainee?.call_sign ?? trainee?.personnel_id ?? "Trainee"} · {trainee?.display_name ?? "Assigned trainee"}</strong><span>{row.program_type} · {row.phase} · {row.status}</span></div><div className="portal-training-progress-value"><strong>{row.progress_percent}%</strong><span>{trainer?.display_name ? `Trainer: ${trainer.display_name}` : "Trainer unassigned"}</span></div></Link>;
           }) : <div className="portal-empty-state"><strong>No active training records.</strong></div>}
         </div>
       </section>
@@ -156,12 +137,7 @@ export default async function TrainingWorkspacePage() {
         <div className="command-v2-mini-list portal-training-list">
           {historyRows.length ? historyRows.map((row: any) => {
             const member = relationOne(row.personnel);
-            return (
-              <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
-                <div><strong>{row.title}</strong><span>{member?.display_name ?? "Personnel"} · {row.record_type}</span></div>
-                <div><strong>{row.verification_status}</strong><span>{row.completed_on ? dateLabel(row.completed_on) : row.provider}</span></div>
-              </Link>
-            );
+            return <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}><div><strong>{row.title}</strong><span>{member?.display_name ?? "Personnel"} · {row.record_type}</span></div><div><strong>{row.verification_status}</strong><span>{row.completed_on ? dateLabel(row.completed_on) : row.provider}</span></div></Link>;
           }) : <div className="portal-empty-state"><strong>No permanent training history recorded yet.</strong></div>}
         </div>
       </section>
@@ -170,21 +146,13 @@ export default async function TrainingWorkspacePage() {
         <section className="portal-panel">
           <div className="portal-panel-heading"><div><p>FTO staffing</p><h2>Authorized FTOs</h2></div><span>{trainers.length}</span></div>
           <div className="command-v2-mini-list portal-training-list">
-            {trainers.length ? trainers.map((trainer: any) => (
-              <Link key={trainer.id} href={`/portal/command/personnel/${trainer.personnelId}/training`}>
-                <div><strong>{trainer.callSign ?? trainer.personnelId} · {trainer.displayName}</strong><span>{trainer.rank} · FTO Authorized</span></div>
-                <div><strong>{trainer.activeTrainees}</strong><span>Active trainee{trainer.activeTrainees === 1 ? "" : "s"}</span></div>
-              </Link>
-            )) : <div className="portal-empty-state"><strong>No current FTO certifications found.</strong></div>}
+            {trainers.length ? trainers.map((trainer: any) => <Link key={trainer.id} href={`/portal/command/personnel/${trainer.personnelId}/training`}><div><strong>{trainer.callSign ?? trainer.personnelId} · {trainer.displayName}</strong><span>{trainer.rank} · FTO Authorized</span></div><div><strong>{trainer.activeTrainees}</strong><span>Active trainee{trainer.activeTrainees === 1 ? "" : "s"}</span></div></Link>) : <div className="portal-empty-state"><strong>No current FTO certifications found.</strong></div>}
           </div>
         </section>
 
         <section className="portal-panel portal-training-certification-launcher">
           <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification Center</h2></div><span>{pendingRows.length} pending</span></div>
-          <div className="command-v2-action-row">
-            <Link className="portal-button portal-button--primary" href="/portal/command/certifications">Open Certification Center</Link>
-            <Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Pending Requests</Link>
-          </div>
+          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href="/portal/command/certifications">Open Certification Center</Link><Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Pending Requests</Link></div>
         </section>
 
         <section className="portal-panel">
@@ -192,12 +160,7 @@ export default async function TrainingWorkspacePage() {
           <div className="command-v2-mini-list portal-training-list">
             {expiringRows.length ? expiringRows.slice(0, 8).map((row: any) => {
               const member = relationOne(row.personnel_profiles);
-              return (
-                <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
-                  <div><strong>{row.name}</strong><span>{member?.display_name ?? "Personnel"}</span></div>
-                  <div><strong>{dateLabel(row.expires_on)}</strong><span>Expires</span></div>
-                </Link>
-              );
+              return <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}><div><strong>{row.name}</strong><span>{member?.display_name ?? "Personnel"}</span></div><div><strong>{dateLabel(row.expires_on)}</strong><span>Expires</span></div></Link>;
             }) : <div className="portal-empty-state"><strong>No certifications expire within 90 days.</strong></div>}
           </div>
         </section>

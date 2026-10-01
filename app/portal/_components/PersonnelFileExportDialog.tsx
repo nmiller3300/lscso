@@ -40,10 +40,22 @@ type Props = {
   onClose: () => void;
 };
 
+function exportFilename(header: string | null, fallback: string) {
+  if (!header) return fallback;
+  const encoded = /filename\*=UTF-8''([^;]+)/i.exec(header);
+  if (encoded?.[1]) {
+    try { return decodeURIComponent(encoded[1].replace(/["']/g, "")); } catch {}
+  }
+  const simple = /filename="?([^";]+)"?/i.exec(header);
+  return simple?.[1]?.trim() || fallback;
+}
+
 export function PersonnelFileExportDialog({ personnelId, displayName, rank, initialKind = "internal", onClose }: Props) {
   const [kind, setKind] = useState<PersonnelFileExportKind>(initialKind);
   const [destination, setDestination] = useState("");
-  const [exportStarted, setExportStarted] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportError, setExportError] = useState("");
+  const [exportNotice, setExportNotice] = useState("");
   const openRecords = kind === "open-records";
   const destinationLabel = openRecords ? "Requesting party / ORR reference" : "Destination department / agency";
   const destinationPlaceholder = openRecords ? "Requester, organization, or ORR-00000" : "Receiving department or agency";
@@ -51,7 +63,8 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
   useEffect(() => {
     setKind(initialKind);
     setDestination("");
-    setExportStarted(false);
+    setExportError("");
+    setExportNotice("");
   }, [initialKind, personnelId]);
 
   const notice = useMemo(() => {
@@ -73,41 +86,56 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
     };
   }, [kind]);
 
-  function createPdf() {
-    if (destination.trim().length < 2 || exportStarted) return;
-    const wireExportType = kind === "internal" ? "normal" : kind;
-    const query = new URLSearchParams({
-      exportType: wireExportType,
-      recipient: destination.trim(),
-      sections: sectionsByKind[kind],
-    });
-    setExportStarted(true);
-    window.location.href = `/api/portal/personnel/${encodeURIComponent(personnelId)}/record-export?${query.toString()}`;
+  async function createPdf() {
+    if (destination.trim().length < 2 || exporting) return;
+    setExporting(true);
+    setExportError("");
+    setExportNotice("");
+    try {
+      const wireExportType = kind === "internal" ? "normal" : kind;
+      const query = new URLSearchParams({
+        exportType: wireExportType,
+        recipient: destination.trim(),
+        sections: sectionsByKind[kind],
+      });
+      const response = await fetch(`/api/portal/personnel/${encodeURIComponent(personnelId)}/record-export?${query.toString()}`, { cache: "no-store" });
+      if (!response.ok) {
+        const body = await response.text();
+        throw new Error(body || "The personnel file could not be generated.");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = exportFilename(response.headers.get("content-disposition"), `${personnelId}-${kind}-personnel-file.pdf`);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setExportNotice("Personnel file created. Your PDF download has started.");
+    } catch (reason) {
+      setExportError(reason instanceof Error ? reason.message : "The personnel file could not be generated.");
+    } finally {
+      setExporting(false);
+    }
   }
 
   return (
-    <div className="portal-modal-backdrop personnel-export-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) onClose(); }}>
+    <div className="portal-modal-backdrop personnel-export-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target && !exporting) onClose(); }}>
       <section className="portal-modal personnel-export-dialog" role="dialog" aria-modal="true" aria-labelledby="personnel-file-export-title">
         <div className="portal-modal-heading personnel-export-heading">
           <div><span>Official personnel file release</span><h2 id="personnel-file-export-title">Export Personnel File</h2></div>
-          <button onClick={onClose} type="button" aria-label="Close">×</button>
+          <button disabled={exporting} onClick={onClose} type="button" aria-label="Close">×</button>
         </div>
 
         <p className="personnel-export-subject"><strong>{displayName}</strong> · {personnelId}{rank ? ` · ${rank}` : ""}</p>
 
-        <fieldset className="personnel-export-types" disabled={exportStarted}>
+        <fieldset className="personnel-export-types" disabled={exporting}>
           <legend>File type</legend>
           <div className="personnel-export-type-grid">
             {(Object.keys(labels) as PersonnelFileExportKind[]).map((option) => (
-              <button
-                aria-pressed={kind === option}
-                className={kind === option ? "is-active" : ""}
-                key={option}
-                onClick={() => setKind(option)}
-                type="button"
-              >
-                <span>{shortLabels[option]}</span>
-                <strong>{labels[option]}</strong>
+              <button aria-pressed={kind === option} className={kind === option ? "is-active" : ""} key={option} onClick={() => setKind(option)} type="button">
+                <span>{shortLabels[option]}</span><strong>{labels[option]}</strong>
               </button>
             ))}
           </div>
@@ -117,14 +145,7 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
 
         <label className="personnel-export-destination">
           <span>{destinationLabel}</span>
-          <input
-            autoFocus
-            disabled={exportStarted}
-            value={destination}
-            onChange={(event) => setDestination(event.target.value)}
-            maxLength={160}
-            placeholder={destinationPlaceholder}
-          />
+          <input autoFocus disabled={exporting} value={destination} onChange={(event) => setDestination(event.target.value)} maxLength={160} placeholder={destinationPlaceholder} />
         </label>
 
         <div className="personnel-export-notice-preview">
@@ -134,22 +155,13 @@ export function PersonnelFileExportDialog({ personnelId, displayName, rank, init
           <p>{notice.body}</p>
         </div>
 
-        {openRecords ? <div className="personnel-export-ocsa-preview">
-          <strong>Open Records authority</strong>
-          <span>{SAN_ANDREAS_OPEN_RECORDS_CITATION}</span>
-          <p>{SAN_ANDREAS_EXEMPTION_RULE}</p>
-        </div> : null}
-
-        {exportStarted ? (
-          <div className="portal-form-success" role="status">
-            <strong>PDF export started</strong>
-            <span>The personnel file download has been requested. You can close this window after the browser begins the download.</span>
-          </div>
-        ) : null}
+        {openRecords ? <div className="personnel-export-ocsa-preview"><strong>Open Records authority</strong><span>{SAN_ANDREAS_OPEN_RECORDS_CITATION}</span><p>{SAN_ANDREAS_EXEMPTION_RULE}</p></div> : null}
+        {exportError ? <div className="portal-form-error" role="alert">{exportError}</div> : null}
+        {exportNotice ? <div className="portal-form-success" role="status"><strong>Export complete</strong><span>{exportNotice}</span></div> : null}
 
         <div className="portal-modal-actions personnel-export-actions">
-          <button className="portal-button portal-button--secondary" onClick={onClose} type="button">{exportStarted ? "Close" : "Cancel"}</button>
-          <button className="portal-button portal-button--primary" disabled={destination.trim().length < 2 || exportStarted} onClick={createPdf} type="button">{exportStarted ? "PDF Export Started" : `Create ${shortLabels[kind]} PDF`}</button>
+          <button className="portal-button portal-button--secondary" disabled={exporting} onClick={onClose} type="button">{exportNotice ? "Close" : "Cancel"}</button>
+          <button className="portal-button portal-button--primary" disabled={exporting || destination.trim().length < 2} onClick={() => void createPdf()} type="button">{exporting ? "Creating PDF…" : `Create ${shortLabels[kind]} PDF`}</button>
         </div>
       </section>
     </div>
