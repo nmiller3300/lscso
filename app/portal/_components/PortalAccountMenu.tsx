@@ -104,7 +104,7 @@ export function PortalAccountMenu() {
         <BrowserPushControl />
       </div>
       <Link href="/portal/my-office" onClick={closeMenu}>My Info</Link>
-      <Link href="/portal/account" onClick={closeMenu}>FiveM connection</Link>
+      <Link href="/portal/account" onClick={closeMenu}>FiveM Setup</Link>
       <PasswordChangeDialog
         triggerLabel="Change password"
         triggerClassName="portal-account-menu__action"
