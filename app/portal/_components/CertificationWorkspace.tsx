@@ -9,6 +9,7 @@ type Person = { id: string; display_name: string; rank: string; call_sign: strin
 type Certification = { id: string; profile_id: string; name: string; status: string; issuer: string; certificate_number: string | null; issued_on: string | null; expires_on: string | null; notes: string | null };
 type ActivityFilter = "attention" | "current" | "history";
 
+const ACTIVITY_PAGE_SIZE = 25;
 const expirationPolicy: Record<string, string> = {
   "Advanced Criminal Investigations": "No expiration",
   "CPR / AED": "1 year",
@@ -48,14 +49,7 @@ const expirationPolicy: Record<string, string> = {
   "Traffic Enforcement": "No expiration",
 };
 
-const certificationCategories = [
-  "Core & Medical",
-  "Patrol & Traffic",
-  "Investigations",
-  "Firearms & Tactical",
-  "Instruction & Leadership",
-  "Specialty",
-] as const;
+const certificationCategories = ["Core & Medical", "Patrol & Traffic", "Investigations", "Firearms & Tactical", "Instruction & Leadership", "Specialty"] as const;
 
 function categoryFor(name: string) {
   const value = name.toLowerCase();
@@ -88,21 +82,11 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("attention");
   const [activityMember, setActivityMember] = useState("");
   const [activityQuery, setActivityQuery] = useState("");
-  const [activityLimit, setActivityLimit] = useState(20);
+  const [activityPage, setActivityPage] = useState(1);
 
   const peopleById = useMemo(() => new Map(personnel.map((person) => [person.id, person])), [personnel]);
-
-  const unavailableNames = useMemo(() => new Set(
-    certifications
-      .filter((item) => item.profile_id === targetProfileId && ["Current", "Requested", "Pending"].includes(item.status))
-      .map((item) => item.name),
-  ), [certifications, targetProfileId]);
-
-  const availableCatalog = useMemo(
-    () => catalog.filter((name) => !unavailableNames.has(name)),
-    [catalog, unavailableNames],
-  );
-
+  const unavailableNames = useMemo(() => new Set(certifications.filter((item) => item.profile_id === targetProfileId && ["Current", "Requested", "Pending"].includes(item.status)).map((item) => item.name)), [certifications, targetProfileId]);
+  const availableCatalog = useMemo(() => catalog.filter((name) => !unavailableNames.has(name)), [catalog, unavailableNames]);
   const catalogCounts = useMemo(() => {
     const counts = new Map<string, number>();
     for (const category of certificationCategories) counts.set(category, 0);
@@ -112,23 +96,16 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
     }
     return counts;
   }, [availableCatalog]);
-
   const visibleCatalog = useMemo(() => {
     const query = catalogQuery.trim().toLowerCase();
-    return availableCatalog.filter((name) => {
-      if (query) return name.toLowerCase().includes(query);
-      return categoryFor(name) === catalogCategory;
-    });
+    return availableCatalog.filter((name) => query ? name.toLowerCase().includes(query) : categoryFor(name) === catalogCategory);
   }, [availableCatalog, catalogCategory, catalogQuery]);
-
   const attentionCertifications = useMemo(() => certifications.filter((item) => {
     if (["Requested", "Pending"].includes(item.status)) return true;
     return item.status === "Current" && Boolean(item.expires_on) && String(item.expires_on) <= new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10);
   }), [certifications]);
-
   const currentCount = certifications.filter((item) => item.status === "Current").length;
   const historyCount = certifications.filter((item) => ["Expired", "Revoked", "Denied"].includes(item.status)).length;
-
   const filteredActivity = useMemo(() => {
     const query = activityQuery.trim().toLowerCase();
     return certifications.filter((item) => {
@@ -143,27 +120,14 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
       return ["Expired", "Revoked", "Denied"].includes(item.status);
     });
   }, [activityFilter, activityMember, activityQuery, certifications, peopleById]);
+  const activityPageCount = Math.max(1, Math.ceil(filteredActivity.length / ACTIVITY_PAGE_SIZE));
+  const currentActivityPage = Math.min(activityPage, activityPageCount);
+  const visibleActivity = filteredActivity.slice((currentActivityPage - 1) * ACTIVITY_PAGE_SIZE, currentActivityPage * ACTIVITY_PAGE_SIZE);
 
-  const visibleActivity = filteredActivity.slice(0, activityLimit);
-
-  function toggleCertification(name: string) {
-    setSelectedCertifications((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
-  }
-
-  function handleMemberChange(profileId: string) {
-    setTargetProfileId(profileId);
-    setSelectedCertifications([]);
-    setCatalogQuery("");
-  }
-
-  function selectVisible() {
-    setSelectedCertifications((current) => Array.from(new Set([...current, ...visibleCatalog])));
-  }
-
-  function changeActivityFilter(filter: ActivityFilter) {
-    setActivityFilter(filter);
-    setActivityLimit(20);
-  }
+  function toggleCertification(name: string) { setSelectedCertifications((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]); }
+  function handleMemberChange(profileId: string) { setTargetProfileId(profileId); setSelectedCertifications([]); setCatalogQuery(""); }
+  function selectVisible() { setSelectedCertifications((current) => Array.from(new Set([...current, ...visibleCatalog]))); }
+  function changeActivityFilter(filter: ActivityFilter) { setActivityFilter(filter); setActivityPage(1); }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -176,40 +140,21 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
       setNotice(canIssue ? "Select at least one certification to issue." : "Select a certification to request.");
       return;
     }
-
     setPending(true);
     const supabase = createClient() as any;
     const result = canIssue
-      ? await supabase.rpc("issue_certifications_bulk", {
-          target_profile_id: selectedProfileId,
-          certification_names: selectedCertifications,
-          issued_date: String(form.get("issuedOn") ?? "") || today,
-          expiration_date: null,
-          issue_notes: String(form.get("notes") ?? "").trim() || null,
-        })
-      : await supabase.rpc("request_certification", {
-          target_profile_id: selectedProfileId,
-          certification_name: certificationName,
-          request_notes: String(form.get("notes") ?? "").trim() || null,
-        });
-
+      ? await supabase.rpc("issue_certifications_bulk", { target_profile_id: selectedProfileId, certification_names: selectedCertifications, issued_date: String(form.get("issuedOn") ?? "") || today, expiration_date: null, issue_notes: String(form.get("notes") ?? "").trim() || null })
+      : await supabase.rpc("request_certification", { target_profile_id: selectedProfileId, certification_name: certificationName, request_notes: String(form.get("notes") ?? "").trim() || null });
     setPending(false);
     if (result.error) { setNotice(result.error.message); return; }
-
     if (canIssue) {
       const count = Array.isArray(result.data) ? result.data.length : selectedCertifications.length;
       setNotice(`${count} certification${count === 1 ? "" : "s"} issued.`);
-      setSelectedCertifications([]);
-      setTargetProfileId("");
-      setCatalogQuery("");
-      formElement.reset();
+      setSelectedCertifications([]); setTargetProfileId(""); setCatalogQuery(""); formElement.reset();
     } else {
-      setNotice(`${certificationName} submitted for final issuance.`);
-      setTargetProfileId("");
-      formElement.reset();
+      setNotice(`${certificationName} submitted for final issuance.`); setTargetProfileId(""); formElement.reset();
     }
-    router.refresh();
-    window.setTimeout(() => setNotice(""), 4200);
+    router.refresh(); window.setTimeout(() => setNotice(""), 4200);
   }
 
   async function confirmDeleteCertification() {
@@ -219,10 +164,7 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
     const result = await (createClient() as any).rpc("delete_certification", { certification_id: target.id });
     setPending(false);
     if (result.error) { setNotice(result.error.message); return; }
-    setDeleteTarget(null);
-    setNotice(`${target.name} removed from the personnel record.`);
-    router.refresh();
-    window.setTimeout(() => setNotice(""), 4200);
+    setDeleteTarget(null); setNotice(`${target.name} removed from the personnel record.`); router.refresh(); window.setTimeout(() => setNotice(""), 4200);
   }
 
   const deletePerson = deleteTarget ? peopleById.get(deleteTarget.profile_id) : null;
@@ -234,19 +176,13 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
         <form onSubmit={submit}>
           <div className="portal-form-grid portal-form-grid--three">
             <label>Personnel member<select name="member" required value={targetProfileId} onChange={(event) => handleMemberChange(event.target.value)}><option disabled value="">Select personnel</option>{personnel.map((person) => <option key={person.id} value={person.id}>{person.display_name} · {person.rank}{person.call_sign ? ` · ${person.call_sign}` : ""}</option>)}</select></label>
-            {!canIssue ? <label>Certification<select name="certification" required defaultValue=""><option disabled value="">Select certification</option>{certificationCategories.map((category) => {
-              const names = availableCatalog.filter((name) => categoryFor(name) === category);
-              return names.length ? <optgroup key={category} label={category}>{names.map((name) => <option key={name}>{name}</option>)}</optgroup> : null;
-            })}</select></label> : null}
+            {!canIssue ? <label>Certification<select name="certification" required defaultValue=""><option disabled value="">Select certification</option>{certificationCategories.map((category) => { const names = availableCatalog.filter((name) => categoryFor(name) === category); return names.length ? <optgroup key={category} label={category}>{names.map((name) => <option key={name}>{name}</option>)}</optgroup> : null; })}</select></label> : null}
             {canIssue ? <div className="portal-form-protection"><strong>Already-held certifications are hidden</strong><span>Select a member first. Current and already-pending certifications are removed from the picker automatically.</span></div> : <div className="portal-form-protection"><strong>Recommendation only</strong><span>This request does not add the certification until an authorized administrator issues it.</span></div>}
           </div>
 
           {canIssue ? <fieldset className="certification-picker">
             <legend><span>Select certifications</span><b>{selectedCertifications.length} selected</b></legend>
-            <div className="certification-picker__toolbar">
-              <input aria-label="Search certifications" onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Search certifications..." type="search" value={catalogQuery} />
-              <div className="certification-picker__actions"><button disabled={!visibleCatalog.length} onClick={selectVisible} type="button">Select visible</button><button disabled={!selectedCertifications.length} onClick={() => setSelectedCertifications([])} type="button">Clear</button></div>
-            </div>
+            <div className="certification-picker__toolbar"><input aria-label="Search certifications" onChange={(event) => setCatalogQuery(event.target.value)} placeholder="Search certifications..." type="search" value={catalogQuery} /><div className="certification-picker__actions"><button disabled={!visibleCatalog.length} onClick={selectVisible} type="button">Select visible</button><button disabled={!selectedCertifications.length} onClick={() => setSelectedCertifications([])} type="button">Clear</button></div></div>
             {!catalogQuery ? <div className="certification-category-tabs">{certificationCategories.map((category) => <button className={catalogCategory === category ? "is-active" : undefined} key={category} onClick={() => setCatalogCategory(category)} type="button"><span>{category}</span><b>{catalogCounts.get(category) ?? 0}</b></button>)}</div> : null}
             {!targetProfileId ? <div className="certification-picker__empty"><strong>Select a personnel member first.</strong><span>The picker will automatically hide qualifications already on that member’s record.</span></div> : visibleCatalog.length ? <div className="certification-picker__grid">{visibleCatalog.map((name) => <label className={selectedCertifications.includes(name) ? "is-selected" : undefined} key={name}><input checked={selectedCertifications.includes(name)} onChange={() => toggleCertification(name)} type="checkbox" /><span>{name}<small>{expirationPolicy[name] ?? "No expiration"}</small></span></label>)}</div> : <div className="certification-picker__empty"><strong>No certifications match this view.</strong><span>Try another category or search term.</span></div>}
           </fieldset> : null}
@@ -259,18 +195,12 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
 
       <section className="portal-panel certification-record-panel">
         <div className="portal-panel-heading"><div><p>Department certification record</p><h2>Certification activity</h2></div><span>{certifications.length} total records</span></div>
-
         <div className="certification-summary-grid">
           <button className={activityFilter === "attention" ? "is-active" : undefined} onClick={() => changeActivityFilter("attention")} type="button"><span>Needs attention</span><strong>{attentionCertifications.length}</strong><small>Pending or expiring within 60 days</small></button>
           <button className={activityFilter === "current" ? "is-active" : undefined} onClick={() => changeActivityFilter("current")} type="button"><span>Current</span><strong>{currentCount}</strong><small>Active department qualifications</small></button>
           <button className={activityFilter === "history" ? "is-active" : undefined} onClick={() => changeActivityFilter("history")} type="button"><span>History</span><strong>{historyCount}</strong><small>Expired, revoked, or denied</small></button>
         </div>
-
-        <div className="certification-record-filters">
-          <input aria-label="Search certification activity" onChange={(event) => { setActivityQuery(event.target.value); setActivityLimit(20); }} placeholder="Search member, certification, or certificate #..." type="search" value={activityQuery} />
-          <select aria-label="Filter certification activity by personnel" onChange={(event) => { setActivityMember(event.target.value); setActivityLimit(20); }} value={activityMember}><option value="">All personnel</option>{personnel.map((person) => <option key={person.id} value={person.id}>{person.display_name} · {person.rank}</option>)}</select>
-        </div>
-
+        <div className="certification-record-filters"><input aria-label="Search certification activity" onChange={(event) => { setActivityQuery(event.target.value); setActivityPage(1); }} placeholder="Search member, certification, or certificate #..." type="search" value={activityQuery} /><select aria-label="Filter certification activity by personnel" onChange={(event) => { setActivityMember(event.target.value); setActivityPage(1); }} value={activityMember}><option value="">All personnel</option>{personnel.map((person) => <option key={person.id} value={person.id}>{person.display_name} · {person.rank}</option>)}</select></div>
         <div className="deputy-certification-list certification-activity-list">
           {visibleActivity.map((certification) => {
             const person = peopleById.get(certification.profile_id);
@@ -279,22 +209,12 @@ export function CertificationWorkspace({ personnel, catalog, certifications, can
           })}
           {!filteredActivity.length ? <div className="portal-empty-state"><strong>No certification records match this view.</strong><span>Change the status view, member, or search term.</span></div> : null}
         </div>
-
-        {filteredActivity.length > visibleActivity.length ? <div className="certification-load-more"><button className="portal-button portal-button--secondary" onClick={() => setActivityLimit((current) => current + 20)} type="button">Show 20 more · {filteredActivity.length - visibleActivity.length} remaining</button></div> : null}
+        {activityPageCount > 1 ? <nav className="portal-pagination" aria-label="Certification activity pages"><button className="portal-button portal-button--secondary" disabled={currentActivityPage <= 1} onClick={() => setActivityPage((current) => Math.max(1, current - 1))} type="button">Previous</button><span>Page {currentActivityPage} of {activityPageCount} · {filteredActivity.length} records</span><button className="portal-button portal-button--secondary" disabled={currentActivityPage >= activityPageCount} onClick={() => setActivityPage((current) => Math.min(activityPageCount, current + 1))} type="button">Next</button></nav> : null}
       </section>
 
-      <PortalDialog
-        open={Boolean(deleteTarget)}
-        onClose={() => { if (!pending) setDeleteTarget(null); }}
-        eyebrow="Certification correction"
-        title="Remove issued certification?"
-        description="Use this only to correct an accidental issuance. The action is recorded in the protected personnel system."
-        dismissOnBackdrop={false}
-        footer={<><button className="portal-button portal-button--secondary" disabled={pending} onClick={() => setDeleteTarget(null)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pending} onClick={confirmDeleteCertification} type="button">{pending ? "Removing…" : "Remove certification"}</button></>}
-      >
+      <PortalDialog open={Boolean(deleteTarget)} onClose={() => { if (!pending) setDeleteTarget(null); }} eyebrow="Certification correction" title="Remove issued certification?" description="Use this only to correct an accidental issuance. The action is recorded in the protected personnel system." dismissOnBackdrop={false} footer={<><button className="portal-button portal-button--secondary" disabled={pending} onClick={() => setDeleteTarget(null)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={pending} onClick={confirmDeleteCertification} type="button">{pending ? "Removing…" : "Remove certification"}</button></>}>
         <div className="portal-form-protection"><strong>{deleteTarget?.name ?? "Certification"}</strong><span>{deletePerson?.display_name ?? "Personnel record"} · This does not silently rewrite certification history.</span></div>
       </PortalDialog>
-
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
     </>
   );
