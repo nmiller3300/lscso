@@ -1,24 +1,127 @@
-/* Production audit polish — 2026-10-01. Keep these fixes narrow and presentation-only. */
+/* Production audit polish — 2026-10-01. */
 
-/* Guardian routing labels must keep the record type and the word "routing" visibly separated. */
-.guardian-route-card > div:first-child > div > strong {
+/* Keep compact counters and their labels visibly separated across portal surfaces. */
+.portal-root .portal-panel-heading > span,
+.portal-root .portal-panel-heading > b,
+.portal-root .portal-section-heading > span,
+.portal-root .portal-metric > span,
+.portal-root .portal-metric > small,
+.portal-root .deputy-summary-grid > article > span,
+.portal-root .deputy-summary-grid > article > small,
+.portal-root .certification-summary-grid button > span,
+.portal-root .certification-summary-grid button > small,
+.portal-root .guardian-route-card > div:first-child > div > strong,
+.portal-root .request-route-events summary,
+.portal-root .personnel-admin-actions > span {
   word-spacing: 0.22em;
 }
 
-/* Small metric/status labels in panel headings were visually collapsing values into labels (for example 0DELEGATED). */
-.portal-panel-heading > span {
-  word-spacing: 0.2em;
+/* Text that is informational must never be visually clamped into half-sentences. */
+.portal-root .portal-account-admin__intro,
+.portal-root .portal-form-protection span,
+.portal-root .portal-page-heading__description {
+  max-height: none !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  word-break: normal !important;
+  overflow-wrap: break-word !important;
+  -webkit-line-clamp: unset !important;
 }
 
-/* Training already has a dedicated Certification Center launcher in the Qualifications panel. */
-.portal-app[data-portal-active="training"] .portal-page-heading .portal-page-actions > a[href="/portal/command/certifications"] {
-  display: none;
-}
-
-/* Keep recruitment action/help copy on normal word boundaries. */
+/* Recruitment controls should wrap only at real word boundaries. */
 .portal-app[data-portal-active="applications"] .portal-page-actions,
 .portal-app[data-portal-active="applications"] .portal-page-heading__description,
-.portal-app[data-portal-active="applications"] .portal-button {
+.portal-app[data-portal-active="applications"] .portal-button,
+.portal-app[data-portal-active="applications"] .recruitment-applicant,
+.portal-app[data-portal-active="applications"] .recruitment-list {
   word-break: normal;
-  overflow-wrap: normal;
+  overflow-wrap: break-word;
+}
+
+/* Friendly typed date + deliberately large calendar target. */
+.portal-date-field {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 46px;
+  width: 100%;
+  min-width: 0;
+}
+
+.portal-date-field__text {
+  width: 100% !important;
+  min-width: 0;
+  padding-right: 12px !important;
+  border-radius: 10px 0 0 10px !important;
+}
+
+.portal-date-field__native {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 46px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.portal-date-field__button {
+  display: grid;
+  min-width: 46px;
+  min-height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255,255,255,.14);
+  border-left: 0;
+  border-radius: 0 10px 10px 0;
+  background: rgba(255,255,255,.045);
+  color: #d6c17b;
+  cursor: pointer;
+}
+
+.portal-date-field__button:hover,
+.portal-date-field__button:focus-visible {
+  border-color: rgba(214,193,123,.45);
+  background: rgba(214,193,123,.09);
+  outline: none;
+}
+
+.portal-date-field__button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.portal-date-field__button svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Shared desktop paging controls for long operational lists. */
+.portal-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.portal-pagination > span {
+  min-width: 116px;
+  text-align: center;
+  color: var(--portal-muted, #9aa1a9);
+  font-size: .75rem;
+  font-weight: 700;
+  word-spacing: .18em;
+}
+
+.portal-pagination .is-disabled {
+  opacity: .4;
+  pointer-events: none;
 }
