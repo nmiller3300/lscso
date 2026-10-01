@@ -137,7 +137,7 @@ export async function POST(request: Request) {
             rank: expectedRank,
             accessBand: getComputerAccessBand(jobGrade),
           },
-          rankMatchesFramework: profile.rank === expectedRank,
+          rankMatchesFramework: expectedRank ? profile.rank === expectedRank : null,
         },
       },
       { headers: { "Cache-Control": "no-store" } },
