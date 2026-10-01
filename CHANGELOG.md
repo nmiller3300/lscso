@@ -9,6 +9,13 @@ This file is the authoritative development history for the Los Santos County She
 - Historical entries from August 20 through September 11, 2026 were backfilled from the repository commit history and database migrations. Temporary implementation churn and immediately reverted experiments are summarized by the meaningful final behavior rather than copied as raw Git noise.
 - Git remains the forensic commit-level record. This changelog records the lasting system capability and behavior people actually need to understand.
 
+## 2026-10-01
+
+### Changed
+- **Personnel Portal — FiveM Setup Refresh**: Reworked the existing account-linking page into a dedicated FiveM Setup experience with a clearer three-step pairing flow, live code-expiration feedback, automatic connection detection, linked-character details, and improved disconnect/refresh controls while preserving the existing pairing backend and database records.
+- **FiveM Integration — AEGIS Identity Readiness**: Updated the personnel-facing connection language to make the existing FiveM identity link the approved identity bridge for AEGIS and other department in-game services without asking personnel to enter their Portal password in game.
+- **Personnel Portal — Account Menu Naming**: Renamed the account-menu entry from FiveM connection to FiveM Setup so the existing integration is easier for personnel to find and understand.
+
 ## 2026-09-19
 
 ### Added

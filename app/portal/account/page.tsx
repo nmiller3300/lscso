@@ -18,8 +18,8 @@ export default async function PortalAccountPage() {
         active="overview"
         audience={audience}
         eyebrow="Secure account"
-        title="Account connections"
-        description="Manage services connected to your LSCSO personnel account."
+        title="FiveM Setup"
+        description="Connect your LSCSO character to your personnel account for AEGIS and approved in-game department services."
         actions={
           <Link className="portal-button portal-button--secondary" href={homeHref}>
             Back to portal
