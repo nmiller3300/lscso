@@ -1,0 +1,24 @@
+/* Production audit polish — 2026-10-01. Keep these fixes narrow and presentation-only. */
+
+/* Guardian routing labels must keep the record type and the word "routing" visibly separated. */
+.guardian-route-card > div:first-child > div > strong {
+  word-spacing: 0.22em;
+}
+
+/* Small metric/status labels in panel headings were visually collapsing values into labels (for example 0DELEGATED). */
+.portal-panel-heading > span {
+  word-spacing: 0.2em;
+}
+
+/* Training already has a dedicated Certification Center launcher in the Qualifications panel. */
+.portal-app[data-portal-active="training"] .portal-page-heading .portal-page-actions > a[href="/portal/command/certifications"] {
+  display: none;
+}
+
+/* Keep recruitment action/help copy on normal word boundaries. */
+.portal-app[data-portal-active="applications"] .portal-page-actions,
+.portal-app[data-portal-active="applications"] .portal-page-heading__description,
+.portal-app[data-portal-active="applications"] .portal-button {
+  word-break: normal;
+  overflow-wrap: normal;
+}
