@@ -9,6 +9,14 @@ This file is the authoritative development history for the Los Santos County She
 - Historical entries from August 20 through September 11, 2026 were backfilled from the repository commit history and database migrations. Temporary implementation churn and immediately reverted experiments are summarized by the meaningful final behavior rather than copied as raw Git noise.
 - Git remains the forensic commit-level record. This changelog records the lasting system capability and behavior people actually need to understand.
 
+## 2026-10-03
+
+### Added
+- **Command — Discord Announcements**: Added a Captain+ Department Announcements workspace for publishing official LSCSO Discord notices with an `@LSCSO` role notification, LSCSO-branded embed preview, optional PNG/JPG/WebP image, send confirmation, and permanent announcement history.
+
+### Security
+- **Command Announcements — Server-Enforced Authority**: Enforced Captain, Major, Undersheriff, or Sheriff authority on the page, API, and database send function; kept the dedicated Discord webhook in Supabase Vault; restricted Discord allowed mentions to the LSCSO role; and limited uploaded announcement images to the dedicated public image bucket.
+
 ## 2026-09-19
 
 ### Added
@@ -338,18 +346,3 @@ This file is the authoritative development history for the Los Santos County She
 - **Database — RLS and Data API Hardening**: Hardened Supabase Data API privileges, request RLS, and permission boundaries for protected personnel data.
 - **Guardian — Privacy and Immutability**: Removed unnecessary IP storage, protected immutable/system-managed Guardian fields, and restricted subject/record visibility to the intended roles.
 - **Personnel — Atomic Deactivation**: Added atomic profile deactivation rather than piecemeal account-state changes.
-- **Portal — Search Exclusion**: Kept authenticated personnel portal routes out of public search indexing.
-
-### Removed
-- **Public Site — Warrant Information**: Removed public warrant information from navigation and decommissioned the public warrant page.
-- **Recognition — Deputy of the Month Medal**: Removed the obsolete Deputy of the Month medal/catalog behavior from the personnel recognition system.
-
-## 2026-08-20
-
-### Added
-- **Repository — LSCSO Website Project**: Initialized the `nmiller3300/lscso` repository at approximately 6:11 PM ET, establishing the source history this lifetime changelog now covers.
-- **Public Site — Initial LSCSO Website**: Built the first LSCSO public website structure and core public-facing pages.
-- **Branding — Repository-Hosted Assets**: Added GitHub-hosted department brand assets for reliable website use.
-
-### Operations
-- **Development — Source-Control Baseline**: Established Git as the authoritative forensic history for all subsequent LSCSO website and Personnel Portal development.
