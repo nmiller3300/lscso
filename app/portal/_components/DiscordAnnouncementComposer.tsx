@@ -226,7 +226,16 @@ export function DiscordAnnouncementComposer() {
                 <div><span>ISSUED BY</span><strong>{formattedIssuer}</strong></div>
                 <div><span>OFFICIAL NOTICE</span><strong>Los Santos County Sheriff&apos;s Office</strong></div>
               </div>
-              {imagePreview ? <img alt="Announcement preview" className={styles.embedImage} src={imagePreview} /> : null}
+              {imagePreview ? (
+                <Image
+                  alt="Announcement preview"
+                  className={styles.embedImage}
+                  height={500}
+                  src={imagePreview}
+                  unoptimized
+                  width={900}
+                />
+              ) : null}
               <div className={styles.embedFooter}>
                 <Image alt="" height={18} src="/images/lscso-portal-patch.webp" width={18} />
                 <span>LSCSO Command Announcement · Sent when published</span>
