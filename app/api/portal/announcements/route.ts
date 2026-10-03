@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { hasStandingDepartmentAuthority, type LscsoRank } from "@/lib/authorization/lscso-authority";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 export const runtime = "nodejs";
