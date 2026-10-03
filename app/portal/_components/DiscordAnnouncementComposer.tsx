@@ -217,7 +217,7 @@ export function DiscordAnnouncementComposer() {
             <div className={styles.embedAccent} />
             <div className={styles.embedBody}>
               <div className={styles.embedAuthor}>
-                <Image alt="" height={24} src="/images/lscso-portal-patch.webp" width={24} />
+                <Image alt="" height={24} src="/images/lscso-patch-color.png" width={24} />
                 <span>LOS SANTOS COUNTY SHERIFF&apos;S OFFICE · COMMAND</span>
               </div>
               <h3>{title.trim() || "Announcement title"}</h3>
@@ -237,7 +237,7 @@ export function DiscordAnnouncementComposer() {
                 />
               ) : null}
               <div className={styles.embedFooter}>
-                <Image alt="" height={18} src="/images/lscso-portal-patch.webp" width={18} />
+                <Image alt="" height={18} src="/images/lscso-patch-color.png" width={18} />
                 <span>LSCSO Command Announcement · Sent when published</span>
               </div>
             </div>
