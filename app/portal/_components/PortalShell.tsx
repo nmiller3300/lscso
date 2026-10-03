@@ -20,7 +20,7 @@ import { PortalSidebarController } from "./PortalSidebarController";
 import { PromotionSelfReviewCenter } from "./PromotionSelfReviewCenter";
 
 type PortalShellProps = {
-  active: "overview" | "personnel" | "supervision" | "training" | "promotions" | "orders" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa";
+  active: "overview" | "personnel" | "supervision" | "training" | "promotions" | "orders" | "administration" | "guardians" | "record" | "approvals" | "activity" | "certifications" | "awards" | "notifications" | "applications" | "psa" | "announcements";
   audience?: "command" | "deputy";
   eyebrow: string;
   title: ReactNode;
