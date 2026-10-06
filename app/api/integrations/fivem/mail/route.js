@@ -264,6 +264,7 @@ async function sendMessage(admin, profile, body) {
   const cc = parseAddressList(body.cc, 20);
   const bcc = parseAddressList(body.bcc, 20);
   const subject = cleanString(body.subject, 200);
+  const replyToMessageId = cleanString(body.replyToMessageId, 80) || null;
   const messageBody = typeof body.body === "string" ? body.body.trim().slice(0, 20000) : "";
   if (!to.length) throw new Error("At least one LSCSO recipient is required.");
   if (!subject || !messageBody) throw new Error("Subject and message body are required.");
@@ -285,6 +286,7 @@ async function sendMessage(admin, profile, body) {
     subject,
     body: messageBody,
     system_message: false,
+    reply_to_message_id: replyToMessageId,
     metadata: { to, cc, bccCount: bcc.length },
   }).select("id").single();
   if (messageError) throw messageError;
