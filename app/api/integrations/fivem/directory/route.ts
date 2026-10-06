@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authorizeFiveMIntegration } from "@/lib/integrations/fivem/auth";
 import { isLscsoGrade, LSCSO_JOB_NAME } from "@/lib/integrations/fivem/ranks";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mailAddressForProfile } from "@/lib/mail/address";
 
 export const dynamic = "force-dynamic";
 
@@ -11,26 +12,6 @@ function cleanString(value: unknown, maxLength: number) {
 
 function noStore(payload: unknown, status = 200) {
   return NextResponse.json(payload, { status, headers: { "Cache-Control": "no-store" } });
-}
-
-function normalizeMailboxPart(value: string) {
-  return value
-    .normalize("NFKD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9]/g, "");
-}
-
-function generatedEmail(displayName: string, rank: string) {
-  if (rank === "Sheriff") return "sheriff@lscso.gov";
-  if (rank === "Undersheriff") return "undersheriff@lscso.gov";
-
-  const parts = displayName.trim().split(/\s+/).filter(Boolean);
-  if (!parts.length) return null;
-  const first = normalizeMailboxPart(parts[0]);
-  const last = normalizeMailboxPart(parts[parts.length - 1]);
-  if (!first || !last) return null;
-  return `${first[0]}.${last}@lscso.gov`;
 }
 
 async function verifyCaller(request: Request, body: Record<string, unknown>) {
@@ -94,7 +75,7 @@ export async function POST(request: Request) {
     const [{ data: profiles, error: profileError }, { data: links, error: linkError }] = await Promise.all([
       admin
         .from("personnel_profiles")
-        .select("id,personnel_id,display_name,rank,call_sign,division,status,access_tier")
+        .select("id,personnel_id,username,display_name,rank,call_sign,division,status,access_tier")
         .in("status", ["Active", "Acting", "Reserve"])
         .order("display_name"),
       admin
@@ -121,7 +102,7 @@ export async function POST(request: Request) {
         division: profile.division,
         status: profile.status,
         accessTier: profile.access_tier,
-        email: generatedEmail(profile.display_name, profile.rank),
+        email: mailAddressForProfile(profile),
         citizenId: link?.citizen_id ?? null,
         lastSeenAt: link?.last_seen_at ?? null,
       };
