@@ -1,7 +1,7 @@
 import { checked, fail, mobileContext, MobileError, reply, text, uuid } from "@/lib/integrations/fivem/mobile";
 
 export const dynamic = "force-dynamic";
-const guardianFields = "id,guardian_number,subject_profile_id,author_profile_id,record_type,status,title,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,follow_up_due_at,points_assessed,acknowledged_at,employee_response,created_at,updated_at";
+const guardianFields = "id,guardian_number,reference_number,subject_profile_id,author_profile_id,record_type,status,title,incident_at,location,policy_reference,observed_behavior,expected_standard,action_taken,follow_up_plan,follow_up_due_at,points_assessed,acknowledged_at,employee_response,created_at,updated_at";
 const kinds = ["Feedback", "Written Warning", "Write-Up", "Commendation"];
 function date(value: unknown, required = false) {
   const s = text(value, 40);
@@ -31,9 +31,12 @@ export async function POST(request: Request) {
         db.from("command_orders").select("id,order_number,title,body,target_audience,acknowledgment_required,effective_at,status").eq("status", "Active").order("order_number", { ascending: false }).limit(100),
         db.from("command_order_acknowledgments").select("command_order_id,acknowledged_at").eq("profile_id", profile.id),
         db.from("organizational_units").select("id,name").eq("active", true).eq("unit_type", "Division").order("name"),
+        db.from("personnel_unit_assignments").select("id,assignment_type,starts_at,ends_at,notes,organizational_units(name,unit_type)").eq("profile_id", profile.id).order("starts_at", { ascending: false }),
+        db.from("division_assignments").select("id,division,assignment_type,effective_at,ends_at,notes,created_at").eq("profile_id", profile.id).order("effective_at", { ascending: false }),
+        db.from("personnel_awards").select("id,award_name,citation,awarded_on,image_asset_path,created_at").eq("profile_id", profile.id).order("awarded_on", { ascending: false }),
       ]);
-      const [roster, guardians, purview, notifications, certifications, training, requests, documents, announcements, points, leave, orders, orderAcknowledgments, divisions] = results.map(checked);
-      return reply({ ok: true, snapshot: { profile, roster, guardians, purview, notifications, certifications, training, requests, documents, announcements, points, leave, orders, orderAcknowledgments, divisions, syncedAt: new Date().toISOString() } });
+      const [roster, guardians, purview, notifications, certifications, training, requests, documents, announcements, points, leave, orders, orderAcknowledgments, divisions, assignments, assignmentHistory, awards] = results.map(checked);
+      return reply({ ok: true, snapshot: { profile, roster, guardians, purview, notifications, certifications, training, requests, documents, announcements, points, leave, orders, orderAcknowledgments, divisions, assignments, assignmentHistory, awards, syncedAt: new Date().toISOString() } });
     }
     if (action === "guardian_save") {
       const recordType = text(body.recordType, 40), id = uuid(body.id), subjectId = uuid(body.subjectId);
@@ -44,14 +47,14 @@ export async function POST(request: Request) {
       if (subjectId === profile.id || !purview.some(row => row.profile_id === subjectId)) throw new MobileError("This member is outside your supervisory purview.", 403);
       const points = recordType === "Commendation" ? 0 : Number(body.points ?? 0);
       if (!Number.isInteger(points) || points < 0 || points > 10) throw new MobileError("Points must be between 0 and 10.");
-      const requiresReview = ["Written Warning", "Write-Up"].includes(recordType);
+      const requiresReview = recordType === "Write-Up";
       const status = body.draft === true ? "Draft" : requiresReview ? "Pending Approval" : "Awaiting Acknowledgment";
       const payload = { subject_profile_id: subjectId, record_type: recordType, status, title,
         incident_at: date(body.incidentAt, true), location: text(body.location, 240), policy_reference: text(body.policyReference, 1000) || null,
         observed_behavior: observed, expected_standard: text(body.expectedStandard, 10000), action_taken: text(body.actionTaken, 10000),
         follow_up_plan: text(body.followUpPlan, 4000), follow_up_due_at: date(body.followUpDueAt), points_assessed: points,
         submitted_at: status === "Draft" ? null : new Date().toISOString(), issued_at: status === "Awaiting Acknowledgment" ? new Date().toISOString() : null,
-        structured_fields: { source: "LSCSO Phone" } };
+        structured_fields: { source: "AEGIS Tablet" } };
       const prior = checked<any>(await db.from("guardian_records").select("id,author_profile_id,status,guardian_number").eq("id", id).maybeSingle());
       if (prior) {
         if (prior.author_profile_id !== profile.id) throw new MobileError("Only the author can edit this draft.", 403);
