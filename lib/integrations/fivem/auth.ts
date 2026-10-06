@@ -20,6 +20,7 @@ const AEGIS_TABLET_ALLOWED_PATHS = new Set([
   "/api/integrations/fivem/myhr",
   "/api/integrations/fivem/guardian",
   "/api/integrations/fivem/directory",
+  "/api/integrations/fivem/mail",
   "/api/integrations/fivem/mobile/session",
   "/api/integrations/fivem/mobile/data",
   "/api/integrations/fivem/mobile/sync",
