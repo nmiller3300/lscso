@@ -40,7 +40,7 @@ export async function POST(request: Request) {
     }
     if (action === "guardian_save") {
       const recordType = text(body.recordType, 40), id = uuid(body.id), subjectId = uuid(body.subjectId);
-      if (!kinds.includes(recordType)) throw new MobileError("Choose a Guardian type.");
+      if (!kinds.includes(recordType)) throw new MobileError("Choose a Guardian type.");\n      if (recordType === "Commendation" && !["Executive", "Command"].includes(profile.access_tier)) throw new MobileError("Commendations may only be authored by Command staff.", 403);
       const title = text(body.title, 160), observed = text(body.observedBehavior, 10000);
       if (title.length < 4 || observed.length < 10) throw new MobileError("Add a title and a complete account of the incident.");
       const purview: any[] = checked(await db.rpc("get_personnel_in_my_purview")) ?? [];
