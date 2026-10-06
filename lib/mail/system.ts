@@ -56,7 +56,7 @@ export async function sendSystemMail(request: SystemMailRequest) {
       .not("username", "is", null);
     if (profilesError) throw profilesError;
     for (const profile of profiles || []) {
-      if (!recipients.has(profile.id)) recipients.set(profile.id, { profileId: profile.id, address: profileAddress(profile.username), deliveredVia: group.address });
+      if (!recipients.has(profile.id)) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile), deliveredVia: group.address });
     }
   }
 
