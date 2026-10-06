@@ -29,7 +29,7 @@ export async function sendSystemMail(request: SystemMailRequest) {
       .in("status", ["Active", "Acting"])
       .not("username", "is", null);
     if (error) throw error;
-    for (const profile of data || []) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile) });
+    for (const profile of data || []) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile)! });
   }
 
   const groups = [...new Set((request.toGroupAddresses || []).map((value) => value.trim().toLowerCase()).filter(Boolean))].slice(0, 50);
@@ -56,7 +56,7 @@ export async function sendSystemMail(request: SystemMailRequest) {
       .not("username", "is", null);
     if (profilesError) throw profilesError;
     for (const profile of profiles || []) {
-      if (!recipients.has(profile.id)) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile), deliveredVia: group.address });
+      if (!recipients.has(profile.id)) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile)!, deliveredVia: group.address });
     }
   }
 
