@@ -1,11 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mailAddressForProfile } from "@/lib/mail/address";
 
 const DOMAIN = "lscso.gov";
 export const LSCSO_NOREPLY_ADDRESS = `noreply@${DOMAIN}`;
-
-function profileAddress(username: string) {
-  return `${username.trim().toLowerCase()}@${DOMAIN}`;
-}
 
 export type SystemMailRequest = {
   subject: string;
@@ -27,12 +24,12 @@ export async function sendSystemMail(request: SystemMailRequest) {
   const directIds = [...new Set((request.toProfileIds || []).filter(Boolean))].slice(0, 250);
   if (directIds.length) {
     const { data, error } = await admin.from("personnel_profiles")
-      .select("id,username,status")
+      .select("id,username,display_name,rank,status")
       .in("id", directIds)
       .in("status", ["Active", "Acting"])
       .not("username", "is", null);
     if (error) throw error;
-    for (const profile of data || []) recipients.set(profile.id, { profileId: profile.id, address: profileAddress(profile.username) });
+    for (const profile of data || []) recipients.set(profile.id, { profileId: profile.id, address: mailAddressForProfile(profile) });
   }
 
   const groups = [...new Set((request.toGroupAddresses || []).map((value) => value.trim().toLowerCase()).filter(Boolean))].slice(0, 50);
@@ -53,7 +50,7 @@ export async function sendSystemMail(request: SystemMailRequest) {
     if (!ids.length) continue;
 
     const { data: profiles, error: profilesError } = await admin.from("personnel_profiles")
-      .select("id,username,status")
+      .select("id,username,display_name,rank,status")
       .in("id", ids)
       .in("status", ["Active", "Acting"])
       .not("username", "is", null);
