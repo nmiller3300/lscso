@@ -187,7 +187,7 @@ export function FiveMConnectionPanel({
         </div>
       ) : (
         <p className="fivem-connect-note">
-          Generate a one-time code when you are ready to connect. You can also sign in through the LSCSO phone app and choose Link this character.
+          Generate a one-time code when you are ready to connect. Then open AEGIS → MyInfo and enter the code, or use /fivemlink in-game.
         </p>
       )}
 
