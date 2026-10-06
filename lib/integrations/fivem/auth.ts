@@ -12,6 +12,15 @@ const AEGIS_MOBILE_ALLOWED_PATHS = new Set([
   "/api/integrations/fivem/mobile/pairing",
 ]);
 
+// Dedicated server-only token for the AEGIS Personnel tablet bridge. The plaintext
+// token lives only in the FiveM server resource; the website stores only this hash.
+const AEGIS_TABLET_TOKEN_SHA256 = "52b116f186eb327dc5d897040927d6218b6e01a9eb79be380ca6c65fc8db9897";
+const AEGIS_TABLET_ALLOWED_PATHS = new Set([
+  "/api/integrations/fivem/mobile/session",
+  "/api/integrations/fivem/mobile/data",
+  "/api/integrations/fivem/mobile/sync",
+]);
+
 function constantTimeEqual(left: string, right: string) {
   const leftBuffer = Buffer.from(left, "utf8");
   const rightBuffer = Buffer.from(right, "utf8");
@@ -44,9 +53,21 @@ export function authorizeFiveMIntegration(request: Request): FiveMIntegrationAut
 
   const pathname = new URL(request.url).pathname;
   const mobileHeader = request.headers.get("x-aegis-lscso-mobile") === "1";
-  const mobileTokenMatches = constantTimeEqual(sha256(supplied), AEGIS_MOBILE_TOKEN_SHA256);
+  const suppliedHash = sha256(supplied);
 
-  if (mobileHeader && AEGIS_MOBILE_ALLOWED_PATHS.has(pathname) && mobileTokenMatches) {
+  if (
+    mobileHeader &&
+    AEGIS_MOBILE_ALLOWED_PATHS.has(pathname) &&
+    constantTimeEqual(suppliedHash, AEGIS_MOBILE_TOKEN_SHA256)
+  ) {
+    return { ok: true };
+  }
+
+  if (
+    mobileHeader &&
+    AEGIS_TABLET_ALLOWED_PATHS.has(pathname) &&
+    constantTimeEqual(suppliedHash, AEGIS_TABLET_TOKEN_SHA256)
+  ) {
     return { ok: true };
   }
 
