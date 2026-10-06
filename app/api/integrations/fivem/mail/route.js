@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { authorizeFiveMIntegration } from "@/lib/integrations/fivem/auth";
 import { isLscsoGrade, LSCSO_JOB_NAME } from "@/lib/integrations/fivem/ranks";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { mailAddressForProfile } from "@/lib/mail/address";
 
 export const dynamic = "force-dynamic";
 
@@ -16,10 +17,6 @@ function cleanString(value, maxLength) {
 function cleanAddress(value) {
   const address = cleanString(value, 96).toLowerCase();
   return /^[a-z0-9][a-z0-9._-]{1,62}@lscso\.gov$/.test(address) ? address : "";
-}
-
-function personalAddress(username) {
-  return `${String(username || "").trim().toLowerCase()}@${MAIL_DOMAIN}`;
 }
 
 function parseAddressList(value, max = 30) {
@@ -91,7 +88,7 @@ async function getDirectory(admin) {
     people: (profiles || []).map((p) => ({
       id: p.id,
       username: p.username,
-      email: personalAddress(p.username),
+      email: mailAddressForProfile(p),
       displayName: p.display_name,
       rank: p.rank,
       callSign: p.call_sign,
@@ -157,13 +154,13 @@ async function loadMailbox(admin, profile) {
     account: {
       profileId: profile.id,
       username: profile.username,
-      email: personalAddress(profile.username),
+      email: mailAddressForProfile(profile),
       displayName: profile.display_name,
       rank: profile.rank,
       callSign: profile.call_sign,
       personnelId: profile.personnel_id,
       canManageMail: isMailAdmin(profile),
-      sendAs: [{ address: personalAddress(profile.username), displayName: profile.display_name, type: "personal" }, ...managedSendAs],
+      sendAs: [{ address: mailAddressForProfile(profile), displayName: profile.display_name, type: "personal" }, ...managedSendAs],
     },
     unread,
     inbox,
@@ -190,13 +187,17 @@ async function resolveRecipients(admin, profile, addresses, type) {
   const recipients = [];
   for (const address of addresses) {
     const username = address.slice(0, -(`@${MAIL_DOMAIN}`).length);
-    const { data: person, error: personError } = await admin.from("personnel_profiles")
-      .select("id,username,status")
-      .ilike("username", username)
-      .in("status", ["Active", "Acting"])
-      .maybeSingle();
+    let personQuery = admin.from("personnel_profiles")
+      .select("id,username,display_name,rank,status")
+      .in("status", ["Active", "Acting"]);
+
+    if (address === `sheriff@${MAIL_DOMAIN}`) personQuery = personQuery.eq("rank", "Sheriff");
+    else if (address === `undersheriff@${MAIL_DOMAIN}`) personQuery = personQuery.eq("rank", "Undersheriff");
+    else personQuery = personQuery.ilike("username", username);
+
+    const { data: person, error: personError } = await personQuery.maybeSingle();
     if (personError) throw personError;
-    if (person?.username && personalAddress(person.username) === address) {
+    if (person?.username && mailAddressForProfile(person) === address) {
       recipients.push({ profileId: person.id, address, type });
       continue;
     }
@@ -218,7 +219,7 @@ async function resolveRecipients(admin, profile, addresses, type) {
 
     const memberIds = [...new Set(members.map((row) => row.profile_id))];
     const { data: memberProfiles, error: memberProfilesError } = await admin.from("personnel_profiles")
-      .select("id,username,status")
+      .select("id,username,display_name,rank,status")
       .in("id", memberIds)
       .in("status", ["Active", "Acting"])
       .not("username", "is", null);
@@ -226,7 +227,7 @@ async function resolveRecipients(admin, profile, addresses, type) {
     for (const memberProfile of memberProfiles || []) {
       recipients.push({
         profileId: memberProfile.id,
-        address: personalAddress(memberProfile.username),
+        address: mailAddressForProfile(memberProfile),
         type: "group",
         deliveredVia: address,
       });
@@ -234,9 +235,8 @@ async function resolveRecipients(admin, profile, addresses, type) {
   }
   return recipients;
 }
-
 async function resolveFromAddress(admin, profile, requested) {
-  const personal = personalAddress(profile.username);
+  const personal = mailAddressForProfile(profile);
   if (!requested || requested === personal) return { address: personal, name: profile.display_name };
   if (requested === SYSTEM_ADDRESS) throw new Error("noreply@lscso.gov is reserved for trusted system automation.");
 
