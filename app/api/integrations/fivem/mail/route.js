@@ -108,9 +108,9 @@ async function getGroupMembership(admin) {
 }
 
 async function loadMailbox(admin, profile) {
-  const [{ data: deliveries, error: deliveryError }, { data: sentRows, error: sentError }, directory, memberships] = await Promise.all([
+  const [{ data: deliveries, error: deliveryError }, { data: sentRows, error: sentError }, { data: drafts, error: draftError }, directory, memberships] = await Promise.all([
     admin.from("lscso_mail_deliveries")
-      .select("id,message_id,recipient_address,delivery_type,delivered_via,folder,is_read,read_at,created_at")
+      .select("id,message_id,recipient_address,delivery_type,delivered_via,folder,is_read,is_starred,read_at,created_at")
       .eq("recipient_profile_id", profile.id)
       .order("created_at", { ascending: false })
       .limit(150),
@@ -119,11 +119,17 @@ async function loadMailbox(admin, profile) {
       .eq("sender_profile_id", profile.id)
       .order("sent_at", { ascending: false })
       .limit(100),
+    admin.from("lscso_mail_drafts")
+      .select("id,from_address,to_addresses,cc_addresses,bcc_addresses,subject,body,reply_to_message_id,created_at,updated_at")
+      .eq("owner_profile_id", profile.id)
+      .order("updated_at", { ascending: false })
+      .limit(50),
     getDirectory(admin),
     getGroupMembership(admin),
   ]);
   if (deliveryError) throw deliveryError;
   if (sentError) throw sentError;
+  if (draftError) throw draftError;
 
   const messageIds = [...new Set((deliveries || []).map((d) => d.message_id))];
   let messages = [];
@@ -165,6 +171,7 @@ async function loadMailbox(admin, profile) {
     unread,
     inbox,
     sent: sentRows || [],
+    drafts: drafts || [],
     directory,
     groups: [...groupMap.values()],
     systemAddress: SYSTEM_ADDRESS,
@@ -342,7 +349,72 @@ export async function POST(request) {
 
     if (action === "send") {
       const messageId = await sendMessage(admin, profile, body);
+      const draftId = cleanString(body.draftId, 80);
+      if (draftId) {
+        const { error: draftDeleteError } = await admin.from("lscso_mail_drafts").delete()
+          .eq("id", draftId).eq("owner_profile_id", profile.id);
+        if (draftDeleteError) throw draftDeleteError;
+      }
       return NextResponse.json({ ok: true, messageId, mail: await loadMailbox(admin, profile) }, { headers: { "Cache-Control": "no-store" } });
+    }
+
+    if (action === "save_draft") {
+      const draftId = cleanString(body.draftId, 80);
+      const fromAddress = cleanAddress(body.from) || mailAddressForProfile(profile);
+      const payload = {
+        owner_profile_id: profile.id,
+        from_address: fromAddress,
+        to_addresses: parseAddressList(body.to),
+        cc_addresses: parseAddressList(body.cc, 20),
+        bcc_addresses: parseAddressList(body.bcc, 20),
+        subject: cleanString(body.subject, 200),
+        body: typeof body.body === "string" ? body.body.slice(0, 20000) : "",
+        reply_to_message_id: cleanString(body.replyToMessageId, 80) || null,
+        updated_at: new Date().toISOString(),
+      };
+      let saved;
+      if (draftId) {
+        const { data, error } = await admin.from("lscso_mail_drafts").update(payload)
+          .eq("id", draftId).eq("owner_profile_id", profile.id)
+          .select("id").maybeSingle();
+        if (error) throw error;
+        saved = data;
+      } else {
+        const { data, error } = await admin.from("lscso_mail_drafts").insert(payload).select("id").single();
+        if (error) throw error;
+        saved = data;
+      }
+      return NextResponse.json({ ok: true, draftId: saved?.id || draftId || null, mail: await loadMailbox(admin, profile) }, { headers: { "Cache-Control": "no-store" } });
+    }
+
+    if (action === "delete_draft") {
+      const draftId = cleanString(body.draftId, 80);
+      if (!draftId) throw new Error("Draft ID is required.");
+      const { error } = await admin.from("lscso_mail_drafts").delete().eq("id", draftId).eq("owner_profile_id", profile.id);
+      if (error) throw error;
+      return NextResponse.json({ ok: true, mail: await loadMailbox(admin, profile) }, { headers: { "Cache-Control": "no-store" } });
+    }
+
+    if (action === "toggle_star") {
+      const deliveryId = cleanString(body.deliveryId, 80);
+      if (!deliveryId) throw new Error("Delivery ID is required.");
+      const { data: delivery, error: readError } = await admin.from("lscso_mail_deliveries")
+        .select("is_starred").eq("id", deliveryId).eq("recipient_profile_id", profile.id).maybeSingle();
+      if (readError) throw readError;
+      if (!delivery) throw new Error("Message delivery not found.");
+      const { error } = await admin.from("lscso_mail_deliveries").update({ is_starred: !delivery.is_starred })
+        .eq("id", deliveryId).eq("recipient_profile_id", profile.id);
+      if (error) throw error;
+      return NextResponse.json({ ok: true, mail: await loadMailbox(admin, profile) }, { headers: { "Cache-Control": "no-store" } });
+    }
+
+    if (action === "mark_unread") {
+      const deliveryId = cleanString(body.deliveryId, 80);
+      if (!deliveryId) throw new Error("Delivery ID is required.");
+      const { error } = await admin.from("lscso_mail_deliveries").update({ is_read: false, read_at: null })
+        .eq("id", deliveryId).eq("recipient_profile_id", profile.id);
+      if (error) throw error;
+      return NextResponse.json({ ok: true, mail: await loadMailbox(admin, profile) }, { headers: { "Cache-Control": "no-store" } });
     }
 
     if (action === "mark_read") {
