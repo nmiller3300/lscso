@@ -76,9 +76,21 @@ function constantTimeHexEqual(left, right) {
 async function authorizeRequest(request) {
   const mobileHeader = request.headers.get("x-aegis-lscso-mobile") === "1";
   if (!mobileHeader) return false;
-  const authorization = request.headers.get("authorization") || "";
-  const match = authorization.match(/^Bearer\s+(.+)$/i);
-  const token = match?.[1]?.trim() || "";
+
+  // Do not require the custom AEGIS token in Authorization. Supabase's gateway
+  // interprets Authorization as a Supabase JWT/API key before the function runs
+  // and rejects non-Supabase bearer tokens with HTTP 403.
+  const directToken = (request.headers.get("x-aegis-integration-token") || "").trim();
+  let token = directToken;
+
+  // Backward compatibility for environments that pass a valid Supabase
+  // Authorization header and put the AEGIS token there after the gateway.
+  if (!token) {
+    const authorization = request.headers.get("authorization") || "";
+    const match = authorization.match(/^Bearer\s+(.+)$/i);
+    token = match?.[1]?.trim() || "";
+  }
+
   if (!token) return false;
   const digest = await sha256Hex(token);
   return constantTimeHexEqual(digest, MOBILE_TOKEN_SHA256) || constantTimeHexEqual(digest, TABLET_TOKEN_SHA256);
