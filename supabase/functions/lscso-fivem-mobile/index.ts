@@ -73,22 +73,15 @@ function constantTimeHexEqual(left, right) {
   return diff === 0;
 }
 
-async function authorizeRequest(request) {
-  const mobileHeader = request.headers.get("x-aegis-lscso-mobile") === "1";
-  if (!mobileHeader) return false;
+async function authorizeRequest(request, body) {
+  // Primary transport: dedicated server-only header.
+  let token = (request.headers.get("x-aegis-integration-token") || "").trim();
 
-  // Do not require the custom AEGIS token in Authorization. Supabase's gateway
-  // interprets Authorization as a Supabase JWT/API key before the function runs
-  // and rejects non-Supabase bearer tokens with HTTP 403.
-  const directToken = (request.headers.get("x-aegis-integration-token") || "").trim();
-  let token = directToken;
-
-  // Backward compatibility for environments that pass a valid Supabase
-  // Authorization header and put the AEGIS token there after the gateway.
-  if (!token) {
-    const authorization = request.headers.get("authorization") || "";
-    const match = authorization.match(/^Bearer\s+(.+)$/i);
-    token = match?.[1]?.trim() || "";
+  // FiveM/host proxies can strip custom headers. The same server-only secret is
+  // therefore also accepted from the JSON body over HTTPS. It is never exposed
+  // to NUI/client code.
+  if (!token && body && typeof body === "object") {
+    token = cleanString(body.__integrationToken, 220);
   }
 
   if (!token) return false;
@@ -514,11 +507,11 @@ async function handleGuardian(body) {
 }
 
 Deno.serve(async (request) => {
-  if (request.method === "GET") return jsonResponse({ ok: true, service: "lscso-fivem-mobile", version: "1.0.0", transport: "supabase-edge" });
+  if (request.method === "GET") return jsonResponse({ ok: true, service: "lscso-fivem-mobile", version: "1.0.2", transport: "supabase-edge" });
   if (request.method !== "POST") return jsonResponse({ ok: false, error: "Method not allowed." }, 405);
-  if (!(await authorizeRequest(request))) return jsonResponse({ ok: false, code: "unauthorized", error: "Unauthorized." }, 401);
   const body = await request.json().catch(() => null);
   if (!body || typeof body !== "object") return jsonResponse({ ok: false, code: "invalid_request", error: "A JSON request body is required." }, 400);
+  if (!(await authorizeRequest(request, body))) return jsonResponse({ ok: false, code: "unauthorized", error: "AEGIS server authentication failed." }, 401);
   const route = cleanString(body.__route, 120);
   try {
     if (route === "/api/integrations/fivem/mobile/pairing" || route === "pairingCreate") return await handlePairingCreate(body);
