@@ -11,9 +11,11 @@ export const LSCSO_GRADES = {
   7: "Lieutenant",
   8: "1st Lieutenant",
   9: "Captain",
-  10: "Major",
-  11: "Undersheriff",
-  12: "Sheriff",
+  10: "DPT. Associate",
+  11: "DPT. Attourney",
+  12: "Major",
+  13: "Undersheriff",
+  14: "Sheriff",
 } as const;
 
 export type LscsoGrade = keyof typeof LSCSO_GRADES;
@@ -23,10 +25,11 @@ export type ComputerAccessBand =
   | "preliminary_supervisor"
   | "supervisor"
   | "command"
-  | "executive";
+  | "executive"
+  | "attorney";
 
 export function isLscsoGrade(value: unknown): value is LscsoGrade {
-  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 12;
+  return Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 14;
 }
 
 export function getLscsoRankForGrade(grade: number) {
@@ -34,7 +37,8 @@ export function getLscsoRankForGrade(grade: number) {
 }
 
 export function getComputerAccessBand(grade: LscsoGrade): ComputerAccessBand {
-  if (grade >= 11) return "executive";
+  if (grade >= 13) return "executive";
+  if (grade === 10 || grade === 11) return "attorney";
   if (grade >= 8) return "command";
   if (grade >= 6) return "supervisor";
   if (grade >= 5) return "preliminary_supervisor";
