@@ -16,6 +16,9 @@ const AEGIS_MOBILE_ALLOWED_PATHS = new Set([
 // token lives only in the FiveM server resource; the website stores only this hash.
 const AEGIS_TABLET_TOKEN_SHA256 = "52b116f186eb327dc5d897040927d6218b6e01a9eb79be380ca6c65fc8db9897";
 const AEGIS_TABLET_ALLOWED_PATHS = new Set([
+  "/api/integrations/fivem/pair",
+  "/api/integrations/fivem/myhr",
+  "/api/integrations/fivem/guardian",
   "/api/integrations/fivem/mobile/session",
   "/api/integrations/fivem/mobile/data",
   "/api/integrations/fivem/mobile/sync",
