@@ -7,11 +7,5 @@
     "deploymentEnabled": {
       "command-portal-v2-preview": false
     }
-  },
-  "crons": [
-    {
-      "path": "/api/system/jailbirds-cleanup",
-      "schedule": "0 * * * *"
-    }
-  ]
+  }
 }
