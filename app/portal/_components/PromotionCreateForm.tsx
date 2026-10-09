@@ -8,10 +8,10 @@ export type PromotionCandidate = { id:string; personnelId:string; displayName:st
 const ranks=["Recruit","Deputy","Deputy II","Deputy III","Master Deputy","Corporal","Sergeant","Lieutenant","1st Lieutenant","Captain","Major","Undersheriff","Sheriff"] as const;
 const rankLevel=(rank:string)=>ranks.indexOf(rank as (typeof ranks)[number]);
 
-export function PromotionCreateForm({actorRank,canInitiate,candidates}:{actorRank:string;canInitiate:boolean;candidates:PromotionCandidate[]}){
+export function PromotionCreateForm({actorRank,canInitiate,candidates,initialPersonnelId}:{actorRank:string;canInitiate:boolean;candidates:PromotionCandidate[];initialPersonnelId?:string}){
   const router=useRouter();
-  const [open,setOpen]=useState(false);
-  const [candidateId,setCandidateId]=useState(candidates[0]?.id??"");
+  const [open,setOpen]=useState(Boolean(initialPersonnelId && candidates.some((item)=>item.personnelId===initialPersonnelId)));
+  const [candidateId,setCandidateId]=useState(candidates.find((item)=>item.personnelId===initialPersonnelId)?.id??candidates[0]?.id??"");
   const [requestedRank,setRequestedRank]=useState("");
   const [reason,setReason]=useState("");
   const [pending,setPending]=useState(false);
