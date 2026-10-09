@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useMemo, useState, type FormEvent } from "react";
 import { invokePersonnelAdmin } from "@/lib/supabase/personnel-admin";
 import { PersonnelIdentityManager } from "./PersonnelIdentityManager";
@@ -92,7 +93,8 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
         </div>
         <div className="portal-control-actions">
           <button className="portal-button portal-button--primary" onClick={() => { setCallSignError(""); setCallSignNotice(""); setCallSignOpen(true); }} type="button">Assign / Change Call Sign</button>
-          <button className="portal-button" onClick={() => setRankOpen(true)} type="button">Promote / Change Rank</button>
+          <Link className="portal-button portal-button--primary" href="/portal/command/promotions">Promote Personnel</Link>
+          <button className="portal-button" onClick={() => setRankOpen(true)} type="button">Change Rank / Status</button>
           <button className="portal-button" onClick={() => setLoaOpen(true)} type="button">Record / End LOA</button>
         </div>
       </section>
@@ -143,7 +145,7 @@ export function RosterPersonnelControls({ members }: { members: MemberOption[] }
         <div className="portal-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.currentTarget === event.target) setRankOpen(false); }}>
           <section className="portal-modal" role="dialog" aria-modal="true" aria-labelledby="roster-rank-manager-title">
             <div className="portal-modal-heading">
-              <div><span>Roster personnel controls</span><h2 id="roster-rank-manager-title">Promote / Change Rank</h2></div>
+              <div><span>Roster personnel controls</span><h2 id="roster-rank-manager-title">Change Rank / Status</h2></div>
               <button onClick={() => setRankOpen(false)} type="button" aria-label="Close rank manager">×</button>
             </div>
             <label className="portal-call-sign-field">
