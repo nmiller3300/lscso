@@ -38,6 +38,7 @@ export function PersonnelRecordHeader({
         <div className="personnel-record-identity-actions">
           {status ? <span className="personnel-record-status">{status}</span> : null}
           {probationLabel ? <span className="personnel-record-status" title="15-day new-hire probation period">{probationLabel}</span> : null}
+          <Link href={`/portal/command/promotions?personnel=${encodeURIComponent(personnelId)}`}>Promotion Review</Link>
           <Link href="/portal/command/personnel">All personnel</Link>
         </div>
       </div>
