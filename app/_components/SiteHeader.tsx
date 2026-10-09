@@ -18,7 +18,6 @@ const mobilePrimaryNavigation = [
   { href: "/archives", label: "Historical Archives", detail: "Department history & released records" },
   { href: "/office-of-the-sheriff", label: "Office of the Sheriff", detail: "Executive leadership" },
   { href: "/open-records", label: "Open Records", detail: "Request public records & track releases" },
-  { href: "/jailbirds", label: "Jailbirds", detail: "Recent arrest bookings & public releases" },
 ];
 
 export function SiteHeader() {
@@ -117,7 +116,6 @@ export function SiteHeader() {
           </details>
 
           <Link href="/open-records">Open Records</Link>
-          <Link href="/jailbirds">Jailbirds</Link>
           <Link href="/join">Join LSCSO</Link>
           <Link href="/portal">Personnel Portal</Link>
         </nav>
