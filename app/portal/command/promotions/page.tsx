@@ -10,7 +10,8 @@ const WORKSPACE_TIERS=new Set(["Executive","Command","Supervisor","Preliminary"]
 const COMMAND_INITIATORS=new Set(["Sheriff","Undersheriff","Major","Captain"]);
 const FINAL_DECIDERS=new Set(["Sheriff","Undersheriff","Major"]);
 
-export default async function PromotionsPage(){
+export default async function PromotionsPage({ searchParams }: { searchParams: Promise<{ personnel?: string }> }){
+  const { personnel } = await searchParams;
   const profile=await getCurrentPortalProfile();
   if(!profile||!WORKSPACE_TIERS.has(profile.access_tier))redirect("/portal/my-office");
   const supabase=await createClient() as any;
@@ -64,7 +65,7 @@ export default async function PromotionsPage(){
   });
   const openCount=items.filter((item)=>["Submitted","Under Review"].includes(item.status)).length;
 
-  return <PortalShell active="promotions" eyebrow="Career Progression" title="Promotion Review" actions={<PromotionCreateForm actorRank={profile.rank} canInitiate={canInitiate} candidates={candidates}/>}>
+  return <PortalShell active="promotions" eyebrow="Career Progression" title="Promotion Review" actions={<PromotionCreateForm actorRank={profile.rank} canInitiate={canInitiate} candidates={candidates} initialPersonnelId={personnel}/>}>
     <section className="portal-metric-grid" style={{marginBottom:16}}><article className="portal-metric portal-metric--gold"><span>Open reviews</span><strong>{openCount}</strong><small>Active promotion cases</small></article><article className="portal-metric"><span>Self requested</span><strong>{items.filter((item)=>item.sourceType==="Self Request"&&["Submitted","Under Review"].includes(item.status)).length}</strong><small>Member initiated</small></article><article className="portal-metric"><span>Supervisor recommended</span><strong>{items.filter((item)=>item.sourceType==="Supervisor Recommendation"&&["Submitted","Under Review"].includes(item.status)).length}</strong><small>Supervisor initiated</small></article><article className="portal-metric"><span>Command initiated</span><strong>{items.filter((item)=>item.sourceType==="Command Initiated"&&["Submitted","Under Review"].includes(item.status)).length}</strong><small>No request required</small></article></section>
     <PromotionCaseList initialCases={items} canBegin={canInitiate} canDecide={canDecide}/>
   </PortalShell>;
