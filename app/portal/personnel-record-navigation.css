@@ -387,3 +387,17 @@
   inset: auto !important;
   transform: none !important;
 }
+
+/* The old UX overhaul makes the entire personnel header sticky at desktop widths.
+   That forces a tall navigation block over scrolling panels and Common Tasks.
+   Keep the entire personnel record in normal document flow instead. */
+@media (min-width: 861px) {
+  .personnel-record-shell {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: auto !important;
+  }
+}
