@@ -367,3 +367,23 @@
     transition: none !important;
   }
 }
+
+/* Keep the record's content panels beneath the complete navigation surface.
+ * Older portal layout rules use negative offsets on shared two-column panels. */
+.personnel-record-shell {
+  display: flow-root !important;
+  margin-bottom: 28px !important;
+}
+.personnel-record-shell ~ .personnel-record-two-column,
+.personnel-record-shell + .personnel-record-two-column {
+  position: relative !important;
+  inset: auto !important;
+  clear: both !important;
+  margin-top: 0 !important;
+  transform: none !important;
+}
+.personnel-record-shell ~ .personnel-record-two-column > .portal-panel {
+  position: relative !important;
+  inset: auto !important;
+  transform: none !important;
+}
