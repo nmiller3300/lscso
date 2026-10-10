@@ -15,9 +15,12 @@ type DeactivatedMember = {
   credentialsAssigned: boolean;
 };
 
-export function DeactivatedAccountManager({ members }: { members: DeactivatedMember[] }) {
+export function DeactivatedAccountManager({ members, initialPersonnelId }: { members: DeactivatedMember[]; initialPersonnelId?: string }) {
   const router = useRouter();
-  const [selectedId, setSelectedId] = useState(members[0]?.profileId ?? "");
+  const [selectedId, setSelectedId] = useState(() =>
+    members.find((member) => member.personnelId.toUpperCase() === initialPersonnelId?.toUpperCase())?.profileId
+    ?? members[0]?.profileId ?? "",
+  );
   const selected = members.find((member) => member.profileId === selectedId) ?? members[0];
   const [username, setUsername] = useState(selected?.username ?? "");
   const [password, setPassword] = useState("");
@@ -33,6 +36,17 @@ export function DeactivatedAccountManager({ members }: { members: DeactivatedMem
     setError("");
     setNotice("");
   }, [selected?.profileId, selected?.username]);
+
+  useEffect(() => {
+    if (!initialPersonnelId) return;
+    const target = members.find((member) => member.personnelId.toUpperCase() === initialPersonnelId.toUpperCase());
+    if (!target) return;
+    setSelectedId(target.profileId);
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById("deactivated-personnel")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [initialPersonnelId, members]);
 
   if (!members.length || !selected) return null;
 
@@ -89,7 +103,7 @@ export function DeactivatedAccountManager({ members }: { members: DeactivatedMem
   }
 
   return (
-    <section className="portal-panel" style={{ marginBottom: 16 }}>
+    <section id="deactivated-personnel" className="portal-panel" style={{ marginBottom: 16 }}>
       <div className="portal-panel-heading">
         <div><p>Executive account control</p><h2>Deactivated personnel</h2></div>
         <span>{members.length}</span>

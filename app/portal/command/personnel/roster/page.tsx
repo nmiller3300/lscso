@@ -14,7 +14,8 @@ const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"])
 const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff"]);
 const ACTIVE_TRAINING_STATUSES = new Set(["Not Started", "In Progress", "Needs Improvement"]);
 
-export default async function FullRosterPage() {
+export default async function FullRosterPage({ searchParams }: { searchParams: Promise<{ reactivate?: string }> }) {
+  const { reactivate } = await searchParams;
   const profile = await getCurrentPortalProfile();
   const attorney = profile?.access_tier === "Attorney" && profile.rank === "Department Attorney";
   if (!profile || (!["Executive", "Command"].includes(profile.access_tier) && !attorney)) {
@@ -194,7 +195,7 @@ export default async function FullRosterPage() {
       }
     >
       {!attorney && PERSONNEL_CHANGE_APPROVERS.has(profile.rank) ? <RosterPersonnelControls members={changeablePersonnel} /> : null}
-      {!attorney && EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} /> : null}
+      {!attorney && EXECUTIVE_REACTIVATORS.has(profile.rank) ? <DeactivatedAccountManager members={deactivatedPersonnel} initialPersonnelId={reactivate} /> : null}
 
       <section className="portal-panel" style={{ marginBottom: 16 }}>
         <div className="portal-panel-heading">
