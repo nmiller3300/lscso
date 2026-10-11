@@ -16,7 +16,7 @@ type PageProps = {
 export default async function AdministrationArchivePage({ searchParams }: PageProps) {
   const profile = await getCurrentPortalProfile();
   if (!profile) redirect("/portal/login");
-  if (profile.rank !== "Sheriff" && profile.rank !== "Undersheriff") redirect("/portal/command/administration");
+  if (!["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank)) redirect("/portal/command/administration");
 
   const params = await searchParams;
   const records = await loadArchiveRecords();

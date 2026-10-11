@@ -6,7 +6,7 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 export default async function RehireReinstatementPage() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Sheriff", "Undersheriff"].includes(profile.rank)) redirect("/portal/command/administration");
+  if (!profile || !["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank)) redirect("/portal/command/administration");
 
   const supabase = await createClient() as any;
   const { data, error } = await supabase.rpc("get_rehire_reinstatement_workspace");

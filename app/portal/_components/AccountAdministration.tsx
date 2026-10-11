@@ -24,11 +24,12 @@ type AccountAdministrationProps = {
 
 const STANDARD_CALL_SIGN = /^S-4[0-9]{2}$/;
 const TEST_CALL_SIGN = /^TA-[0-9]{1,3}$/;
-const ACCOUNT_SECURITY_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const ACCOUNT_SECURITY_RANKS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
 
 const ranks = [
   "Sheriff",
   "Undersheriff",
+  "Assistant Sheriff",
   "Major",
   "Captain",
   "1st Lieutenant",
@@ -73,7 +74,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [testAccount, setTestAccount] = useState(false);
-  const executive = profile.rank === "Sheriff" || profile.rank === "Undersheriff";
+  const executive = ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank);
   const canAssignCredentials = ACCOUNT_SECURITY_RANKS.has(profile.rank);
 
   const activeAccounts = useMemo(() => personnel.filter((member) => member.status !== "Deactivated"), [personnel]);
@@ -161,7 +162,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
     if (isTestAccount ? !TEST_CALL_SIGN.test(callSign) : !STANDARD_CALL_SIGN.test(callSign)) {
       return setError(isTestAccount ? "Test call sign must use TA-#, such as TA-1." : "Call sign must use S-4##, such as S-417.");
     }
-    if (!executive && (rank === "Sheriff" || rank === "Undersheriff")) return setError("Only Sheriff or Undersheriff may create an Executive account.");
+    if (!executive && ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(rank)) return setError("Executive Command authority is required to create an Executive account.");
     if (personnel.some((member) => member.username === username)) return setError(`@${username} is already assigned.`);
     if (activeAccounts.some((member) => member.callSign === callSign)) return setError(`${callSign} is currently assigned.`);
 
@@ -267,7 +268,7 @@ export function AccountAdministration({ personnel, divisionOptions }: AccountAdm
             <label>Username<input name="username" required autoComplete="off" placeholder="first.last" /></label>
             <label>Temporary password<input name="password" required autoComplete="new-password" minLength={PASSWORD_MIN_LENGTH} placeholder="Minimum 8 characters" type="password" /></label>
             <label>Operational call sign<input defaultValue={testAccount ? "TA-" : "S-4"} key={testAccount ? "test" : "standard"} maxLength={6} name="callSign" pattern={testAccount ? "TA-[0-9]{1,3}" : "S-4[0-9]{2}"} required placeholder={testAccount ? "TA-1" : "S-4##"} /></label>
-            <label>Rank<select defaultValue="Deputy" name="rank">{ranks.filter((rank) => executive || (rank !== "Sheriff" && rank !== "Undersheriff")).map((rank) => <option key={rank}>{rank}</option>)}</select></label>
+            <label>Rank<select defaultValue="Deputy" name="rank">{ranks.filter((rank) => executive || !["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(rank)).map((rank) => <option key={rank}>{rank}</option>)}</select></label>
             <label>Primary assignment<select defaultValue={divisionOptions.includes("Patrol Division") ? "Patrol Division" : divisionOptions[0]} name="division">{divisionOptions.map((division) => <option key={division}>{division}</option>)}</select></label>
           </div>
 

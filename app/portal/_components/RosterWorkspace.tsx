@@ -27,7 +27,7 @@ const accessOptions: Array<AccessTier | "All"> = [
 const rankAccess: Record<string, AccessTier> = {
   Sheriff: "Executive",
   Undersheriff: "Executive",
-  "Assistant Sheriff": "Command",
+  "Assistant Sheriff": "Executive",
   Major: "Command",
   Captain: "Command",
   "1st Lieutenant": "Command",
@@ -153,7 +153,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
     }
 
     if (rankAccess[rank] === "Executive" && !isExecutiveCaller) {
-      setFormError("Only Sheriff or Undersheriff may create an Executive account.");
+      setFormError("Only Executive Command may create an Executive account.");
       return;
     }
 

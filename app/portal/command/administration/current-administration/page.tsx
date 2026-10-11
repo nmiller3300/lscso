@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 export default async function CurrentAdministrationPage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) redirect("/portal/login");
-  if (!['Sheriff', 'Undersheriff'].includes(profile.rank)) redirect("/portal/command/administration");
+  if (!['Sheriff', 'Undersheriff', 'Assistant Sheriff'].includes(profile.rank)) redirect("/portal/command/administration");
 
   const { members, personnel } = await loadAdministrationWorkspace();
 

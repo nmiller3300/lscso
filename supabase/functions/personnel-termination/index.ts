@@ -42,8 +42,8 @@ Deno.serve(async (request) => {
     return json({ error: "Active command profile required" }, 403);
   }
 
-  const executiveAllowed = caller.access_tier === "Executive" && ["Sheriff", "Undersheriff"].includes(caller.rank);
-  if (!executiveAllowed) return json({ error: "Only Sheriff or Undersheriff may terminate personnel." }, 403);
+  const executiveAllowed = caller.access_tier === "Executive" && ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(caller.rank);
+  if (!executiveAllowed) return json({ error: "Only Executive Command may terminate personnel." }, 403);
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const profileId = typeof body?.profile_id === "string" ? body.profile_id : "";
@@ -62,6 +62,10 @@ Deno.serve(async (request) => {
   if (target.status === "Deactivated") return json({ error: "This personnel record is already separated." }, 409);
   if (target.rank === "Sheriff" && caller.rank !== "Sheriff") {
     return json({ error: "The Sheriff personnel record may only be administered by the Sheriff." }, 403);
+  }
+
+  if (caller.rank === "Assistant Sheriff" && ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(target.rank)) {
+    return json({ error: "The Assistant Sheriff cannot terminate equal or higher executive ranks." }, 403);
   }
 
   const authUserId = target.auth_user_id;

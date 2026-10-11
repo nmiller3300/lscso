@@ -24,12 +24,12 @@ export type PersonnelRecord = {
 export const rankAccess = [
   {
     tier: "Executive",
-    ranks: ["Sheriff", "Undersheriff"],
+    ranks: ["Sheriff", "Undersheriff", "Assistant Sheriff"],
     scope: "Department-wide executive authority.",
   },
   {
     tier: "Command",
-    ranks: ["Assistant Sheriff", "Major", "Captain"],
+    ranks: ["Major", "Captain"],
     scope: "Standing department-wide command authority; home assignment sets responsibility, not access boundaries.",
   },
   {

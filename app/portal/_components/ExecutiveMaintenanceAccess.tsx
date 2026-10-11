@@ -23,7 +23,7 @@ export function ExecutiveMaintenanceAccess() {
       const { data: profile } = await supabase.from("personnel_profiles").select("access_tier,status").eq("auth_user_id", data.user.id).maybeSingle();
       if (!profile || profile.access_tier !== "Executive" || !["Active", "Acting"].includes(profile.status)) {
         await supabase.auth.signOut({ scope: "local" });
-        throw new Error("Executive maintenance access is restricted to active Sheriff or Undersheriff accounts.");
+        throw new Error("Executive maintenance access is restricted to active Executive Command accounts.");
       }
       router.replace("/portal/command/administration/maintenance");
       router.refresh();

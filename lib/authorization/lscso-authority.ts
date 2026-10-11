@@ -36,7 +36,7 @@ export const rankLevel: Record<LscsoRank, number> = {
 export const rankTier: Record<LscsoRank, AuthorityTier> = {
   Sheriff: "Executive",
   Undersheriff: "Executive",
-  "Assistant Sheriff": "Command",
+  "Assistant Sheriff": "Executive",
   Major: "Command",
   Captain: "Command",
   "1st Lieutenant": "Command",

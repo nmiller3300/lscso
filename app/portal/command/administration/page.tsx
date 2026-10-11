@@ -4,15 +4,15 @@ import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
-const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
-const OPEN_RECORDS_CUSTODIANS = new Set(["Sheriff", "Undersheriff", "Major", "Captain", "1st Lieutenant"]);
+const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
+const OPEN_RECORDS_CUSTODIANS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain", "1st Lieutenant"]);
 type AdminTool = { href: string; code: string; eyebrow: string; title: string; description: string; badge?: string; group: "Personnel Administration" | "Department Governance" };
 
 export default async function AdministrationWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile || !["Executive", "Command"].includes(profile.access_tier)) redirect("/portal/command/supervision");
   const executive = profile.access_tier === "Executive";
-  const returnAuthority = ["Sheriff", "Undersheriff"].includes(profile.rank);
+  const returnAuthority = ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank);
   const openRecordsAuthority = OPEN_RECORDS_CUSTODIANS.has(profile.rank);
   const supabase = await createClient() as any;
   const { data: accessRows } = await supabase.rpc("get_my_roster_access");
@@ -23,11 +23,11 @@ export default async function AdministrationWorkspacePage() {
     ...(canManageAccounts ? [{ href: "/portal/command/administration/accounts", code: "AC", eyebrow: "Accounts & access", title: "Personnel Accounts", description: "Create department accounts, issue credentials, and manage account access.", group: "Personnel Administration" as const }] : []),
     ...(returnAuthority ? [{ href: "/portal/command/administration/rehire", code: "RR", eyebrow: "Former personnel", title: "Rehire & Reinstatement", description: "Review prior service and return separated personnel to the existing record.", badge: "Executive", group: "Personnel Administration" as const }] : []),
     { href: "/portal/command/service-records", code: "SR", eyebrow: "Personnel actions", title: "Service Records", description: "Record administrative personnel actions and preserve the official service history.", group: "Personnel Administration" },
-    ...(returnAuthority ? [{ href: "/portal/command/administration/current-administration", code: "CA", eyebrow: "Office of the Sheriff", title: "Current Administration", description: "Manage the public command administration, portraits, titles, biographies, visibility, and presentation order.", badge: "Sheriff / Undersheriff", group: "Department Governance" as const }] : []),
+    ...(returnAuthority ? [{ href: "/portal/command/administration/current-administration", code: "CA", eyebrow: "Office of the Sheriff", title: "Current Administration", description: "Manage the public command administration, portraits, titles, biographies, visibility, and presentation order.", badge: "Executive Command", group: "Department Governance" as const }] : []),
     ...(openRecordsAuthority ? [{ href: "/portal/command/administration/open-records", code: "OR", eyebrow: "Records custodian", title: "Open Records Requests", description: "First Lieutenant+ review, fee assessment, payment confirmation, legal review, file release, and statutory request history.", badge: "1st LT+", group: "Department Governance" as const }] : []),
     { href: "/portal/jailbirds", code: "JB", eyebrow: "Public booking releases", title: "Jailbirds", description: "Publish arrest booking photographs and release information to the public 72-hour Jailbirds board.", group: "Department Governance" },
     { href: "/portal/command/activity", code: "AU", eyebrow: "Audit & accountability", title: "Activity & Audit", description: "Review recorded portal, personnel, and administrative activity.", group: "Department Governance" },
-    ...(returnAuthority ? [{ href: "/portal/command/administration/archive", code: "HA", eyebrow: "Living history", title: "Historical Archive", description: "Build the active Miller–White archive and control which records are released into the public historical collection.", badge: "Sheriff / Undersheriff", group: "Department Governance" as const }] : []),
+    ...(returnAuthority ? [{ href: "/portal/command/administration/archive", code: "HA", eyebrow: "Living history", title: "Historical Archive", description: "Build the active Miller–White archive and control which records are released into the public historical collection.", badge: "Executive Command", group: "Department Governance" as const }] : []),
     ...(executive ? [
       { href: "/portal/command/administration/structure", code: "CS", eyebrow: "Organization", title: "Command Structure", description: "Manage units, assignments, authority, and the department command structure.", badge: "Executive", group: "Department Governance" as const },
       { href: "/portal/command/administration/changelog", code: "CL", eyebrow: "System history", title: "Lifetime Changelog", description: "Review the complete dated history of website and Personnel Portal additions, changes, fixes, removals, security work, and operations.", badge: "Executive", group: "Department Governance" as const },

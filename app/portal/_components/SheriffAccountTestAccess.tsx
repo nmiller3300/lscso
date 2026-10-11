@@ -39,7 +39,7 @@ function credentialEventLabel(value: string | null) {
 
 export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccount[] }) {
   const profile = usePortalProfile();
-  const isSheriff = profile.rank === "Sheriff";
+  const isSheriff = ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank);
   const [selectedProfileId, setSelectedProfileId] = useState("");
   const [activity, setActivity] = useState<SheriffCredentialActivity[]>([]);
   const [loadingActivity, setLoadingActivity] = useState(false);
@@ -120,8 +120,8 @@ export function SheriffAccountTestAccess({ accounts }: { accounts: TestableAccou
   return (
     <section className="portal-panel portal-sheriff-security">
       <div className="portal-panel-heading">
-        <div><p>Sheriff restricted</p><h2>Account Security & Testing</h2></div>
-        <span>Sheriff only</span>
+        <div><p>Executive Command</p><h2>Account Security & Testing</h2></div>
+        <span>Executive access</span>
       </div>
       <p className="portal-sheriff-security__intro">Test personnel access and review credential activity without exposing or resetting member passwords.</p>
 

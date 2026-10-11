@@ -55,11 +55,11 @@ Deno.serve(async (request) => {
 
   if (
     callerError || !caller ||
-    caller.rank !== "Sheriff" ||
+    !["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(caller.rank) ||
     caller.access_tier !== "Executive" ||
     !["Active", "Acting"].includes(caller.status)
   ) {
-    return json({ error: "Sheriff authorization required" }, 403);
+    return json({ error: "Executive Command authorization required" }, 403);
   }
 
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;

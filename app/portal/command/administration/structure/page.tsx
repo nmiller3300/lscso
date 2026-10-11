@@ -78,7 +78,7 @@ export default async function CommandStructurePage() {
           <section className="portal-panel">
             <div className="portal-panel-heading"><div><p>Standing authority</p><h2>Command boundary</h2></div></div>
             <div className="command-structure-rank-list">
-              <div><strong>Sheriff / Undersheriff</strong><span>Executive · department-wide</span></div>
+              <div><strong>Sheriff / Undersheriff / Assistant Sheriff</strong><span>Executive · department-wide</span></div>
               <div><strong>Major / Captain</strong><span>Command · department-wide operational reach</span></div>
               <div><strong>1st Lieutenant</strong><span>Command Staff · structured purview</span></div>
               <div><strong>Lieutenant / Sergeant / Corporal</strong><span>Scoped supervisory purview</span></div>

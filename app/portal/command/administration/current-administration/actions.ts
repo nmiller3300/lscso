@@ -13,7 +13,7 @@ function value(formData: FormData, key: string) {
 
 async function requireAdministrationAuthority() {
   const profile = await getCurrentPortalProfile();
-  if (!profile || !["Sheriff", "Undersheriff"].includes(profile.rank)) throw new Error("Not authorized to manage the current administration.");
+  if (!profile || !["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(profile.rank)) throw new Error("Not authorized to manage the current administration.");
   return profile;
 }
 

@@ -11,6 +11,7 @@ const corsHeaders = {
 const rankAccess: Record<string, string> = {
   Sheriff: "Executive",
   Undersheriff: "Executive",
+  "Assistant Sheriff": "Executive",
   Major: "Command",
   Captain: "Command",
   "1st Lieutenant": "Command",
@@ -22,12 +23,12 @@ const rankAccess: Record<string, string> = {
   "Deputy II": "Deputy",
   Deputy: "Deputy",
   Recruit: "Deputy",
-  "Department Attorney": "Attorney",
 };
 
 const rankRole: Record<string, string> = {
   Sheriff: "sheriff",
   Undersheriff: "undersheriff",
+  "Assistant Sheriff": "undersheriff",
   Major: "command",
   Captain: "command",
   "1st Lieutenant": "command",
@@ -39,12 +40,12 @@ const rankRole: Record<string, string> = {
   "Deputy II": "deputy",
   Deputy: "deputy",
   Recruit: "deputy",
-  "Department Attorney": "department_attorney",
 };
 
 const rankLevel: Record<string, number> = {
   Sheriff: 130,
   Undersheriff: 120,
+  "Assistant Sheriff": 115,
   Major: 110,
   Captain: 100,
   "1st Lieutenant": 90,
@@ -55,11 +56,10 @@ const rankLevel: Record<string, number> = {
   "Deputy III": 40,
   "Deputy II": 30,
   Deputy: 20,
-  "Department Attorney": 15,
   Recruit: 10,
 };
 
-const standingLeadershipRanks = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const standingLeadershipRanks = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
 
 function json(body: unknown, status = 200) {
   return Response.json(body, { status, headers: corsHeaders });
@@ -115,7 +115,7 @@ Deno.serve(async (request) => {
   const body = await request.json().catch(() => null) as Record<string, unknown> | null;
   const operation = body?.operation;
   const executiveAllowed = caller.access_tier === "Executive" &&
-    ["Sheriff", "Undersheriff"].includes(caller.rank);
+    ["Sheriff", "Undersheriff", "Assistant Sheriff"].includes(caller.rank);
   const standingPersonnelAdmin = standingLeadershipRanks.has(caller.rank);
 
   let personnelAdminDelegated = false;
@@ -145,6 +145,7 @@ Deno.serve(async (request) => {
     if (caller.rank === "Sheriff") return true;
     if (targetRank === "Sheriff") return false;
     if (caller.rank === "Undersheriff") return true;
+    if (caller.rank === "Assistant Sheriff") return (rankLevel[targetRank] ?? 999) < rankLevel["Assistant Sheriff"];
     if (caller.rank === "Major") return (rankLevel[targetRank] ?? 999) < rankLevel.Major;
     if (caller.rank === "Captain") return (rankLevel[targetRank] ?? 999) < rankLevel.Captain;
     if (personnelAdminDelegated || temporaryCommandDelegated) return !standingLeadershipRanks.has(targetRank);
@@ -154,6 +155,7 @@ Deno.serve(async (request) => {
   const canCreateRank = (targetRank: string) => {
     if (caller.rank === "Sheriff") return targetRank !== "Sheriff";
     if (caller.rank === "Undersheriff") return !["Sheriff", "Undersheriff"].includes(targetRank);
+    if (caller.rank === "Assistant Sheriff") return (rankLevel[targetRank] ?? 999) < rankLevel["Assistant Sheriff"];
     if (caller.rank === "Major") return (rankLevel[targetRank] ?? 999) < rankLevel.Major;
     if (caller.rank === "Captain") return (rankLevel[targetRank] ?? 999) < rankLevel.Captain;
     return false;
@@ -236,7 +238,7 @@ Deno.serve(async (request) => {
       return json({ error: "The Sheriff account may only be administered by the Sheriff." }, 403);
     }
     if (target.access_tier === "Executive" && !executiveAllowed) {
-      return json({ error: "Only Sheriff or Undersheriff may assign Executive credentials." }, 403);
+      return json({ error: "Only Executive Command may assign Executive credentials." }, 403);
     }
     if (target.auth_user_id) return json({ error: "Credentials are already assigned to this profile." }, 409);
 
@@ -289,21 +291,14 @@ Deno.serve(async (request) => {
     const rank = typeof body?.rank === "string" ? body.rank : "";
     const division = typeof body?.division === "string" ? body.division.trim() : "Unassigned";
     const isTestAccount = body?.is_test_account === true;
-    const isAttorney = rank === "Department Attorney";
-
-    if (isAttorney && isTestAccount) {
-      return json({ error: "Department Attorney is an official personnel role and cannot be created as a test account." }, 400);
-    }
 
     if (
       !validUsername(username) || !validPassword(password) || displayName.length < 2 ||
-      !validPersonnelId(personnelId, isTestAccount) || (!isAttorney && !validCallSign(callSign, isTestAccount)) || !rankAccess[rank]
+      !validPersonnelId(personnelId, isTestAccount) || !validCallSign(callSign, isTestAccount) || !rankAccess[rank]
     ) {
       return json({ error: isTestAccount
         ? "Test accounts require a TA-000 personnel ID and TA-# call sign."
-        : isAttorney
-          ? "Department Attorney accounts require an LS-### personnel ID and valid portal credentials. No call sign is assigned."
-          : "Personnel and credential fields are incomplete or invalid." }, 400);
+        : "Personnel and credential fields are incomplete or invalid." }, 400);
     }
     if (!canCreateRank(rank)) return json({ error: "You cannot create a personnel account at that rank." }, 403);
 
@@ -316,8 +311,8 @@ Deno.serve(async (request) => {
         rank,
         access_tier: rankAccess[rank],
         call_sign: null,
-        division: isAttorney ? "Department Attorney" : division,
-        supervisor_label: isAttorney ? "Office of the Sheriff" : "Pending command assignment",
+        division,
+        supervisor_label: "Pending command assignment",
         status: "Active",
         is_test_account: isTestAccount,
       })
@@ -341,7 +336,7 @@ Deno.serve(async (request) => {
         display_name: displayName,
         greeting_name: displayName,
         rank,
-        call_sign: isAttorney ? null : callSign,
+        call_sign: callSign,
         personnel_id: personnelId,
         must_change_password: true,
       },
@@ -362,53 +357,18 @@ Deno.serve(async (request) => {
       return json({ error: linkError.message }, 500);
     }
 
-    if (isAttorney) {
-      const { data: attorneyUnit } = await admin
-        .from("organizational_units")
-        .select("id")
-        .eq("name", "Department Attorney")
-        .eq("active", true)
-        .maybeSingle();
-      if (attorneyUnit?.id) {
-        await admin.from("personnel_unit_assignments").insert({
-          profile_id: profile.id,
-          organizational_unit_id: attorneyUnit.id,
-          assignment_type: "Primary",
-          starts_at: new Date().toISOString(),
-          notes: "Department Attorney appointment",
-          created_by: caller.id,
-        });
-      }
-      await admin.from("personnel_career_events").insert({
-        profile_id: profile.id,
-        event_type: "Appointment",
-        effective_at: new Date().toISOString(),
-        from_rank: null,
-        to_rank: "Department Attorney",
-        title: "Appointed as LSCSO Department Attorney",
-        notes: "Created through Personnel Accounts. Department Attorneys receive an LS employee number and no operational call sign.",
-        recorded_by: caller.id,
-      });
-    } else {
-      const { error: assignmentError } = await admin.rpc("admin_assign_call_sign", {
-        target_profile_id: profile.id,
-        new_call_sign: callSign,
-        actor_profile_id: caller.id,
-        assignment_reason: "Initial command assignment",
-      });
-      if (assignmentError) {
-        await admin.auth.admin.deleteUser(created.user.id, false);
-        await admin.from("personnel_profiles").delete().eq("id", profile.id);
-        return json({ error: assignmentError.message ?? "Personnel account could not be finalized." }, 500);
-      }
-    }
-
-    await writeAudit("PERSONNEL_ACCOUNT_CREATED", profile.id, {
-      username,
-      personnel_id: personnelId,
-      rank,
-      call_sign: isAttorney ? null : callSign,
+    const { error: assignmentError } = await admin.rpc("admin_assign_call_sign", {
+      target_profile_id: profile.id,
+      new_call_sign: callSign,
+      actor_profile_id: caller.id,
+      assignment_reason: "Initial command assignment",
     });
+    if (assignmentError) {
+      await admin.auth.admin.deleteUser(created.user.id, false);
+      await admin.from("personnel_profiles").delete().eq("id", profile.id);
+      return json({ error: assignmentError.message ?? "Personnel account could not be finalized." }, 500);
+    }
+    await writeAudit("PERSONNEL_ACCOUNT_CREATED", profile.id, { username, personnel_id: personnelId, rank });
     return json({ success: true, profile_id: profile.id, username });
   }
 
@@ -426,7 +386,7 @@ Deno.serve(async (request) => {
     return json({ error: "The Sheriff account may only be administered by the Sheriff." }, 403);
   }
   if (target.access_tier === "Executive" && !executiveAllowed) {
-    return json({ error: "Only Sheriff or Undersheriff may change an Executive account." }, 403);
+    return json({ error: "Only Executive Command may change an Executive account." }, 403);
   }
 
   if (operation === "reset_password") {
@@ -494,9 +454,6 @@ Deno.serve(async (request) => {
   }
 
   if (operation === "assign_call_sign") {
-    if (target.rank === "Department Attorney" || target.access_tier === "Attorney") {
-      return json({ error: "Department Attorneys use their LS employee number and do not receive operational call signs." }, 409);
-    }
     const callSign = typeof body?.call_sign === "string" ? body.call_sign.trim().toUpperCase() : "";
     const reason = auditReason(body?.reason);
     if (profileId === caller.id) return json({ error: "Personnel administrators cannot reassign their own call sign." }, 400);
@@ -530,7 +487,7 @@ Deno.serve(async (request) => {
 
   if (operation === "deactivate") {
     const reason = auditReason(body?.reason);
-    if (!executiveAllowed) return json({ error: "Only Sheriff or Undersheriff may deactivate an account." }, 403);
+    if (!executiveAllowed) return json({ error: "Only Executive Command may deactivate an account." }, 403);
     if (profileId === caller.id) return json({ error: "You cannot deactivate your own active account." }, 400);
     if (target.rank === "Sheriff" && caller.rank !== "Sheriff") {
       return json({ error: "The Sheriff account may only be administered by the Sheriff." }, 403);

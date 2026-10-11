@@ -11,7 +11,7 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
 const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major"]);
-const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff"]);
+const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff"]);
 const ACTIVE_TRAINING_STATUSES = new Set(["Not Started", "In Progress", "Needs Improvement"]);
 
 export default async function FullRosterPage({ searchParams }: { searchParams: Promise<{ reactivate?: string }> }) {
