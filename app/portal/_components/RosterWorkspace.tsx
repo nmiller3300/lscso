@@ -207,7 +207,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
       division,
       supervisor: rank === "Sheriff" ? "County Electorate" : "Pending command assignment",
       status: "Active",
-      certifications: 0,
+      assignments: 0,
       guardianOpen: 0,
       lastSession: "Never · New account",
       isTestAccount,
@@ -500,7 +500,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
               <div><span>Supervisor</span><strong>{selected.supervisor}</strong></div>
               <div><span>Last session</span><strong>{selected.lastSession}</strong></div>
               <div><span>Call-sign history</span><strong>{selected.callSignHistory?.length ? selected.callSignHistory.join(" · ") : "No prior assignments"}</strong></div>
-              <div><span>Certifications</span><strong>{selected.certifications} active</strong></div>
+              <div><span>Divisions & assignments</span><strong>{selected.assignments} active</strong></div>
               <div><span>Guardian follow-ups</span><strong>{selected.guardianOpen} open</strong></div>
               <div><span>Account type</span><strong>{selected.isTestAccount ? "Testing · Excluded from official reports" : "Department personnel"}</strong></div>
             </div>
@@ -563,7 +563,7 @@ export function RosterWorkspace({ personnel: initialPersonnel }: RosterWorkspace
                   <small className="portal-field-help">Type the final two digits. Released call signs may be recycled.</small>
                 </label>
                 <label>Rank<select defaultValue="Deputy" name="rank">{isExecutiveCaller ? <><option>Sheriff</option><option>Undersheriff</option></> : null}<option>Major</option><option>Captain</option><option>1st Lieutenant</option><option>Lieutenant</option><option>Sergeant</option><option>Corporal</option><option>Master Deputy</option><option>Deputy III</option><option>Deputy II</option><option>Deputy</option><option>Recruit</option></select></label>
-                <label>Primary division<select defaultValue="Patrol Division" name="division"><option>Office of the Sheriff</option><option>Field Operations</option><option>Patrol Division</option><option>Training & FTO</option><option>Internal Affairs</option><option>Academy</option></select></label>
+                <label>Primary division<select defaultValue="Patrol Division" name="division"><option>Office of the Sheriff</option><option>Aviation</option><option>Gang &amp; Narcotics</option><option>K-9 Division</option><option>Criminal Investigations Division</option><option>Marine Division</option><option>Court Services Division</option><option>Patrol Division</option><option>Internal Affairs</option><option>Academy</option></select></label>
               </div>
               <div className="portal-form-protection"><strong>Personnel ID is automatic.</strong><span>The system assigns the next available LS-### number when the account is created. Permanent personnel IDs are never manually tracked or recycled.</span></div>
               <div className="portal-form-protection"><strong>First sign-in protection is required.</strong><span>Every new or reset credential must be changed by the member after secure sign-in.</span></div>
