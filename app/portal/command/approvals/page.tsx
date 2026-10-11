@@ -16,7 +16,7 @@ export default async function ApprovalsPage() {
 
   const supabase = await createClient() as any;
   const fullCommandAccess = ["Executive", "Command"].includes(profile.access_tier);
-  const [{ data: profiles }, guardiansResult, requestsResult, leaveResult, certificationRequestsResult] = await Promise.all([
+  const [{ data: profiles }, guardiansResult, requestsResult, leaveResult] = await Promise.all([
     supabase.from("personnel_profiles").select("id,display_name"),
     fullCommandAccess
       ? supabase.from("guardian_records").select("id,guardian_number,record_type,status,subject_profile_id,author_profile_id,created_at,follow_up_due_at").eq("status", "Pending Approval").order("created_at", { ascending: false })
@@ -24,9 +24,6 @@ export default async function ApprovalsPage() {
     supabase.from("personnel_requests").select("id,request_number,request_type,details,requested_effective_at,status,requester_profile_id,created_at,subject,current_reviewer_profile_id,current_reviewer_label,routing_fallback,routing_stage,routing_label,requested_unit_id").in("status", ["Submitted", "In Review"]).order("created_at", { ascending: false }),
     fullCommandAccess
       ? supabase.from("leave_requests").select("id,request_number,profile_id,leave_type,starts_on,expected_return_on,notes,status,created_at").in("status", ["Submitted", "In Review"]).order("created_at", { ascending: false })
-      : Promise.resolve({ data: [] }),
-    fullCommandAccess
-      ? supabase.from("certifications").select("id,profile_id,name,status,notes,created_at").in("status", ["Requested", "Pending"]).order("created_at", { ascending: false })
       : Promise.resolve({ data: [] }),
   ]);
 
@@ -43,7 +40,6 @@ export default async function ApprovalsPage() {
     return Boolean(row.routing_fallback && ["Sheriff", "Undersheriff"].includes(profile.rank));
   });
   const leave = fullCommandAccess ? (leaveResult.data ?? []).filter((row: any) => allowedDecision(row.profile_id)) : [];
-  const certificationRequests = fullCommandAccess ? (certificationRequestsResult.data ?? []).filter((row: any) => allowedDecision(row.profile_id)) : [];
 
   const names = new Map((profiles ?? []).map((item: any) => [item.id, item.display_name]));
   const guardianItems: CommandApprovalItem[] = guardians.map((record: any) => ({
@@ -75,7 +71,7 @@ export default async function ApprovalsPage() {
 
   const leaveItems = leave.map((item: any) => ({ id: item.id, request_number: Number(item.request_number), display_name: names.get(item.profile_id) ?? "Personnel", leave_type: item.leave_type, starts_on: item.starts_on, expected_return_on: item.expected_return_on, notes: item.notes, status: item.status }));
   const scopeUnavailable = fullCommandAccess && !departmentAuthority && !purview?.structuredAuthorityAvailable;
-  const totalPending = requestItems.length + guardianItems.length + leaveItems.length + certificationRequests.length;
+  const totalPending = requestItems.length + guardianItems.length + leaveItems.length;
 
   return (
     <PortalShell
@@ -93,7 +89,6 @@ export default async function ApprovalsPage() {
           <Link className="portal-button portal-button--secondary" href="#personnel-requests">Personnel Requests · {requestItems.length}</Link>
           {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#leave-requests">LOA · {leaveItems.length}</Link> : null}
           {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#guardian-requests">Guardians · {guardianItems.length}</Link> : null}
-          {fullCommandAccess ? <Link className="portal-button portal-button--secondary" href="#certification-requests">Certifications · {certificationRequests.length}</Link> : null}
         </div>
       </section>
 
@@ -101,7 +96,6 @@ export default async function ApprovalsPage() {
         <article className="portal-metric portal-metric--neutral"><span>Personnel requests</span><strong>{String(requestItems.length).padStart(2, "0")}</strong><small>Routed directly to you</small></article>
         {fullCommandAccess ? <article className="portal-metric portal-metric--warning"><span>Leave requests</span><strong>{String(leaveItems.length).padStart(2, "0")}</strong><small>LOA decisions pending</small></article> : null}
         {fullCommandAccess ? <article className="portal-metric portal-metric--gold"><span>Guardian approvals</span><strong>{String(guardianItems.length).padStart(2, "0")}</strong><small>Awaiting review</small></article> : null}
-        {fullCommandAccess ? <article className="portal-metric portal-metric--neutral"><span>Certification requests</span><strong>{String(certificationRequests.length).padStart(2, "0")}</strong><small>Issue or deny</small></article> : null}
       </section>
 
       <section className="portal-panel" id="personnel-requests">
@@ -119,14 +113,6 @@ export default async function ApprovalsPage() {
           <section className="portal-panel" id="guardian-requests">
             <div className="portal-panel-heading"><div><p>Accountability</p><h2>Guardian approvals</h2></div><span>{guardianItems.length} pending</span></div>
             <CommandApprovalQueue initialItems={guardianItems} />
-          </section>
-
-          <section className="portal-panel" id="certification-requests">
-            <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification requests</h2></div><Link href="/portal/command/certifications">Open Certification Center →</Link></div>
-            <div className="deputy-request-history">
-              {certificationRequests.map((item: any) => <article key={item.id}><span>CE</span><div><strong>{item.name}</strong><small>{names.get(item.profile_id) ?? "Personnel"} · {item.notes ?? "No request note"}</small></div><b>{item.status}</b></article>)}
-              {!certificationRequests.length ? <div className="portal-empty-state"><strong>No certification requests are awaiting review.</strong></div> : null}
-            </div>
           </section>
         </>
       ) : null}
