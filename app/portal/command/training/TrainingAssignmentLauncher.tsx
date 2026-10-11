@@ -11,7 +11,6 @@ type PersonnelOption = {
   displayName: string;
   rank: string;
   callSign: string | null;
-  ftoQualified: boolean;
 };
 
 type Props = {
