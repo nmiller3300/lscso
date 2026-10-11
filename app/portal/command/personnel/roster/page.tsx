@@ -25,9 +25,7 @@ export default async function FullRosterPage({ searchParams }: { searchParams: P
   const supabase = await createClient() as any;
   const [
     { data: profiles },
-    { data: callSigns },
-    { data: certifications },
-    { data: guardians },
+    { data: callSigns },    { data: guardians },
     { data: unitAssignments },
     { data: training },
     { data: delegations },
@@ -36,9 +34,7 @@ export default async function FullRosterPage({ searchParams }: { searchParams: P
     { data: organizationalUnits },
   ] = await Promise.all([
     supabase.from("personnel_profiles").select("*").order("personnel_id"),
-    supabase.from("call_sign_assignments").select("profile_id,call_sign,assigned_at,released_at").order("assigned_at", { ascending: false }),
-    supabase.from("certifications").select("profile_id,status,name,expires_on"),
-    supabase.from("guardian_records").select("subject_profile_id,status"),
+    supabase.from("call_sign_assignments").select("profile_id,call_sign,assigned_at,released_at").order("assigned_at", { ascending: false }),    supabase.from("guardian_records").select("subject_profile_id,status"),
     supabase
       .from("personnel_unit_assignments")
       .select("profile_id,assignment_type,starts_at,ends_at,organizational_units(name)")
@@ -133,7 +129,7 @@ export default async function FullRosterPage({ searchParams }: { searchParams: P
     division: primaryAssignment.get(member.id) ?? member.division ?? "Unassigned",
     supervisor: member.supervisor_label,
     status: member.status as PersonnelRecord["status"],
-    certifications: (certifications ?? []).filter((item:any) => item.profile_id === member.id && item.status === "Current").length,
+    assignments: assignmentCount.get(member.id) ?? 0,
     guardianOpen: (guardians ?? []).filter((item:any) => item.subject_profile_id === member.id && !["Acknowledged", "Closed"].includes(item.status)).length,
     lastSession: member.last_sign_in_at ? new Date(member.last_sign_in_at).toLocaleString("en-US") : "Never",
     isTestAccount: member.is_test_account,
