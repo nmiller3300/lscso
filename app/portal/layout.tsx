@@ -4,7 +4,6 @@ import { MaintenanceNotice } from "../_components/MaintenanceNotice";
 import { LateNightCoffee } from "./_components/LateNightCoffee";
 import "./portal.css";
 import "./medals.css";
-import "./certifications.css";
 import "./command-v2.css";
 import "./quick-find.css";
 import "./home-v2.css";
