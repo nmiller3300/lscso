@@ -32,13 +32,8 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
     .maybeSingle();
   if (!member) notFound();
 
-  const [{ data: rosterAccessRows }, certs, training, history, requirements] = await Promise.all([
+  const [{ data: rosterAccessRows }, training, history, requirements] = await Promise.all([
     supabase.rpc("get_my_roster_access"),
-    supabase
-      .from("certifications")
-      .select("id,name,certificate_number,status,issued_on,expires_on")
-      .eq("profile_id", member.id)
-      .order("issued_on", { ascending: false }),
     supabase
       .from("training_progress")
       .select("id,program_type,phase,status,progress_percent,started_on,completed_on,evaluation_notes,evaluator_profile_id,trainer:personnel_profiles!training_progress_evaluator_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
@@ -67,8 +62,6 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
         .order("created_at", { ascending: false })
     : { data: [] };
 
-  const currentCertifications = (certs.data ?? []).filter((item: any) => item.status === "Current");
-  const ftoQualified = currentCertifications.some((item: any) => item.name === "Field Training Officer" && (!item.expires_on || item.expires_on >= new Date().toISOString().slice(0, 10)));
   const activeTrainingRows = trainingRows.filter((item: any) => ACTIVE_TRAINING_STATUSES.includes(item.status));
   const activeTraining = activeTrainingRows[0];
   const rosterAccess = rosterAccessRows?.[0];
@@ -77,7 +70,6 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
   const requirementRows = requirements.data ?? [];
   const currentRequirement = (requirement: string) => requirementRows.find((item: any) => item.requirement === requirement);
   const academyRequirement = currentRequirement("Academy");
-  const ftoRequirement = currentRequirement("FTO");
 
   const editableRecords = activeTrainingRows.map((item: any) => {
     const trainer = Array.isArray(item.trainer) ? item.trainer[0] : item.trainer;
@@ -99,7 +91,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
       title={`${member.display_name} · Training`}
       actions={(
         <>
-          <Link className="portal-button portal-button--secondary" href="/portal/command/training">Training & FTO</Link>
+          <Link className="portal-button portal-button--secondary" href="/portal/command/training">Training</Link>
           <Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}`}>Back to Record</Link>
         </>
       )}
@@ -112,9 +104,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
           <span>{activeTraining ? activeTraining.status : "No active training"}</span>
         </div>
         <div className="command-v2-workspace-grid">
-          <div className="portal-panel">
-            <div className="portal-panel-heading"><div><p>FTO qualification</p><h2>{ftoQualified ? "Authorized" : "Not Authorized"}</h2></div></div>
-          </div>
+          
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Active trainer</p><h2>{activeTraining ? ((Array.isArray(activeTraining.trainer) ? activeTraining.trainer[0] : activeTraining.trainer)?.display_name ?? "Unassigned") : "None"}</h2></div></div>
           </div>
@@ -125,9 +115,9 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
       </section>
 
       <section className="portal-panel training-entry-requirements">
-        <div className="portal-panel-heading"><div><p>Entry training</p><h2>Academy & FTO Requirements</h2></div></div>
+        <div className="portal-panel-heading"><div><p>Entry training</p><h2>Academy Requirements</h2></div></div>
         <div className="training-requirement-grid">
-          {[{ label: "Academy", row: academyRequirement }, { label: "FTO", row: ftoRequirement }].map(({ label, row }) => (
+          {[{ label: "Academy", row: academyRequirement }].map(({ label, row }) => (
             <article key={label}>
               <span>{label}</span>
               <strong>{row?.disposition ?? "Not Recorded"}</strong>
@@ -152,7 +142,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
           <div className="training-history-list">
             {historyRows.length ? historyRows.map((item: any) => (
               <article key={item.id}>
-                <div className="training-history-list__mark">{item.category === "FTO" ? "FTO" : "TRN"}</div>
+                <div className="training-history-list__mark">"TRN"</div>
                 <div>
                   <span>{item.record_type} · {item.category}</span>
                   <strong>{item.title}</strong>
@@ -181,7 +171,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
                   </div>
                 </div>
               );
-            }) : <div className="portal-empty-state"><strong>No Academy, FTO, remedial, or continuing-education progression records.</strong></div>}
+            }) : <div className="portal-empty-state"><strong>No active Academy, remedial, or continuing-education progression records.</strong></div>}
           </div>
         </section>
 
@@ -202,12 +192,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="portal-panel personnel-record-wide">
-          <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certifications</h2></div><span>{certs.data?.length ?? 0}</span></div>
-          <div className="personnel-certification-grid personnel-certification-grid--command">
-            {(certs.data ?? []).length ? (certs.data ?? []).map((item:any) => <article key={item.id}><span>{item.status}</span><strong>{item.name}</strong><small>{item.certificate_number ?? "No certificate number"}</small><dl><div><dt>Issued</dt><dd>{dateLabel(item.issued_on) ?? "Pending"}</dd></div><div><dt>Expires</dt><dd>{item.expires_on ? dateLabel(item.expires_on) : "No expiration"}</dd></div></dl></article>) : <div className="portal-empty-state"><strong>No certification records.</strong></div>}
-          </div>
-        </section>
+        
       </div>
     </PortalShell>
   );
