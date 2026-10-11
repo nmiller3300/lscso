@@ -26,8 +26,7 @@ export default async function PersonnelPortalPage() {
   const supabase = await createClient() as any;
   const probation = getPersonnelProbationState(profile.probation_ends_at);
 
-  const [certifications, assignments, guardians, requests, training, trainingHistory, trainingRequirements, notifications, actingGrants, awards, flags, pointEvents, disciplinaryPoints, correspondence] = await Promise.all([
-    supabase.from("certifications").select("*").eq("profile_id", profile.id).order("created_at", { ascending: false }),
+  const [assignments, guardians, requests, training, trainingHistory, trainingRequirements, notifications, actingGrants, awards, flags, pointEvents, disciplinaryPoints, correspondence] = await Promise.all([
     supabase.from("personnel_unit_assignments").select("id,assignment_type,starts_at,notes,organizational_units(name,unit_type)").eq("profile_id", profile.id).is("ends_at", null).order("starts_at", { ascending: false }),
     supabase.from("guardian_records").select("id,status,record_type,points_assessed").eq("subject_profile_id", profile.id),
     supabase.from("personnel_requests").select("id,status").eq("requester_profile_id", profile.id),
@@ -43,18 +42,13 @@ export default async function PersonnelPortalPage() {
     supabase.from("personnel_correspondence").select("id,subject,body,sent_at,author:personnel_profiles!personnel_correspondence_author_profile_id_fkey(display_name,rank)").eq("recipient_profile_id", profile.id).is("archived_at", null).order("sent_at", { ascending: false }),
   ]);
 
-  const certificationRows = certifications.data ?? [];
-  const currentCertifications = certificationRows.filter((item: any) => item.status === "Current");
-  const pendingCertifications = certificationRows.filter((item: any) => ["Requested", "Pending"].includes(item.status));
-  const pastCertifications = certificationRows.filter((item: any) => !["Current", "Requested", "Pending"].includes(item.status));
   const openRequests = (requests.data ?? []).filter((item: any) => !["Approved", "Denied", "Cancelled", "Completed"].includes(item.status)).length;
   const commandAccess = ["Executive", "Command"].includes(profile.access_tier);
   const pendingAcknowledgments = (guardians.data ?? []).filter((item: any) => !["Acknowledged", "Closed"].includes(item.status)).length;
-  const trainingRows = training.data ?? [];
-  const trainingHistoryRows = trainingHistory.data ?? [];
+  const trainingRows = (training.data ?? []).filter((item: any) => item.program_type !== "FTO");
+  const trainingHistoryRows = (trainingHistory.data ?? []).filter((item: any) => item.category !== "FTO");
   const requirementRows = trainingRequirements.data ?? [];
   const academyRequirement = requirementRows.find((item: any) => item.requirement === "Academy");
-  const ftoRequirement = requirementRows.find((item: any) => item.requirement === "FTO");
   const activeTraining = trainingRows.find((item: any) => ["Not Started", "In Progress", "Needs Improvement"].includes(item.status));
   const letterRows = (correspondence.data ?? []).map((item: any) => {
     const author = Array.isArray(item.author) ? item.author[0] : item.author;
@@ -80,7 +74,7 @@ export default async function PersonnelPortalPage() {
 
       <section className="deputy-summary-grid">
         <article><span>Documents</span><strong>{String(letterRows.length + (guardians.data?.length ?? 0)).padStart(2, "0")}</strong><small>{pendingAcknowledgments} awaiting acknowledgment</small></article>
-        <article><span>Current certifications</span><strong>{String(currentCertifications.length).padStart(2, "0")}</strong><small>{pendingCertifications.length} pending review</small></article>
+        <article><span>My divisions</span><strong>{String((assignments.data ?? []).length).padStart(2, "0")}</strong><small>Active department assignments</small></article>
         <article><span>Training records</span><strong>{String(trainingHistoryRows.length).padStart(2, "0")}</strong><small>{activeTraining ? `${activeTraining.program_type} active` : "No active program"}</small></article>
         <article><span>Open requests</span><strong>{String(openRequests).padStart(2, "0")}</strong><small>Awaiting action</small></article>
       </section>
@@ -105,21 +99,12 @@ export default async function PersonnelPortalPage() {
         </details>
       </section>
 
-      <section className="portal-panel deputy-certifications" id="certifications">
-        <div className="portal-panel-heading"><div><p>Qualifications</p><h2>My Certifications</h2></div><Link href="#requests">Request certification</Link></div>
-        <div className="personnel-certification-summary"><div><strong>{currentCertifications.length}</strong><span>Current</span></div><div><strong>{pendingCertifications.length}</strong><span>Pending</span></div><div><strong>{pastCertifications.length}</strong><span>Previous</span></div></div>
-        <div className="personnel-certification-grid">
-          {currentCertifications.map((certification: any) => <article key={certification.id}><span>Current</span><strong>{certification.name}</strong><small>{certification.issuer}</small><dl><div><dt>Issued</dt><dd>{dateLabel(certification.issued_on)}</dd></div><div><dt>Expires</dt><dd>{certification.expires_on ? dateLabel(certification.expires_on) : "No expiration"}</dd></div></dl></article>)}
-          {!currentCertifications.length ? <div className="portal-empty-state"><strong>No current certifications are on file.</strong></div> : null}
-        </div>
-        {pendingCertifications.length ? <details className="personnel-history-disclosure"><summary>Pending certification requests <span>{pendingCertifications.length}</span></summary><div className="personnel-compact-records">{pendingCertifications.map((certification: any) => <div key={certification.id}><strong>{certification.name}</strong><span>{certification.status} · Requested {dateLabel(certification.created_at)}</span></div>)}</div></details> : null}
-        {pastCertifications.length ? <details className="personnel-history-disclosure"><summary>Previous certifications <span>{pastCertifications.length}</span></summary><div className="personnel-compact-records">{pastCertifications.map((certification: any) => <div key={certification.id}><strong>{certification.name}</strong><span>{certification.status} · {certification.expires_on ? `Expired ${dateLabel(certification.expires_on)}` : "No longer current"}</span></div>)}</div></details> : null}
-      </section>
+      
 
       <section className="portal-panel" id="awards"><div className="portal-panel-heading"><div><p>Service record</p><h2>Medals & Decorations</h2></div><span>Permanent departmental decorations</span></div><MedalGallery awards={awards.data ?? []} /></section>
 
-      <section className="portal-panel deputy-assignments" id="assignments">
-        <div className="portal-panel-heading"><div><p>Current service</p><h2>My Assignments</h2></div><span>{assignments.data?.length ?? 0} active</span></div>
+      <section className="portal-panel deputy-assignments" id="divisions">
+        <div className="portal-panel-heading"><div><p>Current service</p><h2>My Divisions & Assignments</h2></div><span>{assignments.data?.length ?? 0} active</span></div>
         <div className="personnel-assignment-list personnel-assignment-list--member">
           {(assignments.data ?? []).map((assignment: any) => { const unit = Array.isArray(assignment.organizational_units) ? assignment.organizational_units[0] : assignment.organizational_units; return <article key={assignment.id}><div><span>{assignment.assignment_type}</span><strong>{unit?.name ?? "Unknown unit"}</strong><small>{unit?.unit_type ?? "Organizational assignment"} · Effective {dateLabel(assignment.starts_at)}{assignment.notes ? ` · ${assignment.notes}` : ""}</small></div></article>; })}
           {!(assignments.data ?? []).length ? <div className="portal-empty-state"><strong>No organizational assignments are on file.</strong></div> : null}
@@ -132,11 +117,11 @@ export default async function PersonnelPortalPage() {
       <section className="portal-panel" id="training">
         <div className="portal-panel-heading"><div><p>Professional development</p><h2>My Training</h2></div><span>{trainingHistoryRows.length} permanent</span></div>
         <div className="training-requirement-grid">
-          {[{ label: "Academy", row: academyRequirement }, { label: "FTO", row: ftoRequirement }].map(({ label, row }) => <article key={label}><span>{label}</span><strong>{row?.disposition ?? "Not Recorded"}</strong><small>{row?.reason ?? "No entry-training disposition on file."}</small>{row?.effective_at ? <b>{dateLabel(row.effective_at)}</b> : null}</article>)}
+          {[{ label: "Academy", row: academyRequirement }].map(({ label, row }) => <article key={label}><span>{label}</span><strong>{row?.disposition ?? "Not Recorded"}</strong><small>{row?.reason ?? "No entry-training disposition on file."}</small>{row?.effective_at ? <b>{dateLabel(row.effective_at)}</b> : null}</article>)}
         </div>
         {activeTraining ? <div className="deputy-progress-card" style={{ marginTop: 12 }}><div><span>{activeTraining.program_type}</span><strong>{activeTraining.status}</strong><p>{activeTraining.evaluation_notes ?? `${activeTraining.phase} · ${activeTraining.progress_percent}%`}</p></div><div className="deputy-progress-track" aria-label="Training progress">{trainingRows.map((progress: any, index: number) => <div className={["Complete", "Released"].includes(progress.status) ? "is-complete" : undefined} key={progress.id}><span>{index + 1}</span><strong>{progress.phase}</strong><small>{progress.status}</small></div>)}</div></div> : null}
         <div className="training-history-list" style={{ marginTop: 12 }}>
-          {trainingHistoryRows.map((item: any) => <article key={item.id}><div className="training-history-list__mark">{item.category === "FTO" ? "FTO" : "TRN"}</div><div><span>{item.record_type} · {item.category}</span><strong>{item.title}</strong><small>{item.provider}{item.completed_on ? ` · ${dateLabel(item.completed_on)}` : " · Completion date not recorded"}</small>{item.notes ? <p>{item.notes}</p> : null}</div><b>{item.verification_status}</b></article>)}
+          {trainingHistoryRows.map((item: any) => <article key={item.id}><div className="training-history-list__mark">"TRN"</div><div><span>{item.record_type} · {item.category}</span><strong>{item.title}</strong><small>{item.provider}{item.completed_on ? ` · ${dateLabel(item.completed_on)}` : " · Completion date not recorded"}</small>{item.notes ? <p>{item.notes}</p> : null}</div><b>{item.verification_status}</b></article>)}
           {!trainingHistoryRows.length && !activeTraining ? <div className="portal-empty-state"><strong>No training history is on file.</strong></div> : null}
         </div>
       </section>
