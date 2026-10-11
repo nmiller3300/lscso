@@ -41,34 +41,21 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const probation = getPersonnelProbationState(member.probation_ends_at);
 
   const [
-    { count: certifications },
-    { count: guardians },
+        { count: guardians },
     { count: awards },
     { count: flags },
     assignments,
-    ftoCertification,
     delegations,
     currentLeave,
-    { count: activeTrainees },
     latestCareer,
-  ] = await Promise.all([
-    supabase.from("certifications").select("id", { count: "exact", head: true }).eq("profile_id", member.id).eq("status", "Current"),
-    supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("subject_profile_id", member.id),
+  ] = await Promise.all([    supabase.from("guardian_records").select("id", { count: "exact", head: true }).eq("subject_profile_id", member.id),
     supabase.from("personnel_awards").select("id", { count: "exact", head: true }).eq("profile_id", member.id),
     supabase.from("personnel_flags").select("id", { count: "exact", head: true }).eq("profile_id", member.id).eq("active", true),
     supabase.from("personnel_unit_assignments")
       .select("id,assignment_type,starts_at,ends_at,notes,organizational_units(id,name,unit_type)")
       .eq("profile_id", member.id)
       .is("ends_at", null)
-      .order("starts_at", { ascending: true }),
-    supabase.from("certifications")
-      .select("id,expires_on")
-      .eq("profile_id", member.id)
-      .eq("name", "Field Training Officer")
-      .eq("status", "Current")
-      .or(`expires_on.is.null,expires_on.gte.${today}`)
-      .limit(1),
-    supabase.from("personnel_delegations")
+      .order("starts_at", { ascending: true }),    supabase.from("personnel_delegations")
       .select("id,delegation_type,expires_at,organizational_units(name)")
       .eq("profile_id", member.id)
       .is("revoked_at", null)
@@ -81,12 +68,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
       .eq("status", "Approved")
       .lte("starts_on", today)
       .gte("expected_return_on", today)
-      .limit(1),
-    supabase.from("training_progress")
-      .select("id", { count: "exact", head: true })
-      .eq("evaluator_profile_id", member.id)
-      .in("status", ACTIVE_TRAINING_STATUSES),
-    supabase.from("personnel_career_events")
+      .limit(1),    supabase.from("personnel_career_events")
       .select("event_type,title,effective_at")
       .eq("profile_id", member.id)
       .order("effective_at", { ascending: false })
@@ -99,7 +81,6 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
   const primaryUnitName = primaryAssignment?.organizational_units?.name ?? member.division;
   const activeDelegations = delegations.data ?? [];
   const leaveRow = currentLeave.data?.[0];
-  const ftoQualified = Boolean(ftoCertification.data?.length);
   const displayStatus = member.status === "Suspended" ? "Suspended" : leaveRow ? "LOA" : member.status;
   const latestCareerRow = latestCareer.data?.[0];
   const probationLabel = probation.active ? `PROBATION · ${probation.daysRemaining}D` : null;
@@ -121,7 +102,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
       <PersonnelRecordUtilities personnelId={member.personnel_id} displayName={member.display_name} />
 
       <div className="deputy-summary-grid command-v2-record-metrics">
-        <article><span>Certifications</span><strong>{String(certifications ?? 0).padStart(2, "0")}</strong><small>Current</small></article>
+        <article><span>Divisions & assignments</span><strong>{String(activeAssignments.length).padStart(2, "0")}</strong><small>Active appointments</small></article>
         <article><span>Guardians</span><strong>{String(guardians ?? 0).padStart(2, "0")}</strong><small>Total record</small></article>
         <article><span>Medals</span><strong>{String(awards ?? 0).padStart(2, "0")}</strong><small>Permanent decorations</small></article>
         <article><span>Active flags</span><strong>{String(flags ?? 0).padStart(2, "0")}</strong><small>Administrative</small></article>
@@ -134,10 +115,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
             <div className="portal-panel-heading"><div><p>Standing authority</p><h2>{member.access_tier}</h2></div></div>
             <p className="command-v2-compact-copy">Baseline authority follows the member&apos;s current rank. Additional responsibility is granted through named delegation rather than raw permission toggles.</p>
           </div>
-          <div className="portal-panel">
-            <div className="portal-panel-heading"><div><p>FTO permissions</p><h2>{ftoQualified ? "Authorized" : "Not authorized"}</h2></div><span>{activeTrainees ?? 0} trainees</span></div>
-            <p className="command-v2-compact-copy">{ftoQualified ? "This member holds a current Field Training Officer certification and has FTO permissions for trainees assigned to them." : "No current Field Training Officer certification is recorded, so this member has no FTO permissions."}</p>
-          </div>
+          
           <div className="portal-panel">
             <div className="portal-panel-heading"><div><p>Operational status</p><h2>{displayStatus}{probation.active ? " · Probation" : ""}</h2></div></div>
             <p className="command-v2-compact-copy">{leaveSummary ? `${leaveSummary}${probation.active ? ` · Probation continues through ${shortDate(probation.endsAt)} (${probation.daysRemaining} days remaining)` : ""}` : probation.active ? `15-day probationary period ends ${shortDate(probation.endsAt)} · ${probation.daysRemaining} days remaining.` : "No current approved leave or probation marker changes this member's displayed operational status."}</p>
@@ -157,7 +135,7 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
             })}
           </div>
         ) : (
-          <div className="command-v2-inline-state" style={{ marginTop: 14 }}><strong>No active delegated authority.</strong><span>This member is currently operating only under standing rank, assignment, qualification, and direct supervisory authority.</span></div>
+          <div className="command-v2-inline-state" style={{ marginTop: 14 }}><strong>No active delegated authority.</strong><span>This member is currently operating only under standing rank, assignment, and direct supervisory authority.</span></div>
         )}
       </section>
 
@@ -189,8 +167,8 @@ export default async function PersonnelRecordPage({ params }: PersonnelRecordPag
           <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href={guardianHref}>Open Guardians</Link></div>
         </section>
         <section className="portal-panel command-v2-launcher">
-          <div className="portal-panel-heading"><div><p>Training</p><h2>Qualifications</h2></div></div>
-          <p className="command-v2-compact-copy">Review this employee&apos;s training, FTO assignment, and certification history.</p>
+          <div className="portal-panel-heading"><div><p>Training</p><h2>Training History</h2></div></div>
+          <p className="command-v2-compact-copy">Review this employee&apos;s training and professional development history.</p>
           <div className="command-v2-action-row"><Link className="portal-button portal-button--secondary" href={`/portal/command/personnel/${member.personnel_id}/training`}>Open training record</Link></div>
         </section>
       </div>
