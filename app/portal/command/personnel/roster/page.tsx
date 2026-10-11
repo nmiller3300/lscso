@@ -227,9 +227,7 @@ export default async function FullRosterPage({ searchParams }: { searchParams: P
         <p className="command-v2-compact-copy">Select a member to open the full personnel record. Department Attorneys are listed by LS employee number and never display an operational call sign.</p>
         <div className="command-v2-mini-list" style={{ marginTop: 14 }}>
           {operationalPersonnel.map((member:any) => {
-            const memberCerts = (certifications ?? []).filter((item:any) => item.profile_id === member.id && item.status === "Current");
-            const ftoQualified = memberCerts.some((item:any) => item.name === "Field Training Officer" && (!item.expires_on || item.expires_on >= today));
-            const trainingRow = activeTraining.get(member.id);
+                        const trainingRow = activeTraining.get(member.id);
             const trainer = trainingRow ? (Array.isArray(trainingRow.trainer) ? trainingRow.trainer[0] : trainingRow.trainer) : null;
             const leaveRow = currentLeave.get(member.id);
             const career = latestCareer.get(member.id);
@@ -240,10 +238,10 @@ export default async function FullRosterPage({ searchParams }: { searchParams: P
               <Link href={`/portal/command/personnel/${member.personnel_id}`} key={member.id}>
                 <div>
                   <strong>{rosterIdentifier} · {member.rank} {member.display_name}{probation.active ? <span className="personnel-record-status" style={{ marginLeft: 8 }}>PROBATION · {probation.daysRemaining}D</span> : null}</strong>
-                  <span>{primaryAssignment.get(member.id) ?? member.division ?? "Unassigned"} · {displayStatus} · {memberCerts.length} certifications · {assignmentCount.get(member.id) ?? 0} assignments</span>
+                  <span>{primaryAssignment.get(member.id) ?? member.division ?? "Unassigned"} · {displayStatus} · {assignmentCount.get(member.id) ?? 0} assignments</span>
                 </div>
                 <div>
-                  <strong>{member.rank === "Department Attorney" ? "Legal counsel" : trainingRow ? `${trainingRow.phase} · ${trainingRow.progress_percent}%` : ftoQualified ? "FTO Qualified" : "No active training"}</strong>
+                  <strong>{member.rank === "Department Attorney" ? "Legal counsel" : trainingRow ? `${trainingRow.phase} · ${trainingRow.progress_percent}%` : "No active training"}</strong>
                   <span>{member.rank === "Department Attorney" ? "Non-sworn · No operational call sign" : <>{probation.active ? `Probation ends ${new Date(probation.endsAt!).toLocaleDateString()} · ` : ""}{trainingRow && trainer?.display_name ? `Trainer: ${trainer.display_name}` : `${activeDelegations.get(member.id) ?? 0} delegated roles`}{career ? ` · Latest: ${career.event_type}` : ""}</>}</span>
                 </div>
               </Link>
