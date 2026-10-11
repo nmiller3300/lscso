@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { PortalShell } from "../../_components/PortalShell";
-import { WhiteDashboardPrank } from "../../_components/WhiteDashboardPrank";
 import { loadPersonnelPurview } from "@/lib/authorization/load-personnel-purview";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
@@ -72,7 +71,6 @@ export default async function CommandHomePage() {
 
   return (
     <PortalShell active="overview" eyebrow="Command" title="Home" actions={<Link className="portal-button portal-button--primary" href="/portal/notifications#action-required">Open Action Center</Link>}>
-      <WhiteDashboardPrank />
       {dataIssues.length ? <div className="portal-data-warning" role="status"><strong>Some Command data is temporarily unavailable.</strong><span>{dataIssues.join(", ")} could not be loaded. A missing dataset is shown as — rather than being reported as zero.</span></div> : null}
       {scopeUnavailable ? <div className="command-v2-inline-state"><strong>Your assigned command scope is not active yet.</strong><span>Executive Command must assign your personnel or organizational responsibility before personnel decisions can be made.</span></div> : null}
 
