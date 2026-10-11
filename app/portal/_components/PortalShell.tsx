@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrowserPushControl } from "./BrowserPushControl";
 import { CaseNumberGenerator } from "./CaseNumberGenerator";
+import { CommandPortalTour } from "./CommandPortalTour";
 import { CoffeeBreakButton } from "./CoffeeBreakButton";
 import { CommandQuickFind } from "./CommandQuickFind";
 import { HiringAuthorityShortcut } from "./HiringAuthorityShortcut";
@@ -36,6 +37,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
       <LegacyPortalModalBridge />
       <PortalRealtimeRefresh />
       <PortalInteractionLayer />
+      {audience === "command" ? <CommandPortalTour /> : null}
 
       <aside className="portal-sidebar">
         <div className="portal-sidebar-head">
