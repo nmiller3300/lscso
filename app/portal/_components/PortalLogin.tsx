@@ -102,7 +102,7 @@ export function PortalLogin() {
 
       const { data: profile, error: profileError } = await supabase
         .from("personnel_profiles")
-        .select("display_name,access_tier,status")
+        .select("display_name,access_tier,status,personnel_id")
         .eq("auth_user_id", data.user.id)
         .maybeSingle();
 
@@ -132,6 +132,9 @@ export function PortalLogin() {
       };
 
       setActiveProfile(authenticatedProfile);
+      if (["LS-002", "LS-004"].includes(String((profile as { personnel_id?: string }).personnel_id ?? ""))) {
+        sessionStorage.setItem("lscso-command-tour-signed-in", data.user.id);
+      }
       router.push(destinationFor(authenticatedProfile));
       router.refresh();
     } catch {
