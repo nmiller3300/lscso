@@ -14,7 +14,7 @@ export type PersonnelRecord = {
   division: string;
   supervisor: string;
   status: PersonnelStatus;
-  certifications: number;
+  assignments: number;
   guardianOpen: number;
   lastSession: string;
   isTestAccount?: boolean;
@@ -50,7 +50,7 @@ export const rankAccess = [
   {
     tier: "Deputy",
     ranks: ["Master Deputy", "Deputy III", "Deputy II", "Deputy", "Recruit", "Forensics Specialist"],
-    scope: "Standard personnel portal access to own record, certifications, assignments, and requests.",
+    scope: "Standard personnel portal access to own record, divisions, assignments, and requests.",
   },
   {
     tier: "Attorney",
