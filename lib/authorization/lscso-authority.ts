@@ -1,6 +1,7 @@
 export type LscsoRank =
   | "Sheriff"
   | "Undersheriff"
+  | "Assistant Sheriff"
   | "Major"
   | "Captain"
   | "1st Lieutenant"
@@ -18,6 +19,7 @@ export type AuthorityTier = "Executive" | "Command" | "Supervisor" | "Preliminar
 export const rankLevel: Record<LscsoRank, number> = {
   Sheriff: 130,
   Undersheriff: 120,
+  "Assistant Sheriff": 115,
   Major: 110,
   Captain: 100,
   "1st Lieutenant": 90,
@@ -34,6 +36,7 @@ export const rankLevel: Record<LscsoRank, number> = {
 export const rankTier: Record<LscsoRank, AuthorityTier> = {
   Sheriff: "Executive",
   Undersheriff: "Executive",
+  "Assistant Sheriff": "Command",
   Major: "Command",
   Captain: "Command",
   "1st Lieutenant": "Command",
@@ -132,7 +135,7 @@ function hasAnyScope(context: AuthorityContext, allowed: AuthorityScope[]) {
 
 /** Sheriff, Undersheriff, Major and Captain are not restricted to their home bureau. */
 export function hasStandingDepartmentAuthority(rank: LscsoRank): boolean {
-  return ["Sheriff", "Undersheriff", "Major", "Captain"].includes(rank);
+  return ["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"].includes(rank);
 }
 
 /**
