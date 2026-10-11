@@ -4,167 +4,64 @@ import { PortalShell } from "../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
-const ACTIVE_TRAINING_STATUSES = ["Not Started", "In Progress", "Needs Improvement"];
-
-function relationOne(value: any) {
-  return Array.isArray(value) ? value[0] : value;
-}
-
-function dateLabel(value: string | null | undefined) {
-  if (!value) return "Date not recorded";
-  const normalized = value.length === 10 ? `${value}T12:00:00` : value;
-  return new Date(normalized).toLocaleDateString();
-}
+const activeStatuses = ["Not Started", "In Progress", "Needs Improvement"];
 
 export default async function TrainingWorkspacePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile) return null;
-
   const supabase = await createClient() as any;
-  const today = new Date();
-  const todayKey = today.toISOString().slice(0, 10);
-  const ninetyDays = new Date(today);
-  ninetyDays.setDate(today.getDate() + 90);
-  const ninetyDayKey = ninetyDays.toISOString().slice(0, 10);
-
   const { data: accessRows } = await supabase.rpc("get_my_roster_access");
-  const rosterAccess = accessRows?.[0];
-  const canManageTraining = Boolean(rosterAccess?.can_manage_training);
-  const canTrainAssigned = Boolean(rosterAccess?.can_train_assigned);
+  const canManageTraining = Boolean(accessRows?.[0]?.can_manage_training);
+  const canTrainAssigned = Boolean(accessRows?.[0]?.can_train_assigned);
 
-  let activeTrainingQuery = supabase
-    .from("training_progress")
-    .select("id,profile_id,program_type,phase,status,progress_percent,started_on,updated_at,evaluator_profile_id,trainee:personnel_profiles!training_progress_profile_id_fkey(personnel_id,display_name,rank,call_sign),trainer:personnel_profiles!training_progress_evaluator_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
-    .in("status", ACTIVE_TRAINING_STATUSES)
-    .order("updated_at", { ascending: false });
+  let activeQuery = supabase.from("training_progress")
+    .select("id,profile_id,program_type,phase,status,progress_percent,updated_at,evaluator_profile_id,trainee:personnel_profiles!training_progress_profile_id_fkey(personnel_id,display_name,rank,call_sign),trainer:personnel_profiles!training_progress_evaluator_profile_id_fkey(display_name)")
+    .in("status",activeStatuses).neq("program_type","FTO").order("updated_at",{ascending:false});
+  if (!canManageTraining) activeQuery = activeQuery.eq("evaluator_profile_id",profile.id);
 
-  if (!canManageTraining) activeTrainingQuery = activeTrainingQuery.eq("evaluator_profile_id", profile.id);
-
-  const [trainingResult, ftoResult, expiringResult, pendingResult, personnelResult, historyResult, historyCountResult] = await Promise.all([
-    canManageTraining || canTrainAssigned ? activeTrainingQuery : Promise.resolve({ data: [] }),
-    supabase
-      .from("certifications")
-      .select("id,profile_id,expires_on,personnel_profiles!certifications_profile_id_fkey(id,personnel_id,display_name,rank,call_sign,status)")
-      .eq("name", "Field Training Officer")
-      .eq("status", "Current")
-      .order("issued_on", { ascending: true }),
-    supabase
-      .from("certifications")
-      .select("id,name,expires_on,profile_id,personnel_profiles!certifications_profile_id_fkey(personnel_id,display_name,rank,call_sign)")
-      .eq("status", "Current")
-      .not("expires_on", "is", null)
-      .gte("expires_on", todayKey)
-      .lte("expires_on", ninetyDayKey)
-      .order("expires_on", { ascending: true }),
-    supabase
-      .from("certifications")
-      .select("id,name,status,created_at,profile_id")
-      .in("status", ["Requested", "Pending"])
-      .order("created_at", { ascending: false }),
-    canManageTraining
-      ? supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,status,is_test_account").in("status", ["Active", "Acting"]).eq("is_test_account", false).order("display_name")
-      : Promise.resolve({ data: [] }),
-    canManageTraining || canTrainAssigned
-      ? supabase.from("personnel_training_records").select("id,profile_id,record_type,category,title,provider,completed_on,verification_status,created_at,personnel:personnel_profiles!personnel_training_records_profile_id_fkey(personnel_id,display_name,rank,call_sign)").order("created_at", { ascending: false }).limit(8)
-      : Promise.resolve({ data: [] }),
-    canManageTraining || canTrainAssigned
-      ? supabase.from("personnel_training_records").select("id", { count: "exact", head: true })
-      : Promise.resolve({ count: 0 }),
+  const [trainingResult,personnelResult,historyResult] = await Promise.all([
+    canManageTraining || canTrainAssigned ? activeQuery : Promise.resolve({data:[]}),
+    canManageTraining ? supabase.from("personnel_profiles").select("id,personnel_id,display_name,rank,call_sign,status").in("status",["Active","Acting"]).order("display_name") : Promise.resolve({data:[]}),
+    canManageTraining || canTrainAssigned ? supabase.from("personnel_training_records").select("id,profile_id,record_type,category,title,provider,completed_on,verification_status,personnel:personnel_profiles!personnel_training_records_profile_id_fkey(personnel_id,display_name)").neq("category","FTO").order("created_at",{ascending:false}).limit(12) : Promise.resolve({data:[]}),
   ]);
-
-  const trainingRows = trainingResult.data ?? [];
-  const currentFtoRows = (ftoResult.data ?? []).filter((row: any) => !row.expires_on || row.expires_on >= todayKey);
-  const expiringRows = expiringResult.data ?? [];
-  const pendingRows = pendingResult.data ?? [];
-  const historyRows = historyResult.data ?? [];
-  const historyCount = Number(historyCountResult.count ?? 0);
-
-  const ftoIds = new Set(currentFtoRows.map((row: any) => row.profile_id));
-  const personnelOptions = (personnelResult.data ?? []).map((member: any) => ({
-    id: member.id,
-    personnelId: member.personnel_id,
-    displayName: member.display_name,
-    rank: member.rank,
-    callSign: member.call_sign,
-    ftoQualified: ftoIds.has(member.id),
+  const active = trainingResult.data ?? [];
+  const history = historyResult.data ?? [];
+  const personnel = (personnelResult.data ?? []).map((member:any)=>({
+    id:member.id,personnelId:member.personnel_id,displayName:member.display_name,
+    rank:member.rank,callSign:member.call_sign,ftoQualified:false
   }));
-
-  const trainers = currentFtoRows
-    .map((row: any) => {
-      const member = relationOne(row.personnel_profiles);
-      if (!member || !["Active", "Acting"].includes(member.status)) return null;
-      return {
-        id: row.profile_id,
-        personnelId: member.personnel_id,
-        displayName: member.display_name,
-        rank: member.rank,
-        callSign: member.call_sign,
-        activeTrainees: trainingRows.filter((training: any) => training.evaluator_profile_id === row.profile_id).length,
-      };
-    })
-    .filter(Boolean)
-    .sort((a: any, b: any) => a.displayName.localeCompare(b.displayName));
-
-  const needsAttention = trainingRows.filter((row: any) => row.status === "Needs Improvement").length;
-
+  const attention = active.filter((item:any)=>item.status==="Needs Improvement").length;
+  const one = (value:any)=>Array.isArray(value)?value[0]:value;
   return (
-    <PortalShell
-      active="training"
-      eyebrow="Training & FTO"
-      title="Training & FTO"
-      actions={canManageTraining ? <TrainingAssignmentLauncher personnel={personnelOptions} /> : undefined}
-    >
+    <PortalShell active="training" eyebrow="Personnel development" title="Department Training"
+      description="Academy, remedial, and continuing education. Division assignments are managed separately."
+      actions={canManageTraining ? <TrainingAssignmentLauncher personnel={personnel} /> : undefined}>
       <div className="portal-metric-grid portal-training-metrics">
-        <article className="portal-metric portal-metric--gold"><span>{canManageTraining ? "Active trainees" : "My active trainees"}</span><strong>{trainingRows.length}</strong><small>Current progression</small></article>
-        <article className="portal-metric"><span>FTO authorized</span><strong>{trainers.length}</strong><small>Current FTO certifications</small></article>
-        <article className={`portal-metric ${needsAttention ? "portal-metric--warning" : ""}`}><span>Needs attention</span><strong>{needsAttention}</strong><small>Training requiring review</small></article>
-        <article className="portal-metric"><span>Permanent records</span><strong>{historyCount}</strong><small>Completed and verified history</small></article>
+        <article className="portal-metric portal-metric--gold"><span>Active training</span><strong>{active.length}</strong><small>Current department programs</small></article>
+        <article className="portal-metric"><span>Needs attention</span><strong>{attention}</strong><small>Training requiring review</small></article>
+        <article className="portal-metric"><span>Recent history</span><strong>{history.length}</strong><small>Permanent training records</small></article>
       </div>
-
       <section className="portal-panel portal-training-board">
-        <div className="portal-panel-heading"><div><p>Active training</p><h2>{canManageTraining ? "Department training board" : "My assigned trainees"}</h2></div><span>{trainingRows.length}</span></div>
+        <div className="portal-panel-heading"><div><p>Current assignments</p><h2>Department training board</h2></div><span>{active.length}</span></div>
         <div className="command-v2-personnel-results portal-training-trainee-list">
-          {trainingRows.length ? trainingRows.map((row: any) => {
-            const trainee = relationOne(row.trainee);
-            const trainer = relationOne(row.trainer);
-            return <Link key={row.id} href={`/portal/command/personnel/${trainee?.personnel_id ?? ""}/training`}><div><strong>{trainee?.call_sign ?? trainee?.personnel_id ?? "Trainee"} · {trainee?.display_name ?? "Assigned trainee"}</strong><span>{row.program_type} · {row.phase} · {row.status}</span></div><div className="portal-training-progress-value"><strong>{row.progress_percent}%</strong><span>{trainer?.display_name ? `Trainer: ${trainer.display_name}` : "Trainer unassigned"}</span></div></Link>;
-          }) : <div className="portal-empty-state"><strong>No active training records.</strong></div>}
+          {active.length ? active.map((item:any)=>{
+            const trainee=one(item.trainee);const trainer=one(item.trainer);
+            return <Link key={item.id} href={`/portal/command/personnel/${trainee?.personnel_id ?? ""}/training`}>
+              <div><strong>{trainee?.display_name ?? "Personnel"}</strong><span>{item.program_type} · {item.phase} · {item.status}</span></div>
+              <div className="portal-training-progress-value"><strong>{item.progress_percent}%</strong><span>{trainer?.display_name ?? "Trainer unassigned"}</span></div>
+            </Link>;
+          }):<div className="portal-empty-state"><strong>No active department training.</strong></div>}
         </div>
       </section>
-
       <section className="portal-panel portal-training-history-board">
-        <div className="portal-panel-heading"><div><p>Personnel record</p><h2>Recent Training History</h2></div><span>{historyCount}</span></div>
+        <div className="portal-panel-heading"><div><p>Service record</p><h2>Recent training history</h2></div><span>{history.length}</span></div>
         <div className="command-v2-mini-list portal-training-list">
-          {historyRows.length ? historyRows.map((row: any) => {
-            const member = relationOne(row.personnel);
-            return <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}><div><strong>{row.title}</strong><span>{member?.display_name ?? "Personnel"} · {row.record_type}</span></div><div><strong>{row.verification_status}</strong><span>{row.completed_on ? dateLabel(row.completed_on) : row.provider}</span></div></Link>;
-          }) : <div className="portal-empty-state"><strong>No permanent training history recorded yet.</strong></div>}
+          {history.length ? history.map((item:any)=>{const member=one(item.personnel);return <Link key={item.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}>
+            <div><strong>{item.title}</strong><span>{member?.display_name ?? "Personnel"} · {item.record_type}</span></div>
+            <div><strong>{item.verification_status}</strong><span>{item.completed_on ?? item.provider ?? "On file"}</span></div>
+          </Link>}):<div className="portal-empty-state"><strong>No training history recorded.</strong></div>}
         </div>
       </section>
-
-      <div className="portal-training-grid">
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>FTO staffing</p><h2>Authorized FTOs</h2></div><span>{trainers.length}</span></div>
-          <div className="command-v2-mini-list portal-training-list">
-            {trainers.length ? trainers.map((trainer: any) => <Link key={trainer.id} href={`/portal/command/personnel/${trainer.personnelId}/training`}><div><strong>{trainer.callSign ?? trainer.personnelId} · {trainer.displayName}</strong><span>{trainer.rank} · FTO Authorized</span></div><div><strong>{trainer.activeTrainees}</strong><span>Active trainee{trainer.activeTrainees === 1 ? "" : "s"}</span></div></Link>) : <div className="portal-empty-state"><strong>No current FTO certifications found.</strong></div>}
-          </div>
-        </section>
-
-        <section className="portal-panel portal-training-certification-launcher">
-          <div className="portal-panel-heading"><div><p>Qualifications</p><h2>Certification Center</h2></div><span>{pendingRows.length} pending</span></div>
-          <div className="command-v2-action-row"><Link className="portal-button portal-button--primary" href="/portal/command/certifications">Open Certification Center</Link><Link className="portal-button portal-button--secondary" href="/portal/command/approvals#certification-requests">Pending Requests</Link></div>
-        </section>
-
-        <section className="portal-panel">
-          <div className="portal-panel-heading"><div><p>Readiness</p><h2>Expiring within 90 days</h2></div><span>{expiringRows.length}</span></div>
-          <div className="command-v2-mini-list portal-training-list">
-            {expiringRows.length ? expiringRows.slice(0, 8).map((row: any) => {
-              const member = relationOne(row.personnel_profiles);
-              return <Link key={row.id} href={`/portal/command/personnel/${member?.personnel_id ?? ""}/training`}><div><strong>{row.name}</strong><span>{member?.display_name ?? "Personnel"}</span></div><div><strong>{dateLabel(row.expires_on)}</strong><span>Expires</span></div></Link>;
-            }) : <div className="portal-empty-state"><strong>No certifications expire within 90 days.</strong></div>}
-          </div>
-        </section>
-      </div>
     </PortalShell>
   );
 }
