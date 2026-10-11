@@ -34,10 +34,10 @@ export function CommandPortalTour(){
   let active=true;
   async function init(){
    const {data:{user}}=await createClient().auth.getUser();
-   if(!active||!user||sessionStorage.getItem("lscso-command-tour-signed-in")!==user.id)return;
+   if(!active||!user)return;
    const {data,error}=await (createClient() as any).from("command_tour_progress").select("tour_version,current_step,completed_at").eq("auth_user_id",user.id).maybeSingle();
    if(!active||error)return;
-   if(data?.tour_version===VERSION&&data.completed_at){sessionStorage.removeItem("lscso-command-tour-signed-in");return;}
+   if(data?.tour_version===VERSION&&data.completed_at){return;}
    setStep(data?.tour_version===VERSION?Math.max(0,Math.min(LESSONS.length-1,data.current_step)):0);
    setOpen(true);
   }
@@ -68,7 +68,7 @@ export function CommandPortalTour(){
    const {data:{user}}=await createClient().auth.getUser();if(!user)throw new Error("Sign in required");
    const {error}=await (createClient() as any).from("command_tour_progress").upsert({auth_user_id:user.id,tour_version:VERSION,current_step:next,completed_at:finish?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:"auth_user_id"});
    if(error)throw error;
-   if(finish){sessionStorage.removeItem("lscso-command-tour-signed-in");setOpen(false);}
+   if(finish){setOpen(false);}
    else setStep(next);
   }catch{setMessage("Progress could not be saved. Check your connection and retry.");}
   finally{setBusy(false);}
