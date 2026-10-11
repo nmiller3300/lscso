@@ -22,7 +22,7 @@ const LESSONS:Lesson[] = [
   {title:"Your own personnel office",href:"/portal/my-office",selector:'a[href="/portal/my-office"]',why:"My Info is the member-facing view of records, requests, documents, qualifications, and leave.",leadership:"Command staff are also subject to department standards. Keep personal records accurate and follow the same approved processes.",practice:"Open My Info and find your personal documents and requests.",question:"Do department leaders still follow normal personnel procedures?",answers:["Yes, including documentation and accountability","No, Command is exempt","Only when supervised"],correct:0}
 ];
 
-const VERSION="leadership-v2";
+const VERSION="leadership-v3";
 const TARGETS=new Set(["LS-002","LS-004"]);
 type Rect={top:number;left:number;width:number;height:number};
 type Task={ selector:string; instruction:string; explain:string; destination?:string; fallback?:string; };
@@ -81,7 +81,7 @@ export function CommandPortalTour(){
   const refresh=()=>{
    const preferred=document.querySelector<HTMLElement>(`.portal-navigation ${selector}`)||document.querySelector<HTMLElement>(selector);
    const element=preferred|| (phase==="explore"&&task.fallback?document.querySelector<HTMLElement>(task.fallback):null);
-   setTargetFound(Boolean(element));
+   setTargetFound(Boolean(preferred));
    if(!element){setRect(null);return}
    const r=element.getBoundingClientRect();
    if(r.width&&r.height)setRect({top:Math.max(4,r.top-4),left:Math.max(4,r.left-4),width:r.width+8,height:r.height+8});
