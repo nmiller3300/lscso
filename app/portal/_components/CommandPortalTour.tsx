@@ -21,76 +21,115 @@ const LESSONS:Lesson[] = [
   {title:"Administration and access",href:"/portal/command/administration",selector:'a[href="/portal/command/administration"]',why:"Administration includes account management and other high-impact operations.",leadership:"Use least privilege, identify the person and reason, and preserve an audit trail. Some functions remain restricted even to Command.",practice:"Locate account controls but do not create, deactivate or reset accounts.",question:"What is the safe way to change a member's access?",answers:["Share an existing login","Give every employee Executive access","Use an authorized, auditable account workflow"],correct:2},
   {title:"Your own personnel office",href:"/portal/my-office",selector:'a[href="/portal/my-office"]',why:"My Info is the member-facing view of records, requests, documents, qualifications, and leave.",leadership:"Command staff are also subject to department standards. Keep personal records accurate and follow the same approved processes.",practice:"Open My Info and find your personal documents and requests.",question:"Do department leaders still follow normal personnel procedures?",answers:["Yes, including documentation and accountability","No, Command is exempt","Only when supervised"],correct:0}
 ];
+
 const VERSION="leadership-v2";
 const TARGETS=new Set(["LS-002","LS-004"]);
 type Rect={top:number;left:number;width:number;height:number};
+type Task={ selector:string; instruction:string; explain:string; destination?:string; fallback?:string; };
+const TASKS:Record<number,Task>={
+ 0:{selector:'a[href="/portal/notifications#action-required"]',instruction:"Find the Action Center shortcut and open it.",explain:"The Action Center consolidates work needing a response. Reviewing an item is different from deciding it.",destination:"/portal/notifications",fallback:".portal-page-heading"},
+ 1:{selector:'a[href="#personnel-requests"]',instruction:"Click Personnel requests to jump to its review queue.",explain:"Here you inspect requests assigned to you, their status and any routing. During training, never press Approve or Deny.",destination:"#personnel-requests",fallback:".portal-page-heading"},
+ 2:{selector:'a[href="/portal/command/personnel/roster"]',instruction:"Open the Department Roster using the highlighted button.",explain:"Compare personnel identity, callsign and employment status. Use records rather than guessing based on a name.",destination:"/portal/command/personnel/roster",fallback:".portal-page-heading"},
+ 3:{selector:".portal-page-heading",instruction:"Examine the career and promotions page. Find its case-review controls and current status.",explain:"A documented review with training and history comes before a rank decision."},
+ 4:{selector:'a[href="/portal/command/applications/editor"]',instruction:"Open the Recruitment Application Editor to learn where application questions are maintained.",explain:"Separate application form management from live applicant decisions. Do not save a change during orientation.",destination:"/portal/command/applications/editor",fallback:".portal-page-heading"},
+ 5:{selector:'a[href="/portal/command/guardians"]',instruction:"Use the Guardian Workspace shortcut in Supervision to inspect where oversight records live.",explain:"Supervision connects personnel oversight to documented follow-ups and Guardians.",destination:"/portal/command/guardians",fallback:".portal-page-heading"},
+ 6:{selector:"#guardian-record-directory-title",instruction:"Find Search Existing Records. This is where you research historical Guardians.",explain:"Read findings and responses before taking action. Creating or approving one is not part of this tour.",fallback:".portal-page-heading"},
+ 7:{selector:'a[href="/portal/command/certifications"]',instruction:"Click Open Certification Center to see how qualifications are reviewed.",explain:"This is how you check current and pending certifications; starting training is a separate live action.",destination:"/portal/command/certifications",fallback:".portal-page-heading"},
+ 8:{selector:".portal-page-heading",instruction:"Review the Command Orders interface and find its acknowledgement details.",explain:"A directive creates a formal obligation. Do not issue an order as an exercise."},
+ 9:{selector:".portal-page-heading",instruction:"Locate the Department Announcements publishing area, without posting.",explain:"Verify audience, wording and distribution before a live Discord announcement."},
+ 10:{selector:".portal-page-heading",instruction:"Locate public information controls. Do not publish a PSA during the tour.",explain:"Public notices should be accurate, approved and free of protected personnel details."},
+ 11:{selector:'a[href="/portal/command/approvals"]',instruction:"Inspect the administrative workspace. Follow the highlighted shortcut to Approvals.",explain:"Administrative authority is limited and auditable. Account changes must follow the authorized process.",destination:"/portal/command/approvals",fallback:".portal-page-heading"},
+ 12:{selector:".portal-page-heading",instruction:"Find your personnel information, documents and requests.",explain:"Leadership has the same obligation to maintain accurate records and follow department process."}
+};
 export function CommandPortalTour(){
- const profile=usePortalProfile(), pathname=usePathname(),router=useRouter();
+ const profile=usePortalProfile(),pathname=usePathname(),router=useRouter();
  const eligible=TARGETS.has(profile.personnel_id);
- const [open,setOpen]=useState(false),[step,setStep]=useState(0),[rect,setRect]=useState<Rect|null>(null),[selected,setSelected]=useState<number|null>(null),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);
- const lesson=LESSONS[step];
+ const [open,setOpen]=useState(false),[step,setStep]=useState(0),[phase,setPhase]=useState<"navigate"|"explore"|"done">("navigate"),[rect,setRect]=useState<Rect|null>(null),[targetFound,setTargetFound]=useState(false),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);
+ const lesson=LESSONS[step],task=TASKS[step];
+ const navSelector=`a[href="${lesson.href}"]`;
  useEffect(()=>{
-  if(!eligible)return;
-  let active=true;
+  if(!eligible)return;let active=true;
   async function init(){
    const {data:{user}}=await createClient().auth.getUser();
    if(!active||!user)return;
    const {data,error}=await (createClient() as any).from("command_tour_progress").select("tour_version,current_step,completed_at").eq("auth_user_id",user.id).maybeSingle();
-   if(!active||error)return;
-   if(data?.tour_version===VERSION&&data.completed_at){return;}
-   setStep(data?.tour_version===VERSION?Math.max(0,Math.min(LESSONS.length-1,data.current_step)):0);
-   setOpen(true);
+   if(!active||error){if(active&&error)setMessage("The tour could not load. Please refresh.");return;}
+   if(data?.tour_version===VERSION&&data.completed_at)return;
+   const next=data?.tour_version===VERSION?Math.max(0,Math.min(LESSONS.length-1,data.current_step)):0;
+   setStep(next);setPhase(location.pathname===LESSONS[next].href?"explore":"navigate");setOpen(true);
   }
-  void init();
-  return()=>{active=false;};
+  void init();return()=>{active=false};
  },[eligible]);
- useEffect(()=>{setSelected(null);setMessage("");},[step]);
  useEffect(()=>{
   if(!open)return;
-  if(pathname!==lesson.href)router.push(lesson.href);
- },[open,lesson.href,pathname,router]);
+  if(phase==="navigate"&&pathname===lesson.href)setPhase("explore");
+  if(phase==="explore"&&task.destination&&pathname!==lesson.href) {
+   const expected=task.destination.split("#")[0];
+   if((expected&&pathname===expected)||(!expected&&location.hash===task.destination))setPhase("done");
+  }
+ },[open,phase,pathname,lesson.href,task.destination]);
  useEffect(()=>{
-  if(!open)return;
-  let frame=0;
+  if(!open||phase!=="explore"||!task.destination?.startsWith("#"))return;
+  if(location.hash===task.destination)setPhase("done");
+  const check=()=>{if(location.hash===task.destination)setPhase("done")};
+  window.addEventListener("hashchange",check);return()=>window.removeEventListener("hashchange",check);
+ },[open,phase,task.destination]);
+ useEffect(()=>{
+  if(!open||phase==="done")return;
+  const selector=phase==="navigate"?navSelector:task.selector;
+  let frame=0;let observer:MutationObserver|null=null;
   const refresh=()=>{
-   const target=document.querySelector<HTMLElement>(`.portal-navigation ${lesson.selector}`) || document.querySelector<HTMLElement>(`.portal-mobile-menu-groups ${lesson.selector}`) || document.querySelector<HTMLElement>(".portal-page-heading");
-   if(target){const r=target.getBoundingClientRect();setRect({top:Math.max(4,r.top-5),left:Math.max(4,r.left-5),width:r.width+10,height:r.height+10});}
+   const preferred=document.querySelector<HTMLElement>(`.portal-navigation ${selector}`)||document.querySelector<HTMLElement>(selector);
+   const element=preferred|| (phase==="explore"&&task.fallback?document.querySelector<HTMLElement>(task.fallback):null);
+   setTargetFound(Boolean(element));
+   if(!element){setRect(null);return}
+   const r=element.getBoundingClientRect();
+   if(r.width&&r.height)setRect({top:Math.max(4,r.top-4),left:Math.max(4,r.left-4),width:r.width+8,height:r.height+8});
    else setRect(null);
   };
-  const run=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(refresh);};
-  run();window.addEventListener("resize",run);window.addEventListener("scroll",run,true);
-  const observer=new MutationObserver(run);observer.observe(document.body,{childList:true,subtree:true});
-  return()=>{observer.disconnect();window.removeEventListener("resize",run);window.removeEventListener("scroll",run,true);cancelAnimationFrame(frame);};
- },[open,pathname,lesson.selector]);
- const save=useCallback(async(next:number,finish=false)=>{
-  setBusy(true);
+  const run=()=>{cancelAnimationFrame(frame);frame=requestAnimationFrame(refresh)};
+  run();window.addEventListener("scroll",run,true);window.addEventListener("resize",run);
+  observer=new MutationObserver(run);observer.observe(document.body,{childList:true,subtree:true});
+  return()=>{observer?.disconnect();cancelAnimationFrame(frame);window.removeEventListener("scroll",run,true);window.removeEventListener("resize",run)};
+ },[open,phase,pathname,navSelector,task.selector,task.fallback]);
+ useEffect(()=>{
+  if(!open)return;
+  const handle=(event:MouseEvent)=>{
+   const el=event.target instanceof Element?event.target.closest("a,button"):null;
+   if(!el)return;
+   if(phase==="navigate"&&el.matches(navSelector)){setPhase("explore");setMessage("");}
+   else if(phase==="explore"&&task.destination&&el.matches(task.selector)){setPhase("done");setMessage("");}
+  };
+  document.addEventListener("click",handle,true);return()=>document.removeEventListener("click",handle,true);
+ },[open,phase,navSelector,task.selector,task.destination]);
+ const advance=useCallback(async()=>{
+  setBusy(true);setMessage("");
   try{
-   const {data:{user}}=await createClient().auth.getUser();if(!user)throw new Error("Sign in required");
+   const {data:{user}}=await createClient().auth.getUser();if(!user)throw Error("You must be signed in.");
+   const finish=step===LESSONS.length-1,next=Math.min(step+1,LESSONS.length-1);
    const {error}=await (createClient() as any).from("command_tour_progress").upsert({auth_user_id:user.id,tour_version:VERSION,current_step:next,completed_at:finish?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:"auth_user_id"});
    if(error)throw error;
-   if(finish){setOpen(false);}
-   else setStep(next);
-  }catch{setMessage("Progress could not be saved. Check your connection and retry.");}
+   if(finish)setOpen(false);
+   else{setStep(next);setPhase("navigate");setRect(null);}
+  }catch{setMessage("Unable to save your progress; try again.");}
   finally{setBusy(false);}
- },[]);
+ },[step]);
  if(!open||!eligible)return null;
- const answerOk=selected===lesson.correct;
- return <div className="lscso-leadership-tour" role="dialog" aria-modal="true" aria-label="LSCSO Command leadership orientation">
+ const navigate=phase==="navigate";
+ return <div className="lscso-leadership-tour" role="region" aria-label="LSCSO guided leadership training">
   {rect?<div className="lscso-tour-spotlight" style={{top:rect.top,left:rect.left,width:rect.width,height:rect.height}} aria-hidden="true"/>:<div className="lscso-tour-shade" aria-hidden="true"/>}
-  <section className="lscso-tour-card">
-   <div className="lscso-tour-kicker">OFFICE OF THE SHERIFF · LEADERSHIP ORIENTATION</div>
-   <div className="lscso-tour-track"><div style={{width:`${(step+1)/LESSONS.length*100}%`}}/></div>
-   <p className="lscso-tour-counter">Section {step+1} of {LESSONS.length} · {profile.rank}</p>
+  <section className="lscso-tour-card" aria-live="polite">
+   <div className="lscso-tour-kicker">OFFICE OF THE SHERIFF · INTERACTIVE COMMAND TRAINING</div>
+   <div className="lscso-tour-track"><div style={{width:`${(step+(phase==="done"?1:phase==="explore"?.5:0))/LESSONS.length*100}%`}}/></div>
+   <p className="lscso-tour-counter">Module {step+1} of {LESSONS.length} · {phase==="navigate"?"1. Open the section":phase==="explore"?"2. Explore the feature":"3. Section complete"}</p>
    <h2>{lesson.title}</h2>
-   <p>{lesson.why}</p>
-   <div className="lscso-tour-leadership"><strong>Your responsibility as Command</strong><p>{lesson.leadership}</p></div>
-   <p className="lscso-tour-practice"><strong>On-screen exercise:</strong> {lesson.practice}</p>
-   <p className="lscso-tour-question">{lesson.question}</p>
-   <div className="lscso-tour-answers">{lesson.answers.map((answer,i)=><button type="button" key={answer} aria-pressed={selected===i} className={selected===i?"selected":""} onClick={()=>setSelected(i)}>{answer}</button>)}</div>
-   {selected!==null&&<p role="status" className={answerOk?"lscso-tour-correct":"lscso-tour-incorrect"}>{answerOk?"Correct. This is how we protect personnel and uphold department standards.":"Not quite. Review the leadership guidance and try another answer."}</p>}
+   {navigate?<><p>First, click the highlighted <strong>{lesson.title}</strong> link in the actual portal menu.</p><p>You will be taken to the live workspace, where the next spotlight demonstrates an actual feature.</p></>:phase==="explore"?<><p>{lesson.why}</p><div className="lscso-tour-leadership"><strong>How Command uses this</strong><p>{lesson.leadership}</p></div><div className="lscso-tour-practice"><strong>Do this now:</strong> {task.instruction}</div><p>{task.explain}</p></>:<><h3>Section explored</h3><p>{task.explain}</p><p>You can move on once you're comfortable finding and using this part of the portal.</p></>}
    {message&&<p role="alert">{message}</p>}
-   <div className="lscso-tour-actions"><button type="button" disabled={step===0||busy} onClick={()=>void save(step-1)}>Previous</button><button type="button" className="primary" disabled={!answerOk||busy} onClick={()=>void save(Math.min(step+1,LESSONS.length-1),step===LESSONS.length-1)}>{busy?"Saving…":step===LESSONS.length-1?"Complete orientation":"Continue →"}</button></div>
-   <small>Answers are required for progress. This tour cannot submit forms or change personnel records. Completion is saved to your LSCSO account.</small>
+   <div className="lscso-tour-actions">
+    <button type="button" onClick={()=>{if(phase==="navigate"){router.push(lesson.href);setPhase("explore")}else if(phase==="explore")setPhase("navigate");else setPhase("explore")}}>{navigate?"Open section for me":phase==="done"?"Review again":"Back to menu step"}</button>
+    {phase==="explore"&&!task.destination?<button type="button" className="primary" onClick={()=>setPhase("done")}>I've located this feature</button>:phase==="explore"&&!targetFound?<button type="button" className="primary" onClick={()=>setPhase("done")}>This control isn't available</button>:phase==="done"?<button type="button" className="primary" disabled={busy} onClick={()=>void advance()}>{busy?"Saving…":step===LESSONS.length-1?"Finish orientation":"Next module →"}</button>:null}
+   </div>
+   <small>This is a guided practice tour. Click highlighted controls directly; it will never automatically submit approvals, publish notices, or modify personnel records. Completed modules are saved to your LSCSO account.</small>
   </section>
   <style jsx global>{`
    .lscso-leadership-tour{position:fixed;inset:0;z-index:99990;pointer-events:none;font-family:inherit}
@@ -103,9 +142,7 @@ export function CommandPortalTour(){
    .lscso-tour-card h2{font-size:23px;color:#fff;margin:9px 0}
    .lscso-tour-card p{line-height:1.5;font-size:14px}
    .lscso-tour-leadership{border-left:3px solid #cfac76;padding:8px 12px;background:#1c303a;border-radius:5px;margin:14px 0}.lscso-tour-leadership strong{color:#f0d09a}.lscso-tour-leadership p{margin:6px 0}
-   .lscso-tour-practice{background:#22343d;padding:10px;border-radius:8px}.lscso-tour-question{font-weight:750;color:white}
-   .lscso-tour-answers{display:grid;gap:7px}.lscso-tour-answers button{padding:11px;text-align:left;border:1px solid #546775;border-radius:8px;background:#182933;color:#fff;cursor:pointer}.lscso-tour-answers button.selected{border-color:#e3c186;background:#354436}
-   .lscso-tour-correct{color:#a8ecc0}.lscso-tour-incorrect{color:#f1c29e}
+   .lscso-tour-practice{background:#22343d;padding:12px;border-radius:8px;line-height:1.5;font-size:14px}.lscso-tour-practice strong{color:#f0d09a}
    .lscso-tour-actions{display:flex;justify-content:space-between;gap:12px;margin:16px 0}.lscso-tour-actions button{border-radius:8px;border:1px solid #81909c;padding:11px 16px;color:#fff;background:#243540;font-weight:700;cursor:pointer}.lscso-tour-actions button.primary{background:#d9b579;border-color:#d9b579;color:#14212a}.lscso-tour-actions button:disabled{opacity:.4;cursor:not-allowed}
    .lscso-tour-card small{color:#a9b6c0;font-size:11px;line-height:1.5;display:block}
    @media(max-width:780px){.lscso-tour-card{right:12px;bottom:12px;max-height:73vh;padding:15px}.lscso-tour-card h2{font-size:19px}}
