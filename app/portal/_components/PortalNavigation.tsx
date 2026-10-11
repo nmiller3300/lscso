@@ -20,7 +20,8 @@ const commandNavigation: NavigationItem[] = [
   { id:"applications",href:"/portal/command/applications",label:"Recruitment",mobileLabel:"Recruitment",glyph:"AP",section:"Personnel Operations",detail:"Applications and hiring" },
   { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Personnel Operations",detail:"Personnel oversight" },
   { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Personnel Operations",detail:"Create, review, and track Guardians" },
-  { id:"training",href:"/portal/command/training",label:"Training & FTO",mobileLabel:"Training",glyph:"TR",section:"Personnel Operations",detail:"Training and FTO",matches:["certifications"] },
+  { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Personnel Operations",detail:"Personnel development" },
+  { id:"certifications",href:"/portal/command/administration/structure",label:"Divisions & Assignments",mobileLabel:"Divisions",glyph:"CE",section:"Personnel Operations",detail:"Organizational divisions" },
   { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
   { id:"announcements",href:"/portal/command/announcements",label:"Department Announcements",mobileLabel:"Announcements",glyph:"AN",section:"Department",detail:"Publish official Discord notices" },
   { id:"psa",href:"/portal/command/psa",label:"Public Information",mobileLabel:"Public Info",glyph:"PS",section:"Department",detail:"PSAs and notices" },
@@ -33,7 +34,7 @@ const supervisorNavigation: NavigationItem[] = [
   { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Work",detail:"Create and manage authorized Guardians" },
   { id:"promotions",href:"/portal/command/promotions",label:"Promotion Recommendations",mobileLabel:"Promotions",glyph:"UP",section:"Work",detail:"Recommend personnel" },
   { id:"approvals",href:"/portal/command/approvals",label:"Assigned Requests",mobileLabel:"Requests",glyph:"RQ",section:"Work",detail:"Pending requests" },
-  { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Work",detail:"Training and qualifications",matches:["certifications"] },
+  { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Work",detail:"Personnel development" },
   { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Department directives" },
   myInfo,
 ];
@@ -48,7 +49,7 @@ const attorneyNavigation: NavigationItem[] = [
 const deputyNavigation: NavigationItem[] = [
   myInfo,
   { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Personnel",detail:"Department directives" },
-  { id:"certifications",href:"/portal/my-office#certifications",label:"Certifications",mobileLabel:"Certs",glyph:"CE",section:"Personnel",detail:"Qualifications" },
+  { id:"certifications",href:"/portal/my-office#divisions",label:"Divisions",mobileLabel:"Divisions",glyph:"CE",section:"Personnel",detail:"Department assignments" },
   { id:"awards",href:"/portal/my-office#awards",label:"Medals & awards",mobileLabel:"Awards",glyph:"AW",section:"Personnel",detail:"Recognition" },
   { id:"guardians",href:"/portal/my-office#documents",label:"My Documents",mobileLabel:"Documents",glyph:"MD",section:"Personnel",detail:"Personnel documents" },
   { id:"requests",href:"/portal/my-office#requests",label:"Requests & LOA",mobileLabel:"Requests",glyph:"RQ",section:"Personnel",detail:"Requests and leave" },
