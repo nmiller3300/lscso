@@ -142,7 +142,7 @@ export default async function PersonnelTrainingPage({ params }: PageProps) {
           <div className="training-history-list">
             {historyRows.length ? historyRows.map((item: any) => (
               <article key={item.id}>
-                <div className="training-history-list__mark">"TRN"</div>
+                <div className="training-history-list__mark">TRN</div>
                 <div>
                   <span>{item.record_type} · {item.category}</span>
                   <strong>{item.title}</strong>
