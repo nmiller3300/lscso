@@ -32,7 +32,7 @@ export function PersonnelRecordTabs({ personnelId, active }: { personnelId: stri
       description: "Assignment, access and professional readiness",
       items: [
         { id: "administration", label: "Administration", description: "Rank, assignments, callsign, access and leave", href: `${base}/administration`, glyph: "AD" },
-        { id: "training", label: "Training & Certifications", description: "FTO progress, training and qualifications", href: `${base}/training`, glyph: "TR" },
+        { id: "training", label: "Training History", description: "Personnel training records", href: `${base}/training`, glyph: "TR" },
       ],
     },
     {
