@@ -18,7 +18,7 @@ type Props = {
   personnel: PersonnelOption[];
 };
 
-const programs = ["Academy", "FTO", "Remedial", "Continuing Education"];
+const programs = ["Academy", "Remedial", "Continuing Education"];
 const phases = ["Orientation", "Observation", "Supervised Patrol", "Evaluation", "Remedial", "Release Review"];
 
 function label(person: PersonnelOption) {
@@ -28,13 +28,13 @@ function label(person: PersonnelOption) {
 export function TrainingAssignmentLauncher({ personnel }: Props) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [program, setProgram] = useState("FTO");
+  const [program, setProgram] = useState("Academy");
   const [traineeId, setTraineeId] = useState(personnel[0]?.id ?? "");
   const [trainerId, setTrainerId] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState("");
 
-  const trainers = useMemo(() => personnel.filter((person) => person.id !== traineeId && (program !== "FTO" || person.ftoQualified)), [personnel, program, traineeId]);
+  const trainers = useMemo(() => personnel.filter((person) => person.id !== traineeId), [personnel, program, traineeId]);
 
   useEffect(() => {
     if (!trainers.some((person) => person.id === trainerId)) setTrainerId(trainers[0]?.id ?? "");
@@ -81,12 +81,11 @@ export function TrainingAssignmentLauncher({ personnel }: Props) {
           <div className="portal-form-grid portal-form-grid--two">
             <label>Program<select value={program} onChange={(event) => setProgram(event.target.value)}>{programs.map((item) => <option key={item}>{item}</option>)}</select></label>
             <label>Trainee<select value={traineeId} onChange={(event) => setTraineeId(event.target.value)}>{personnel.map((person) => <option key={person.id} value={person.id}>{label(person)}</option>)}</select></label>
-            <label>{program === "FTO" ? "Field Training Officer" : "Trainer"}<select value={trainerId} onChange={(event) => setTrainerId(event.target.value)}>{trainers.map((person) => <option key={person.id} value={person.id}>{label(person)}</option>)}</select></label>
+            <label>"Trainer"<select value={trainerId} onChange={(event) => setTrainerId(event.target.value)}>{trainers.map((person) => <option key={person.id} value={person.id}>{label(person)}</option>)}</select></label>
             <label>Starting phase<input defaultValue="Orientation" list="training-start-phases" name="phase" required /></label>
           </div>
           <datalist id="training-start-phases">{phases.map((item) => <option key={item} value={item} />)}</datalist>
           <label>Assignment note <span>Optional</span><textarea name="notes" rows={3} /></label>
-          {program === "FTO" && !trainers.length ? <div className="portal-form-protection"><strong>No eligible FTO</strong><span>Issue a current Field Training Officer certification before assigning FTO training.</span></div> : null}
         </form>
       </PortalDialog>
       {notice ? <div className="portal-toast" role="status">{notice}</div> : null}
