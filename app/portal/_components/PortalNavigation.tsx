@@ -21,7 +21,7 @@ const commandNavigation: NavigationItem[] = [
   { id:"supervision",href:"/portal/command/supervision",label:"Supervision",mobileLabel:"Supervise",glyph:"SV",section:"Personnel Operations",detail:"Personnel oversight" },
   { id:"guardians",href:"/portal/command/guardians",label:"Guardian Workspace",mobileLabel:"Guardians",glyph:"GU",section:"Personnel Operations",detail:"Create, review, and track Guardians" },
   { id:"training",href:"/portal/command/training",label:"Training",mobileLabel:"Training",glyph:"TR",section:"Personnel Operations",detail:"Personnel development" },
-  { id:"certifications",href:"/portal/command/administration/structure",label:"Divisions & Assignments",mobileLabel:"Divisions",glyph:"CE",section:"Personnel Operations",detail:"Organizational divisions" },
+  { id:"certifications",href:"/portal/command/divisions",label:"Divisions & Assignments",mobileLabel:"Divisions",glyph:"CE",section:"Personnel Operations",detail:"Organizational divisions" },
   { id:"orders",href:"/portal/orders",label:"Command Orders",mobileLabel:"Orders",glyph:"CO",section:"Department",detail:"Internal directives" },
   { id:"announcements",href:"/portal/command/announcements",label:"Department Announcements",mobileLabel:"Announcements",glyph:"AN",section:"Department",detail:"Publish official Discord notices" },
   { id:"psa",href:"/portal/command/psa",label:"Public Information",mobileLabel:"Public Info",glyph:"PS",section:"Department",detail:"PSAs and notices" },
