@@ -16,12 +16,10 @@ export default async function CommandHomePage() {
 
   const supabase = await createClient() as any;
   const now = new Date();
-  const thirtyDays = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
   const fourteenDays = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000);
-  const [profilesResult, guardiansResult, certificationsResult, requestsResult, leaveResult, applicationsResult, promotionsResult] = await Promise.all([
+  const [profilesResult, guardiansResult, requestsResult, leaveResult, applicationsResult, promotionsResult] = await Promise.all([
     supabase.from("personnel_profiles").select("id,status,is_test_account,display_name,personnel_id"),
     supabase.from("guardian_records").select("id,status,record_type,subject_profile_id,follow_up_due_at,created_at,guardian_number,title,structured_fields").order("created_at", { ascending: false }),
-    supabase.from("certifications").select("id,profile_id,status,expires_on"),
     supabase.from("personnel_requests").select("id,request_number,requester_profile_id,status,request_type,subject,current_reviewer_profile_id,current_reviewer_label,routing_fallback,routing_stage,routing_label,created_at").order("created_at", { ascending: false }),
     supabase.from("leave_requests").select("id,status,profile_id,starts_on,expected_return_on,created_at").order("created_at", { ascending: false }),
     supabase.from("recruitment_applications").select("id,application_number,full_name,discord_username,status,submitted_at").order("submitted_at", { ascending: false }).limit(100),
@@ -31,7 +29,6 @@ export default async function CommandHomePage() {
   const dataIssues = [
     profilesResult.error ? "personnel" : null,
     guardiansResult.error ? "Guardians" : null,
-    certificationsResult.error ? "certifications" : null,
     requestsResult.error ? "personnel requests" : null,
     leaveResult.error ? "leave requests" : null,
     applicationsResult.error ? "applications" : null,
@@ -48,7 +45,6 @@ export default async function CommandHomePage() {
   const personnel = (profilesResult.data ?? []).filter((item: any) => allowedDecision(item.id));
   const names = new Map((profilesResult.data ?? []).map((item: any) => [item.id, item]));
   const guardians = guardiansResult.data ?? [];
-  const certifications = certificationsResult.data ?? [];
   const requests = requestsResult.data ?? [];
   const leave = leaveResult.data ?? [];
   const applications = applicationsResult.data ?? [];
@@ -68,12 +64,10 @@ export default async function CommandHomePage() {
   const pendingGuardians = guardians.filter((item: any) => allowedDecision(item.subject_profile_id) && !isEvaluationSchedule(item) && item.status === "Pending Approval");
   const pendingRequests = requests.filter(requestNeedsMyReview);
   const pendingLeave = leave.filter((item: any) => allowedDecision(item.profile_id) && ["Submitted", "In Review"].includes(item.status));
-  const pendingCertifications = certifications.filter((item: any) => allowedDecision(item.profile_id) && ["Requested", "Pending"].includes(item.status));
   const pendingApplications = applications.filter((item: any) => item.status === "Submitted");
   const followUps = guardians.filter((item: any) => allowedDecision(item.subject_profile_id) && !isEvaluationSchedule(item) && item.follow_up_due_at && new Date(item.follow_up_due_at) <= now && !["Acknowledged", "Closed"].includes(item.status));
-  const expiring = certifications.filter((item: any) => allowedDecision(item.profile_id) && item.status === "Current" && item.expires_on && new Date(item.expires_on) <= thirtyDays);
   const evaluationAttention = overdueEvaluations.length + dueSoonEvaluations.length;
-  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingCertifications.length + pendingApplications.length + promotions.length + followUps.length + evaluationAttention;
+  const attentionTotal = pendingGuardians.length + pendingRequests.length + pendingLeave.length + pendingApplications.length + promotions.length + followUps.length + evaluationAttention;
   const metric = (value: number, unavailable: boolean) => unavailable ? "—" : String(value).padStart(2, "0");
 
   return (
@@ -127,7 +121,7 @@ export default async function CommandHomePage() {
             <nav aria-label="Additional Command workspaces">
               <Link href="/portal/command/promotions">Promotion Review<b>→</b></Link>
               <Link href="/portal/command/guardians">Guardian Workspace<b>→</b></Link>
-              <Link href="/portal/command/training">Training & FTO<b>→</b></Link>
+              <Link href="/portal/command/training">Training<b>→</b></Link>
               <Link href="/portal/my-office">My Info<b>→</b></Link>
             </nav>
           </div>
