@@ -5,17 +5,16 @@ import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
 import { PortalDateField } from "./PortalDateField";
 
-type RequestKind="transfer"|"certification"|"record"|"legacy-promotion";
+type RequestKind="transfer"|"record"|"legacy-promotion";
 type RouteEvent={id:string;eventType:string;stageLabel:string;reviewerLabel:string|null;actorLabel:string|null;detail:string|null;createdAt:string};
 type PersonnelRequest={databaseId:string;id:string;kind:RequestKind;label:string;submitted:string;status:string;routingStage:string;routingLabel:string;reviewerLabel:string;requestedUnitName:string|null;events:RouteEvent[]};
 type DivisionOption={id:string;name:string};
 
 const requestTypes={
   transfer:{short:"DT",label:"Division transfer",description:"Request reassignment with chain-of-command routing.",routing:"Direct supervisor → Receiving division → Executive Command",databaseType:"Division Transfer"},
-  certification:{short:"CR",label:"Certification addition",description:"Submit proof and route it to Training for validation.",routing:"Training & Recruitment → Personnel file",databaseType:"Certification"},
   record:{short:"RR",label:"Record review",description:"Ask Personnel Command to review a possible record issue.",routing:"Executive Command → Attributed resolution",databaseType:"Other"},
 } as const;
-const createKinds=["transfer","certification","record"] as const;
+const createKinds=["transfer","record"] as const;
 const formatWhen=(value:string)=>new Date(value).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
 const nextAction=(request:PersonnelRequest)=>["Approved","Denied","Cancelled","Completed"].includes(request.status)?"No further action required":request.routingStage==="Supervisor Review"?"Awaiting supervisor review":request.routingStage==="Receiving Division Review"?"Awaiting receiving-division review":request.routingStage==="Training Review"?"Awaiting Training & Recruitment review":request.routingStage==="Executive Command"?"Awaiting Executive Command decision":"Awaiting routed review";
 
@@ -40,7 +39,7 @@ export function DeputyRequestCenter(){
     for(const event of eventsResult.data??[]){const list=eventMap.get(event.request_id)??[];list.push({id:event.id,eventType:event.event_type,stageLabel:event.stage_label,reviewerLabel:event.reviewer_label,actorLabel:event.actor_label,detail:event.detail,createdAt:event.created_at});eventMap.set(event.request_id,list);}
     setDivisions((unitsResult.data??[]).filter((unit:any)=>unit.name!==profile.division&&unit.name!=="Office of the Sheriff").map((unit:any)=>({id:String(unit.id),name:String(unit.name)})));
     setRequests((rows??[]).map((row:any)=>{
-      const kind:RequestKind=row.request_type==="Division Transfer"?"transfer":row.request_type==="Certification"?"certification":row.request_type==="Promotion"?"legacy-promotion":"record";
+      const kind:RequestKind=row.request_type==="Division Transfer"?"transfer":row.request_type==="Promotion"?"legacy-promotion":"record";
       const label=kind==="legacy-promotion"?"Legacy promotion request":requestTypes[kind].label;
       return {databaseId:row.id,id:`RQ-${String(row.request_number).padStart(4,"0")}`,kind,label,submitted:formatWhen(row.created_at),status:row.status,routingStage:row.routing_stage??"Routing pending",routingLabel:row.routing_label??"Routing pending",reviewerLabel:row.current_reviewer_label??(["Approved","Denied"].includes(row.status)?"Completed":"Command routing pending"),requestedUnitName:row.requested_unit_id?unitNames.get(String(row.requested_unit_id))??"Requested division":null,events:eventMap.get(row.id)??[]};
     }));
