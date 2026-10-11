@@ -11,7 +11,7 @@ export function TestAccountBanner() {
       <span>Test account</span>
       <div>
         <strong>This personnel record is reserved for workflow testing.</strong>
-        <p>Guardians, acknowledgments, requests, assignments, and certification actions here are excluded from official personnel reporting.</p>
+        <p>Guardians, acknowledgments, requests, and division assignments here are excluded from official personnel reporting.</p>
       </div>
     </section>
   );
