@@ -196,7 +196,8 @@ export function resolvePersonnelAuthority(input: AuthorityResolutionInput): Auth
     actorRank: actor.rank,
     actorTier: actor.tier,
     scopes: uniqueScopes(scopes),
-    targetIsExecutive: rankLevel[target.rank] >= rankLevel.Undersheriff,
+    // Assistant Sheriff and above are protected from subordinate command actions.
+    targetIsExecutive: rankLevel[target.rank] >= rankLevel["Assistant Sheriff"],
   };
 
   return {
