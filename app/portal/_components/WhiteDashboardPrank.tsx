@@ -11,8 +11,8 @@ export function WhiteDashboardPrank(){
   if(profile.personnel_id!=="LS-002")return;
   try {if(sessionStorage.getItem(KEY))return;sessionStorage.setItem(KEY,"seen");}catch{return;}
   const start=window.setTimeout(()=>setStage("breach"),1300);
-  const reveal=window.setTimeout(()=>setStage("reveal"),7400);
-  const end=window.setTimeout(()=>setStage("hidden"),16000);
+  const reveal=window.setTimeout(()=>setStage("reveal"),9000);
+  const end=window.setTimeout(()=>setStage("hidden"),22000);
   return()=>{window.clearTimeout(start);window.clearTimeout(reveal);window.clearTimeout(end);};
  },[profile.personnel_id]);
  if(stage==="hidden"||profile.personnel_id!=="LS-002")return null;
@@ -20,17 +20,17 @@ export function WhiteDashboardPrank(){
   <section className={stage==="breach"?"white-prank-card is-breach":"white-prank-card is-reveal"}>
    <button type="button" className="white-prank-dismiss" aria-label="Dismiss prank" onClick={()=>setStage("hidden")}>×</button>
    {stage==="breach"?<>
-    <div className="white-prank-signal">UNAUTHORIZED ACCESS SIMULATION · 00:06</div>
-    <h2>OVERRIDE DETECTED</h2>
-    <p>Command interface integrity check failed.</p>
-    <div className="white-prank-lines"><span>› probing authority: UNDERSHERIFF</span><span>› verifying sheriff override...</span><span>› injecting classified nonsense...</span><span>› loading suspiciously dramatic screen...</span></div>
+    <div className="white-prank-signal">CRITICAL SECURITY ALERT · EXECUTIVE CHANNEL</div>
+    <h2>COMMAND ACCESS COMPROMISED</h2>
+    <p>Undersheriff authorization has been overridden. Attempting to regain control…</p>
+    <div className="white-prank-lines"><span>› target identified: UNDERSHERIFF MICHAEL WHITE</span><span>› executive hierarchy: SHERIFF OVERRIDE ACCEPTED</span><span>› downloading 47 terabytes of questionable leadership decisions...</span><span>› authenticating notorious intruder: SHERIFF MILLER</span></div>
     <div className="white-prank-meter"><span/></div>
    </>:<>
-    <div className="white-prank-signal">SURPRISE, UNDERSHERIFF.</div>
-    <h2>YOU'VE BEEN PRANKED 😂</h2>
-    <p>Nice try, White. — Sheriff Miller</p>
-    <small>Nothing was accessed, changed, or hacked. Your dashboard is completely fine.</small>
-    <button className="white-prank-ok" type="button" onClick={()=>setStage("hidden")}>Alright, you got me</button>
+    <div className="white-prank-signal">ACCESS OVERRIDE COMPLETE · SHERIFF MILLER</div>
+    <h2>YOU JUST GOT ABSOLUTELY OWNED 😂</h2>
+    <p>White, you were two seconds away from calling the IT department. I AM the IT department. — Sheriff Miller</p>
+    <small>PRANK REVEAL: This was a harmless visual gag. Nothing was accessed, modified, deleted, or hacked.</small>
+    <button className="white-prank-ok" type="button" onClick={()=>setStage("hidden")}>Fine, you got me 💀</button>
    </>}
   </section>
   <style jsx global>{`
@@ -43,7 +43,7 @@ export function WhiteDashboardPrank(){
     .white-prank-card p{font-size:16px;line-height:1.5;color:#d8e4e1}
     .white-prank-lines{text-align:left;background:#111a1f;border-radius:8px;padding:15px;display:grid;gap:7px;font-size:12px;color:#e4a9a9;margin-top:16px}
     .white-prank-meter{height:7px;background:#303b42;border-radius:9px;overflow:hidden;margin-top:18px}
-    .white-prank-meter span{display:block;height:100%;background:#eb5f73;animation:white-prank-load 6s linear forwards}
+    .white-prank-meter span{display:block;height:100%;background:#eb5f73;animation:white-prank-load 7.5s linear forwards}
     .white-prank-dismiss{position:absolute;right:12px;top:8px;background:none;border:0;color:#fff;font-size:24px;cursor:pointer}
     .white-prank-ok{margin-top:18px;background:#4bd8a1;border:0;border-radius:8px;padding:10px 15px;color:#062218;font-weight:800;cursor:pointer}
     .white-prank-card small{display:block;color:#b9d0c7;margin-top:10px}
