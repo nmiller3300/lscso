@@ -56,7 +56,7 @@ export function CommandPortalTour(){
    if(!active||error){if(active&&error)setMessage("The tour could not load. Please refresh.");return;}
    if(data?.tour_version===VERSION&&data.completed_at)return;
    const next=data?.tour_version===VERSION?Math.max(0,Math.min(LESSONS.length-1,data.current_step)):0;
-   setStep(next);setPhase(location.pathname===LESSONS[next].href?"explore":"navigate");setOpen(true);
+   setStep(next);const savedPhase=sessionStorage.getItem("lscso-tour-phase:"+user.id+":"+next);setPhase(savedPhase==="done"?"done":location.pathname===LESSONS[next].href?"explore":"navigate");setOpen(true);
   }
   void init();return()=>{active=false};
  },[eligible]);
@@ -98,10 +98,10 @@ export function CommandPortalTour(){
    const el=event.target instanceof Element?event.target.closest("a,button"):null;
    if(!el)return;
    if(phase==="navigate"&&el.matches(navSelector)){setPhase("explore");setMessage("");}
-   else if(phase==="explore"&&task.destination&&el.matches(task.selector)){setPhase("done");setMessage("");}
+   else if(phase==="explore"&&task.destination&&el.matches(task.selector)){sessionStorage.setItem("lscso-tour-phase:"+profile.auth_user_id+":"+step,"done");setPhase("done");setMessage("");}
   };
   document.addEventListener("click",handle,true);return()=>document.removeEventListener("click",handle,true);
- },[open,phase,navSelector,task.selector,task.destination]);
+ },[open,phase,navSelector,task.selector,task.destination,profile.auth_user_id,step]);
  const advance=useCallback(async()=>{
   setBusy(true);setMessage("");
   try{
@@ -109,7 +109,7 @@ export function CommandPortalTour(){
    const finish=step===LESSONS.length-1,next=Math.min(step+1,LESSONS.length-1);
    const {error}=await (createClient() as any).from("command_tour_progress").upsert({auth_user_id:user.id,tour_version:VERSION,current_step:next,completed_at:finish?new Date().toISOString():null,updated_at:new Date().toISOString()},{onConflict:"auth_user_id"});
    if(error)throw error;
-   if(finish)setOpen(false);
+   sessionStorage.removeItem("lscso-tour-phase:"+user.id+":"+step);if(finish)setOpen(false);
    else{setStep(next);setPhase("navigate");setRect(null);}
   }catch{setMessage("Unable to save your progress; try again.");}
   finally{setBusy(false);}
