@@ -23,7 +23,7 @@ type Props = {
   activeRecords: ActiveTrainingRecord[];
 };
 
-const categories = ["Academy", "FTO", "Remedial", "Continuing Education", "Leadership", "Specialty", "Other"];
+const categories = ["Academy", "Remedial", "Continuing Education", "Leadership", "Specialty", "Other"];
 const statuses = ["Not Started", "In Progress", "Needs Improvement", "Complete", "Released", "Withdrawn"];
 
 function TrainingProgressEditor({ record, onSaved }: { record: ActiveTrainingRecord; onSaved: (message: string) => void }) {
@@ -181,13 +181,13 @@ export function PersonnelTrainingControls({ memberId, memberName, currentProfile
         onClose={() => { if (!submitting) setRequirementOpen(false); }}
         eyebrow="Entry training"
         title={`Training Requirement · ${memberName}`}
-        description="Record whether Academy or FTO is required, completed, waived, or not applicable."
+        description="Record whether Academy training is required, completed, waived, or not applicable."
         dismissOnBackdrop={!submitting}
         footer={<><button className="portal-button portal-button--secondary" disabled={submitting} onClick={() => setRequirementOpen(false)} type="button">Cancel</button><button className="portal-button portal-button--primary" disabled={submitting} form="training-requirement-form" type="submit">{submitting ? "Saving…" : "Save Requirement"}</button></>}
       >
         <form className="portal-dialog-form" id="training-requirement-form" onSubmit={setRequirement}>
           <div className="portal-form-grid portal-form-grid--two">
-            <label>Requirement<select name="requirement"><option>Academy</option><option>FTO</option></select></label>
+            <label>Requirement<select name="requirement"><option>Academy</option></select></label>
             <label>Disposition<select name="disposition"><option>Required</option><option>In Progress</option><option>Completed</option><option>Not Required</option><option>Waived</option></select></label>
           </div>
           <label>Reason<textarea name="reason" required rows={4} placeholder="Example: Not Required — appointed at Command rank." /></label>
