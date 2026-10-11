@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { applicationLabel } from "@/lib/recruitment/application";
 
-const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const DEPARTMENT_COMMAND_RANKS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
 const EXECUTIVE_FALLBACK_RANKS = new Set(["Sheriff", "Undersheriff"]);
 
 export default async function CommandHomePage() {

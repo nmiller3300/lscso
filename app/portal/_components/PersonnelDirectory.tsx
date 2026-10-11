@@ -24,6 +24,7 @@ const FAVORITES_KEY = "lscso.command.favorite-personnel:v1";
 const RANK_ROLE_ORDER = [
   "Sheriff",
   "Undersheriff",
+  "Assistant Sheriff",
   "Major",
   "Captain",
   "1st Lieutenant",

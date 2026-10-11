@@ -7,8 +7,8 @@ import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createClient } from "@/lib/supabase/server";
 
 const WORKSPACE_TIERS=new Set(["Executive","Command","Supervisor","Preliminary"]);
-const COMMAND_INITIATORS=new Set(["Sheriff","Undersheriff","Major","Captain"]);
-const FINAL_DECIDERS=new Set(["Sheriff","Undersheriff","Major"]);
+const COMMAND_INITIATORS=new Set(["Sheriff","Undersheriff","Assistant Sheriff","Major","Captain"]);
+const FINAL_DECIDERS=new Set(["Sheriff","Undersheriff","Assistant Sheriff","Major"]);
 
 export default async function PromotionsPage({ searchParams }: { searchParams: Promise<{ personnel?: string }> }){
   const { personnel } = await searchParams;

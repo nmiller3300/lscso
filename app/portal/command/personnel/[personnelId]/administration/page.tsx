@@ -11,8 +11,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
 type PageProps = { params: Promise<{ personnelId: string }> };
-const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
-const DELEGATION_MANAGERS = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major"]);
+const DELEGATION_MANAGERS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
 const TERMINATION_AUTHORITY = new Set(["Sheriff", "Undersheriff"]);
 const OPEN_ENDED_RETURN = "9999-12-31";
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { usePortalProfile } from "./PortalProfileProvider";
 
-const ranks=["Recruit","Deputy","Deputy II","Deputy III","Master Deputy","Corporal","Sergeant","Lieutenant","1st Lieutenant","Captain","Major","Undersheriff","Sheriff"] as const;
+const ranks=["Recruit","Deputy","Deputy II","Deputy III","Master Deputy","Corporal","Sergeant","Lieutenant","1st Lieutenant","Captain","Major","Assistant Sheriff","Undersheriff","Sheriff"] as const;
 type PromotionCase={id:string;case_number:number;source_type:string;current_rank:string;requested_rank:string;statement:string;status:string;decision_notes:string|null;effective_at:string|null;created_at:string};
 const isOpen=(status:string)=>["Submitted","Under Review"].includes(status);
 const when=(value:string|null)=>value?new Date(value).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"}):"Not recorded";

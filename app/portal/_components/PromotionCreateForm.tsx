@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export type PromotionCandidate = { id:string; personnelId:string; displayName:string; rank:string; callSign:string|null };
-const ranks=["Recruit","Deputy","Deputy II","Deputy III","Master Deputy","Corporal","Sergeant","Lieutenant","1st Lieutenant","Captain","Major","Undersheriff","Sheriff"] as const;
+const ranks=["Recruit","Deputy","Deputy II","Deputy III","Master Deputy","Corporal","Sergeant","Lieutenant","1st Lieutenant","Captain","Major","Assistant Sheriff","Undersheriff","Sheriff"] as const;
 const rankLevel=(rank:string)=>ranks.indexOf(rank as (typeof ranks)[number]);
 
 export function PromotionCreateForm({actorRank,canInitiate,candidates,initialPersonnelId}:{actorRank:string;canInitiate:boolean;candidates:PromotionCandidate[];initialPersonnelId?:string}){

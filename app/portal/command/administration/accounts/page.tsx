@@ -4,7 +4,7 @@ import { PortalShell } from "../../../_components/PortalShell";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 
-const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Major", "Captain"]);
+const STANDING_ACCOUNT_ADMIN = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major", "Captain"]);
 
 export default async function AccountAdministrationPage() {
   const profile = await getCurrentPortalProfile();

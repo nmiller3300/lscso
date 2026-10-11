@@ -29,7 +29,7 @@ export const rankAccess = [
   },
   {
     tier: "Command",
-    ranks: ["Major", "Captain"],
+    ranks: ["Assistant Sheriff", "Major", "Captain"],
     scope: "Standing department-wide command authority; home assignment sets responsibility, not access boundaries.",
   },
   {

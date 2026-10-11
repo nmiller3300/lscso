@@ -72,6 +72,7 @@ export type AuthorityResolution = {
 const standingDepartmentRanks = new Set<LscsoRank>([
   "Sheriff",
   "Undersheriff",
+  "Assistant Sheriff",
   "Major",
   "Captain",
 ]);

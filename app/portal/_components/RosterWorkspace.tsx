@@ -27,6 +27,7 @@ const accessOptions: Array<AccessTier | "All"> = [
 const rankAccess: Record<string, AccessTier> = {
   Sheriff: "Executive",
   Undersheriff: "Executive",
+  "Assistant Sheriff": "Command",
   Major: "Command",
   Captain: "Command",
   "1st Lieutenant": "Command",

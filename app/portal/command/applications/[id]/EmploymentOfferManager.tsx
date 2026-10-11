@@ -19,7 +19,7 @@ export type RecruitmentOffer = {
   termination_reason: string | null;
 };
 
-const OFFER_RANKS = ["Sheriff","Undersheriff","Major","Captain","1st Lieutenant","Lieutenant","Sergeant","Corporal","Master Deputy","Deputy III","Deputy II","Deputy","Recruit"] as const;
+const OFFER_RANKS = ["Sheriff","Undersheriff","Assistant Sheriff","Major","Captain","1st Lieutenant","Lieutenant","Sergeant","Corporal","Master Deputy","Deputy III","Deputy II","Deputy","Recruit"] as const;
 type OfferRank = (typeof OFFER_RANKS)[number];
 type OfferWindow = "" | "24" | "48" | "72" | "168";
 

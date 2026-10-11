@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { getPersonnelProbationState } from "@/lib/personnel/probation";
 
-const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Major"]);
+const PERSONNEL_CHANGE_APPROVERS = new Set(["Sheriff", "Undersheriff", "Assistant Sheriff", "Major"]);
 const EXECUTIVE_REACTIVATORS = new Set(["Sheriff", "Undersheriff"]);
 const ACTIVE_TRAINING_STATUSES = new Set(["Not Started", "In Progress", "Needs Improvement"]);
 
