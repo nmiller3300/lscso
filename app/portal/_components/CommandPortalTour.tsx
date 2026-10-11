@@ -44,7 +44,7 @@ const TASKS:Record<number,Task>={
 export function CommandPortalTour(){
  const profile=usePortalProfile(),pathname=usePathname(),router=useRouter();
  const eligible=TARGETS.has(profile.personnel_id);
- const [open,setOpen]=useState(false),[step,setStep]=useState(0),[phase,setPhase]=useState<"navigate"|"explore"|"done">("navigate"),[rect,setRect]=useState<Rect|null>(null),[targetFound,setTargetFound]=useState(false),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);
+ const [open,setOpen]=useState(false),[loaded,setLoaded]=useState(false),[step,setStep]=useState(0),[phase,setPhase]=useState<"navigate"|"explore"|"done">("navigate"),[rect,setRect]=useState<Rect|null>(null),[targetFound,setTargetFound]=useState(false),[message,setMessage]=useState(""),[busy,setBusy]=useState(false);
  const lesson=LESSONS[step],task=TASKS[step];
  const navSelector=`a[href="${lesson.href}"]`;
  useEffect(()=>{
@@ -53,7 +53,7 @@ export function CommandPortalTour(){
    const {data:{user}}=await createClient().auth.getUser();
    if(!active||!user)return;
    const {data,error}=await (createClient() as any).from("command_tour_progress").select("tour_version,current_step,completed_at").eq("auth_user_id",user.id).maybeSingle();
-   if(!active||error){if(active&&error)setMessage("The tour could not load. Please refresh.");return;}
+   if(!active)return;setLoaded(true);if(error){setMessage("Unable to read tour progress. Use Start Training to retry.");return;}
    if(data?.tour_version===VERSION&&data.completed_at)return;
    const next=data?.tour_version===VERSION?Math.max(0,Math.min(LESSONS.length-1,data.current_step)):0;
    setStep(next);const savedPhase=sessionStorage.getItem("lscso-tour-phase:"+user.id+":"+next);setPhase(savedPhase==="done"?"done":location.pathname===LESSONS[next].href?"explore":"navigate");setOpen(true);
@@ -114,7 +114,8 @@ export function CommandPortalTour(){
   }catch{setMessage("Unable to save your progress; try again.");}
   finally{setBusy(false);}
  },[step]);
- if(!open||!eligible)return null;
+ if(!eligible)return null;
+ if(!open)return <button type="button" className="lscso-tour-launch" onClick={()=>{setStep(0);setPhase("navigate");setMessage("");setOpen(true);}} style={{position:"fixed",bottom:20,right:20,zIndex:99991,padding:"12px 18px",borderRadius:10,border:"1px solid #d9b579",background:"#152a36",color:"#f4d6a1",fontWeight:700,cursor:"pointer"}}>{loaded?"Start / Replay Leadership Training":"Start Leadership Training"}</button>;
  const navigate=phase==="navigate";
  return <div className="lscso-leadership-tour" role="region" aria-label="LSCSO guided leadership training">
   {rect?<div className="lscso-tour-spotlight" style={{top:rect.top,left:rect.left,width:rect.width,height:rect.height}} aria-hidden="true"/>:<div className="lscso-tour-shade" aria-hidden="true"/>}
