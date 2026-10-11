@@ -28,7 +28,7 @@ export default async function TrainingWorkspacePage() {
   const history = historyResult.data ?? [];
   const personnel = (personnelResult.data ?? []).map((member:any)=>({
     id:member.id,personnelId:member.personnel_id,displayName:member.display_name,
-    rank:member.rank,callSign:member.call_sign,ftoQualified:false
+    rank:member.rank,callSign:member.call_sign
   }));
   const attention = active.filter((item:any)=>item.status==="Needs Improvement").length;
   const one = (value:any)=>Array.isArray(value)?value[0]:value;
