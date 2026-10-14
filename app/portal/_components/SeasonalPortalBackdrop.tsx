@@ -6,7 +6,7 @@ import { PortalCinematicBackdrop } from "./PortalCinematicBackdrop";
 import { PortalResponsiveCinematicBackdrop } from "./PortalResponsiveCinematicBackdrop";
 
 export function SeasonalPortalBackdrop() {
-  const { active_theme, effects } = useSeasonalAppearance();
-  return active_theme === "halloween" && effects.liquid ? <SeasonalLiquidCanvas/> :
+  const { active_theme, effects, intensity } = useSeasonalAppearance();
+  return active_theme === "halloween" && effects.liquid ? <SeasonalLiquidCanvas intensity={intensity}/> :
     <><PortalCinematicBackdrop/><PortalResponsiveCinematicBackdrop/></>;
 }

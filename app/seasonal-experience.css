@@ -79,3 +79,31 @@ html[data-season-intensity=high] .seasonal-liquid-backdrop canvas{opacity:1}
 html[data-season-intensity=high] .seasonal-pumpkin{filter:drop-shadow(0 10px 35px #ef650b55)}
 
 .seasonal-admin__preview-note{border:1px solid rgba(244,148,62,.3);border-radius:14px;padding:16px 18px;color:#ffcc93;background:linear-gradient(110deg,rgba(76,29,94,.24),rgba(215,102,30,.09));font-size:13px;line-height:1.55}
+
+/* The liquid scene is an actual moving login backdrop rather than a fixed color layer. */
+html[data-season="halloween"] .portal-gateway--glow-login{
+  background:radial-gradient(circle at 22% 74%,rgba(68,24,82,.28),transparent 48%),#0b0711 !important;
+}
+html[data-season="halloween"] .portal-gateway--glow-login::after{
+  background:radial-gradient(ellipse at center,transparent 0 51%,rgba(4,2,10,.37) 94%),linear-gradient(180deg,rgba(4,2,8,.23),transparent 21%,transparent 79%,rgba(4,2,8,.3)) !important;
+}
+html[data-season="halloween"] .portal-gateway--glow-login>.seasonal-liquid-backdrop{
+  position:absolute;inset:0;z-index:1;width:100%;height:100%;opacity:1;
+}
+html[data-season="halloween"] .portal-gateway--glow-login .portal-glow-login{
+  background:transparent !important;
+}
+html[data-season="halloween"] .portal-glow-login__card{
+  background:radial-gradient(circle at 50% 40%,rgba(30,12,45,.89),rgba(7,6,15,.94) 68%) !important;
+}
+html[data-season="halloween"] .portal-gateway__brand{
+  background:linear-gradient(140deg,rgba(13,8,26,.5),rgba(14,6,23,.75)) !important;
+}
+/* Cooler, deeper moon to match the actual Halloween patch rather than bright lilac. */
+html[data-season="halloween"] .seasonal-moon__face{
+  background:radial-gradient(circle at 38% 30%,#b7a9b5,#897897 47%,#473550 92%);
+  box-shadow:0 0 35px rgba(104,51,139,.2),inset -22px -16px 40px rgba(19,8,33,.55);
+  opacity:.52;
+}
+html[data-season="halloween"] .seasonal-moon{filter:drop-shadow(0 0 28px rgba(122,56,155,.17))}
+html[data-season="halloween"] .seasonal-moon__cloud{opacity:.75}
