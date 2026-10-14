@@ -1,10 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { PublicSiteFrame } from "./_components/PublicSiteFrame";
+import { SeasonalExperience } from "./_components/SeasonalExperience";
+import { getSeasonalSettings } from "@/lib/seasonal/server";
 import "./globals.css";
 import "./public-premium-system.css";
 import "./public-header-glass-restore.css";
 import "./maintenance.css";
+import "./seasonal-experience.css";
 
 const geist = localFont({
   src: "./fonts/Geist.woff2",
@@ -50,10 +53,11 @@ export const viewport: Viewport = {
   themeColor: "#11110f",
 };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const season = await getSeasonalSettings();
   return (
-    <html lang="en" className={geist.variable}>
-      <body><PublicSiteFrame>{children}</PublicSiteFrame></body>
+    <html lang="en" className={geist.variable} data-season={season.active_theme} data-season-intensity={season.intensity}>
+      <body><SeasonalExperience initial={season}><PublicSiteFrame>{children}</PublicSiteFrame></SeasonalExperience></body>
     </html>
   );
 }
