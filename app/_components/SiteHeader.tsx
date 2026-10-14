@@ -1,5 +1,6 @@
-import { SeasonalLogo } from "./SeasonalExperience";
 "use client";
+
+import { SeasonalLogo } from "./SeasonalExperience";
 
 import Image from "next/image";
 import Link from "next/link";
