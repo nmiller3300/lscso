@@ -13,8 +13,4 @@ alter table public.site_seasonal_appearance enable row level security;
 revoke all on public.site_seasonal_appearance from anon, authenticated;
 insert into public.site_seasonal_appearance (id, active_theme)
 values ('global', 'halloween') on conflict (id) do nothing;
--- Logos are decorative/public assets only; uploads require the server-side Sheriff check.
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values ('lscso-seasonal-logos', 'lscso-seasonal-logos', true, 3145728,
-        array['image/png','image/jpeg','image/webp','image/avif'])
-on conflict (id) do nothing;
+-- Seasonal patch files are bundled as static website assets; no upload bucket needed.\n
