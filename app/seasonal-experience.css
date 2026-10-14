@@ -77,3 +77,5 @@ html[data-season-intensity=low] .seasonal-liquid-backdrop canvas{opacity:.48}
 html[data-season-intensity=high] .seasonal-mist{opacity:.95}
 html[data-season-intensity=high] .seasonal-liquid-backdrop canvas{opacity:1}
 html[data-season-intensity=high] .seasonal-pumpkin{filter:drop-shadow(0 10px 35px #ef650b55)}
+
+.seasonal-admin__preview-note{border:1px solid rgba(244,148,62,.3);border-radius:14px;padding:16px 18px;color:#ffcc93;background:linear-gradient(110deg,rgba(76,29,94,.24),rgba(215,102,30,.09));font-size:13px;line-height:1.55}

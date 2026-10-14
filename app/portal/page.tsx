@@ -17,15 +17,7 @@ export default function PortalEntryPage() {
           <span className="portal-gateway__grid" />
         </div>
 
-        <Image
-          className="portal-gateway__watermark"
-          src="/images/lscso-patch-color.png"
-          alt=""
-          width={768}
-          height={768}
-          aria-hidden="true"
-          priority
-        />
+        <SeasonalLogo className="portal-gateway__watermark" alt="" width={768} height={768} />
 
         <header className="portal-gateway__agency">
           <div className="portal-gateway__agency-mark">

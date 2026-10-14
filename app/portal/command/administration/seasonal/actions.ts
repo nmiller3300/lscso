@@ -4,7 +4,7 @@ import { updateTag, revalidatePath } from "next/cache";
 import { getCurrentPortalProfile } from "@/lib/supabase/portal-profile";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SEASONAL_SETTINGS, EFFECT_NAMES, SEASONS, normalizeSeasonalSettings, type Season } from "@/lib/seasonal/config";
-import { SEASONAL_CACHE_TAG } from "@/lib/seasonal/server";
+import { SEASONAL_CACHE_TAG, isSeasonalDesignPreview } from "@/lib/seasonal/server";
 
 export type SeasonActionState = { ok: boolean; message: string };
 const state = (ok: boolean, message: string): SeasonActionState => ({ ok, message });
@@ -23,6 +23,7 @@ function refreshSeason() {
 export async function saveSeasonalAppearance(_previous: SeasonActionState, form: FormData): Promise<SeasonActionState> {
   try {
     const actor = await sheriffOnly();
+    if (isSeasonalDesignPreview) return state(false, "Preview mode cannot publish to the live department database.");
     const theme = String(form.get("active_theme") ?? "");
     const intensity = String(form.get("intensity") ?? "");
     if (!SEASONS.includes(theme as Season)) return state(false, "Choose a valid seasonal theme.");
@@ -43,6 +44,7 @@ export async function saveSeasonalAppearance(_previous: SeasonActionState, form:
 export async function uploadSeasonalLogo(_previous: SeasonActionState, form: FormData): Promise<SeasonActionState> {
   try {
     const actor = await sheriffOnly();
+    if (isSeasonalDesignPreview) return state(false, "Preview mode cannot upload into the live database. Seasonal artwork is already included in this branch.");
     const season = String(form.get("season") ?? "") as Season;
     if (!SEASONS.includes(season) || season === "standard") return state(false, "Choose Halloween, Thanksgiving or Christmas.");
     const file = form.get("logo");

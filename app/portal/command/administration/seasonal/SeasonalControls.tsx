@@ -13,7 +13,7 @@ const EFFECT_LABELS: Record<string, string> = {
   liquid: "Fluid background lighting",
 };
 
-export function SeasonalControls({ initial }: { initial: SeasonalSettings }) {
+export function SeasonalControls({ initial, isPreview = false }: { initial: SeasonalSettings; isPreview?: boolean }) {
   const router = useRouter();
   const [theme, setTheme] = useState<Season>(initial.active_theme);
   const [intensity, setIntensity] = useState(initial.intensity);
@@ -44,6 +44,7 @@ export function SeasonalControls({ initial }: { initial: SeasonalSettings }) {
       <div><span>Department visual identity</span><h2>Set the season.</h2><p>The selected design updates public pages, recruitment, the login experience and personnel workspaces. The existing homepage hero remains unchanged.</p></div>
       <div className={"seasonal-admin__swatch seasonal-admin__swatch--" + theme} aria-hidden="true"><span>LSCSO</span><strong>{SEASON_LABELS[theme]}</strong></div>
     </section>
+    {isPreview && <div role="status" className="seasonal-admin__preview-note">This is a protected preview. You can explore a theme using Preview on portal, but publishing and uploads remain disabled until the production version is approved.</div>}
     <form action={submit} className="portal-panel seasonal-admin__form">
       <h3>Theme and atmosphere</h3>
       <label className="seasonal-admin__field">Website theme
@@ -66,7 +67,7 @@ export function SeasonalControls({ initial }: { initial: SeasonalSettings }) {
       <div className="seasonal-admin__actions">
         <button className="portal-button portal-button--secondary" type="button" onClick={preview}>Preview on portal →</button>
         <button className="portal-button portal-button--secondary" type="button" onClick={clearPreview}>Exit my preview</button>
-        <button className="portal-button portal-button--primary" type="submit" disabled={pending}>{pending ? "Publishing…" : "Publish website theme"}</button>
+        <button className="portal-button portal-button--primary" type="submit" disabled={pending || isPreview}>{pending ? "Publishing…" : "Publish website theme"}</button>
       </div>
       <small>Preview is visible only in this browser session. Publish changes the theme for everyone.</small>
     </form>
@@ -76,7 +77,7 @@ export function SeasonalControls({ initial }: { initial: SeasonalSettings }) {
       <label className="seasonal-admin__field">Holiday<select name="season" defaultValue="halloween"><option value="halloween">Halloween</option><option value="thanksgiving">Thanksgiving</option><option value="christmas">Christmas</option></select></label>
       <label className="seasonal-admin__field">Seasonal patch (PNG/JPG/WebP/AVIF, up to 3 MB)<input type="file" name="logo" accept="image/png,image/jpeg,image/webp,image/avif" required /></label>
       {logoResult.message && <p className={logoResult.ok ? "seasonal-admin__ok" : "seasonal-admin__error"} role="status">{logoResult.message}</p>}
-      <button className="portal-button portal-button--primary" disabled={uploading}>{uploading ? "Uploading…" : "Upload seasonal patch"}</button>
+      <button className="portal-button portal-button--primary" disabled={uploading || isPreview}>{uploading ? "Uploading…" : "Upload seasonal patch"}</button>
     </form>
   </div>;
 }

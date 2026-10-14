@@ -47,15 +47,7 @@ export default async function JoinPage() {
           <span className="join-experience__beam join-experience__beam--steel" />
         </div>
 
-        <Image
-          className="join-experience__watermark"
-          src="/images/lscso-patch-color.png"
-          alt=""
-          width={900}
-          height={900}
-          priority
-          aria-hidden="true"
-        />
+        <SeasonalLogo className="join-experience__watermark" alt="" width={900} height={900} />
 
         <div className="site-shell join-experience__hero-shell">
           <div className="join-experience__hero-grid">

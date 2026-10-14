@@ -86,7 +86,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
         <section className="application-page__hero application-page__hero--closed candidate-intake-hero">
           <PortalResponsiveCinematicBackdrop />
           <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
-          <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={760} height={760} aria-hidden="true" priority />
+          <SeasonalLogo className="candidate-intake-watermark" alt="" width={760} height={760} />
           <div className="site-shell application-closed candidate-intake-closed">
             <p className="section-kicker">LSCSO Candidate Selection</p>
             <span className="application-closed__status"><i /> Candidate intake standby</span>
@@ -123,7 +123,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
       <section className="application-page__hero candidate-intake-hero">
         <PortalResponsiveCinematicBackdrop />
         <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
-        <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={840} height={840} aria-hidden="true" priority />
+        <SeasonalLogo className="candidate-intake-watermark" alt="" width={840} height={840} />
         <div className="site-shell">
           <div className="application-page__masthead candidate-intake-masthead">
             <div className="candidate-intake-masthead__copy">
