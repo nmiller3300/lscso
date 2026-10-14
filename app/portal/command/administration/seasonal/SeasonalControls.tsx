@@ -3,95 +3,61 @@
 import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSeasonalAppearance, type SeasonActionState } from "./actions";
-import { EFFECT_NAMES, SEASONS, SEASON_LABELS, type SeasonalSettings, type Season } from "@/lib/seasonal/config";
+import { SEASONS, SEASON_LABELS, AVAILABLE_SEASONS, type SeasonalSettings, type Season } from "@/lib/seasonal/config";
 import "./seasonal-controls.css";
 
-const initialState: SeasonActionState = { ok: false, message: "" };
-const EFFECT_LABELS: Record<string, string> = {
-  leaves: "Falling leaves",
-  bats: "Flying bats",
-  lightning: "Lightning in the distance",
-  moon: "Moon and moving clouds",
-  fog: "Rolling fog",
-  pumpkins: "Glowing pumpkins",
-  liquid: "Moving background",
-};
-
+const emptyState: SeasonActionState = { ok: false, message: "" };
 export function SeasonalControls({ initial, isPreview = false }: { initial: SeasonalSettings; isPreview?: boolean }) {
   const router = useRouter();
-  const [theme, setTheme] = useState<Season>(initial.active_theme);
-  const [intensity, setIntensity] = useState(initial.intensity);
-  const [effects, setEffects] = useState(initial.effects);
-  const [result, submit, pending] = useActionState(saveSeasonalAppearance, initialState);
-
+  const [selected, setSelected] = useState<Season>(initial.active_theme);
+  const [result, submit, pending] = useActionState(saveSeasonalAppearance, emptyState);
   useEffect(() => {
-    if (result.ok) {
-      sessionStorage.removeItem("lscso-season-preview");
-      window.dispatchEvent(new Event("lscso-season-preview"));
-      router.refresh();
-    }
-  }, [result, router]);
-
-  function preview(destination: string) {
-    sessionStorage.setItem("lscso-season-preview", JSON.stringify({ active_theme: theme, intensity, effects, logos: initial.logos }));
-    window.dispatchEvent(new Event("lscso-season-preview"));
-    router.push(destination);
-  }
-  function clearPreview() {
+    if (!result.ok) return;
     sessionStorage.removeItem("lscso-season-preview");
     window.dispatchEvent(new Event("lscso-season-preview"));
     router.refresh();
-  }
+  }, [result, router]);
 
-  const patch = initial.logos[theme] || "/images/lscso-patch-color.png";
-  return <div className="seasonal-admin">
+  const selectedLogo = selected === "halloween" ? "/images/lscso-halloween.webp" : "/images/lscso-patch-color.png";
+  const currentLogo = initial.active_theme === "halloween" ? "/images/lscso-halloween.webp" : "/images/lscso-patch-color.png";
+  return <div className="seasonal-admin seasonal-simple">
     <section className="portal-panel seasonal-admin__lead">
-      <div>
-        <span>Website appearance</span>
-        <h2>Set the season.</h2>
-        <p>Change the colors, details, and decorations across the LSCSO website. The homepage layout stays exactly where it is.</p>
+      <div><span>Website appearance</span><h2>Seasonal Themes</h2>
+        <p>Set the look of the entire LSCSO website, including the public pages, applications and personnel portal.</p>
       </div>
-      <div className={"seasonal-admin__swatch seasonal-admin__swatch--" + theme}>
-        <img src={patch} alt="" width={112} height={112} />
-        <strong>{SEASON_LABELS[theme]}</strong>
+      <div className={"seasonal-admin__swatch seasonal-admin__swatch--" + initial.active_theme}>
+        <img src={currentLogo} alt="" width={112} height={112}/>
+        <strong>{SEASON_LABELS[initial.active_theme]}</strong>
+        <small>Currently active</small>
       </div>
     </section>
-    {isPreview && <p role="status" className="seasonal-admin__preview-note">Try any combination below. Your choices only change what <strong>you</strong> see until a Sheriff publishes the finished design.</p>}
     <form action={submit} className="portal-panel seasonal-admin__form">
-      <h3>Choose your website look</h3>
-      <label className="seasonal-admin__field">Season
-        <select name="active_theme" value={theme} onChange={(e) => setTheme(e.target.value as Season)}>
-          {SEASONS.map((season) => <option value={season} key={season}>{SEASON_LABELS[season]}</option>)}
+      <h3>Choose a theme</h3>
+      <label className="seasonal-admin__field">Website theme
+        <select name="active_theme" value={selected} onChange={(e) => setSelected(e.target.value as Season)}>
+          {SEASONS.map((season) => <option key={season} value={season} disabled={!AVAILABLE_SEASONS.includes(season as typeof AVAILABLE_SEASONS[number])}>
+            {SEASON_LABELS[season]}{AVAILABLE_SEASONS.includes(season as typeof AVAILABLE_SEASONS[number]) ? "" : " — Coming soon"}
+          </option>)}
         </select>
       </label>
-      <label className="seasonal-admin__field">Amount of movement
-        <select name="intensity" value={intensity} onChange={(e) => setIntensity(e.target.value as SeasonalSettings["intensity"])}>
-          <option value="low">A little</option><option value="medium">Normal</option><option value="high">A lot</option>
-        </select>
-      </label>
-      <h3 className="seasonal-admin__subhead">Decorations</h3>
-      <div className="seasonal-admin__effects">
-        {EFFECT_NAMES.map((name) => <label key={name}>
-          <input type="checkbox" name={"effect_" + name} checked={effects[name]} onChange={(e) => setEffects((old) => ({ ...old, [name]: e.target.checked }))} />
-          <span>{EFFECT_LABELS[name]}</span>
-        </label>)}
+      <div className="seasonal-simple__selection">
+        <img src={selectedLogo} width={84} height={84} alt="Selected LSCSO patch"/>
+        <div><strong>{SEASON_LABELS[selected]}</strong><p>{selected === "halloween"
+          ? "Halloween colors, animations and artwork are applied together."
+          : "Return to the original LSCSO website design."}</p></div>
       </div>
-      {result.message && <p className={result.ok ? "seasonal-admin__ok" : "seasonal-admin__error"} role="status">{result.message}</p>}
-      <div className="seasonal-admin__actions">
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => preview("/portal")}>See portal login →</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => preview("/")}>See homepage →</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => preview("/join")}>See recruitment →</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={() => preview("/join/application")}>See application →</button>
-        <button className="portal-button portal-button--secondary" type="button" onClick={clearPreview}>Reset preview</button>
-        {!isPreview && <button className="portal-button portal-button--primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Apply to website"}</button>}
-      </div>
-      <small>{isPreview ? "Nothing you do here changes the live LSCSO website." : "Preview changes only your own screen. Apply to website changes the design for everyone."}</small>
+      {result.message && <p role="status" className={result.ok ? "seasonal-admin__ok" : "seasonal-admin__error"}>{result.message}</p>}
+      {isPreview
+        ? <p className="seasonal-admin__preview-note">This is a design preview. Theme changes are disabled here.</p>
+        : <button type="submit" className="portal-button portal-button--primary" disabled={pending || selected === initial.active_theme}>{pending ? "Applying theme…" : selected === "standard" ? "Restore LSCSO Original" : "Activate Halloween"}</button>}
+      <small>Only the Sheriff can change the website theme. The original design can be restored here at any time.</small>
     </form>
-    <section className="portal-panel seasonal-admin__form seasonal-admin__logo-preview">
-      <h3>Department patches</h3>
-      <div className="seasonal-admin__patch-row">
-        <img src="/images/lscso-halloween.webp" alt="LSCSO Halloween patch" width={114} height={114} />
-        <div><strong>Halloween patch — included</strong><p>Your official Halloween artwork is already installed. No upload needed. The standard patch returns automatically when the normal theme is selected.</p></div>
+    <section className="portal-panel seasonal-simple__future">
+      <h3>Upcoming seasonal themes</h3>
+      <p>These seasons will be added later. They cannot be activated yet.</p>
+      <div className="seasonal-simple__future-grid">
+        {SEASONS.filter((season) => !AVAILABLE_SEASONS.includes(season as typeof AVAILABLE_SEASONS[number])).map((season) =>
+          <div key={season}><strong>{SEASON_LABELS[season]}</strong><span>Coming soon</span></div>)}
       </div>
     </section>
   </div>;

@@ -8,10 +8,8 @@ export default async function SeasonalAppearancePage() {
   const profile = await getCurrentPortalProfile();
   if (!profile || profile.rank !== "Sheriff") redirect("/portal/command/administration");
   const settings = await getSeasonalSettings();
-  return (
-    <PortalShell active="administration" eyebrow="Sheriff Administration" title="Seasonal Appearance"
-      description="Manage the public website and personnel portal's seasonal identity. Changes are department-wide.">
-      <SeasonalControls initial={settings} isPreview={isSeasonalDesignPreview} />
-    </PortalShell>
-  );
+  return <PortalShell active="administration" eyebrow="Sheriff Administration"
+    title="Seasonal Themes" description="Choose the website's official appearance. Sheriff only.">
+    <SeasonalControls initial={settings} isPreview={isSeasonalDesignPreview}/>
+  </PortalShell>;
 }
