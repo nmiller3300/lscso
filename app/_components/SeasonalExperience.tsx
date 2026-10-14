@@ -56,7 +56,7 @@ function Leaves({ count }: { count: number }) {
         "--leaf-delay": "-" + ((i * 3.7) % 22) + "s",
         "--leaf-duration": (15 + (i * 7) % 16) + "s",
         "--leaf-size": (13 + (i * 5) % 16) + "px",
-        "--leaf-shift": (((i * 19) % 19) - 9) + "vw",
+        "--leaf-shift": (((i * 11) % 23) - 11) + "vw",
       } as CSSProperties;
       return <svg style={style} className={"seasonal-leaf seasonal-leaf--" + (i % 3)} key={i} viewBox="0 0 30 30" focusable="false">
         <path d="M14 3 C9 10 3 8 5 16 C8 22 14 20 16 27 C22 20 23 16 25 12 C20 12 17 7 14 3Z" fill="currentColor"/>

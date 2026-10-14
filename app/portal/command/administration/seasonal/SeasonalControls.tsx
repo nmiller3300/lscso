@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { saveSeasonalAppearance, uploadSeasonalLogo, type SeasonActionState } from "./actions";
 import { EFFECT_NAMES, SEASONS, SEASON_LABELS, type SeasonalSettings, type Season } from "@/lib/seasonal/config";
@@ -20,6 +20,13 @@ export function SeasonalControls({ initial }: { initial: SeasonalSettings }) {
   const [effects, setEffects] = useState(initial.effects);
   const [result, submit, pending] = useActionState(saveSeasonalAppearance, initialState);
   const [logoResult, submitLogo, uploading] = useActionState(uploadSeasonalLogo, initialState);
+  useEffect(() => {
+    if (result.ok) {
+      sessionStorage.removeItem("lscso-season-preview");
+      window.dispatchEvent(new Event("lscso-season-preview"));
+      router.refresh();
+    }
+  }, [result, router]);
 
   function preview() {
     sessionStorage.setItem("lscso-season-preview", JSON.stringify({ active_theme: theme, intensity, effects, logos: initial.logos }));

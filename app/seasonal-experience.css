@@ -68,3 +68,12 @@ html[data-season=christmas] .public-site-system::before{background:radial-gradie
 @media(max-width:550px){.seasonal-atmosphere--application .seasonal-leaf{display:none}.seasonal-atmosphere--login .seasonal-pumpkin{width:80px}.seasonal-bat--3,.seasonal-storm{display:none}.seasonal-preview-bar{flex-direction:column;align-items:flex-start}}
 @media(prefers-reduced-motion:reduce){.seasonal-leaf-field,.seasonal-bat,.seasonal-storm,.seasonal-mist{display:none!important}.seasonal-moon,.seasonal-moon__cloud,.seasonal-pumpkin{animation:none!important}}
 @media(forced-colors:active){.seasonal-atmosphere{display:none}}
+
+/* The intensity slider affects motion, atmospheric strength and GPU layer presence. */
+html[data-season-intensity=low] .seasonal-mist{opacity:.28}
+html[data-season-intensity=low] .seasonal-pumpkin{opacity:.58}
+html[data-season-intensity=low] .seasonal-storm{display:none}
+html[data-season-intensity=low] .seasonal-liquid-backdrop canvas{opacity:.48}
+html[data-season-intensity=high] .seasonal-mist{opacity:.95}
+html[data-season-intensity=high] .seasonal-liquid-backdrop canvas{opacity:1}
+html[data-season-intensity=high] .seasonal-pumpkin{filter:drop-shadow(0 10px 35px #ef650b55)}
