@@ -1,0 +1,129 @@
+
+/* Complete Halloween portal chrome, loaded after existing portal styles. */
+html[data-season="halloween"] .portal-root{
+  --portal-black:#0c0816;
+  --portal-bg:#0e0a17;--portal-bg-soft:#171020;
+  --portal-sidebar:#140d21;--portal-surface:#21172b;
+  --portal-surface-2:#281b33;--portal-surface-3:#2d2138;
+  --portal-line:rgba(181,115,169,.24);
+  --portal-line-strong:rgba(201,142,189,.33);
+  --portal-gold:#ee9657;--portal-gold-bright:#ffc18e;
+  --portal-gold-soft:rgba(238,150,87,.13);
+  --portal-v2-gold:#ee9657;--portal-v2-gold-bright:#ffc18e;
+  --portal-v2-panel:rgba(25,16,36,.88);--portal-v2-panel-strong:rgba(14,10,24,.94);
+  --portal-v2-line:rgba(180,114,180,.24);
+  --portal-v2-line-gold:rgba(242,151,80,.28);
+  --portal-muted:#b6aabb;--portal-muted-2:#95849f;
+  --portal-focus:rgba(231,148,89,.24);
+  background:#0f0a19!important;color:#f8eff4;
+}
+html[data-season="halloween"] .portal-app{
+  background:radial-gradient(circle at 76% 5%,rgba(76,31,90,.12),transparent 34%),#100b19!important;
+}
+html[data-season="halloween"] .portal-app .portal-sidebar{
+  background:linear-gradient(180deg,#241330,#120e1d 58%,#0c0a16)!important;
+  border-right:1px solid rgba(205,133,177,.24)!important;
+  box-shadow:19px 0 58px rgba(0,0,0,.25);
+}
+html[data-season="halloween"] .portal-sidebar::before{
+  background:linear-gradient(180deg,rgba(255,158,92,.17),transparent 52%)!important;
+}
+html[data-season="halloween"] .portal-sidebar-head{
+  border-bottom-color:rgba(210,136,184,.23)!important;
+}
+html[data-season="halloween"] .portal-brand img{
+  filter:drop-shadow(0 8px 18px rgba(230,104,35,.26));
+}
+html[data-season="halloween"] .portal-app .portal-navigation-group__label{
+  color:#a98cae!important;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a{
+  color:#c9b9cc;border:1px solid transparent;
+  transition:color .18s,border-color .18s,background .18s;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a:hover{
+  color:#ffe1c6;border-color:rgba(198,123,185,.23);
+  background:linear-gradient(90deg,rgba(114,49,127,.23),rgba(37,18,51,.19))!important;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a.is-active{
+  color:#ffe1bb!important;
+  border-color:rgba(238,152,81,.39)!important;
+  background:linear-gradient(115deg,rgba(136,53,132,.45),rgba(231,122,49,.13))!important;
+  box-shadow:inset 3px 0 #f4a36a,0 8px 26px rgba(0,0,0,.13);
+}
+html[data-season="halloween"] .portal-app .portal-navigation a.is-active::before{background:#f3a568!important}
+html[data-season="halloween"] .portal-app .portal-navigation a>span:first-child,
+html[data-season="halloween"] .portal-app .portal-navigation-icon{
+  border-color:rgba(198,125,179,.23);
+  background:rgba(67,34,77,.3);
+  color:#f3b381;
+}
+html[data-season="halloween"] .portal-app .portal-topbar{
+  background:linear-gradient(110deg,rgba(28,16,41,.96),rgba(17,13,29,.95))!important;
+  border-bottom:1px solid rgba(181,121,177,.25)!important;
+}
+html[data-season="halloween"] .portal-app .portal-workspace{
+  background:radial-gradient(circle at 90% 15%,rgba(122,48,122,.09),transparent 38%),#100c18;
+}
+html[data-season="halloween"] .portal-app .portal-page-heading{
+  background:radial-gradient(circle at 85% 8%,rgba(140,53,142,.17),transparent 38%),
+    linear-gradient(130deg,rgba(51,23,62,.88),rgba(19,15,30,.94))!important;
+  border-color:rgba(205,135,183,.27)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.055),0 18px 44px rgba(0,0,0,.18);
+}
+html[data-season="halloween"] .portal-app .portal-page-heading p,
+html[data-season="halloween"] .portal-app .portal-panel-heading p{color:#ffc18e!important}
+html[data-season="halloween"] .portal-app .portal-panel,
+html[data-season="halloween"] .portal-app .deputy-summary-grid>article,
+html[data-season="halloween"] .portal-app .portal-metric{
+  background:linear-gradient(140deg,rgba(35,23,47,.95),rgba(16,13,27,.94))!important;
+  border:1px solid rgba(188,125,177,.25)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.04),0 15px 42px rgba(0,0,0,.17);
+}
+html[data-season="halloween"] .portal-app .portal-panel::before{
+  background:linear-gradient(90deg,transparent,rgba(241,152,84,.36),rgba(140,65,137,.2),transparent);
+}
+html[data-season="halloween"] .portal-app :is(.command-v2-task-grid>a,.command-v2-home-shortcuts>a,.command-home-quick-actions nav>a){
+  border:1px solid rgba(196,124,171,.24)!important;
+  background:linear-gradient(140deg,rgba(64,28,70,.31),rgba(24,18,37,.65))!important;
+  color:#f3e9ef;
+  transition:transform .2s,border-color .2s,box-shadow .2s;
+}
+html[data-season="halloween"] .portal-app :is(.command-v2-task-grid>a,.command-v2-home-shortcuts>a,.command-home-quick-actions nav>a):hover{
+  transform:translateY(-2px);border-color:rgba(250,164,100,.46)!important;
+  box-shadow:0 17px 36px rgba(0,0,0,.27);
+}
+html[data-season="halloween"] .portal-app .portal-button--primary{
+  background:linear-gradient(110deg,#f8b777,#df7736)!important;
+  border:1px solid rgba(255,198,135,.67)!important;color:#20111f!important;
+}
+html[data-season="halloween"] .portal-app .portal-button--secondary{
+  background:rgba(70,32,76,.35)!important;
+  border-color:rgba(204,126,181,.34)!important;
+  color:#f6dce7!important;
+}
+html[data-season="halloween"] .portal-app :is(input,textarea,select){
+  background:#160f21!important;border-color:rgba(182,118,176,.29)!important;color:#f8eef4!important;
+}
+html[data-season="halloween"] .portal-app :is(input,textarea,select):focus-visible{
+  outline:2px solid rgba(248,162,102,.65);outline-offset:1px;
+}
+html[data-season="halloween"] .portal-app thead th{
+  background:#25172f!important;border-color:rgba(189,119,180,.28)!important;
+  color:#ffd1ac!important;
+}
+html[data-season="halloween"] .portal-app tbody tr:hover td{
+  background:rgba(91,41,95,.17)!important;
+}
+html[data-season="halloween"] .portal-app .portal-environment span,
+html[data-season="halloween"] .portal-app .portal-account-menu>summary{
+  border-color:rgba(181,111,173,.28);
+  background:rgba(62,28,71,.29)!important;
+}
+@media(max-width:820px){
+html[data-season="halloween"] .portal-app .portal-sidebar{box-shadow:10px 0 40px rgba(0,0,0,.34)}
+}
+@media(prefers-reduced-motion:reduce){
+html[data-season="halloween"] .portal-app .portal-navigation a,
+html[data-season="halloween"] .portal-app .command-v2-task-grid>a{transition:none}
+}

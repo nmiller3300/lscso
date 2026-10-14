@@ -19,6 +19,7 @@ import "./application-premium.css";
 import "./application-role.css";
 import "./candidate-experience.css";
 import "./candidate-portal-bridge.css";
+import "./seasonal-application.css";
 
 export const metadata: Metadata = {
   title: "LSCSO Candidate Intake",

@@ -1,0 +1,96 @@
+
+/* Re-skin actual candidate intake controls while keeping form logic untouched. */
+html[data-season="halloween"] .application-page{
+  --gold:#ee9e63;--gold-light:#ffd0a2;
+  background:#100b19!important;color:#f6edf1;
+}
+html[data-season="halloween"] .application-page__hero{
+  background:radial-gradient(circle at 77% 12%,rgba(92,40,121,.17),transparent 42%),
+    linear-gradient(165deg,#1b1027,#100c1a 58%,#0b0913)!important;
+}
+html[data-season="halloween"] .application-page__masthead{
+  background:linear-gradient(125deg,rgba(34,17,45,.89),rgba(12,11,21,.87))!important;
+  border:1px solid rgba(179,111,185,.32)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.05),0 32px 90px rgba(4,2,9,.36);
+}
+html[data-season="halloween"] .application-page__masthead h1{color:#fff1ee}
+html[data-season="halloween"] .candidate-intake-signal,
+html[data-season="halloween"] .application-page__badge{color:#ffc088;border-color:rgba(242,154,88,.4)}
+html[data-season="halloween"] .application-page__metrics article{
+  background:linear-gradient(125deg,rgba(86,37,96,.29),rgba(27,14,36,.5));
+  border-color:rgba(191,108,178,.23);
+}
+html[data-season="halloween"] .application-role-select{
+  background:linear-gradient(145deg,rgba(29,17,40,.9),rgba(11,10,20,.95))!important;
+  border:1px solid rgba(183,108,167,.32)!important;
+  border-radius:26px;
+}
+html[data-season="halloween"] .application-role-card{
+  border:1px solid rgba(180,102,180,.26)!important;
+  border-radius:19px;
+  background:radial-gradient(circle at 80% 15%,rgba(113,47,129,.15),transparent 48%),
+  linear-gradient(145deg,rgba(31,20,43,.89),rgba(12,12,21,.91))!important;
+  color:#f9eef4;
+  box-shadow:inset 0 1px rgba(255,255,255,.05);
+}
+html[data-season="halloween"] .application-role-card--forensics{
+  background:radial-gradient(circle at 80% 15%,rgba(178,85,44,.13),transparent 45%),
+    linear-gradient(145deg,rgba(35,20,39,.92),rgba(12,12,21,.91))!important;
+}
+html[data-season="halloween"] .application-role-card:not(.is-closed):hover,
+html[data-season="halloween"] .application-role-card:not(.is-closed):focus-visible{
+  transform:translateY(-4px);
+  border-color:rgba(255,172,110,.6)!important;
+  box-shadow:0 20px 48px rgba(13,4,28,.39),0 0 30px rgba(147,72,139,.09);
+}
+html[data-season="halloween"] .application-role-card__top span:first-child,
+html[data-season="halloween"] .application-role-card strong{color:#f2aa73}
+html[data-season="halloween"] .application-role-card__status{
+  border-color:rgba(178,119,168,.4);color:#ffe3c9;
+}
+html[data-season="halloween"] .application-process-strip article{
+  border-color:rgba(174,104,166,.25);
+  background:linear-gradient(155deg,rgba(37,20,47,.83),rgba(15,12,24,.85));
+}
+html[data-season="halloween"] .application-progress,
+html[data-season="halloween"] .application-briefing,
+html[data-season="halloween"] .application-section,
+html[data-season="halloween"] .application-certification{
+  background:linear-gradient(150deg,rgba(29,18,40,.94),rgba(11,10,19,.95))!important;
+  border-color:rgba(168,104,165,.27)!important;
+  box-shadow:0 24px 65px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.04);
+}
+html[data-season="halloween"] .application-progress__bar{background:rgba(173,96,165,.15)}
+html[data-season="halloween"] .application-progress__bar span,
+html[data-season="halloween"] .application-navigation__next,
+html[data-season="halloween"] .application-navigation__submit{
+  background:linear-gradient(110deg,#ffb779,#e47a34)!important;
+  color:#28111c!important;
+}
+html[data-season="halloween"] .application-section__number{
+  background:linear-gradient(150deg,rgba(101,45,116,.34),rgba(233,121,52,.11));
+  border-color:rgba(206,135,166,.26);color:#ffc68d;
+}
+html[data-season="halloween"] .application-question{
+  border-color:rgba(171,108,157,.17);
+  background:linear-gradient(135deg,rgba(12,11,22,.66),rgba(29,17,39,.43))!important;
+}
+html[data-season="halloween"] .application-question:focus-within{
+  border-color:rgba(249,156,92,.63);
+  background:linear-gradient(145deg,rgba(56,23,65,.4),rgba(25,15,35,.65))!important;
+  box-shadow:0 0 0 2px rgba(244,139,76,.12);
+}
+html[data-season="halloween"] .application-question :is(input,textarea,select){
+  color:#f9f2f3;background:#110e1b!important;
+  border-color:rgba(189,125,178,.28);
+}
+html[data-season="halloween"] .application-question :is(input,textarea,select):focus-visible{
+  outline:2px solid rgba(255,174,110,.71);outline-offset:2px;
+}
+html[data-season="halloween"] .application-required{color:#ffc08c}
+html[data-season="halloween"] .application-choice.is-selected{
+  border-color:rgba(249,157,95,.56);
+  background:linear-gradient(125deg,rgba(101,42,98,.36),rgba(171,71,38,.14))!important;
+}
+/* Long-form applicants should never have animated scenery in their input region. */
+html[data-season="halloween"] .application-form{position:relative;z-index:2}

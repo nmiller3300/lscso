@@ -7,6 +7,7 @@ import "./globals.css";
 import "./public-premium-system.css";
 import "./public-header-glass-restore.css";
 import "./maintenance.css";
+import "./seasonal-surface-design.css";
 import "./seasonal-experience.css";
 
 const geist = localFont({

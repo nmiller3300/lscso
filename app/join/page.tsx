@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import "./join-experience.css";
 import "./join-forensics-polish.css";
+import "./seasonal-recruitment.css";
 
 export const metadata: Metadata = {
   title: "Join LSCSO",
