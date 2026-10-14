@@ -96,3 +96,67 @@ html[data-season="halloween"] .public-site-system .gateway-item{border-radius:12
 @media(prefers-reduced-motion:reduce){
 html[data-season="halloween"] .public-site-system .gateway-item{transition:none}
 }
+
+/* Non-home public pages and genuine content sections, not floating scene effects. */
+html[data-season="halloween"] .public-site-system .page-hero {
+  background:radial-gradient(circle at 86% 8%,rgba(109,44,127,.2),transparent 42%),#0d0917;
+}
+html[data-season="halloween"] .public-site-system .page-hero-overlay {
+  background:linear-gradient(95deg,rgba(14,7,24,.96),rgba(25,11,37,.79) 49%,rgba(15,8,26,.31) 85%),
+    linear-gradient(0deg,rgba(13,7,20,.78),transparent 69%);
+}
+html[data-season="halloween"] .public-site-system .page-hero--contained .page-hero-overlay {
+  background:linear-gradient(90deg,rgba(17,9,27,.97),rgba(26,12,38,.88) 50%,rgba(16,9,27,.24) 85%);
+}
+html[data-season="halloween"] .public-site-system .page-hero-media img {
+  filter:saturate(.83) contrast(1.06) brightness(.79);
+}
+html[data-season="halloween"] .public-site-system .section-kicker,
+html[data-season="halloween"] .public-site-system .page-hero .section-kicker {
+  color:#efab75;
+}
+html[data-season="halloween"] .public-site-system .content-section--light,
+html[data-season="halloween"] .public-site-system .home-introduction {
+  --line-light:rgba(175,106,187,.22);
+  background:linear-gradient(130deg,#26182e,#211326 58%,#170e23) !important;
+  color:#f5eef1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--sand {
+  --line-light:rgba(175,106,187,.22);
+  background:linear-gradient(135deg,#1d1229,#261628 73%) !important;
+  color:#f5eef1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(h2,h3,h4,.intro-serif),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(h2,h3,h4,.intro-serif) {
+  color:#f6ebf1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.reading-column,.reading-column p,.section-heading-row p,.value-grid p,.responsibility-grid p,.process-grid p,.quality-grid p),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.reading-column,.reading-column p,.section-heading-row p,.value-grid p,.responsibility-grid p,.process-grid p,.quality-grid p) {
+  color:#c5b5c7 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.value-grid article,.responsibility-grid article,.process-grid article,.quality-grid article),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.value-grid article,.responsibility-grid article,.process-grid article,.quality-grid article) {
+  border-color:rgba(183,117,191,.24) !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.value-grid article>span,.responsibility-grid article>span,.process-grid article>span,.quality-grid article>span),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.value-grid article>span,.responsibility-grid article>span,.process-grid article>span,.quality-grid article>span) {
+  color:#f6b382 !important;
+}
+html[data-season="halloween"] .public-site-system .mission-statement-section {
+  background:linear-gradient(135deg,#321b36,#170e25 72%) !important;
+}
+html[data-season="halloween"] .public-site-system .content-section:not(.content-section--light):not(.content-section--sand):not(.gateway-section){
+  background:linear-gradient(145deg,#1b1126,#0d0917) !important;
+}
+html[data-season="halloween"] .public-site-system .established-mark {
+  border-color:rgba(243,153,86,.41);color:#ffc18c;
+}
+html[data-season="halloween"] .public-site-system :is(.route-link--outline,.route-link--text):hover,
+html[data-season="halloween"] .public-site-system :is(.button--outline,.button--outline-dark):hover {
+  color:#ffcca0;border-color:rgba(232,151,88,.6);
+}
+@media (forced-colors:active) {
+  html[data-season="halloween"] .public-site-system :is(.gateway-item,.content-section,.page-hero) {
+    background:Canvas!important;color:CanvasText!important;
+  }
+}
