@@ -1,0 +1,70 @@
+
+/* Seasonal presentation is scoped; page functionality and hero structure stay intact. */
+.seasonal-atmosphere{position:fixed;inset:0;z-index:22;pointer-events:none;overflow:hidden;contain:layout paint}
+.seasonal-atmosphere--interior,.seasonal-atmosphere--application{z-index:4;opacity:.6}
+.seasonal-atmosphere--public{z-index:4;opacity:.54}
+.seasonal-moon{position:absolute;right:5%;top:10%;width:clamp(110px,16vw,240px);aspect-ratio:1;filter:drop-shadow(0 0 32px rgba(193,128,255,.23));animation:ls-moon 27s ease-in-out infinite alternate}
+.seasonal-moon__face{position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 37% 32%,#f4e9df,#bca8ca 43%,#6d547d 90%);box-shadow:0 0 54px rgba(170,101,239,.25),inset -22px -15px 42px rgba(23,8,43,.43);opacity:.65}
+.seasonal-moon__face:after{position:absolute;inset:3%;border-radius:50%;content:"";background:radial-gradient(circle at 68% 28%,rgba(61,45,83,.2) 0 8%,transparent 9%),radial-gradient(circle at 30% 62%,rgba(61,45,83,.24) 0 13%,transparent 14%)}
+.seasonal-moon__cloud{position:absolute;top:40%;left:-40%;width:190%;height:85%;background:linear-gradient(90deg,transparent,rgba(91,51,123,.25),rgba(29,12,52,.46),transparent);filter:blur(23px);animation:ls-cloud 28s ease-in-out infinite alternate}
+.seasonal-mist{position:absolute;bottom:-12%;left:-20%;width:140%;height:40%;background:radial-gradient(ellipse at 25% 65%,rgba(113,54,149,.23),transparent 45%),radial-gradient(ellipse at 76% 70%,rgba(228,88,23,.13),transparent 53%);filter:blur(35px);animation:ls-fog 21s ease-in-out infinite alternate}
+.seasonal-mist--two{bottom:0;height:28%;opacity:.66;animation-direction:alternate-reverse;animation-duration:32s}
+.seasonal-storm{position:absolute;inset:0;background:radial-gradient(circle at 72% 14%,rgba(203,165,255,.24),transparent 43%);opacity:0;animation:ls-lightning 32s linear infinite}
+.seasonal-leaf-field{position:absolute;inset:0;overflow:hidden}
+.seasonal-leaf{position:absolute;left:var(--leaf-left);top:-14%;width:var(--leaf-size);height:var(--leaf-size);color:#d27c32;opacity:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.17));animation:ls-leaf var(--leaf-duration) linear var(--leaf-delay) infinite;will-change:transform}
+.seasonal-leaf--1{color:#a95532}.seasonal-leaf--2{color:#dca156}
+.seasonal-bat{position:absolute;top:22%;width:clamp(57px,6vw,110px);color:#130b24;opacity:0;animation:ls-bat 34s linear infinite}
+.seasonal-bat--1{animation-delay:-5s}.seasonal-bat--2{top:27%;width:66px;animation-delay:-6s}.seasonal-bat--3{top:18%;width:48px;animation-delay:-7s}
+.seasonal-pumpkin{position:absolute;bottom:-22px;width:clamp(120px,16vw,245px);opacity:.9;filter:drop-shadow(0 18px 24px rgba(0,0,0,.6));animation:ls-pumpkin 8s ease-in-out infinite alternate}
+.seasonal-pumpkin svg{display:block;width:100%;height:auto}
+.seasonal-pumpkin--left{left:1.4%;transform:rotate(-6deg)}.seasonal-pumpkin--right{right:1%;width:clamp(108px,13vw,203px);transform:rotate(8deg);animation-delay:-4s}
+.seasonal-atmosphere--home .seasonal-moon{opacity:.37}
+.seasonal-atmosphere--home .seasonal-pumpkin{opacity:.55;bottom:-45px}
+.seasonal-atmosphere--application .seasonal-leaf{opacity:.4}
+.seasonal-liquid-backdrop{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(circle at 24% 58%,#280c40,#0b0614 73%)}
+.seasonal-liquid-backdrop canvas{display:block;width:100%;height:100%;opacity:.87}
+.seasonal-preview-bar{position:fixed;z-index:9000;left:16px;bottom:16px;max-width:calc(100vw - 32px);display:flex;align-items:center;gap:15px;padding:12px 14px;border:1px solid rgba(244,155,67,.42);border-radius:14px;background:rgba(18,8,31,.96);box-shadow:0 12px 40px #0009;color:white;font-size:12px}
+.seasonal-preview-bar button{font:inherit;border:1px solid #fff4;background:#f9833033;color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+@keyframes ls-leaf{0%{opacity:0;transform:translate3d(0,-10vh,0) rotate(0)}8%{opacity:.74}88%{opacity:.52}100%{opacity:0;transform:translate3d(var(--leaf-shift),120vh,0) rotate(670deg)}}
+@keyframes ls-bat{0%,72%{opacity:0;transform:translate3d(-16vw,0,0) scale(.7)}74%{opacity:.85}89%{opacity:.85}92%,100%{opacity:0;transform:translate3d(120vw,-12vh,0)}}
+@keyframes ls-lightning{0%,64%,64.8%,65.5%,66.2%,100%{opacity:0}64.3%,65.2%{opacity:.23}}
+@keyframes ls-fog{from{transform:translateX(-4%) scale(1)}to{transform:translateX(5%) scale(1.06)}}
+@keyframes ls-cloud{from{transform:translateX(-10%)}to{transform:translateX(24%)}}
+@keyframes ls-moon{from{transform:translateY(0)}to{transform:translateY(11px)}}
+@keyframes ls-pumpkin{from{opacity:.78;filter:drop-shadow(0 18px 24px #0008)}to{opacity:1;filter:drop-shadow(0 18px 24px #ef650c66)}}
+html[data-season=halloween]{--gold:#ed873c;--gold-light:#ffb76d}
+html[data-season=halloween] .public-site-system{--gold:#ef8f44;--gold-light:#ffb76d;background:#0f071b}
+html[data-season=halloween] .public-site-system::before{background:radial-gradient(circle at 78% 10%,#6827aa36,transparent 36%),radial-gradient(circle at 14% 70%,#e9621520,transparent 40%),linear-gradient(180deg,#10081d,#1a0b29 55%,#0a0612)}
+html[data-season=halloween] .public-site-system .site-header{background:linear-gradient(120deg,#2c1244ee,#140b22e8)!important;border-bottom-color:#e77b3255}
+html[data-season=halloween] .public-site-system .site-header::after{background:linear-gradient(90deg,transparent,#9141c6,#ff9a38,#9141c6,transparent)}
+html[data-season=halloween] .public-site-system .section-kicker{color:#ffb579}
+html[data-season=halloween] .public-site-system .home-hero-overlay{background:linear-gradient(90deg,#0e0819e8,#241137a1 48%,#160b2530),linear-gradient(0deg,#130b20a8,transparent 68%)}
+html[data-season=halloween] .public-site-system .home-hero h1 span{color:#ffb26d}
+html[data-season=halloween] .public-site-system .join-experience{--gold:#f39241;--gold-light:#ffbb72}
+html[data-season=halloween] .join-experience__hero{background:radial-gradient(circle at 79% 16%,#7f42c337,transparent 38%),linear-gradient(130deg,#100819,#26113a,#0e0717)}
+html[data-season=halloween] .join-experience__signal{color:#ffbc82}
+html[data-season=halloween] .application-page{--gold:#f39241;--gold-light:#ffbe7d}
+html[data-season=halloween] .application-role-card:hover{border-color:#f69848b3!important;box-shadow:0 16px 55px #5c208e44}
+html[data-season=halloween] .portal-root{--portal-gold:#e98c41;--portal-gold-bright:#ffbd82;--portal-gold-soft:#e87c281c;--portal-focus:#884bc155;--portal-sidebar:#110a20;--portal-bg:#0d0918;--portal-bg-soft:#140c25;--portal-surface:#1b1228;--portal-surface-2:#211631;--portal-line:#ae74df26;--portal-line-strong:#be8be63a;background:linear-gradient(135deg,#12091f,#0a0715 65%,#1d0d22)}
+html[data-season=halloween] .portal-root .portal-sidebar{background:linear-gradient(180deg,#1c0d2bfc,#0b0816fc)!important;border-right-color:#ae74df2f}
+html[data-season=halloween] .portal-root .portal-navigation a.is-active{background:linear-gradient(90deg,#903bd940,#eb853022);border-color:#e58a3c3e}
+html[data-season=halloween] .portal-root .portal-topbar{background:#180e25e9!important;border-bottom-color:#b87ce333}
+html[data-season=halloween] .portal-root .portal-page-heading{background:radial-gradient(circle at 91% 12%,#8f3ecd32,transparent 37%),linear-gradient(120deg,#ef873315,transparent 38%),#160d22bb}
+html[data-season=halloween] .portal-root .portal-button--primary{background:linear-gradient(120deg,#ffb15e,#dc7026)!important;color:#230f1c!important}
+html[data-season=halloween] .portal-gateway--glow-login{background:#10081d}
+html[data-season=halloween] .portal-gateway__brand{background:linear-gradient(130deg,#1c0b2eb3,#0f081be7)!important}
+html[data-season=halloween] .portal-glow-login{background:linear-gradient(120deg,#190a2f8a,#10091fc7)!important}
+html[data-season=halloween] .portal-glow-login__card{box-shadow:0 42px 110px #000a,inset 0 2px #ffffff22,0 0 90px #9e3bcc35}
+html[data-season=halloween] .portal-glow-login__card::before{background:conic-gradient(from 0deg,#fc9839,#953ac7,#ffe0a0,#5b299e,#ffad56);animation-duration:14s}
+html[data-season=halloween] .portal-glow-login__heading>span{color:#ffbf79}
+html[data-season=halloween] .portal-auth__submit{background:linear-gradient(110deg,#ffad58,#b956d9)!important;color:#190b1f!important}
+html[data-season=thanksgiving]{--gold:#b4773c;--gold-light:#ecb47a}
+html[data-season=thanksgiving] .portal-root{--portal-gold:#b4773c;--portal-gold-bright:#ecb47a}
+html[data-season=thanksgiving] .public-site-system::before{background:radial-gradient(circle at 80% 12%,#9e57182e,transparent 36%),linear-gradient(180deg,#20150f,#130d09)}
+html[data-season=christmas]{--gold:#d6ac6d;--gold-light:#f2d8ab}
+html[data-season=christmas] .portal-root{--portal-gold:#d6ac6d;--portal-gold-bright:#f2d8ab;--portal-sidebar:#091b18}
+html[data-season=christmas] .public-site-system::before{background:radial-gradient(circle at 76% 13%,#217c5133,transparent 35%),radial-gradient(circle at 16% 74%,#991c2733,transparent 40%),linear-gradient(180deg,#0a1b13,#110d1a)}
+@media(max-width:800px){.seasonal-moon{right:-25px;top:14%;width:125px;opacity:.36}.seasonal-pumpkin{width:112px;opacity:.45}.seasonal-atmosphere--home .seasonal-pumpkin{display:none}.seasonal-atmosphere--interior .seasonal-leaf:nth-child(n+5){display:none}}
+@media(max-width:550px){.seasonal-atmosphere--application .seasonal-leaf{display:none}.seasonal-atmosphere--login .seasonal-pumpkin{width:80px}.seasonal-bat--3,.seasonal-storm{display:none}.seasonal-preview-bar{flex-direction:column;align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){.seasonal-leaf-field,.seasonal-bat,.seasonal-storm,.seasonal-mist{display:none!important}.seasonal-moon,.seasonal-moon__cloud,.seasonal-pumpkin{animation:none!important}}
+@media(forced-colors:active){.seasonal-atmosphere{display:none}}

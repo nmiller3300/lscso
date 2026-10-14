@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import Image from "next/image";
 import Link from "next/link";
 import { CinematicOrb } from "../_components/CinematicOrb";
@@ -28,13 +29,7 @@ export default function PortalEntryPage() {
 
         <header className="portal-gateway__agency">
           <div className="portal-gateway__agency-mark">
-            <Image
-              src="/images/lscso-patch-color.png"
-              alt="Los Santos County Sheriff’s Office patch"
-              width={84}
-              height={84}
-              priority
-            />
+            <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={84} height={84} />
           </div>
           <div>
             <span>Los Santos County</span>
@@ -99,13 +94,7 @@ export default function PortalEntryPage() {
             contentClassName="portal-glow-login__content"
           >
             <div className="portal-glow-login__mark">
-              <Image
-                src="/images/lscso-patch-color.png"
-                alt="Los Santos County Sheriff’s Office patch"
-                width={76}
-                height={76}
-                priority
-              />
+              <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={76} height={76} />
             </div>
 
             <header className="portal-glow-login__heading">

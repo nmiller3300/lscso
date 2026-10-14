@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "./SeasonalExperience";
 "use client";
 
 import Image from "next/image";
@@ -65,7 +66,7 @@ export function SiteHeader() {
 
       <div className="site-shell nav-shell refined-nav-shell">
         <Link className="site-brand refined-site-brand" href="/" aria-label="LSCSO homepage">
-          <Image src="/images/lscso-patch-color.png" alt="" width={72} height={72} priority />
+          <SeasonalLogo alt="" width={72} height={72} />
           <span>
             <strong>LSCSO</strong>
             <small>Los Santos County Sheriff</small>

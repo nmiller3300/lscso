@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "./SeasonalExperience";
 "use client";
 
 import Image from "next/image";
@@ -18,12 +19,7 @@ export function SiteFooter() {
           }}
         >
           <div className="footer-identity" style={{ flex: "0 1 auto", minWidth: 0 }}>
-            <Image
-              src="/images/lscso-patch-color.png"
-              alt="Los Santos County Sheriff’s Office patch"
-              width={100}
-              height={100}
-            />
+            <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={100} height={100} />
             <div>
               <strong>Los Santos County</strong>
               <span>Sheriff’s Office</span>

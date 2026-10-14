@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -40,7 +41,7 @@ export function PortalShell({ active, audience = "command", eyebrow, title, desc
       <aside className="portal-sidebar">
         <div className="portal-sidebar-head">
           <Link className="portal-brand" href="/portal" aria-label="LSCSO portal entry">
-            <Image src="/images/lscso-patch-color.png" alt="" width={58} height={58} priority />
+            <SeasonalLogo alt="" width={58} height={58} />
             <span><strong>LSCSO</strong><small>Personnel Operations</small></span>
           </Link>
           <PortalSidebarController />

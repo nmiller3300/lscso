@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -74,7 +75,7 @@ export default async function JoinPage() {
                 <b>{recruitment.isOpen ? "OPEN" : "CLOSED"}</b>
               </div>
               <div className="join-experience__intake-seal">
-                <Image src="/images/lscso-patch-color.png" alt="" width={132} height={132} aria-hidden="true" />
+                <SeasonalLogo alt="" width={132} height={132} />
                 <div><small>Recruitment</small><strong>{recruitment.isOpen ? "Applications currently open" : "Applications currently closed"}</strong></div>
               </div>
               <div className="join-experience__intake-tracks">
