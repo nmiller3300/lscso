@@ -22,8 +22,9 @@ function refreshSeason() {
 
 export async function saveSeasonalAppearance(_previous: SeasonActionState, form: FormData): Promise<SeasonActionState> {
   try {
+    // Check deployment before even reading identity; previews never attempt database writes.
+    if (isSeasonalDesignPreview) return state(false, "This is a design preview. No department settings were changed.");
     const actor = await sheriffOnly();
-    if (isSeasonalDesignPreview) return state(false, "Preview mode cannot publish to the live department database.");
     const theme = String(form.get("active_theme") ?? "");
     const intensity = String(form.get("intensity") ?? "");
     if (!SEASONS.includes(theme as Season)) return state(false, "Choose a valid seasonal theme.");
@@ -43,8 +44,8 @@ export async function saveSeasonalAppearance(_previous: SeasonActionState, form:
 
 export async function uploadSeasonalLogo(_previous: SeasonActionState, form: FormData): Promise<SeasonActionState> {
   try {
+    if (isSeasonalDesignPreview) return state(false, "Preview only. Your seasonal artwork is already included; nothing was uploaded.");
     const actor = await sheriffOnly();
-    if (isSeasonalDesignPreview) return state(false, "Preview mode cannot upload into the live database. Seasonal artwork is already included in this branch.");
     const season = String(form.get("season") ?? "") as Season;
     if (!SEASONS.includes(season) || season === "standard") return state(false, "Choose Halloween, Thanksgiving or Christmas.");
     const file = form.get("logo");

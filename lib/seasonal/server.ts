@@ -4,9 +4,9 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { DEFAULT_SEASONAL_SETTINGS, normalizeSeasonalSettings } from "./config";
 
 export const SEASONAL_CACHE_TAG = "lscso-seasonal-appearance";
-export const isSeasonalDesignPreview =
-  process.env.VERCEL_ENV === "preview" &&
-  process.env.VERCEL_GIT_COMMIT_REF === "feature/seasonal-halloween-experience";
+// Fail closed: anything that isn't explicitly Vercel production is read-only.
+// Preview cannot depend on the Git branch variable (which may be unavailable at runtime).
+export const isSeasonalDesignPreview = process.env.VERCEL_ENV !== "production";
 export const getSeasonalSettings = unstable_cache(async () => {
   // The feature-branch preview always showcases Halloween without requiring
   // a production database migration or writing to the live site's settings.
@@ -23,4 +23,4 @@ export const getSeasonalSettings = unstable_cache(async () => {
     // A missing migration or temporarily unavailable DB must not take the public site down.
     return DEFAULT_SEASONAL_SETTINGS;
   }
-}, ["lscso-seasonal-appearance-v1"], { revalidate: 300, tags: [SEASONAL_CACHE_TAG] });
+}, ["lscso-seasonal-appearance-v2"], { revalidate: 300, tags: [SEASONAL_CACHE_TAG] });
