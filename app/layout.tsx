@@ -9,6 +9,7 @@ import "./public-header-glass-restore.css";
 import "./maintenance.css";
 import "./seasonal-experience.css";
 import "./seasonal-surface-design.css";
+import "./seasonal-public-navigation.css";
 
 const geist = localFont({
   src: "./fonts/Geist.woff2",

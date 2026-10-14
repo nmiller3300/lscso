@@ -24,6 +24,9 @@ const mobilePrimaryNavigation = [
 
 export function SiteHeader() {
   const pathname = usePathname();
+  const isCurrent = (href: string) => pathname === href || (href !== "/" && pathname.startsWith(`${href}/`));
+  const aboutActive = isCurrent("/about") || isCurrent("/archives");
+  const divisionActive = divisions.some((division) => isCurrent(division.href));
   const mobileNavigationRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
@@ -75,7 +78,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="desktop-navigation refined-desktop-navigation" aria-label="Primary navigation">
-          <details className="division-menu about-menu">
+          <details className={`division-menu about-menu${aboutActive ? " nav-group-current" : ""}`}>
             <summary>
               <span>About</span>
               <span className="division-chevron" aria-hidden="true">⌄</span>
@@ -85,20 +88,20 @@ export function SiteHeader() {
                 <small>Agency &amp; History</small>
                 <strong>About the Sheriff&apos;s Office</strong>
               </div>
-              <Link href="/about">
+              <Link href="/about" className={isCurrent("/about") ? "nav-current" : undefined} aria-current={isCurrent("/about") ? "page" : undefined}>
                 <span>About LSCSO</span>
                 <span aria-hidden="true">↗</span>
               </Link>
-              <Link href="/archives">
+              <Link href="/archives" className={isCurrent("/archives") ? "nav-current" : undefined} aria-current={isCurrent("/archives") ? "page" : undefined}>
                 <span>Historical Archives</span>
                 <span aria-hidden="true">↗</span>
               </Link>
             </div>
           </details>
 
-          <Link href="/office-of-the-sheriff">Office of the Sheriff</Link>
+          <Link href="/office-of-the-sheriff" className={isCurrent("/office-of-the-sheriff") ? "nav-current" : undefined} aria-current={isCurrent("/office-of-the-sheriff") ? "page" : undefined}>Office of the Sheriff</Link>
 
-          <details className="division-menu">
+          <details className={`division-menu${divisionActive ? " nav-group-current" : ""}`}>
             <summary>
               <span>Divisions</span>
               <span className="division-chevron" aria-hidden="true">⌄</span>
@@ -109,7 +112,7 @@ export function SiteHeader() {
                 <strong>Department Divisions</strong>
               </div>
               {divisions.map((division) => (
-                <Link href={division.href} key={division.href}>
+                <Link href={division.href} key={division.href} className={isCurrent(division.href) ? "nav-current" : undefined} aria-current={isCurrent(division.href) ? "page" : undefined}>
                   <span>{division.label}</span>
                   <span aria-hidden="true">↗</span>
                 </Link>
@@ -117,9 +120,9 @@ export function SiteHeader() {
             </div>
           </details>
 
-          <Link href="/open-records">Open Records</Link>
-          <Link href="/join">Join LSCSO</Link>
-          <Link href="/portal">Personnel Portal</Link>
+          <Link href="/open-records" className={isCurrent("/open-records") ? "nav-current" : undefined} aria-current={isCurrent("/open-records") ? "page" : undefined}>Open Records</Link>
+          <Link href="/join" className={isCurrent("/join") ? "nav-current" : undefined} aria-current={isCurrent("/join") ? "page" : undefined}>Join LSCSO</Link>
+          <Link href="/portal" className={isCurrent("/portal") ? "nav-current" : undefined} aria-current={isCurrent("/portal") ? "page" : undefined}>Personnel Portal</Link>
         </nav>
 
         <details className="mobile-navigation" ref={mobileNavigationRef}>
@@ -131,6 +134,7 @@ export function SiteHeader() {
 
           <nav aria-label="Mobile navigation">
             <div className="mobile-navigation__intro">
+              <SeasonalLogo alt="" className="mobile-navigation__patch" width={68} height={68} />
               <span>Los Santos County Sheriff&apos;s Office</span>
               <strong>Navigation</strong>
               <p>Public information, department operations, recruitment, and personnel access.</p>
@@ -138,7 +142,7 @@ export function SiteHeader() {
 
             <div className="mobile-navigation__primary">
               {mobilePrimaryNavigation.map((item, index) => (
-                <Link href={item.href} key={item.href}>
+                <Link href={item.href} key={item.href} className={isCurrent(item.href) ? "nav-current" : undefined} aria-current={isCurrent(item.href) ? "page" : undefined}>
                   <span>{String(index + 1).padStart(2, "0")}</span>
                   <div>
                     <strong>{item.label}</strong>
@@ -149,7 +153,7 @@ export function SiteHeader() {
               ))}
             </div>
 
-            <details className="mobile-division-menu">
+            <details className={`mobile-division-menu${divisionActive ? " nav-group-current" : ""}`}>
               <summary>
                 <div>
                   <small>Operations</small>
@@ -159,7 +163,7 @@ export function SiteHeader() {
               </summary>
               <div>
                 {divisions.map((division) => (
-                  <Link href={division.href} key={division.href}>
+                  <Link href={division.href} key={division.href} className={isCurrent(division.href) ? "nav-current" : undefined} aria-current={isCurrent(division.href) ? "page" : undefined}>
                     <span>{division.label}</span>
                     <small>{division.detail}</small>
                     <b aria-hidden="true">→</b>
@@ -169,11 +173,11 @@ export function SiteHeader() {
             </details>
 
             <div className="mobile-navigation__actions">
-              <Link className="mobile-navigation__join" href="/join">
+              <Link className={`mobile-navigation__join${isCurrent("/join") ? " nav-current" : ""}`} href="/join" aria-current={isCurrent("/join") ? "page" : undefined}>
                 <span><small>Recruitment</small><strong>Join LSCSO</strong></span>
                 <b aria-hidden="true">→</b>
               </Link>
-              <Link className="mobile-navigation__portal" href="/portal">
+              <Link className={`mobile-navigation__portal${isCurrent("/portal") ? " nav-current" : ""}`} href="/portal" aria-current={isCurrent("/portal") ? "page" : undefined}>
                 <span><small>Authorized personnel</small><strong>Personnel Portal</strong></span>
                 <b aria-hidden="true">→</b>
               </Link>
