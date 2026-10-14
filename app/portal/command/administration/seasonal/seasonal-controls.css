@@ -1,0 +1,31 @@
+
+.seasonal-simple{display:grid;gap:18px}
+.seasonal-simple .portal-panel{padding:clamp(20px,3vw,32px)!important}
+.seasonal-admin__lead{display:grid;grid-template-columns:minmax(0,1fr) 205px;align-items:center;gap:26px}
+.seasonal-admin__lead>div:first-child>span{color:var(--portal-gold-bright);font-size:11px;font-weight:800;letter-spacing:.13em;text-transform:uppercase}
+.seasonal-admin__lead h2{font-size:clamp(32px,4.5vw,56px);letter-spacing:-.045em;margin:10px 0}
+.seasonal-admin__lead p,.seasonal-simple p{color:var(--portal-muted);line-height:1.65}
+.seasonal-admin__swatch{display:flex;flex-direction:column;gap:11px;align-items:center;justify-content:center;min-height:190px;border:1px solid rgba(220,151,97,.25);border-radius:19px;background:linear-gradient(145deg,#27152c,#0e0a17);padding:18px;text-align:center}
+.seasonal-admin__swatch img{object-fit:contain;height:112px;filter:drop-shadow(0 9px 20px #0009)}
+.seasonal-admin__swatch strong{font-size:17px;color:#fff1e9}
+.seasonal-admin__swatch small{font-size:11px;color:var(--portal-gold-bright)}
+.seasonal-admin__swatch--standard{background:linear-gradient(145deg,#333023,#121719)}
+.seasonal-admin__form{display:grid;gap:17px}
+.seasonal-admin__form h3,.seasonal-simple__future h3{font-size:21px;margin:0}
+.seasonal-admin__field{display:grid;gap:9px;font-weight:750;font-size:13px}
+.seasonal-admin__field select{min-height:50px;width:100%;border-radius:12px;border:1px solid var(--portal-line-strong);padding:12px 15px;background:var(--portal-surface-2);color:var(--portal-ink);font:inherit}
+.seasonal-simple__selection{display:flex;align-items:center;gap:17px;padding:17px;border-radius:14px;border:1px solid var(--portal-line);background:rgba(115,71,110,.08)}
+.seasonal-simple__selection img{width:84px;height:84px;object-fit:contain;flex:none}
+.seasonal-simple__selection strong{font-size:19px}
+.seasonal-simple__selection p{font-size:13px;margin:6px 0 0}
+.seasonal-simple .portal-button--primary{min-height:46px;justify-self:start;padding:12px 25px}
+.seasonal-simple .portal-button--primary:disabled{opacity:.55;cursor:not-allowed}
+.seasonal-admin__ok{color:#8ce6ae!important}.seasonal-admin__error{color:#ff9b9b!important}
+.seasonal-simple small{font-size:12px;color:var(--portal-muted)}
+.seasonal-simple__future{display:grid;gap:12px}
+.seasonal-simple__future-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:11px}
+.seasonal-simple__future-grid>div{display:grid;gap:6px;padding:16px;border-radius:12px;border:1px solid var(--portal-line);background:rgba(136,84,125,.08)}
+.seasonal-simple__future-grid strong{font-size:14px}
+.seasonal-simple__future-grid span{color:var(--portal-muted);font-size:12px}
+.seasonal-admin__preview-note{color:#ffca99;border:1px solid rgba(242,153,95,.28);padding:14px;border-radius:11px}
+@media(max-width:700px){.seasonal-admin__lead{grid-template-columns:1fr}.seasonal-simple .portal-button--primary{width:100%}.seasonal-simple__selection{align-items:flex-start}}

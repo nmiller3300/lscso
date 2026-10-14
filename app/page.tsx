@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -72,12 +73,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="established-mark">
-            <Image
-              src="/images/lscso-patch-color.png"
-              alt="Los Santos County Sheriff’s Office patch"
-              width={160}
-              height={160}
-            />
+            <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={160} height={160} />
             <div>
               <span>Established</span>
               <strong>1963</strong>

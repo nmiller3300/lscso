@@ -1,0 +1,139 @@
+
+/* Halloween navigation is the site chrome, not a decoration overlay. */
+html[data-season="halloween"] .public-site-system .site-header {
+  border-bottom: 1px solid rgba(223,122,62,.35) !important;
+  background:linear-gradient(120deg,rgba(24,10,37,.97),rgba(11,7,22,.96)) !important;
+  box-shadow:0 16px 52px rgba(4,2,10,.44),inset 0 1px rgba(255,255,255,.045);
+}
+html[data-season="halloween"] .public-site-system .site-header::after {
+  background:linear-gradient(90deg,transparent,rgba(115,44,145,.61),rgba(231,122,45,.55),rgba(115,44,145,.61),transparent);
+  box-shadow:0 0 21px rgba(146,61,158,.18);
+}
+html[data-season="halloween"] .public-site-system .site-brand img {
+  filter:drop-shadow(0 0 14px rgba(213,81,31,.23));
+}
+html[data-season="halloween"] .public-site-system .refined-desktop-navigation > a,
+html[data-season="halloween"] .public-site-system .division-menu > summary {
+  position:relative;
+  color:#dbcfda;
+  border-radius:9px;
+  padding-inline:9px;
+  transition:color .18s,background .18s;
+}
+html[data-season="halloween"] .public-site-system .refined-desktop-navigation > a:hover,
+html[data-season="halloween"] .public-site-system .division-menu > summary:hover,
+html[data-season="halloween"] .public-site-system .division-menu[open] > summary {
+  color:#ffd1a6;
+  background:rgba(106,43,128,.22);
+}
+html[data-season="halloween"] .public-site-system .refined-desktop-navigation > a.nav-current,
+html[data-season="halloween"] .public-site-system .division-menu.nav-group-current > summary {
+  color:#ffca97;
+  background:linear-gradient(130deg,rgba(111,43,136,.23),rgba(211,102,35,.10));
+}
+html[data-season="halloween"] .public-site-system .refined-desktop-navigation > a.nav-current::before,
+html[data-season="halloween"] .public-site-system .division-menu.nav-group-current > summary::before {
+  position:absolute;left:10px;right:10px;bottom:5px;height:2px;
+  content:"";background:linear-gradient(90deg,#9b4bb3,#f2a05f);
+  border-radius:4px;box-shadow:0 0 9px rgba(239,134,66,.27);
+}
+html[data-season="halloween"] .public-site-system .division-chevron {color:#f9ad72}
+html[data-season="halloween"] .public-site-system .division-dropdown {
+  border:1px solid rgba(185,107,179,.39) !important;
+  border-radius:15px;
+  background:radial-gradient(circle at 86% 8%,rgba(113,42,133,.20),transparent 46%),linear-gradient(145deg,#251331,#120b1d 88%) !important;
+  box-shadow:0 26px 70px rgba(2,1,6,.66),inset 0 1px rgba(255,255,255,.05) !important;
+  overflow:hidden;
+}
+html[data-season="halloween"] .public-site-system .division-dropdown-heading {
+  border-bottom:1px solid rgba(176,101,174,.29);
+}
+html[data-season="halloween"] .public-site-system .division-dropdown-heading small {color:#f4a86c}
+html[data-season="halloween"] .public-site-system .division-dropdown > a {
+  border-bottom-color:rgba(159,97,166,.16);
+  color:#d9c8db;
+}
+html[data-season="halloween"] .public-site-system .division-dropdown > a:hover,
+html[data-season="halloween"] .public-site-system .division-dropdown > a:focus-visible,
+html[data-season="halloween"] .public-site-system .division-dropdown > a.nav-current {
+  background:linear-gradient(90deg,rgba(113,43,133,.34),rgba(224,108,46,.08)) !important;
+  color:#ffe3c9 !important;
+  box-shadow:inset 3px 0 #e7904e;
+}
+html[data-season="halloween"] .public-site-system .site-header a:focus-visible,
+html[data-season="halloween"] .public-site-system .site-header summary:focus-visible {
+  outline:2px solid #ffb577;outline-offset:3px;
+}
+@media(max-width:1060px) {
+  html[data-season="halloween"] .public-site-system .mobile-navigation > summary {
+    border:1px solid rgba(215,131,72,.48) !important;
+    background:linear-gradient(140deg,rgba(61,24,77,.82),rgba(17,10,30,.9)) !important;
+    box-shadow:0 12px 32px rgba(7,3,15,.39),inset 0 1px rgba(255,255,255,.08) !important;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation[open] > summary {
+    background:#251330 !important;border-color:rgba(244,163,92,.62) !important;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation > nav {
+    background:radial-gradient(circle at 90% 9%,rgba(97,38,119,.24),transparent 38%),
+      radial-gradient(circle at 10% 89%,rgba(189,74,28,.08),transparent 37%),
+      linear-gradient(145deg,#1c0c2c,#10091a 50%,#090713) !important;
+    color:#f6e9f0;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__intro {
+    position:relative;padding-right:72px;border-bottom-color:rgba(202,122,176,.29);
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__patch {
+    position:absolute;top:0;right:0;width:64px;height:64px;
+    object-fit:contain;filter:drop-shadow(0 5px 15px rgba(255,104,24,.19));
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__intro > span,
+  html[data-season="halloween"] .public-site-system .mobile-navigation__primary > a > span {
+    color:#e8a674;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__primary > a {
+    border-bottom-color:rgba(175,105,177,.22);
+    border-radius:9px;padding-inline:10px !important;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__primary > a:hover,
+  html[data-season="halloween"] .public-site-system .mobile-navigation__primary > a.nav-current {
+    background:linear-gradient(90deg,rgba(121,46,146,.27),rgba(232,108,41,.08));
+    box-shadow:inset 3px 0 #ed9855;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__primary > a.nav-current strong {
+    color:#ffcc9f;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-division-menu {
+    border-color:rgba(183,105,175,.35);
+    background:linear-gradient(150deg,rgba(53,23,69,.58),rgba(18,11,28,.76));
+  }
+  html[data-season="halloween"] .public-site-system .mobile-division-menu[open],
+  html[data-season="halloween"] .public-site-system .mobile-division-menu.nav-group-current {
+    border-color:rgba(236,148,87,.46);
+  }
+  html[data-season="halloween"] .public-site-system .mobile-division-menu > div a {
+    border-color:rgba(177,106,178,.2);
+  }
+  html[data-season="halloween"] .public-site-system .mobile-division-menu > div a:hover,
+  html[data-season="halloween"] .public-site-system .mobile-division-menu > div a.nav-current {
+    color:#ffdbbb;background:rgba(100,39,119,.24);
+    border-radius:8px;padding-left:10px;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation nav .mobile-navigation__join {
+    color:#1c0a1c;
+    background:linear-gradient(110deg,#fabb78,#e38c41) !important;
+    border:1px solid rgba(255,199,139,.59);
+    box-shadow:0 10px 32px rgba(183,67,25,.17);
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation nav .mobile-navigation__portal {
+    background:linear-gradient(115deg,rgba(102,41,118,.43),rgba(33,17,46,.7)) !important;
+    border-color:rgba(196,114,177,.42);
+    color:#ffe9df;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__actions > a.nav-current {
+    outline:2px solid rgba(250,174,105,.64);outline-offset:2px;
+  }
+  html[data-season="halloween"] .public-site-system .mobile-navigation__footer {border-top-color:rgba(182,100,174,.26)}
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-season="halloween"] .public-site-system .site-header :is(a,summary) {transition:none !important}
+}

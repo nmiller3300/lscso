@@ -1,15 +1,14 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import Image from "next/image";
 import Link from "next/link";
 import { CinematicOrb } from "../_components/CinematicOrb";
-import { PortalCinematicBackdrop } from "./_components/PortalCinematicBackdrop";
-import { PortalResponsiveCinematicBackdrop } from "./_components/PortalResponsiveCinematicBackdrop";
+import { SeasonalPortalBackdrop } from "./_components/SeasonalPortalBackdrop";
 import { PortalLogin } from "./_components/PortalLogin";
 
 export default function PortalEntryPage() {
   return (
     <main className="portal-gateway portal-gateway--glow-login">
-      <PortalCinematicBackdrop />
-      <PortalResponsiveCinematicBackdrop />
+      <SeasonalPortalBackdrop />
 
       <section className="portal-gateway__brand" aria-label="Los Santos County Sheriff’s Office Personnel Portal">
         <div className="portal-gateway__ambient" aria-hidden="true">
@@ -18,25 +17,11 @@ export default function PortalEntryPage() {
           <span className="portal-gateway__grid" />
         </div>
 
-        <Image
-          className="portal-gateway__watermark"
-          src="/images/lscso-patch-color.png"
-          alt=""
-          width={768}
-          height={768}
-          aria-hidden="true"
-          priority
-        />
+        <SeasonalLogo className="portal-gateway__watermark" alt="" width={768} height={768} />
 
         <header className="portal-gateway__agency">
           <div className="portal-gateway__agency-mark">
-            <Image
-              src="/images/lscso-patch-color.png"
-              alt="Los Santos County Sheriff’s Office patch"
-              width={84}
-              height={84}
-              priority
-            />
+            <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={84} height={84} />
           </div>
           <div>
             <span>Los Santos County</span>
@@ -101,13 +86,7 @@ export default function PortalEntryPage() {
             contentClassName="portal-glow-login__content"
           >
             <div className="portal-glow-login__mark">
-              <Image
-                src="/images/lscso-patch-color.png"
-                alt="Los Santos County Sheriff’s Office patch"
-                width={76}
-                height={76}
-                priority
-              />
+              <SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={76} height={76} />
             </div>
 
             <header className="portal-glow-login__heading">

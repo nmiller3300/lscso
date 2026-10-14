@@ -1,3 +1,4 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +19,7 @@ import "./application-premium.css";
 import "./application-role.css";
 import "./candidate-experience.css";
 import "./candidate-portal-bridge.css";
+import "./seasonal-application.css";
 
 export const metadata: Metadata = {
   title: "LSCSO Candidate Intake",
@@ -66,7 +68,7 @@ function CandidateIntakeOrb({ selectedTrack }: { selectedTrack: string | null })
     <aside className="candidate-intake-orb-shell" aria-label="Official LSCSO candidate record">
       <CinematicOrb className="portal-glow-login__card candidate-intake-orb" contentClassName="portal-glow-login__content candidate-intake-orb__content">
         <div className="candidate-intake-orb__status"><i /> Intake authenticated</div>
-        <div className="portal-glow-login__mark candidate-intake-orb__mark"><Image src="/images/lscso-patch-color.png" alt="Los Santos County Sheriff’s Office patch" width={76} height={76} priority /></div>
+        <div className="portal-glow-login__mark candidate-intake-orb__mark"><SeasonalLogo alt="Los Santos County Sheriff’s Office patch" width={76} height={76} /></div>
         <header className="portal-glow-login__heading candidate-intake-orb__heading"><span>Los Santos County Sheriff&apos;s Office</span><h2>Candidate Selection</h2><p>{selectedTrack ?? "Choose a pathway to begin your candidate record."}</p></header>
         <div className="candidate-intake-orb__trust" aria-label="Candidate record protections"><span>Secure submission</span><span>Private tracking</span></div>
       </CinematicOrb>
@@ -85,7 +87,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
         <section className="application-page__hero application-page__hero--closed candidate-intake-hero">
           <PortalResponsiveCinematicBackdrop />
           <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
-          <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={760} height={760} aria-hidden="true" priority />
+          <SeasonalLogo className="candidate-intake-watermark" alt="" width={760} height={760} />
           <div className="site-shell application-closed candidate-intake-closed">
             <p className="section-kicker">LSCSO Candidate Selection</p>
             <span className="application-closed__status"><i /> Candidate intake standby</span>
@@ -122,7 +124,7 @@ export default async function ApplicationPage({ searchParams }: { searchParams: 
       <section className="application-page__hero candidate-intake-hero">
         <PortalResponsiveCinematicBackdrop />
         <div className="candidate-intake-ambient" aria-hidden="true"><span /><span /><span /></div>
-        <Image className="candidate-intake-watermark" src="/images/lscso-patch-color.png" alt="" width={840} height={840} aria-hidden="true" priority />
+        <SeasonalLogo className="candidate-intake-watermark" alt="" width={840} height={840} />
         <div className="site-shell">
           <div className="application-page__masthead candidate-intake-masthead">
             <div className="candidate-intake-masthead__copy">

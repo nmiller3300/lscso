@@ -1,0 +1,154 @@
+
+/* Halloween navigation in both command/deputy portal modes, including mobile drawer. */
+html[data-season="halloween"] .portal-app .portal-sidebar {
+  border:1px solid rgba(155,86,165,.2) !important;
+  background:radial-gradient(circle at 20% 0,rgba(102,43,129,.23),transparent 33%),
+    linear-gradient(180deg,#21112d,#120d1f 65%,#0a0815) !important;
+}
+html[data-season="halloween"] .portal-app .portal-sidebar-head {
+  border-bottom-color:rgba(179,105,168,.3) !important;
+}
+html[data-season="halloween"] .portal-app .portal-brand img {
+  filter:drop-shadow(0 4px 14px rgba(252,101,26,.23));
+}
+html[data-season="halloween"] .portal-app .portal-sidebar-label,
+html[data-season="halloween"] .portal-app .portal-navigation-group__label {
+  color:#c09cc3 !important;
+}
+html[data-season="halloween"] .portal-app .portal-navigation-group + .portal-navigation-group::before {
+  background:linear-gradient(90deg,transparent,rgba(158,83,164,.31),transparent) !important;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a {
+  border-radius:12px;color:#cdbdd3;
+  border:1px solid transparent;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a > span:first-child,
+html[data-season="halloween"] .portal-app .portal-navigation-icon {
+  color:#c5a0cf;background:rgba(87,38,105,.25);
+  border-color:rgba(154,91,168,.22);
+}
+html[data-season="halloween"] .portal-app .portal-navigation a:hover,
+html[data-season="halloween"] .portal-app .portal-navigation a:focus-visible {
+  background:linear-gradient(100deg,rgba(118,48,140,.35),rgba(34,15,48,.41)) !important;
+  border-color:rgba(184,110,177,.32) !important;color:#fff0e6;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a.is-active {
+  background:linear-gradient(110deg,rgba(125,47,143,.47),rgba(233,113,44,.14)) !important;
+  border:1px solid rgba(246,160,96,.5) !important;
+  box-shadow:inset 3px 0 #ffb06e,0 10px 25px rgba(6,3,13,.22);
+  color:#ffe8cb !important;
+}
+html[data-season="halloween"] .portal-app .portal-navigation a.is-active .portal-navigation-icon,
+html[data-season="halloween"] .portal-app .portal-navigation a.is-active > span:first-child {
+  background:linear-gradient(140deg,rgba(241,139,64,.27),rgba(135,45,147,.38));
+  color:#ffd7b4;border-color:rgba(251,176,100,.49);
+}
+html[data-season="halloween"] .portal-app .portal-sidebar-utility {
+  border-top-color:rgba(180,111,169,.2);
+}
+html[data-season="halloween"] .portal-app .portal-sidebar-foot {
+  border-top-color:rgba(172,107,170,.24);
+  background:linear-gradient(105deg,rgba(75,31,87,.17),rgba(208,93,28,.05));
+}
+html[data-season="halloween"] .portal-app .portal-sidebar-collapse {
+  color:#eeb58b;
+  border-color:rgba(176,106,172,.32);
+  background:rgba(64,25,79,.24);
+}
+html[data-season="halloween"] .portal-app .portal-topbar {
+  border:1px solid rgba(184,103,174,.18) !important;
+  background:linear-gradient(110deg,rgba(38,17,52,.94),rgba(16,11,27,.96)) !important;
+  box-shadow:0 10px 38px rgba(6,2,11,.27),inset 0 1px rgba(255,255,255,.04);
+}
+html[data-season="halloween"] .portal-app .portal-topbar::after {
+  background:linear-gradient(90deg,transparent,rgba(117,54,139,.34),rgba(234,137,62,.45),transparent) !important;
+}
+html[data-season="halloween"] .portal-app .portal-environment > span,
+html[data-season="halloween"] .portal-app .portal-environment > strong {
+  color:#e6cbd7;
+}
+html[data-season="halloween"] .portal-app .portal-topbar-actions :is(button,a):hover {
+  border-color:rgba(236,147,77,.5);
+}
+html[data-season="halloween"] .portal-app .portal-account-menu > summary {
+  border-color:rgba(197,112,167,.34) !important;
+  background:rgba(77,34,94,.28) !important;
+}
+@media(max-width:860px) {
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-trigger {
+    background:linear-gradient(145deg,rgba(79,29,98,.6),rgba(32,16,45,.94)) !important;
+    border-color:rgba(230,145,90,.42) !important;color:#ffbf8d;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-trigger:hover,
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-trigger[aria-expanded="true"] {
+    background:#3b1d4f !important;border-color:#f5a36c !important;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-backdrop {
+    z-index:400;background:#0c0714;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-drawer {
+    background:radial-gradient(circle at 92% 4%,rgba(110,40,135,.2),transparent 38%),
+      radial-gradient(circle at 12% 90%,rgba(216,84,27,.08),transparent 35%),
+      linear-gradient(155deg,#1a0c28,#100a1a 64%,#080711) !important;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-header {
+    background:rgba(23,11,36,.96);border-bottom-color:rgba(178,96,168,.27);
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-brand > span.portal-mobile-menu-patch {
+    background:linear-gradient(145deg,rgba(124,49,136,.33),rgba(199,84,39,.08));
+    border-color:rgba(222,131,81,.4);
+    overflow:hidden;padding:3px;
+  }
+  html[data-season="halloween"] .portal-mobile-menu-patch img {
+    width:100%;height:100%;object-fit:contain;
+    filter:drop-shadow(0 2px 5px rgba(255,111,27,.24));
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-intro {
+    border-bottom-color:rgba(177,107,183,.2);
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-intro > span,
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group__label {
+    color:#ecae80;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group > div {
+    border-color:rgba(177,100,185,.25);
+    background:linear-gradient(135deg,rgba(53,22,67,.55),rgba(17,11,27,.86));
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a {
+    border-bottom-color:rgba(170,99,181,.16);
+    color:#e5d1e6;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a:hover,
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a:focus-visible {
+    background:rgba(105,44,122,.3);
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a.is-active {
+    background:linear-gradient(90deg,rgba(132,47,139,.5),rgba(233,116,47,.11)) !important;
+    box-shadow:inset 4px 0 #ffa45f;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-glyph {
+    color:#d8a9cc;border-color:rgba(170,98,170,.3);
+    background:rgba(88,40,106,.26);
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a.is-active .portal-mobile-menu-glyph {
+    background:linear-gradient(145deg,#f2b16b,#db7f43);
+    border-color:#ffd1a2;color:#240d1a;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-group a small {
+    color:#b9a8bc;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-close {
+    color:#ffd2a8;border-color:rgba(214,127,164,.39) !important;
+    background:rgba(105,43,115,.22) !important;
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-footer > a {
+    color:#ffd4b3;border-color:rgba(222,137,82,.41);
+    background:rgba(96,41,106,.19);
+  }
+  html[data-season="halloween"] .portal-app .portal-mobile-menu-footer {
+    border-top-color:rgba(172,94,174,.26);
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  html[data-season="halloween"] .portal-app .portal-navigation a {transition:none !important}
+}

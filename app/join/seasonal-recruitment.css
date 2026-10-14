@@ -1,0 +1,79 @@
+
+/* Halloween transforms the existing recruitment page, not just its overlay. */
+html[data-season="halloween"] .join-experience{
+  --join-gold:#f3a367;--join-gold-bright:#ffd0a1;
+  --join-olive:#764d77;--join-steel:#9770aa;
+  --join-ink:#0e0819;--join-panel:rgba(24,12,34,.82);
+  --join-line:rgba(186,113,190,.28);
+  background:#110b1b;
+}
+html[data-season="halloween"] .join-experience__hero{
+  background:radial-gradient(circle at 78% 27%,rgba(99,40,124,.23),transparent 36%),
+    radial-gradient(circle at 12% 74%,rgba(191,76,25,.14),transparent 38%),
+    linear-gradient(145deg,#1a0c27,#100a1c 52%,#0c0915 100%);
+}
+html[data-season="halloween"] .join-experience__hero::before{
+  background:radial-gradient(circle at 65% 12%,rgba(173,104,165,.05),transparent 40%),
+  repeating-linear-gradient(90deg,rgba(186,111,167,.015) 0 1px,transparent 1px 78px);
+}
+html[data-season="halloween"] .join-experience__agency-mark,
+html[data-season="halloween"] .join-experience__intake{
+  border-color:rgba(222,141,93,.32);
+  background:linear-gradient(155deg,rgba(43,19,52,.83),rgba(13,9,23,.86))!important;
+  box-shadow:0 24px 65px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.07);
+}
+html[data-season="halloween"] .join-experience__hero-copy h1 em{color:#ffad71}
+html[data-season="halloween"] .join-experience__beam--gold{background:#e88145;opacity:.46}
+html[data-season="halloween"] .join-experience__beam--steel{background:#8855a1;opacity:.38}
+html[data-season="halloween"] .join-experience__primary,
+html[data-season="halloween"] .join-path>a{
+  border-color:rgba(255,172,113,.58);
+  background:linear-gradient(112deg,#fcb574,#e37e36)!important;
+  color:#230c1e!important;
+  box-shadow:0 14px 35px rgba(205,88,43,.16);
+}
+html[data-season="halloween"] .join-experience__secondary{
+  background:rgba(48,22,58,.45);border-color:rgba(186,108,174,.37);color:#fff3e6;
+}
+html[data-season="halloween"] .join-experience__paths{
+  background:radial-gradient(circle at 13% 4%,rgba(105,43,134,.19),transparent 41%),
+    linear-gradient(180deg,#0d0a17,#160b22 70%,#0d0917)!important;
+}
+html[data-season="halloween"] .join-path{
+  border:1px solid rgba(157,96,162,.36);
+  background:radial-gradient(circle at 83% 17%,rgba(99,37,116,.20),transparent 42%),
+    linear-gradient(140deg,#22122e,#100e1a 75%)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.045),0 25px 62px rgba(0,0,0,.35);
+}
+html[data-season="halloween"] .join-path:nth-child(2){
+  background:radial-gradient(circle at 78% 12%,rgba(177,76,40,.16),transparent 43%),
+    linear-gradient(145deg,#261426,#100d18 78%)!important;
+}
+html[data-season="halloween"] .join-path:not(.is-closed):hover{
+  border-color:rgba(250,158,85,.65);
+  box-shadow:0 25px 70px rgba(0,0,0,.42),0 0 36px rgba(153,69,136,.13);
+  transform:translateY(-4px);
+}
+html[data-season="halloween"] .join-path__copy small,
+html[data-season="halloween"] .join-path__index>span{color:#f5b078}
+html[data-season="halloween"] .join-path__copy p{color:#b9a9ba}
+html[data-season="halloween"] .join-path__glyph{color:#f0a467}
+html[data-season="halloween"] .join-path.is-closed{opacity:.62}
+html[data-season="halloween"] .join-experience__standard{
+  background:linear-gradient(140deg,#f0e5e9,#eee0d3)!important;color:#291a2c;
+}
+html[data-season="halloween"] .join-standard-grid article{
+  border-bottom-color:rgba(91,43,82,.21);
+}
+html[data-season="halloween"] .join-standard-grid h3{color:#38213e}
+html[data-season="halloween"] .join-standard-grid article>span{color:#9b4b40}
+html[data-season="halloween"] .join-experience__process{
+  background:radial-gradient(circle at 10% 42%,rgba(126,44,128,.19),transparent 43%),
+    linear-gradient(135deg,#1d102b,#100b18 85%)!important;
+}
+html[data-season="halloween"] .join-process-rail::before{
+  background:linear-gradient(90deg,rgba(241,131,68,.24),rgba(169,86,154,.6),rgba(241,131,68,.26));
+}
+html[data-season="halloween"] .join-experience__close{
+  background:linear-gradient(125deg,#23112f,#130c1d)!important;
+}

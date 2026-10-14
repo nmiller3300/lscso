@@ -46,6 +46,8 @@ import "./reserve-status.css";
 import "./personnel-record-navigation.css";
 import "./portal-interaction-overhaul.css";
 import "./audit-polish.css";
+import "./seasonal-portal-design.css";
+import "./seasonal-portal-navigation.css";
 
 export const metadata: Metadata = {
   title: "Personnel Operations Portal",

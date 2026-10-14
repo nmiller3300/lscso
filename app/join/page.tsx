@@ -1,9 +1,11 @@
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import "./join-experience.css";
 import "./join-forensics-polish.css";
+import "./seasonal-recruitment.css";
 
 export const metadata: Metadata = {
   title: "Join LSCSO",
@@ -46,15 +48,7 @@ export default async function JoinPage() {
           <span className="join-experience__beam join-experience__beam--steel" />
         </div>
 
-        <Image
-          className="join-experience__watermark"
-          src="/images/lscso-patch-color.png"
-          alt=""
-          width={900}
-          height={900}
-          priority
-          aria-hidden="true"
-        />
+        <SeasonalLogo className="join-experience__watermark" alt="" width={900} height={900} />
 
         <div className="site-shell join-experience__hero-shell">
           <div className="join-experience__hero-grid">
@@ -74,7 +68,7 @@ export default async function JoinPage() {
                 <b>{recruitment.isOpen ? "OPEN" : "CLOSED"}</b>
               </div>
               <div className="join-experience__intake-seal">
-                <Image src="/images/lscso-patch-color.png" alt="" width={132} height={132} aria-hidden="true" />
+                <SeasonalLogo alt="" width={132} height={132} />
                 <div><small>Recruitment</small><strong>{recruitment.isOpen ? "Applications currently open" : "Applications currently closed"}</strong></div>
               </div>
               <div className="join-experience__intake-tracks">

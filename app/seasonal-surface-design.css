@@ -1,0 +1,162 @@
+
+/* Seasonal design system for actual public website elements; the original
+   homepage hero structure and imagery are intentionally untouched. */
+html[data-season="halloween"] .public-site-system {
+  --season-plum:#21102f;--season-night:#0d0917;
+  --season-orange:#ee9250;--season-gold:#ffbd79;
+  --season-border:rgba(180,105,174,.27);
+  --gold:#ee9250;--gold-light:#ffbd79;
+  background:var(--season-night);
+}
+html[data-season="halloween"] .public-site-system .utility-bar{
+  background:#120b1d;border-bottom:1px solid rgba(164,95,173,.23);
+}
+html[data-season="halloween"] .public-site-system .site-header{
+  background:linear-gradient(125deg,rgba(31,14,45,.96),rgba(13,10,23,.94))!important;
+  border-bottom:1px solid rgba(230,124,56,.27);
+  box-shadow:0 20px 60px rgba(6,3,12,.4),inset 0 -1px rgba(238,146,80,.11);
+}
+html[data-season="halloween"] .public-site-system .refined-desktop-navigation>a:hover,
+html[data-season="halloween"] .public-site-system .division-menu>summary:hover {
+  color:#ffc38d;background:rgba(107,58,136,.15);
+}
+html[data-season="halloween"] .public-site-system .division-dropdown,
+html[data-season="halloween"] .public-site-system .mobile-navigation{
+  border-color:rgba(200,118,165,.32);
+  background:linear-gradient(150deg,#23122f,#120b1e 80%)!important;
+  box-shadow:0 20px 55px rgba(0,0,0,.36);
+}
+html[data-season="halloween"] .public-site-system .division-dropdown a:hover,
+html[data-season="halloween"] .public-site-system .mobile-navigation a:hover{
+  background:rgba(147,71,156,.18);color:#ffd1a0;
+}
+html[data-season="halloween"] .public-site-system .home-hero{
+  isolation:isolate;
+  box-shadow:inset 0 -70px 90px rgba(17,8,26,.23);
+}
+html[data-season="halloween"] .public-site-system .home-hero-overlay{
+  background:linear-gradient(90deg,rgba(13,7,24,.87),rgba(25,11,35,.68) 48%,rgba(16,7,25,.20)),
+    linear-gradient(0deg,rgba(18,8,29,.8),transparent 68%);
+}
+html[data-season="halloween"] .public-site-system .home-hero .section-kicker{color:#ffc28a}
+html[data-season="halloween"] .public-site-system .hero-actions a:first-child,
+html[data-season="halloween"] .public-site-system .route-link--gold {
+  background:linear-gradient(112deg,#f7aa66,#df772e)!important;
+  border-color:#ffb46f!important;color:#24101d!important;
+  box-shadow:0 10px 34px rgba(166,63,28,.22);
+}
+html[data-season="halloween"] .public-site-system .hero-actions a:not(:first-child){
+  border-color:rgba(199,117,196,.46);
+  background:rgba(43,18,58,.37);color:#fbece8;
+}
+html[data-season="halloween"] .public-site-system .home-introduction{
+  background:linear-gradient(135deg,#f4edf1,#f1e4d7 84%)!important;
+}
+html[data-season="halloween"] .public-site-system .home-introduction .section-kicker{
+  color:#76335d;
+}
+html[data-season="halloween"] .public-site-system .gateway-section{
+  background:radial-gradient(circle at 84% 18%,rgba(94,35,105,.16),transparent 43%),
+    linear-gradient(155deg,#1c1028,#0d0b16)!important;
+  border-top:1px solid rgba(189,105,160,.16);
+}
+html[data-season="halloween"] .public-site-system .gateway-item{
+  border:1px solid rgba(183,114,183,.19);
+  border-radius:16px;
+  padding-inline:clamp(12px,2vw,28px);
+  background:linear-gradient(130deg,rgba(69,31,77,.23),rgba(16,11,26,.54))!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+  transition:background .18s,border-color .18s,transform .18s;
+}
+html[data-season="halloween"] .public-site-system .gateway-item:hover{
+  border-color:rgba(243,153,90,.54);
+  background:linear-gradient(135deg,rgba(86,39,93,.34),rgba(35,15,38,.72))!important;
+  transform:translateY(-2px);
+}
+html[data-season="halloween"] .public-site-system .gateway-index,
+html[data-season="halloween"] .public-site-system .gateway-arrow{color:#f6ac71}
+html[data-season="halloween"] .public-site-system .home-feature{
+  background:linear-gradient(125deg,#1d112a,#110b19)!important;
+  border-color:rgba(183,114,183,.21);
+}
+html[data-season="halloween"] .public-site-system .recruitment-banner-overlay{
+  background:linear-gradient(95deg,rgba(21,10,31,.91),rgba(45,16,50,.76) 54%,rgba(22,9,33,.30));
+}
+html[data-season="halloween"] .public-site-system .site-footer{
+  background:linear-gradient(155deg,#180e24,#090812)!important;
+  border-top:1px solid rgba(203,124,160,.23);
+}
+html[data-season="halloween"] .public-site-system .footer-navigation a:hover{color:#ffc388}
+html[data-season="halloween"] .public-site-system :is(.content-section,.public-panel,.public-card):not(.content-section--light):not(.content-section--sand){
+  --gold:#e89051;--gold-light:#ffc18a;
+}
+@media(max-width:750px){
+html[data-season="halloween"] .public-site-system .gateway-item{border-radius:12px;padding-inline:14px}
+}
+@media(prefers-reduced-motion:reduce){
+html[data-season="halloween"] .public-site-system .gateway-item{transition:none}
+}
+
+/* Non-home public pages and genuine content sections, not floating scene effects. */
+html[data-season="halloween"] .public-site-system .page-hero {
+  background:radial-gradient(circle at 86% 8%,rgba(109,44,127,.2),transparent 42%),#0d0917;
+}
+html[data-season="halloween"] .public-site-system .page-hero-overlay {
+  background:linear-gradient(95deg,rgba(14,7,24,.96),rgba(25,11,37,.79) 49%,rgba(15,8,26,.31) 85%),
+    linear-gradient(0deg,rgba(13,7,20,.78),transparent 69%);
+}
+html[data-season="halloween"] .public-site-system .page-hero--contained .page-hero-overlay {
+  background:linear-gradient(90deg,rgba(17,9,27,.97),rgba(26,12,38,.88) 50%,rgba(16,9,27,.24) 85%);
+}
+html[data-season="halloween"] .public-site-system .page-hero-media img {
+  filter:saturate(.83) contrast(1.06) brightness(.79);
+}
+html[data-season="halloween"] .public-site-system .section-kicker,
+html[data-season="halloween"] .public-site-system .page-hero .section-kicker {
+  color:#efab75;
+}
+html[data-season="halloween"] .public-site-system .content-section--light,
+html[data-season="halloween"] .public-site-system .home-introduction {
+  --line-light:rgba(175,106,187,.22);
+  background:linear-gradient(130deg,#26182e,#211326 58%,#170e23) !important;
+  color:#f5eef1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--sand {
+  --line-light:rgba(175,106,187,.22);
+  background:linear-gradient(135deg,#1d1229,#261628 73%) !important;
+  color:#f5eef1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(h2,h3,h4,.intro-serif),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(h2,h3,h4,.intro-serif) {
+  color:#f6ebf1 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.reading-column,.reading-column p,.section-heading-row p,.value-grid p,.responsibility-grid p,.process-grid p,.quality-grid p),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.reading-column,.reading-column p,.section-heading-row p,.value-grid p,.responsibility-grid p,.process-grid p,.quality-grid p) {
+  color:#c5b5c7 !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.value-grid article,.responsibility-grid article,.process-grid article,.quality-grid article),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.value-grid article,.responsibility-grid article,.process-grid article,.quality-grid article) {
+  border-color:rgba(183,117,191,.24) !important;
+}
+html[data-season="halloween"] .public-site-system .content-section--light :is(.value-grid article>span,.responsibility-grid article>span,.process-grid article>span,.quality-grid article>span),
+html[data-season="halloween"] .public-site-system .content-section--sand :is(.value-grid article>span,.responsibility-grid article>span,.process-grid article>span,.quality-grid article>span) {
+  color:#f6b382 !important;
+}
+html[data-season="halloween"] .public-site-system .mission-statement-section {
+  background:linear-gradient(135deg,#321b36,#170e25 72%) !important;
+}
+html[data-season="halloween"] .public-site-system .content-section:not(.content-section--light):not(.content-section--sand):not(.gateway-section){
+  background:linear-gradient(145deg,#1b1126,#0d0917) !important;
+}
+html[data-season="halloween"] .public-site-system .established-mark {
+  border-color:rgba(243,153,86,.41);color:#ffc18c;
+}
+html[data-season="halloween"] .public-site-system :is(.route-link--outline,.route-link--text):hover,
+html[data-season="halloween"] .public-site-system :is(.button--outline,.button--outline-dark):hover {
+  color:#ffcca0;border-color:rgba(232,151,88,.6);
+}
+@media (forced-colors:active) {
+  html[data-season="halloween"] .public-site-system :is(.gateway-item,.content-section,.page-hero) {
+    background:Canvas!important;color:CanvasText!important;
+  }
+}
