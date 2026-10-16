@@ -1,3 +1,11 @@
+export const APPLICANT_FULL_NAME_ERROR = "Please enter both your first and last character name (for example, John Bedford).";
+
+export function isValidApplicantFullName(name: unknown): boolean {
+  if (typeof name !== "string") return false;
+  const parts = name.trim().split(/\s+/);
+  return parts.length >= 2 && parts.every((part) => /[\p{L}]/u.test(part));
+}
+
 export const APPLICATION_STATUSES = ["Submitted", "Under Review", "Accepted", "Denied", "Hired", "Withdrawn", "Archived"] as const;
 export const APPLICATION_REVIEW_STATUSES = ["Submitted", "Under Review"] as const;
 export const INTERVIEW_STATUSES = ["Not Scheduled", "Scheduled", "Completed", "No Show", "Passed", "Failed"] as const;

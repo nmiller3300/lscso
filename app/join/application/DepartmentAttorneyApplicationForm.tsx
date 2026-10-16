@@ -6,6 +6,8 @@ import {
   APPLICATION_AI_ACKNOWLEDGEMENT_TEXT,
   APPLICATION_AI_POLICY_TEXT,
   APPLICATION_CERTIFICATION_TEXT,
+  APPLICANT_FULL_NAME_ERROR,
+  isValidApplicantFullName,
   type RecruitmentApplicationQuestion,
 } from "@/lib/recruitment/application";
 
@@ -80,6 +82,10 @@ export function DepartmentAttorneyApplicationForm({ questions }: { questions: Re
         setError("Please answer every required question in this section before continuing.");
         return false;
       }
+      if (question.systemField === "full_name" && !isValidApplicantFullName(value)) {
+        setError(APPLICANT_FULL_NAME_ERROR);
+        return false;
+      }
       if (value.length > 8000) {
         setError("Application answers cannot exceed 8,000 characters.");
         return false;
@@ -122,8 +128,8 @@ export function DepartmentAttorneyApplicationForm({ questions }: { questions: Re
   function signApplication() {
     const name = values[fullNameKey]?.trim();
     setError("");
-    if (!name || name.length < 2) {
-      setError("Return to Applicant Information and enter your character name before signing.");
+    if (!isValidApplicantFullName(name)) {
+      setError(APPLICANT_FULL_NAME_ERROR);
       return;
     }
     setSignatureName(name);

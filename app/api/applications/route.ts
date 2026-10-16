@@ -4,6 +4,8 @@ import { createClient as createServerClient } from "@/lib/supabase/server";
 import {
   APPLICATION_AI_POLICY_TEXT,
   APPLICATION_CERTIFICATION_TEXT,
+  APPLICANT_FULL_NAME_ERROR,
+  isValidApplicantFullName,
   APPLICATION_TRACKS,
   type ApplicationTrack,
 } from "@/lib/recruitment/application";
@@ -51,6 +53,12 @@ export async function POST(request: Request) {
 
     if (!body.answers || typeof body.answers !== "object" || Array.isArray(body.answers)) {
       return NextResponse.json({ error: "Please submit a valid application answer set." }, { status: 400 });
+    }
+
+    const fullNameKey = track === "Department Attorney" ? "attorney_full_name" : track === "Forensics Specialist" ? "forensics_full_name" : "full_name";
+    const applicantName = clean((body.answers as Record<string, unknown>)[fullNameKey]);
+    if (!isValidApplicantFullName(applicantName)) {
+      return NextResponse.json({ error: APPLICANT_FULL_NAME_ERROR }, { status: 400 });
     }
 
     if (body.signature_confirmed !== true || body.applicant_certification !== true) {
