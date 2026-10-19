@@ -1,5 +1,6 @@
 import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import { OriginalAgencyRail } from "./_components/OriginalAgencyRail";
+import { OriginalHomeExperience } from "./_components/OriginalHomeExperience";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -42,7 +43,7 @@ const gateways = [
   },
 ];
 
-export default function HomePage() {
+function LegacyHomePage() {
   return (
     <>
       <section className="home-hero">
@@ -188,4 +189,9 @@ export default function HomePage() {
       </section>
     </>
   );
+}
+
+
+export default function HomePage() {
+  return <OriginalHomeExperience legacy={<LegacyHomePage />} />;
 }

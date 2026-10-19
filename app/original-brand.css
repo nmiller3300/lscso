@@ -282,3 +282,217 @@ html[data-season="standard"] .portal-root{
     transition:none;
   }
 }
+
+/* Original homepage: independent editorial structure, not an overlay on Halloween. */
+html[data-season="standard"] .agency-home-hero{
+  position:relative;isolation:isolate;display:flex;align-items:center;
+  min-height:min(830px,94vh);overflow:hidden;padding:195px 0 102px;
+  background:#141414;border-bottom:1px solid rgba(185,148,99,.34);
+}
+html[data-season="standard"] .agency-home-hero__photo{
+  z-index:-3;object-fit:cover;object-position:70% 53%;
+  filter:grayscale(.48) contrast(1.11) brightness(.75);
+}
+html[data-season="standard"] .agency-home-hero__wash{
+  position:absolute;z-index:-2;inset:0;
+  background:linear-gradient(90deg,rgba(9,9,9,.97),rgba(15,15,15,.82) 44%,rgba(13,13,13,.35) 100%),
+    linear-gradient(0deg,#151515 0%,transparent 42%),
+    linear-gradient(180deg,rgba(0,0,0,.36),transparent 40%);
+}
+html[data-season="standard"] .agency-home-hero__inner{
+  position:relative;display:grid;
+  grid-template-columns:minmax(0,1fr) 210px;
+  gap:clamp(36px,6vw,105px);align-items:end;
+}
+html[data-season="standard"] .agency-home-hero__copy{max-width:740px}
+html[data-season="standard"] .agency-home-overline{
+  display:flex;align-items:center;gap:12px;
+  color:#d9b88e;text-transform:uppercase;font-weight:750;
+  letter-spacing:.17em;font-size:11px;line-height:1.65;
+}
+html[data-season="standard"] .agency-home-overline>span{
+  display:inline-block;width:22px;height:1px;background:currentColor;
+}
+html[data-season="standard"] .agency-home-overline--dark{color:#81653f}
+html[data-season="standard"] .agency-home-hero h1{
+  margin:24px 0 28px;max-width:800px;
+  color:#f7f3ed;font-size:clamp(56px,6.8vw,108px);font-weight:780;
+  letter-spacing:-.072em;line-height:.99;text-wrap:balance;
+}
+html[data-season="standard"] .agency-home-hero h1 span{
+  display:block;color:#c4a072;
+}
+html[data-season="standard"] .agency-home-hero__intro{
+  max-width:590px;font-size:clamp(17px,1.6vw,20px);line-height:1.65;
+  color:rgba(250,247,240,.75);
+}
+html[data-season="standard"] .agency-home-hero__actions{
+  display:flex;flex-wrap:wrap;gap:12px;margin-top:32px;
+}
+html[data-season="standard"] .agency-home-button{
+  min-height:50px;padding:13px 20px;display:inline-flex;align-items:center;justify-content:space-between;gap:22px;
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;font-weight:790;
+  border:1px solid rgba(185,148,99,.65);transition:background .18s,color .18s,border-color .18s;
+}
+html[data-season="standard"] .agency-home-button--gold{
+  background:#b99463;color:#171717;border-color:#b99463;
+}
+html[data-season="standard"] .agency-home-button--gold:hover{
+  background:#dab789;border-color:#dab789;
+}
+html[data-season="standard"] .agency-home-button--outline{
+  background:rgba(19,19,19,.35);color:#f9f6f0;
+}
+html[data-season="standard"] .agency-home-button--outline:hover{
+  background:rgba(185,148,99,.17);
+}
+html[data-season="standard"] .agency-home-hero__seal{
+  min-width:0;padding:16px 0 14px 28px;
+  border-left:1px solid rgba(185,148,99,.38);
+  display:flex;flex-direction:column;align-items:flex-start;gap:18px;
+}
+html[data-season="standard"] .agency-home-hero__seal img{
+  object-fit:contain;width:145px;height:160px;
+  filter:drop-shadow(0 8px 12px rgba(0,0,0,.38));
+}
+html[data-season="standard"] .agency-home-hero__seal>div{
+  display:flex;flex-direction:column;gap:4px;
+}
+html[data-season="standard"] .agency-home-hero__seal strong{
+  color:#cfab7a;letter-spacing:.13em;font-size:10px;
+}
+html[data-season="standard"] .agency-home-hero__seal span{
+  color:#eee9e1;letter-spacing:.08em;font-size:12px;font-weight:730;
+}
+html[data-season="standard"] .agency-home-hero__seal small{
+  color:#aaa29a;letter-spacing:.11em;text-transform:uppercase;font-size:9px;margin-top:5px;
+}
+html[data-season="standard"] .agency-home-mission{
+  background:#f0ede7;color:#252321;
+  padding:clamp(76px,9vw,138px) 0;
+}
+html[data-season="standard"] .agency-home-mission__grid{
+  display:grid;grid-template-columns:1fr .84fr;gap:clamp(60px,10vw,140px);align-items:start;
+}
+html[data-season="standard"] .agency-home-mission h2{
+  font-size:clamp(43px,4.5vw,73px);line-height:1.07;
+  letter-spacing:-.06em;max-width:650px;margin-top:22px;
+}
+html[data-season="standard"] .agency-home-mission__text{
+  border-left:2px solid #b99463;padding-left:30px;margin-top:28px;
+  color:#55514b;font-size:16px;line-height:1.78;
+}
+html[data-season="standard"] .agency-home-mission__text .agency-home-mission__lead{
+  color:#26211d;font-weight:770;font-size:22px;line-height:1.4;
+}
+html[data-season="standard"] .agency-home-mission__text a{
+  display:inline-flex;gap:20px;align-items:center;margin-top:14px;
+  font-size:12px;letter-spacing:.11em;text-transform:uppercase;
+  color:#896841;font-weight:800;border-bottom:1px solid #b99463;padding-bottom:8px;
+}
+html[data-season="standard"] .agency-home-directory{
+  background:#1b1b1b;color:#f6f3ee;
+  padding:clamp(75px,8vw,116px) 0;
+  border-top:1px solid rgba(185,148,99,.3);
+}
+html[data-season="standard"] .agency-home-directory__heading{
+  display:flex;justify-content:space-between;align-items:end;
+  gap:36px;margin-bottom:42px;
+}
+html[data-season="standard"] .agency-home-directory__heading h2{
+  color:#f6f3ee;font-size:clamp(44px,5vw,76px);letter-spacing:-.06em;line-height:1;
+  margin:18px 0 0;
+}
+html[data-season="standard"] .agency-home-directory__heading>p{
+  max-width:325px;color:#b3aaa0;line-height:1.6;font-size:15px;margin-bottom:3px;
+}
+html[data-season="standard"] .agency-home-directory__items{
+  display:flex;flex-direction:column;border-top:1px solid rgba(185,148,99,.35);
+}
+html[data-season="standard"] .agency-home-directory__item{
+  display:grid;grid-template-columns:60px minmax(190px,1.05fr) minmax(175px,.9fr) 25px;
+  align-items:center;gap:22px;
+  min-height:126px;padding:24px 12px;
+  border-bottom:1px solid rgba(185,148,99,.22);
+  transition:background .18s,padding .18s;
+}
+html[data-season="standard"] .agency-home-directory__item:hover{
+  background:rgba(185,148,99,.075);padding-left:22px;
+}
+html[data-season="standard"] .agency-home-directory__number{
+  color:#b99463;font-size:12px;letter-spacing:.14em;font-weight:800;
+}
+html[data-season="standard"] .agency-home-directory__name{
+  display:flex;flex-direction:column;gap:7px;
+}
+html[data-season="standard"] .agency-home-directory__name small{
+  color:#bfa37e;letter-spacing:.16em;text-transform:uppercase;font-size:10px;font-weight:750;
+}
+html[data-season="standard"] .agency-home-directory__name strong{
+  color:#f7f4ee;letter-spacing:-.025em;font-size:clamp(22px,2.1vw,30px);font-weight:740;
+}
+html[data-season="standard"] .agency-home-directory__item>p{
+  color:#aaa39a;font-size:14px;line-height:1.55;margin:0;max-width:350px;
+}
+html[data-season="standard"] .agency-home-directory__arrow{
+  color:#cbab82;font-size:22px;
+}
+html[data-season="standard"] .agency-home-recruitment{
+  display:grid;grid-template-columns:.9fr 1.1fr;
+  background:#262626;color:#f9f6f1;
+  min-height:520px;
+  border-top:1px solid rgba(185,148,99,.3);
+}
+html[data-season="standard"] .agency-home-recruitment__image{
+  position:relative;overflow:hidden;min-height:440px;
+}
+html[data-season="standard"] .agency-home-recruitment__image img{
+  object-fit:cover;object-position:center 28%;
+  filter:saturate(.72) contrast(1.06);
+}
+html[data-season="standard"] .agency-home-recruitment__content{
+  display:flex;flex-direction:column;align-items:flex-start;justify-content:center;
+  padding:clamp(50px,7vw,125px);
+  max-width:790px;
+}
+html[data-season="standard"] .agency-home-recruitment__content h2{
+  margin:20px 0 21px;font-size:clamp(42px,4.3vw,70px);
+  line-height:1.08;letter-spacing:-.055em;text-wrap:balance;
+}
+html[data-season="standard"] .agency-home-recruitment__content>p:not(.agency-home-overline){
+  color:#c7c1b8;max-width:510px;font-size:16px;line-height:1.7;
+}
+html[data-season="standard"] .agency-home-recruitment__content .agency-home-button{
+  margin-top:22px;
+}
+@media(max-width:1100px){
+  html[data-season="standard"] .agency-home-hero__inner{grid-template-columns:minmax(0,1fr) 180px;gap:30px}
+  html[data-season="standard"] .agency-home-hero__seal{padding-left:18px}
+  html[data-season="standard"] .agency-home-directory__item{grid-template-columns:40px minmax(160px,1fr) minmax(150px,1fr) 22px}
+}
+@media(max-width:800px){
+  html[data-season="standard"] .agency-home-hero{min-height:680px;padding:185px 0 85px}
+  html[data-season="standard"] .agency-home-hero__inner{grid-template-columns:1fr;gap:26px}
+  html[data-season="standard"] .agency-home-hero__seal{display:none}
+  html[data-season="standard"] .agency-home-mission__grid{grid-template-columns:1fr;gap:26px}
+  html[data-season="standard"] .agency-home-mission__text{margin-top:0}
+  html[data-season="standard"] .agency-home-directory__item{grid-template-columns:36px 1fr 22px}
+  html[data-season="standard"] .agency-home-directory__item>p{display:none}
+  html[data-season="standard"] .agency-home-recruitment{grid-template-columns:1fr}
+  html[data-season="standard"] .agency-home-recruitment__image{min-height:420px}
+  html[data-season="standard"] .agency-home-recruitment__content{padding:60px 38px 72px}
+}
+@media(max-width:580px){
+  html[data-season="standard"] .agency-home-hero{padding:160px 0 78px;min-height:670px}
+  html[data-season="standard"] .agency-home-hero h1{font-size:clamp(46px,12.4vw,66px)}
+  html[data-season="standard"] .agency-home-hero__photo{object-position:68% center}
+  html[data-season="standard"] .agency-home-hero__intro{font-size:16px}
+  html[data-season="standard"] .agency-home-button{width:100%}
+  html[data-season="standard"] .agency-home-mission__text{padding-left:20px}
+  html[data-season="standard"] .agency-home-directory__heading{display:block}
+  html[data-season="standard"] .agency-home-directory__heading>p{margin:22px 0 0}
+  html[data-season="standard"] .agency-home-directory__item{min-height:100px;gap:12px;padding-inline:4px}
+  html[data-season="standard"] .agency-home-directory__name strong{font-size:21px}
+  html[data-season="standard"] .agency-home-recruitment__image{min-height:350px}
+  html[data-season="standard"] .agency-home-recruitment__content{padding:54px 24px 68px}
+}
