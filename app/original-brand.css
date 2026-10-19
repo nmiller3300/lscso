@@ -496,3 +496,24 @@ html[data-season="standard"] .agency-home-recruitment__content .agency-home-butt
   html[data-season="standard"] .agency-home-recruitment__image{min-height:350px}
   html[data-season="standard"] .agency-home-recruitment__content{padding:54px 24px 68px}
 }
+
+/* The new tall insignia is an editorial seal, never a stretched background photo. */
+html[data-season="standard"] .public-site-system .page-hero .page-hero-identity-mark{
+  position:absolute!important;
+  left:auto!important;
+  right:clamp(0px,5vw,90px)!important;
+  top:13%!important;
+  width:min(43%,440px)!important;
+  height:74%!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  opacity:.57;
+  filter:drop-shadow(0 15px 32px rgba(0,0,0,.42));
+}
+@media(max-width:680px){
+  html[data-season="standard"] .public-site-system .page-hero .page-hero-identity-mark{
+    opacity:.28;
+    width:63%!important;
+    right:-9%!important;
+  }
+}

@@ -24,7 +24,7 @@ export function PageHero({
     <section className={`page-hero${containedImage ? " page-hero--contained" : ""}`}>
       <div className="page-hero-media">
         {image.includes("lscso-patch") ? (
-          <OriginalInsigniaImage legacySrc={image} alt={imageAlt} fill priority sizes="100vw" style={{ objectPosition: imagePosition }} />
+          <OriginalInsigniaImage className="page-hero-identity-mark" legacySrc={image} alt={imageAlt} fill priority sizes="100vw" style={{ objectPosition: imagePosition }} />
         ) : (
           <Image src={image} alt={imageAlt} fill priority sizes="100vw" style={{ objectPosition: imagePosition }} />
         )}
