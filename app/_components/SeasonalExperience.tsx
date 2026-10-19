@@ -124,6 +124,8 @@ export function SeasonalExperience({ initial, children }: { initial: SeasonalSet
 
 export function SeasonalLogo({ width, height, alt, className, style }: { width: number; height: number; alt: string; className?: string; style?: CSSProperties }) {
   const appearance = useSeasonalAppearance();
-  const src = appearance.logos[appearance.active_theme] || "/images/lscso-patch-color.png";
+  const src = appearance.logos[appearance.active_theme] || (appearance.active_theme === "standard"
+    ? "/images/lscso-original-main.webp"
+    : "/images/lscso-patch-color.png");
   return <img className={className} src={src} width={width} height={height} alt={alt} style={{ objectFit: "contain", ...style }} />;
 }
