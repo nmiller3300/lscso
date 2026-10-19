@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { PageHero } from "../_components/PageHero";
+import { OriginalInsigniaImage } from "../_components/OriginalInsigniaImage";
 import { RouteLink } from "../_components/RouteLink";
 import { createClient } from "@/lib/supabase/server";
 import "./office-of-the-sheriff.css";
@@ -62,7 +63,7 @@ export default async function OfficeOfTheSheriffPage() {
 
       <section className="sheriff-office-intro">
         <div className="site-shell sheriff-office-intro-grid">
-          <div className="sheriff-office-seal" aria-hidden="true"><Image src="/images/lscso-patch-color.png" alt="" width={250} height={250} priority /></div>
+          <div className="sheriff-office-seal" aria-hidden="true"><OriginalInsigniaImage legacySrc="/images/lscso-patch-color.png" alt="" width={250} height={250} priority /></div>
           <div className="sheriff-office-intro-copy">
             <p className="section-kicker">Executive Office</p>
             <h2>The Office sets the standard for the entire agency.</h2>

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { OriginalInsigniaImage } from "./OriginalInsigniaImage";
 
 type PageHeroProps = {
   eyebrow: string;
@@ -22,14 +23,11 @@ export function PageHero({
   return (
     <section className={`page-hero${containedImage ? " page-hero--contained" : ""}`}>
       <div className="page-hero-media">
-        <Image
-          src={image}
-          alt={imageAlt}
-          fill
-          priority
-          sizes="100vw"
-          style={{ objectPosition: imagePosition }}
-        />
+        {image.includes("lscso-patch") ? (
+          <OriginalInsigniaImage legacySrc={image} alt={imageAlt} fill priority sizes="100vw" style={{ objectPosition: imagePosition }} />
+        ) : (
+          <Image src={image} alt={imageAlt} fill priority sizes="100vw" style={{ objectPosition: imagePosition }} />
+        )}
       </div>
       <div className="page-hero-overlay" />
       <div className="site-shell page-hero-content">

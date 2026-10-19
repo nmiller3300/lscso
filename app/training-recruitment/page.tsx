@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { OriginalInsigniaImage } from "../_components/OriginalInsigniaImage";
 import Link from "next/link";
 import { getRecruitmentStatus } from "@/lib/recruitment/status";
 import "./training-recruitment-experience.css";
@@ -34,7 +35,7 @@ export default async function TrainingRecruitmentPage() {
     <main className="training-recruitment-experience">
       <section className="training-recruitment-hero">
         <div className="training-recruitment-hero__ambient" aria-hidden="true"><span /><span /><span /></div>
-        <Image className="training-recruitment-hero__watermark" src="/images/lscso-patch-color.png" alt="" width={820} height={820} priority aria-hidden="true" />
+        <OriginalInsigniaImage className="training-recruitment-hero__watermark" legacySrc="/images/lscso-patch-color.png" alt="" width={820} height={820} priority aria-hidden="true" />
         <div className="site-shell training-recruitment-hero__shell">
           <div className="training-recruitment-hero__copy">
             <div className="training-recruitment-hero__signal"><i /> Selection & Development System</div>
