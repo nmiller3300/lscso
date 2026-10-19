@@ -9,8 +9,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
     description: "LSCSO public website and Personnel Operations portal.",
     start_url: "/portal",
     display: "standalone",
-    background_color: "#181818",
-    theme_color: "#181818",
+    background_color: original ? "#181818" : "#11110f",
+    theme_color: original ? "#181818" : "#11110f",
     icons: [
       {
         src: original ? "/images/lscso-original-main.webp" : "/images/lscso-patch-color.png",
