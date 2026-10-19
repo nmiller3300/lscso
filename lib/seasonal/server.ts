@@ -9,7 +9,10 @@ export const isSeasonalDesignPreview = process.env.VERCEL_ENV !== "production";
 export const getSeasonalSettings = unstable_cache(async () => {
   if (isSeasonalDesignPreview) {
     // Design branch is a harmless, read-only Halloween showcase.
-    return { ...DEFAULT_SEASONAL_SETTINGS, active_theme: "halloween" as const };
+    // The original-identity design branch must preview the original theme;
+    // other existing preview branches retain their Halloween showcase behavior.
+    const originalIdentityPreview = process.env.VERCEL_GIT_COMMIT_REF === "feature/original-identity-rebrand";
+    return { ...DEFAULT_SEASONAL_SETTINGS, active_theme: originalIdentityPreview ? "standard" as const : "halloween" as const };
   }
   try {
     const admin = createAdminClient();
