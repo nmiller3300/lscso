@@ -10,6 +10,7 @@ import "./maintenance.css";
 import "./seasonal-experience.css";
 import "./seasonal-surface-design.css";
 import "./seasonal-public-navigation.css";
+import "./original-brand.css";
 
 const geist = localFont({
   src: "./fonts/Geist.woff2",

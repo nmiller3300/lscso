@@ -1,0 +1,284 @@
+/* LSCSO ORIGINAL 2026 — the normal agency identity.
+   Scoped deliberately: the seasonal Halloween experience remains unchanged. */
+
+html[data-season="standard"] {
+  --ink: #181818;
+  --ink-soft: #202020;
+  --brown: #303030;
+  --brown-deep: #1c1c1c;
+  --gold: #b99463;
+  --gold-light: #d2ad7c;
+  --olive: #56524b;
+  --sand: #ddd2c0;
+  --paper: #f1eee8;
+  --white: #fbf9f5;
+  --body-dark: #494746;
+  --line-dark: rgba(234,222,203,.18);
+  --line-light: rgba(24,24,24,.15);
+  background: #181818;
+}
+html[data-season="standard"] body { background:#181818; }
+html[data-season="standard"] .public-site-system {
+  background:#181818;
+  color:#f7f5f0;
+}
+html[data-season="standard"] .public-site-system::before {
+  background:
+    radial-gradient(ellipse at 100% 12%,rgba(185,148,99,.10),transparent 34%),
+    linear-gradient(180deg,#181818,#232323 48%,#161616);
+}
+html[data-season="standard"] .public-site-system::after {
+  opacity:.16;
+  background:repeating-linear-gradient(120deg,rgba(255,255,255,.055) 0 1px,transparent 1px 130px);
+}
+html[data-season="standard"] .public-site-system .site-header {
+  border-bottom:1px solid rgba(185,148,99,.24);
+  background:linear-gradient(180deg,rgba(16,16,16,.97),rgba(22,22,22,.90))!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.25);
+  backdrop-filter:blur(20px) saturate(1);
+}
+html[data-season="standard"] .public-site-system .site-header::after{
+  height:1px;background:linear-gradient(90deg,transparent,rgba(185,148,99,.7) 50%,transparent);
+  box-shadow:none;
+}
+html[data-season="standard"] .public-site-system .utility-bar{
+  background:rgba(9,9,9,.95);border-bottom-color:rgba(185,148,99,.16);
+}
+html[data-season="standard"] .public-site-system .site-brand {
+  gap:14px;
+}
+html[data-season="standard"] .public-site-system .site-brand img {
+  filter:drop-shadow(0 4px 9px rgba(0,0,0,.35));
+}
+html[data-season="standard"] .public-site-system .site-brand strong {
+  color:#d0a976;
+  text-shadow:none;
+  letter-spacing:.12em;
+}
+html[data-season="standard"] .public-site-system .site-brand small {
+  color:rgba(255,255,255,.72);
+}
+html[data-season="standard"] .public-site-system .desktop-navigation>a,
+html[data-season="standard"] .public-site-system .division-menu>summary{
+  color:#e6e2dc;
+}
+html[data-season="standard"] .public-site-system .desktop-navigation>a:hover,
+html[data-season="standard"] .public-site-system .division-menu>summary:hover{
+  color:#d4b284;
+}
+html[data-season="standard"] .public-site-system .division-dropdown{
+  border-color:rgba(185,148,99,.28);
+  background:#1e1e1e;
+}
+html[data-season="standard"] .public-site-system .division-dropdown a:hover{
+  background:rgba(185,148,99,.12);
+}
+html[data-season="standard"] .public-site-system .nav-current {
+  color:#d4b284!important;
+}
+html[data-season="standard"] .public-site-system .home-hero {
+  min-height:min(790px,92vh);
+  background:#161616;
+  isolation:isolate;
+  border-bottom:1px solid rgba(185,148,99,.25);
+}
+html[data-season="standard"] .public-site-system .home-hero-image {
+  filter:grayscale(.42) contrast(1.08) saturate(.66);
+}
+html[data-season="standard"] .public-site-system .home-hero-overlay {
+  background:linear-gradient(90deg,rgba(11,11,11,.97) 0%,rgba(16,16,16,.88) 35%,rgba(18,18,18,.25) 83%),
+    linear-gradient(0deg,rgba(18,18,18,.75),transparent 68%);
+}
+html[data-season="standard"] .public-site-system .home-hero-content{
+  position:relative;z-index:1;
+}
+html[data-season="standard"] .public-site-system .home-hero-copy{
+  max-width:700px;
+}
+html[data-season="standard"] .public-site-system .home-hero h1{
+  max-width:730px;
+  letter-spacing:-.055em;
+  line-height:1.04;
+  text-wrap:balance;
+}
+html[data-season="standard"] .public-site-system .home-hero h1 span {
+  color:#c6a273;
+}
+html[data-season="standard"] .public-site-system .home-hero .section-kicker{
+  color:#d4b284;
+}
+html[data-season="standard"] .public-site-system .home-hero-copy>p:not(.section-kicker){
+  color:rgba(247,245,240,.80);
+  max-width:570px;
+}
+html[data-season="standard"] .public-site-system .established-mark{
+  border-color:rgba(185,148,99,.22);
+  background:rgba(16,16,16,.56);
+  backdrop-filter:blur(16px);
+}
+html[data-season="standard"] .public-site-system .hero-actions a:first-child,
+html[data-season="standard"] .public-site-system .route-link--gold{
+  background:#b99463!important;
+  color:#181818!important;
+  border-color:#b99463!important;
+  box-shadow:none;
+}
+html[data-season="standard"] .public-site-system .hero-actions a:first-child:hover,
+html[data-season="standard"] .public-site-system .route-link--gold:hover{
+  background:#d4b284!important;
+  border-color:#d4b284!important;
+}
+html[data-season="standard"] .public-site-system .route-link--outline,
+html[data-season="standard"] .public-site-system .hero-actions a:not(:first-child){
+  border-color:rgba(213,183,141,.53);
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail {
+  position:relative;
+  border-bottom:1px solid rgba(185,148,99,.27);
+  background:#202020;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__inner{
+  width:min(1180px,calc(100% - 64px));
+  margin:auto;
+  display:grid;
+  grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr));
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__identity,
+html[data-season="standard"] .public-site-system .brand-agency-rail__link{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  min-height:116px;
+  padding:25px 28px;
+  border-right:1px solid rgba(185,148,99,.17);
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__identity{
+  padding-left:0;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__identity strong{
+  color:#d4b284;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+  font-size:12px;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__identity span{
+  color:#d4d0ca;
+  margin-top:8px;
+  font-size:14px;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__link{
+  color:#faf8f5;
+  font-size:15px;
+  font-weight:650;
+  gap:7px;
+  transition:background .2s,color .2s;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__link small{
+  color:#bfa98b;
+  text-transform:uppercase;
+  letter-spacing:.12em;
+  font-weight:750;
+  font-size:10px;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__link:hover,
+html[data-season="standard"] .public-site-system .brand-agency-rail__link:focus-visible{
+  background:#2c2925;
+  color:#d9b88a;
+}
+html[data-season="standard"] .public-site-system .brand-agency-rail__link:last-child{border-right:0}
+html[data-season="standard"] .public-site-system .content-section--light,
+html[data-season="standard"] .public-site-system .home-introduction{
+  background:#f0ede7;
+  color:#22201e;
+}
+html[data-season="standard"] .public-site-system .section-kicker--dark{
+  color:#896e4b;
+}
+html[data-season="standard"] .public-site-system .gateway-section {
+  background:linear-gradient(160deg,#222222,#181818)!important;
+}
+html[data-season="standard"] .public-site-system .gateway-item{
+  background:rgba(255,255,255,.025)!important;
+  border-color:rgba(185,148,99,.19);
+  border-radius:2px;
+  transition:background .18s,border-color .18s,transform .18s;
+}
+html[data-season="standard"] .public-site-system .gateway-item:hover{
+  background:rgba(185,148,99,.085)!important;
+  border-color:rgba(185,148,99,.52);
+}
+html[data-season="standard"] .public-site-system .gateway-index,
+html[data-season="standard"] .public-site-system .gateway-arrow {
+  color:#d4b284;
+}
+html[data-season="standard"] .public-site-system .home-feature,
+html[data-season="standard"] .public-site-system .recruitment-banner{
+  background:#1b1b1b;
+}
+html[data-season="standard"] .public-site-system .home-feature-media img,
+html[data-season="standard"] .public-site-system .recruitment-banner-media img{
+  filter:saturate(.70) contrast(1.08);
+}
+html[data-season="standard"] .public-site-system .page-hero-overlay {
+  background:linear-gradient(90deg,rgba(16,16,16,.94),rgba(22,22,22,.73) 50%,rgba(18,18,18,.3)),
+    linear-gradient(0deg,rgba(17,17,17,.65),transparent);
+}
+html[data-season="standard"] .public-site-system .page-hero .section-kicker{
+  color:#d5b386;
+}
+html[data-season="standard"] .public-site-system .page-hero h1{
+  letter-spacing:-.04em;
+}
+html[data-season="standard"] .public-site-system .site-footer{
+  background:#151515;
+  border-top:1px solid rgba(185,148,99,.32);
+}
+html[data-season="standard"] .public-site-system .footer-identity strong,
+html[data-season="standard"] .public-site-system .footer-navigation>div>span{
+  color:#d4b284;
+}
+html[data-season="standard"] .public-site-system :is(a,button,input,select,textarea,summary):focus-visible{
+  outline:2px solid #d4b284;
+  outline-offset:3px;
+}
+html[data-season="standard"] .portal-root{
+  --portal-gold:#b99463;
+  --portal-gold-bright:#d4b284;
+  --portal-v2-gold:#b99463;
+  --portal-v2-gold-bright:#d4b284;
+  --portal-gold-soft:rgba(185,148,99,.12);
+  --portal-v2-line-gold:rgba(185,148,99,.31);
+}
+@media(max-width:900px) {
+  html[data-season="standard"] .public-site-system .brand-agency-rail__inner {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+  html[data-season="standard"] .public-site-system .brand-agency-rail__identity,
+  html[data-season="standard"] .public-site-system .brand-agency-rail__link {
+    min-height:88px;
+    padding:18px 20px;
+    border-bottom:1px solid rgba(185,148,99,.15);
+  }
+  html[data-season="standard"] .public-site-system .brand-agency-rail__identity{padding-left:20px}
+}
+@media(max-width:580px) {
+  html[data-season="standard"] .public-site-system .brand-agency-rail__inner {
+    width:100%;grid-template-columns:1fr;
+  }
+  html[data-season="standard"] .public-site-system .brand-agency-rail__identity,
+  html[data-season="standard"] .public-site-system .brand-agency-rail__link {
+    min-height:60px;padding:16px 24px;border-right:0;
+  }
+  html[data-season="standard"] .public-site-system .brand-agency-rail__link{
+    gap:4px;
+  }
+  html[data-season="standard"] .public-site-system .home-hero h1{
+    font-size:clamp(40px,11vw,64px);
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  html[data-season="standard"] .public-site-system .brand-agency-rail__link,
+  html[data-season="standard"] .public-site-system .gateway-item{
+    transition:none;
+  }
+}

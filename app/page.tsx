@@ -1,4 +1,5 @@
 import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
+import { OriginalAgencyRail } from "./_components/OriginalAgencyRail";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -81,6 +82,8 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <OriginalAgencyRail />
 
       <section className="home-introduction content-section content-section--light">
         <div className="site-shell introduction-grid">
