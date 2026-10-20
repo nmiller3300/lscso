@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { SeasonalLogo } from "@/app/_components/SeasonalExperience";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { usePortalProfile } from "./PortalProfileProvider";
 import styles from "./DiscordAnnouncementComposer.module.css";
@@ -130,7 +131,7 @@ export function DiscordAnnouncementComposer() {
           </div>
 
           <div className={styles.authorityNotice}>
-            <div className={styles.authoritySeal}>LS</div>
+            <div className={styles.authoritySeal}><SeasonalLogo alt="LSCSO insignia" width={46} height={46} /></div>
             <div>
               <strong>Official department broadcast</strong>
               <span>Sending publishes directly to the configured LSCSO Discord channel and pings the LSCSO role. The webhook never leaves the server.</span>
@@ -217,7 +218,7 @@ export function DiscordAnnouncementComposer() {
             <div className={styles.embedAccent} />
             <div className={styles.embedBody}>
               <div className={styles.embedAuthor}>
-                <Image alt="" height={24} src="/images/lscso-patch-color.png" width={24} />
+                <SeasonalLogo alt="" height={24} width={24} />
                 <span>LOS SANTOS COUNTY SHERIFF&apos;S OFFICE · COMMAND</span>
               </div>
               <h3>{title.trim() || "Announcement title"}</h3>
@@ -237,7 +238,7 @@ export function DiscordAnnouncementComposer() {
                 />
               ) : null}
               <div className={styles.embedFooter}>
-                <Image alt="" height={18} src="/images/lscso-patch-color.png" width={18} />
+                <SeasonalLogo alt="" height={18} width={18} />
                 <span>LSCSO Command Announcement · Sent when published</span>
               </div>
             </div>
