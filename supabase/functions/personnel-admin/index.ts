@@ -17,7 +17,7 @@ const rankAccess: Record<string, string> = {
   "1st Lieutenant": "Command",
   Lieutenant: "Supervisor",
   Sergeant: "Supervisor",
-  Corporal: "Preliminary",
+  Corporal: "Supervisor",
   "Master Deputy": "Deputy",
   "Deputy III": "Deputy",
   "Deputy II": "Deputy",
