@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useSeasonalAppearance, SeasonalLogo } from "./SeasonalExperience";
 import { OriginalAgencyRail } from "./OriginalAgencyRail";
+import { OriginalFlagDisplay } from "./OriginalFlagDisplay";
 
 const publicOffices = [
   { number: "01", label: "Executive direction", title: "Office of the Sheriff", href: "/office-of-the-sheriff", description: "Leadership, accountability and the standards guiding county operations." },
@@ -64,6 +65,17 @@ export function OriginalHomeExperience({ legacy }: { legacy: ReactNode }) {
             <p>The Los Santos County Sheriff's Office provides professional, fair and accountable law enforcement services while protecting life and property, developing our personnel and maintaining the highest standards of integrity.</p>
             <Link href="/about">Learn about the Office <span aria-hidden="true">↗</span></Link>
           </div>
+        </div>
+      </section>
+
+      <section className="agency-home-flag-section" aria-label="LSCSO department identity">
+        <div className="site-shell agency-home-flag-section__inner">
+          <div className="agency-home-flag-section__copy">
+            <p className="agency-home-overline">Los Santos County Sheriff's Office</p>
+            <h2>One Office.<span>One Standard.</span></h2>
+            <p>Driven to Protect. Dedicated to Serve.</p>
+          </div>
+          <OriginalFlagDisplay className="agency-home-flag" />
         </div>
       </section>
 

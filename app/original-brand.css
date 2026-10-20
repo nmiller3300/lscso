@@ -517,3 +517,154 @@ html[data-season="standard"] .public-site-system .page-hero .page-hero-identity-
     right:-9%!important;
   }
 }
+
+
+/* Flag-led agency identity for Original. The stripes and stars are deliberately
+   generated as CSS, not enlarged from a thumbnail. */
+html[data-season="standard"] .original-agency-flag{
+  position:relative;
+  width:100%;
+  aspect-ratio:1200 / 632;
+  overflow:hidden;
+  isolation:isolate;
+  background:#b99463;
+  box-shadow:0 20px 55px rgba(0,0,0,.18);
+}
+html[data-season="standard"] .original-agency-flag__stripes{
+  position:absolute;inset:2% 2%;z-index:0;
+  background:repeating-linear-gradient(to bottom,#181818 0%,#181818 10.2%,#b99463 10.2%,#b99463 16.67%);
+}
+html[data-season="standard"] .original-agency-flag__canton{
+  position:absolute;z-index:1;left:2%;top:2%;width:41%;height:52%;
+  display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(6,1fr);
+  place-items:center;background:#181818;padding:2%;
+}
+html[data-season="standard"] .original-agency-flag__star{
+  color:#b99463;font-size:clamp(8px,1.15vw,21px);line-height:1;
+  text-shadow:0 1px 1px rgba(0,0,0,.15);
+}
+html[data-season="standard"] .original-agency-flag__insignia{
+  position:absolute;z-index:2;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:43%;min-height:65%;
+  background:radial-gradient(ellipse,rgba(22,22,22,.96) 0%,rgba(22,22,22,.90) 54%,transparent 70%);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;
+  text-align:center;
+}
+html[data-season="standard"] .original-agency-flag__insignia img{
+  height:clamp(82px,11vw,150px);width:auto;max-width:47%;
+  object-fit:contain;filter:drop-shadow(0 9px 18px rgba(0,0,0,.45));
+}
+html[data-season="standard"] .original-agency-flag__department{
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  padding-top:7px;
+}
+html[data-season="standard"] .original-agency-flag__department strong{
+  color:#d7b483;font-size:clamp(9px,.9vw,14px);
+  font-weight:850;letter-spacing:.14em;
+}
+html[data-season="standard"] .original-agency-flag__department span{
+  color:#f1e4d0;font-size:clamp(10px,1.2vw,21px);
+  font-weight:850;letter-spacing:.10em;
+}
+html[data-season="standard"] .original-agency-flag__department small{
+  color:#b99463;font-size:clamp(7px,.72vw,11px);
+  letter-spacing:.19em;font-weight:780;margin-top:3px;
+}
+html[data-season="standard"] .sheriff-office-intro {
+  background:linear-gradient(118deg,#202020,#171717);
+  padding:clamp(86px,9vw,148px) 0;
+  border-top:1px solid rgba(185,148,99,.15);
+}
+html[data-season="standard"] .sheriff-office-intro-grid {
+  grid-template-columns:minmax(0,1.12fr) minmax(0,1fr);
+  align-items:center;gap:clamp(38px,5vw,95px);
+}
+html[data-season="standard"] .sheriff-office-seal--legacy{display:none}
+html[data-season="standard"] .sheriff-office-art{
+  width:100%;min-width:0;
+}
+html[data-season="standard"] .sheriff-office-flag {
+  width:100%;
+  border:1px solid rgba(185,148,99,.38);
+}
+html[data-season="standard"] .sheriff-office-intro-copy h2{
+  font-size:clamp(36px,4.1vw,64px);
+  line-height:1.08;
+  text-wrap:balance;overflow-wrap:normal;
+}
+html[data-season="standard"] .sheriff-office-intro-copy .sheriff-office-lead{
+  font-family:inherit;
+  font-size:clamp(17px,1.8vw,22px);font-weight:550;
+  line-height:1.65;color:#e2d7c6;
+}
+html[data-season="standard"] .agency-home-flag-section{
+  background:#1c1c1c;color:#f8f6f2;
+  border-block:1px solid rgba(185,148,99,.26);
+  padding:clamp(66px,7vw,120px) 0;
+}
+html[data-season="standard"] .agency-home-flag-section__inner{
+  display:grid;grid-template-columns:minmax(0,.65fr) minmax(0,1fr);
+  gap:clamp(36px,5vw,80px);align-items:center;
+}
+html[data-season="standard"] .agency-home-flag-section__copy h2{
+  font-size:clamp(40px,4.8vw,72px);line-height:1.02;
+  letter-spacing:-.055em;margin:20px 0 24px;
+}
+html[data-season="standard"] .agency-home-flag-section__copy h2 span{
+  color:#c6a273;display:block;
+}
+html[data-season="standard"] .agency-home-flag-section__copy>p:last-child{
+  color:#d2c6b4;font-size:16px;line-height:1.7;
+}
+html[data-season="standard"] .agency-home-flag{
+  box-shadow:0 28px 64px rgba(0,0,0,.35);
+}
+html[data-season="standard"] .public-site-system .page-hero .page-hero-identity-mark{
+  width:min(21%,160px)!important;
+  height:min(38%,175px)!important;
+  right:clamp(12px,8vw,145px)!important;
+  top:34%!important;opacity:.60;
+}
+/* Protect actual readable mobile space, including narrow iPhone viewports. */
+@media(max-width:850px){
+  html[data-season="standard"] .sheriff-office-intro-grid,
+  html[data-season="standard"] .agency-home-flag-section__inner{
+    grid-template-columns:1fr;gap:40px;
+  }
+  html[data-season="standard"] .sheriff-office-flag{max-width:720px}
+  html[data-season="standard"] .agency-home-flag{max-width:760px}
+  html[data-season="standard"] .original-agency-flag__star{font-size:clamp(9px,2.25vw,18px)}
+  html[data-season="standard"] .original-agency-flag__insignia img{height:clamp(76px,17vw,145px)}
+  html[data-season="standard"] .original-agency-flag__department strong{font-size:clamp(8px,1.45vw,14px)}
+  html[data-season="standard"] .original-agency-flag__department span{font-size:clamp(10px,1.8vw,20px)}
+}
+@media(max-width:580px){
+  html[data-season="standard"] .public-site-system .page-hero{
+    min-height:620px;
+    align-items:flex-end;
+    padding-top:max(130px,env(safe-area-inset-top));
+  }
+  html[data-season="standard"] .public-site-system .page-hero-content{
+    padding-bottom:60px;
+    position:relative;
+    max-width:100%;
+  }
+  html[data-season="standard"] .public-site-system .page-hero h1{
+    font-size:clamp(36px,10vw,55px);
+    line-height:1.06;letter-spacing:-.045em;
+    max-width:100%;overflow-wrap:break-word;hyphens:none;
+  }
+  html[data-season="standard"] .public-site-system .page-hero-content>p:last-child{
+    font-size:16px;line-height:1.65;max-width:100%;
+  }
+  html[data-season="standard"] .sheriff-office-intro{padding:58px 0 72px}
+  html[data-season="standard"] .sheriff-office-intro-grid{gap:35px}
+  html[data-season="standard"] .sheriff-office-intro-copy h2{font-size:clamp(33px,8.4vw,45px)}
+  html[data-season="standard"] .original-agency-flag__insignia{min-height:76%;width:55%}
+  html[data-season="standard"] .original-agency-flag__insignia img{height:60px;max-width:53%}
+  html[data-season="standard"] .original-agency-flag__department strong{font-size:7px;letter-spacing:.06em}
+  html[data-season="standard"] .original-agency-flag__department span{font-size:9px;letter-spacing:.05em}
+  html[data-season="standard"] .original-agency-flag__department small{font-size:6px;letter-spacing:.1em}
+  html[data-season="standard"] .agency-home-flag-section__copy h2{font-size:clamp(42px,10vw,60px)}
+  html[data-season="standard"] .agency-home-flag-section{padding:55px 0 65px}
+}
